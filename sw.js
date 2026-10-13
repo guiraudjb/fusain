@@ -2,7 +2,7 @@
 // La liste ci-dessous est produite par outils/generer.py : rien n'est mis en cache dynamiquement.
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.1.2-9d8752672c';
+const VERSION_CACHE = 'fusain-0.2.0-154e6ca686';
 const FICHIERS = [
     './',
     './Documentation/GUIDE_UTILISATEUR.md',
@@ -18,10 +18,13 @@ const FICHIERS = [
     './js/brouillon.js',
     './js/diagrammes/camembert.js',
     './js/diagrammes/commun.js',
+    './js/diagrammes/frise.js',
     './js/diagrammes/gantt.js',
     './js/diagrammes/index.js',
+    './js/diagrammes/kanban.js',
     './js/diagrammes/logigramme.js',
     './js/diagrammes/mentale.js',
+    './js/diagrammes/quadrant.js',
     './js/diagrammes/sequence.js',
     './js/dom.js',
     './js/etat.js',

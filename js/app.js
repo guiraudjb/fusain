@@ -288,6 +288,38 @@ function renommerSurPlace(cle) {
     saisie.select();
 }
 
+// Glisser un élément à position libre (points d'une matrice) : la nouvelle position est lue dans la zone de référence
+function brancherDeplacement() {
+    let glisse = null;
+    zones.feuille.addEventListener('pointerdown', (e) => {
+        const { editeur, modele } = vue;
+        const marque = e.target.closest?.('[data-fusain]');
+        if (ui.mode !== 'visuel' || !modele || !editeur.deplacer || !marque || e.button !== 0) return;
+        const zone = editeur.zoneDeplacement(zones.feuille.querySelector('.fusain-schema'));
+        if (!zone) return;
+        glisse = { cle: marque.getAttribute('data-fusain'), x: e.clientX, y: e.clientY, bouge: false, zone: zone.getBoundingClientRect() };
+    });
+    window.addEventListener('pointermove', (e) => {
+        if (!glisse) return;
+        if (Math.hypot(e.clientX - glisse.x, e.clientY - glisse.y) > 5) glisse.bouge = true;
+        if (!glisse.bouge) return;
+        const f = zones.feuille.getBoundingClientRect();
+        const x = Math.max(glisse.zone.left, Math.min(glisse.zone.right, e.clientX)) - f.left;
+        const y = Math.max(glisse.zone.top, Math.min(glisse.zone.bottom, e.clientY)) - f.top;
+        zones.feuille.querySelector('.fusain-calque')?.replaceChildren(s('circle', { cx: x, cy: y, r: 7, fill: '#e4794a', 'fill-opacity': 0.7, stroke: '#fff', 'stroke-width': 2 }));
+    });
+    window.addEventListener('pointerup', (e) => {
+        if (!glisse) return;
+        const { cle, bouge, zone } = glisse;
+        glisse = null;
+        zones.feuille.querySelector('.fusain-calque')?.replaceChildren();
+        if (!bouge || !vue.modele || !vue.editeur.deplacer) return;
+        const x = (e.clientX - zone.left) / zone.width;
+        const y = 1 - (e.clientY - zone.top) / zone.height;
+        appliquer((m) => vue.editeur.deplacer(m, cle, x, y), () => cle);
+    });
+}
+
 function brancherFeuille() {
     zones.feuille.addEventListener('click', (e) => {
         if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-saisie')) return;
@@ -727,6 +759,7 @@ function brancherGlobal() {
 async function demarrer() {
     construireBarre();
     brancherFeuille();
+    brancherDeplacement();
     brancherCode();
     brancherGlobal();
     appliquerTheme(preference('theme') === 'sombre');

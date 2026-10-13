@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.2.0 — 13 octobre 2026 — trois nouveaux éditeurs visuels
+
+- Édition visuelle de la **frise chronologique**, du **tableau Kanban** et de la **matrice à quadrants** : huit types de schémas s'éditent désormais sans coder.
+- Matrice : les points se placent en les glissant à la souris (seul type de schéma à position libre).
+- Kanban : une carte change de colonne en glissant sa pastille sur la colonne voulue.
+- Les trois éditeurs sont couverts par les essais de libellés hostiles (200 essais chacun) et par la recette Chrome (43 contrôles).
+
 ## 0.1.2 — 13 octobre 2026 — robustesse et sécurité
 
 **Essais** — nouvelle recette `tests/robustesse.mjs` : des libellés aléatoires hostiles (guillemets, crochets, balises, mots réservés, directives) sont injectés par les cinq éditeurs visuels, 400 essais par type ; le code produit doit rester valide pour Mermaid, se relire à l'identique et conserver le même nombre d'éléments. S'y ajoute un corpus de 14 codes malveillants, rendus puis inspectés. `tests/tout.sh` enchaîne désormais toutes les recettes.

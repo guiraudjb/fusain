@@ -58,7 +58,7 @@ await p.fill('#fusain-code-zone', 'flowchart LR\n  A@{ shape: cyl, label: "Base"
 ok('bascule code seul', (await p.textContent('#fusain-code-etat')) === 'Code seul' && await p.locator('#fusain-erreur .fr-alert').count() === 0, await p.getAttribute('#fusain-code-etat', 'title'));
 await p.screenshot({ path: OUT + '/e2e-code.png' });
 // 9. modèles : ajouter une page de chaque type visuel et vérifier le repérage
-for (const [nom, sel, titre] of [['Diagramme de séquence', '[data-fusain^="i:"]', 'Diagramme de séquence'], ['Carte mentale', '[data-fusain^="r"]', 'Carte mentale'], ['Planning (Gantt)', '[data-fusain^="i:"]', 'Diagramme de Gantt'], ['Camembert', '[data-fusain^="p:"]', 'Camembert']]) {
+for (const [nom, sel, titre] of [['Diagramme de séquence', '[data-fusain^="i:"]', 'Diagramme de séquence'], ['Carte mentale', '[data-fusain^="r"]', 'Carte mentale'], ['Planning (Gantt)', '[data-fusain^="i:"]', 'Diagramme de Gantt'], ['Camembert', '[data-fusain^="p:"]', 'Camembert'], ['Frise chronologique', '[data-fusain^="e:"]', 'Frise chronologique'], ['Tableau Kanban', '[data-fusain^="k:"]', 'Tableau Kanban'], ['Matrice (quadrants)', '[data-fusain^="p:"]', 'Matrice']]) {
   await p.click('button:has-text("Visuel")');
   await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles[open], #fusain-modale-modeles.fr-modal--opened', { timeout: 3000 }).catch(() => console.log('modale non ouverte'));
   await p.waitForTimeout(400);
@@ -73,7 +73,11 @@ const res = await p.evaluate(async () => { const { MODELES } = await import('./j
 for (const r of res) ok('modèle ' + r[0], r[1] === 'ok', r[2]);
 // 11. exports
 const dl = async (action) => { const [d] = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), action()]); const f = `${OUT}/${d.suggestedFilename()}`; await d.saveAs(f); return f; };
-let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 5, f.split('/').pop());
+// 10 bis. matrice : glisser un point vers le coin supérieur droit
+{ const pt = await p.locator('#fusain-feuille [data-fusain="p:0"] circle').first().boundingBox(); const z = await p.locator('#fusain-feuille .fusain-schema g.quadrants').boundingBox();
+  await p.mouse.move(pt.x + pt.width / 2, pt.y + pt.height / 2); await p.mouse.down(); await p.mouse.move(z.x + z.width * 0.6, z.y + z.height * 0.5, { steps: 5 }); await p.mouse.move(z.x + z.width * 0.9, z.y + z.height * 0.1, { steps: 5 }); await p.mouse.up(); await p.waitForTimeout(800);
+  const cq = await lireCode(); ok('matrice : point déplacé à la souris', /"Cyberattaque": \[0\.(8[5-9]|9\d?), 0\.(8[5-9]|9\d?)\]/.test(cq), cq.split('\n').find(l => l.includes('Cyberattaque'))); }
+let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 8, f.split('/').pop());
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); ok('export PDF', fs.statSync(f).size > 5000, `${f.split('/').pop()} ${fs.statSync(f).size} o`);
 await p.waitForTimeout(1500); console.log('   messages:', (await p.textContent('#fusain-messages')).slice(-200));

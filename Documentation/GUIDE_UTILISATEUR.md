@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Cinq types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt et camembert. Les autres se modifient par le code (§4).
+Huit types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban et matrice à quadrants. Les autres se modifient par le code (§4).
 
 **Gestes communs**
 
@@ -37,6 +37,12 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Gantt** — titre, format des dates, jours exclus, sections et tâches. Une tâche a un début (une date, ou `after` suivi de l'identifiant d'une autre tâche) et une durée (`5d`, `2w`) ou une date de fin.
 
 **Camembert** — libellés et valeurs ; vous pouvez coller deux colonnes copiées depuis un tableur.
+
+**Frise chronologique** — périodes, événements de chaque période, sections. La pastille « + » d'une période lui ajoute un événement.
+
+**Tableau Kanban** — colonnes et cartes. Pour changer une carte de colonne, glissez sa pastille « + » sur la colonne voulue.
+
+**Matrice à quadrants** — titre, axes, nom des quatre zones, points. C'est le seul schéma où vous placez librement un élément : glissez un point à la souris dans la matrice.
 
 ## 3. La page
 

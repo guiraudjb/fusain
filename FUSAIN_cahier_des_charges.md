@@ -675,7 +675,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État de la version 0.1.0 (13 octobre 2026) au regard de ce cahier des charges.
+État au 13 octobre 2026 (version 0.2.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -683,14 +683,14 @@ FUSAIN/
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
 | Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, pied de page avec jetons, quatre modes d'ajustement, alerte de lisibilité |
-| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
+| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris) : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Modèles | 18 modèles répartis en quatre catégories |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |
 | Nomenclature | Document de lecture, fichier CycloneDX 1.6 avec empreinte de chaque fichier, script de génération et de vérification |
-| Tests | Tests de logique et de sécurité sans navigateur ; recette automatisée dans Chrome |
+| Tests | Tests de logique et de sécurité sans navigateur ; recette automatisée dans Chrome et dans Firefox ; essais de libellés hostiles et corpus de codes malveillants ; mesures de montée en charge (`tests/tout.sh`, `tests/charge.mjs`) |
 
 ### 14.2 Reste à faire pour la V1
 
@@ -703,5 +703,5 @@ FUSAIN/
 | Intégrité | Les modules propres à FUSAIN autres que le point d'entrée ne portent pas d'attribut d'intégrité (limite des modules ES importés) |
 | Accessibilité | Audit RGAA et déclaration d'accessibilité |
 | Déploiement | Exemple de configuration Nginx avec en-têtes ; paquet Debian |
-| Recette | Essais sur Firefox et Safari (la recette automatisée n'a porté que sur Chrome) ; mesures de performance |
+| Recette | Essais sur Safari (les recettes automatisées portent sur Chrome et Firefox) |
 

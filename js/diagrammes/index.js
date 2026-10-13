@@ -4,8 +4,11 @@ import sequence from './sequence.js';
 import mentale from './mentale.js';
 import gantt from './gantt.js';
 import camembert from './camembert.js';
+import frise from './frise.js';
+import kanban from './kanban.js';
+import quadrant from './quadrant.js';
 
-const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert].map((e) => [e.type, e]));
+const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant].map((e) => [e.type, e]));
 
 export function editeurPour(type) {
     return EDITEURS.get(type) || null;

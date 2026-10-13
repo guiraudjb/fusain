@@ -11,11 +11,11 @@
 - Application web progressive : installable, utilisable hors ligne.
 - Système de Design de l'État (DSFR).
 
-## État d'avancement (version 0.1.0, bêta)
+## État d'avancement (bêta)
 
 | Fonction | État |
 |---|---|
-| Édition visuelle : logigramme, diagramme de séquence, carte mentale, Gantt, camembert | Disponible |
+| Édition visuelle : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants | Disponible |
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
 | 18 modèles de départ | Disponible |
 | Export PDF / PNG / SVG, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
@@ -28,6 +28,7 @@ Le détail de ce qui reste à faire figure dans le [cahier des charges](FUSAIN_c
 
 - [Guide utilisateur](Documentation/GUIDE_UTILISATEUR.md)
 - [Cahier des charges](FUSAIN_cahier_des_charges.md)
+- [Journal des versions](JOURNAL_DES_VERSIONS.md) — mesures, essais et corrections de chaque cycle
 - [Nomenclature logicielle (SBOM) et méthode de mise à jour](NOMENCLATURE_LOGICIELLE_FUSAIN.md) — version exploitable par machine : [`sbom/fusain-sbom-cyclonedx.json`](sbom/fusain-sbom-cyclonedx.json)
 - [Format du fichier de sauvegarde](schema/fusain.schema.json)
 
@@ -38,6 +39,7 @@ Aucune étape de build : le code livré est le code écrit (modules ES natifs, b
 ```bash
 python3 -m http.server 8765          # servir le dépôt, puis ouvrir http://127.0.0.1:8765/
 node --test tests/logique.test.mjs   # tests de logique et de sécurité, sans navigateur
+tests/tout.sh                        # recette complète : logique, Chrome, robustesse, Firefox
 python3 outils/generer.py            # avant chaque publication : intégrité (SRI), liste du cache, nomenclature
 python3 outils/generer.py --verifier # contrôle sans modification (code de sortie 1 en cas d'écart)
 ```

@@ -140,6 +140,7 @@ for (const [nom, sel, titre, agir, attendu] of [
   ['Diagramme radar', '[data-fusain^="s:"]', 'Diagramme radar', async () => { const z = p.locator('#fusain-proprietes .fusain-tableau input[aria-label="Service A, Sobriété"]'); await z.fill('5'); await z.press('Tab'); }, /curve a\["Service A"\]\{4, 3, 5, 5, 4\}/],
   ['Carte proportionnelle (treemap)', '[data-fusain^="t:"]', 'Carte proportionnelle', async () => { await p.locator('#fusain-feuille [data-fusain="t:0.0.0"]').first().click({ force: true }); await p.waitForTimeout(300); const z = champPanneau('Valeur'); await z.fill('500'); await z.press('Tab'); }, /"Salaires": 500/],
   ['Séquence ZenUML', '[data-fusain^="i:"]', 'Séquence ZenUML', async () => { await p.locator('#fusain-feuille [data-fusain="i:0"] text.message-label').first().click({ force: true }); await p.waitForTimeout(300); await p.click('.fusain-poignee'); }, /Usager->Portail: Dépose sa demande\n\s+Portail->Usager: Réponse/],
+  ['Sommaire', '[data-fusain^="e:"]', 'Diapositive de texte', async () => { await p.locator('#fusain-feuille text[data-fusain="e:1.1"]').first().dblclick({ force: true }); await p.waitForTimeout(300); await p.fill('.fusain-saisie', 'Budget **2027** | suite'); await p.keyboard.press('Enter'); }, /diapo sommaire\ntitre: SOMMAIRE\n- ÉLÉMENT 1 \| .*\n- ÉLÉMENT 2 \| Budget \*\*2027\*\* \/ suite\n/],
 ]) {
   await ajouterModele(nom);
   await p.waitForFunction((titreAttendu) => document.querySelector('#fusain-proprietes')?.textContent.includes(titreAttendu), titre, { timeout: 15000 }).catch(() => {});
@@ -155,11 +156,11 @@ for (const [nom, sel, titre, agir, attendu] of [
 { await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);
   await p.click('.fusain-modele:has(.fusain-modele__nom:text-is("Page vierge"))'); await p.waitForTimeout(1000);
   const pages = await p.evaluate(async () => (await import('./js/etat.js')).etat.doc.pages.map((x) => x.code));
-  ok('page vierge ajoutée', pages.length === 24 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
+  ok('page vierge ajoutée', pages.length === 25 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
     && await p.locator('#fusain-feuille .fusain-schema').count() === 0 && await p.locator('#fusain-erreur .fr-alert').count() === 0);
   await champPanneau('Titre affiché sur la page').fill('Annexes'); await champPanneau('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(700);
   ok('page vierge : titre affiché', (await p.textContent('#fusain-feuille svg.fusain-page')).includes('Annexes')); }
-let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 24, f.split('/').pop());
+let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 25, f.split('/').pop());
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); ok('export PDF', fs.statSync(f).size > 5000, `${f.split('/').pop()} ${fs.statSync(f).size} o`);
 await p.waitForTimeout(1500); console.log('   messages:', (await p.textContent('#fusain-messages')).slice(-200));

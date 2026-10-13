@@ -96,7 +96,7 @@ function lireEnonce(texte, modele, groupe) {
         let lien;
         if (m) {
             const corps = m[4];
-            lien = { debut: m[1] || '', fin: m[5] || '', texte: desechapper(sansGuillemets(m[3])),
+            lien = { debut: m[1] || '', fin: m[5] || '', texte: desechapper(sansGuillemets(m[3])).replace(/#124;/g, '|'),
                 trait: m[2] === '==' ? 'epais' : m[2] === '-.' ? 'pointille' : 'plein',
                 longueur: m[2] === '-.' ? corps.length - 1 : corps.length - (m[5] ? 1 : 2) };
         } else {
@@ -113,7 +113,7 @@ function lireEnonce(texte, modele, groupe) {
         if (texte[pos] === '|') {
             const fin = texte.indexOf('|', pos + 1);
             if (fin < 0) throw new Inconnu('libellé de lien non fermé');
-            lien.texte = desechapper(sansGuillemets(texte.slice(pos + 1, fin)));
+            lien.texte = desechapper(sansGuillemets(texte.slice(pos + 1, fin))).replace(/#124;/g, '|');
             pos = fin + 1;
         }
         if (/^`[\s\S]*`$/.test(lien.texte.trim())) throw new Inconnu('texte au format Markdown');
@@ -208,7 +208,8 @@ function ecrireLien(l) {
     else if (l.trait === 'pointille') corps = `-${'.'.repeat(n)}-`;
     else corps = (l.trait === 'epais' ? '=' : '-').repeat(n + (l.fin ? 1 : 2));
     const fleche = l.trait === 'invisible' ? '~~~' : `${l.debut}${corps}${l.fin}`;
-    const texte = l.texte ? `|"${echapper(l.texte)}"|` : '';
+    // La barre verticale délimite le texte d'un lien : dans le texte, elle s'écrit par son code
+    const texte = l.texte ? `|"${echapper(l.texte).replace(/\|/g, '#124;')}"|` : '';
     return `${l.de} ${fleche}${texte} ${l.vers}`;
 }
 

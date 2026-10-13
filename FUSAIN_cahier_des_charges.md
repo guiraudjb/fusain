@@ -253,6 +253,7 @@ Un bouton « Effacer les données locales » est disponible dans la modale « À
 
 - Bibliothèque de modèles pré-remplis couvrant tous les types Mermaid, classés par usage (processus et structure, architecture, gestion de projet, analyse et données), reprise et étendue à partir de celle de PLUME.
 - Chaque modèle indique s'il est éditable en mode visuel.
+- Une page peut aussi être une **diapositive de texte** (depuis la 0.9.0). Ce n'est pas un schéma Mermaid : son code est un format propre à FUSAIN (« diapo » suivi d'une mise en page, puis des lignes « champ: texte » et « - élément »), dessiné par FUSAIN en SVG. Les textes sont écrits comme du texte, jamais interprétés comme du HTML ; le style n'est pas réglable, il est celui de la charte.
 - Une nouvelle page démarre d'un modèle, ou d'une **page vierge** (sans schéma : seuls le titre, le sous-titre et le pied de page sont imprimés), à laquelle un schéma peut être donné ensuite.
 
 ### 5.6 Habillage
@@ -678,17 +679,17 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.8.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.9.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
 | Domaine | Contenu |
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
-| Pages | Document multi-pages, pages vierges, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
+| Pages | Document multi-pages, pages vierges, diapositives de texte (13 mises en page reprises des diapositives libres de VALOR, dessinées en SVG aux mêmes mesures ; texte seul, sans image), A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
 | Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, depuis la 0.7.0 diagramme C4 (contexte, conteneurs, composants), diagramme de blocs, diagramme d'exigences et diagramme radar, depuis la 0.8.0 carte proportionnelle (treemap) et séquence ZenUML, soit vingt-trois types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
-| Modèles | 24 modèles répartis en quatre catégories, tous éditables visuellement ; page vierge |
+| Modèles | 24 modèles de schémas et 13 de diapositives ; répartis en quatre catégories, tous éditables visuellement ; page vierge |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Trusted Types, analyse statique automatisée, Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |

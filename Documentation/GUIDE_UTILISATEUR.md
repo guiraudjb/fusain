@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§4).
+Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§5).
 
 **Gestes communs**
 
@@ -76,7 +76,18 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Matrice à quadrants** — titre, axes, nom des quatre zones, points. C'est le seul schéma où vous placez librement un élément : glissez un point à la souris dans la matrice.
 
-## 3. La page
+## 3. Diapositives de texte
+
+En plus des schémas, une page peut être une **diapositive de texte** : page de titre, sommaire, intercalaire, texte en colonnes, chiffres clés, frise d'étapes, blocs, ou texte libre (titres, paragraphes, puces, tableau). « Ajouter une page » les propose dans la rubrique « Diapositives de texte ».
+
+- Les mises en page et leur style (couleurs, tailles, filets) sont ceux des diapositives libres de VALOR, conformes à la charte graphique de l'État pour les présentations. Vous ne réglez pas le style : vous choisissez une mise en page et vous écrivez les textes.
+- Un clic sur un texte le sélectionne, un double-clic le modifie sur place ; la colonne de droite donne tous les champs. La pastille « + » d'un élément en ajoute un à la suite.
+- Deux astérisques autour d'un passage le mettent en **gras** (`**important**`). Un retour à la ligne dans un champ est repris sur la diapositive.
+- « Mise en page » change de modèle en conservant les textes qui y ont leur place.
+- La diapositive remplit la zone utile de la page : le rendu de référence est l'A3 paysage ; sur un autre format, elle est mise à l'échelle.
+- Les images ne sont pas prises en charge.
+
+## 4. La page
 
 Dans la colonne de droite, bloc « Page » : format (A4, A3), orientation, marges, titre, sous-titre, pied de page, taille et position du schéma.
 
@@ -86,7 +97,7 @@ FUSAIN vous avertit si le texte devient trop petit pour être lu une fois imprim
 
 Chaque page a son propre format : un même document peut mêler A4 et A3.
 
-## 4. Le mode code
+## 5. Le mode code
 
 Le bouton « Code » affiche le code Mermaid de la page à côté de l'aperçu, mis à jour pendant la frappe. En cas d'erreur, le dernier aperçu valide reste affiché et le message indique la ligne concernée.
 
@@ -94,7 +105,7 @@ L'étiquette au-dessus de l'éditeur indique si la page reste éditable visuelle
 
 Pour quitter la zone de code au clavier : Échap, puis Tab.
 
-## 5. Enregistrer et exporter
+## 6. Enregistrer et exporter
 
 - **Enregistrer** produit un fichier `.fusain.json` contenant tout le document. C'est votre sauvegarde : conservez-le.
 - **Ouvrir** recharge un tel fichier (ou glissez-le sur la fenêtre). Un fichier `.mmd` ou `.txt` contenant du code Mermaid est ajouté comme nouvelle page.
@@ -102,7 +113,7 @@ Pour quitter la zone de code au clavier : Échap, puis Tab.
 
 Le brouillon conservé automatiquement par le navigateur est une commodité, pas une sauvegarde : il disparaît si vous effacez les données du navigateur.
 
-## 6. Raccourcis
+## 7. Raccourcis
 
 | Touches | Effet |
 |---|---|
@@ -110,6 +121,6 @@ Le brouillon conservé automatiquement par le navigateur est une commodité, pas
 | Ctrl+S | Enregistrer |
 | Ctrl+O | Ouvrir |
 
-## 7. Hors ligne
+## 8. Hors ligne
 
 Après une première visite, FUSAIN fonctionne sans réseau et peut être installé comme une application depuis le menu du navigateur. Quand une nouvelle version est publiée, un bandeau propose la mise à jour.

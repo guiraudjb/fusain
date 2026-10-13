@@ -2,6 +2,14 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.9.0 — 13 octobre 2026 — diapositives de texte
+
+- **Nouveau type de page : la diapositive de texte.** Treize mises en page : page de titre (deux variantes), sommaire (deux variantes), intercalaire (deux variantes), une colonne, deux ou trois colonnes, texte en colonnes, chiffres clés, frise d'étapes, texte et blocs, texte libre (titres, paragraphes, puces, tableau).
+- **Style identique aux diapositives libres de VALOR** : les 14 modèles de VALOR ont été rendus dans un navigateur et mesurés élément par élément (taille, graisse, couleur, interligne, marges, filets) ; FUSAIN les redessine en SVG avec ces valeurs. Comparaison image contre image sur cinq modèles : moins de 1 % de pixels différents, dus au lissage des lettres.
+- **Ce qui diffère de VALOR, par choix** : le contenu est du texte structuré et non du HTML libre (pas d'injection possible, export PDF vectoriel avec Marianne incorporée) ; le gras se note `**ainsi**` ; pas d'image, donc pas le modèle « image + texte » ; pas d'italique, de souligné ni de taille de police libre.
+- Édition : clic et double-clic sur les textes, formulaire par mise en page, ajout et ordre des éléments, changement de mise en page en conservant les textes.
+- Défaut trouvé à l'export et corrigé : un filet tracé par un chemin à commandes abrégées sortait avec la mauvaise couleur dans le PDF.
+
 ## 0.8.0 — 13 octobre 2026 — treemap et ZenUML
 
 - **Carte proportionnelle (treemap)** : édition visuelle des rubriques et des cases (valeur, division en sous-cases, rangement par glisser, ordre).

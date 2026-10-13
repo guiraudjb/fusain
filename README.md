@@ -17,7 +17,8 @@
 |---|---|
 | Édition visuelle de 23 types : logigramme, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar, treemap, ZenUML | Disponible |
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
-| 24 modèles de départ, page vierge | Disponible |
+| Diapositives de texte aux mises en page de la charte de l'État (titre, sommaire, intercalaire, colonnes, chiffres clés, frise, blocs, texte libre) | Disponible |
+| 24 modèles de schémas et 13 de diapositives, page vierge | Disponible |
 | Export PDF / PNG / SVG, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
 | Fonctionnement hors ligne | Disponible |
 | Édition visuelle du déploiement et du diagramme dynamique C4 | À venir |

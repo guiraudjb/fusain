@@ -13,7 +13,7 @@ async function pagesComposees(doc, indices) {
         const page = doc.pages[i];
         let schema = null;
         try {
-            schema = await rendreSchema(page.code, doc.document.theme);
+            schema = await rendreSchema(page.code, doc.document.theme, page);
         } catch {
             throw new Error(`La page « ${page.nom} » contient une erreur de syntaxe : corrigez-la avant d'exporter.`);
         }

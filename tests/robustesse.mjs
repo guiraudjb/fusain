@@ -23,6 +23,8 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const { typeDiagramme, nettoyerCode } = await import('./js/securite.js');
     const rendu = await import('./js/rendu.js');
     window.__xss = 0;
+    // Une diapositive de texte n'est pas du Mermaid : sa validité se vérifie en la dessinant
+    const valide = (code) => (typeDiagramme(code) === 'diapo' ? rendu.rendreSchema(code, 'bleu-france') : window.mermaid.parse(nettoyerCode(code)));
     // L'extension ZenUML n'est chargée qu'au premier rendu d'un schéma de ce type
     await rendu.rendreSchema(MODELES.find((m) => m.id === 'zenuml').code, 'bleu-france');
     const MORCEAUX = ['"', "'", '`', '[', ']', '(', ')', '{', '}', '|', ';', ':', '#', '%%', '-->', '---', '&', '<', '>', '\\', '/', '\n', ' ', ' end ', 'end', 'subgraph x', 'click A', 'style', '<script>window.__xss=1</script>', '<img src=x onerror="window.__xss=1">', '<b>gras</b>', '#quot;', '#59;', '%%{init:{"securityLevel":"loose"}}%%', 'javascript:window.__xss=1', 'é', 'Ω', '😀', '\t', ',', '=', '==>', '-.->', '~~~', '@{', ':::', '$$', '&lt;', 'title', 'section', 'after', 'Note over', 'loop', 'participant'];
@@ -32,7 +34,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const echecs = [];
     const comptes = {};
 
-    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar', 'treemap', 'zenuml']) {
+    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar', 'treemap', 'zenuml', 'diapo-titre', 'diapo-sommaire', 'diapo-sommaire-colonnes', 'diapo-blocs', 'diapo-libre']) {
         const depart = MODELES.find((m) => m.id === type).code;
         const editeur = editeurPour(typeDiagramme(depart));
         comptes[type] = 0;
@@ -44,7 +46,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
             let code = '';
             try {
                 code = editeur.ecrire(modele);
-                await window.mermaid.parse(nettoyerCode(code));
+                await valide(code);
                 const relu = editeur.ecrire(editeur.analyser(code));
                 if (relu !== code) throw new Error('relecture différente');
                 if (editeur.elements(editeur.analyser(code)).length !== cles.length) throw new Error('nombre d\'éléments modifié : un libellé est sorti de son élément');
@@ -79,7 +81,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
                 code = editeur.ecrire(modele);
                 const relu = editeur.ecrire(editeur.analyser(code));
                 if (relu !== code) throw new Error('relecture différente');
-                if (editeur.elements(editeur.analyser(code)).length) await window.mermaid.parse(nettoyerCode(code));
+                if (editeur.elements(editeur.analyser(code)).length) await valide(code);
             }
             comptes.operations += 1;
         } catch (e) {

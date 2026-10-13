@@ -235,3 +235,41 @@ test('ZenUML : blocs imbriqués relus à l\'identique, renommage d\'un participa
     assert.ok(editeur.ecrire(modele).includes('A->"Service de paie".traiter(x) {') && editeur.ecrire(modele).includes('"Service de paie"->A: non'));
     assert.throws(() => editeur.analyser('zenuml\n    A->B.m() {\n        x = B->C.n()\n    }\n'), /pas gérée/);
 });
+
+// ---------- Diapositives de texte (0.9.0) ----------
+
+test('diapositive : format lu et réécrit à l\'identique, textes sans effet sur la structure', async () => {
+    const { DISPOSITIONS, codeInitial } = await import('../js/diagrammes/diapo.js');
+    const editeur = editeurPour('diapo');
+    for (const id of Object.keys(DISPOSITIONS)) assert.equal(editeur.ecrire(editeur.analyser(codeInitial(id))), codeInitial(id), id);
+    const modele = editeur.analyser('diapo sommaire\ntitre: SOMMAIRE\n- A | a\n- B | b\n');
+    // un retour à la ligne devient <br>, une barre verticale ne crée pas de champ
+    editeur.renommer(modele, 'e:0.1', 'ligne 1\nligne 2 | intrus');
+    editeur.renommer(modele, 'c:titre', 'x\n- faux élément');
+    const code = editeur.ecrire(modele);
+    assert.equal(code, 'diapo sommaire\ntitre: x<br>- faux élément\n- A | ligne 1<br>ligne 2 / intrus\n- B | b\n');
+    assert.equal(editeur.analyser(code).items.length, 2);
+    assert.throws(() => editeur.analyser('diapo inconnue\n'), /mise en page/);
+    assert.throws(() => editeur.analyser('diapo titre\ncouleur: rouge\n'), /champ inconnu/);
+});
+
+test('diapositive libre : un paragraphe ne peut pas devenir un titre, une puce ou un tableau', () => {
+    const editeur = editeurPour('diapo');
+    const modele = editeur.analyser('diapo libre\n# Titre\nTexte\n- puce\n| a | b |\n');
+    assert.deepEqual(modele.blocs.map((b) => b.t), ['h2', 'p', 'li', 'ligne']);
+    editeur.renommer(modele, 'b:1', '# pas un titre');
+    const relu = editeur.analyser(editeur.ecrire(modele));
+    assert.deepEqual(relu.blocs.map((b) => [b.t, b.texte])[1], ['p', '# pas un titre']);
+    // changer de mise en page conserve le titre
+    assert.equal(typeDiagramme(editeur.ecrire(relu)), 'diapo');
+});
+
+test('chaque icône utilisée par un bouton est embarquée', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const lister = (dossier) => readdirSync(dossier, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? lister(`${dossier}/${e.name}`) : [`${dossier}/${e.name}`]));
+    const racine = new URL('..', import.meta.url).pathname;
+    const embarquees = new Set(lister(`${racine}libs/dsfr-v1.15.4/icons`).map((f) => f.split('/').pop().replace(/^fr--/, '').replace(/\.svg$/, '')));
+    const absentes = new Set();
+    for (const fichier of lister(`${racine}js`)) for (const m of readFileSync(fichier, 'utf8').matchAll(/icone: '([a-z0-9-]+-(?:line|fill))'/g)) if (!embarquees.has(m[1])) absentes.add(`${m[1]} (${fichier.split('/js/')[1]})`);
+    assert.deepEqual([...absentes], []);
+});

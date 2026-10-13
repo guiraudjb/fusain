@@ -131,7 +131,7 @@ export function panneau(ctx) {
                 : champTexte('Valeur', v.noeud.valeur ?? '', (val) => appliquer((m) => { viser(m, selection).noeud.valeur = nombre(val); }), { type: 'number', min: 0, step: 'any' }),
             h('div', { class: 'fusain-actions' },
                 bouton(rubrique ? 'Ajouter une case dedans' : 'Diviser en sous-cases', { icone: 'add-line', variante: 'secondary', onclick: () => { let cle; appliquer((m) => { cle = relier(m, selection, null); }, () => cle); } }),
-                v.parent !== modele ? bouton('Sortir de la rubrique', { icone: 'arrow-left-line', onclick: () => appliquer((m) => {
+                v.parent !== modele ? bouton('Sortir de la rubrique', { icone: 'arrow-go-back-line', onclick: () => appliquer((m) => {
                     const w = viser(m, selection);
                     const grandParent = tous(m).find((e) => e.noeud === w.parent);
                     w.parent.enfants.splice(w.i, 1);

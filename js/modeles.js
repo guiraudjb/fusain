@@ -1,10 +1,13 @@
 // Bibliothèque de modèles de départ (cahier des charges §5.5)
 
+import { DISPOSITIONS, codeInitial } from './diagrammes/diapo.js';
+
 export const CATEGORIES = [
     ['processus', 'Processus et structure'],
     ['projet', 'Gestion de projet'],
     ['donnees', 'Analyse et données'],
     ['architecture', 'Ingénierie et architecture'],
+    ['diapos', 'Diapositives de texte (charte de l\'État)'],
 ];
 
 export const MODELES = [
@@ -290,6 +293,8 @@ Transition ecologique,Mobilite,150
         Portail->Usager: Demande de pièces
     }
 ` },
+    // Diapositives de texte : une page par mise en page, reprises des diapositives libres de VALOR
+    ...Object.entries(DISPOSITIONS).map(([id, d]) => ({ id: `diapo-${id}`, categorie: 'diapos', nom: d.nom, code: codeInitial(id) })),
 ];
 
 export const MODELE_INITIAL = MODELES[0];

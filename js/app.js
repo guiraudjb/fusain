@@ -127,7 +127,7 @@ async function rafraichir() {
     let schema = null;
     let erreur = null;
     try {
-        schema = await rendreSchema(page.code, etat.doc.document.theme);
+        schema = await rendreSchema(page.code, etat.doc.document.theme, page);
         derniersRendus.set(page.id, schema);
     } catch (e) {
         erreur = decrireErreur(e);
@@ -528,7 +528,7 @@ async function remplirVignette(cadre, n) {
     const page = etat.doc.pages[i];
     if (!page || n !== jeton) return;
     let schema = null;
-    try { schema = await rendreSchema(page.code, etat.doc.document.theme); } catch { schema = derniersRendus.get(page.id) || null; }
+    try { schema = await rendreSchema(page.code, etat.doc.document.theme, page); } catch { schema = derniersRendus.get(page.id) || null; }
     if (n !== jeton || !cadre.isConnected) return;
     const { svg } = composerPage(page, schema, { index: i, total: etat.doc.pages.length });
     svg.setAttribute('aria-hidden', 'true');

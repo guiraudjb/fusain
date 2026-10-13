@@ -37,7 +37,7 @@ ok('lien par glisser', /n1 --> A/.test(c), c.split('\n').filter(l => /n1/.test(l
 // 4. lien : sélection + propriétés
 await p.locator('.fusain-touche[data-fusain="l:0"]').click({ force: true }); await p.waitForTimeout(300);
 ok('sélection lien', (await p.textContent('#fusain-proprietes')).includes('Lien sélectionné'));
-await p.selectOption('#fusain-proprietes select >> nth=1', 'pointille'); await p.waitForTimeout(700);
+await p.locator('#fusain-proprietes .fusain-champ:has(label:text-is("Trait")) select').selectOption('pointille'); await p.waitForTimeout(700);
 c = await lireCode(); ok('trait pointillé', /A -\.-> B/.test(c));
 // 5. forme + couleur + groupe
 await p.click('[data-fusain="n:A"]'); await p.waitForTimeout(200);
@@ -63,6 +63,19 @@ await p.screenshot({ path: OUT + '/e2e-logigramme.png' });
   cc = await lireCode(); ok('clavier : renommage sur place', cc.includes('["Renommée au clavier"]'), cle);
   await p.click(`#fusain-feuille [data-fusain="${cle}"]`); await p.focus('#fusain-feuille svg.fusain-page'); await p.keyboard.press('Delete'); await p.waitForTimeout(800);
   cc = await lireCode(); ok('clavier : suppression', !cc.includes('Renommée au clavier')); }
+// 7 quater. réglages du logigramme : espacement, tracé des liens, duplication
+{ const liste = (l) => p.locator(`#fusain-proprietes .fusain-champ:has(label:text-is("${l}")) select`);
+  const boite = () => p.evaluate(() => document.querySelector('#fusain-feuille .fusain-schema').getAttribute('viewBox').split(' ').map(Number));
+  const avant = await boite();
+  await liste('Espacement').selectOption('aere'); await p.waitForTimeout(900);
+  const apres = await boite();
+  await liste('Tracé des liens').selectOption('step'); await p.waitForTimeout(900);
+  const trace = await p.evaluate(() => document.querySelector('#fusain-feuille path.flowchart-link').getAttribute('d'));
+  ok('logigramme : espacement aéré et liens en escalier', apres[3] > avant[3] && !/C/.test(trace), `${avant[3]} → ${apres[3]}`);
+  await p.click('#fusain-feuille [data-fusain="n:B"]'); await p.waitForTimeout(200); await p.click('#fusain-proprietes button:has-text("Dupliquer")'); await p.waitForTimeout(900);
+  const cd = await lireCode(); ok('logigramme : duplication d\'une étape', (cd.match(/\{"Dossier complet \?"\}/g) || []).length === 2);
+  await liste('Espacement').selectOption(''); await p.waitForTimeout(700); await liste('Tracé des liens').selectOption(''); await p.waitForTimeout(700);
+  ok('logigramme : réglages par défaut = aucune directive dans le code', !(await lireCode()).includes('%%{')); }
 // 7 bis. page : titre, sous-titre et description accessible
 { const champ = (libelle) => p.locator(`#fusain-proprietes .fusain-champ:has(label:text-is("${libelle}")) :is(input, textarea)`);
   await champ('Titre affiché sur la page').fill('Circuit de traitement'); await champ('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(600);
@@ -94,6 +107,14 @@ const res = await p.evaluate(async () => { const { MODELES } = await import('./j
 for (const r of res) ok('modèle ' + r[0], r[1] === 'ok', r[2]);
 // 11. exports
 const dl = async (action) => { const [d] = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), action()]); const f = `${OUT}/${d.suggestedFilename()}`; await d.saveAs(f); return f; };
+// 10 ter. camembert : couleur d'une part
+{ const n = await p.locator('.fusain-vignette').count();
+  for (let i = 0; i < n; i += 1) { if ((await p.locator('.fusain-vignette').nth(i).textContent()).includes('Camembert')) await p.locator('.fusain-vignette').nth(i).click(); }
+  await p.waitForTimeout(900); await p.locator('#fusain-feuille [data-fusain="p:1"]').first().click({ force: true }); await p.waitForTimeout(300);
+  await p.locator('#fusain-proprietes .fusain-champ:has(label:text-is("Couleur")) select').selectOption('#161616'); await p.waitForTimeout(900);
+  const teintes = await p.evaluate(() => [...document.querySelectorAll('#fusain-feuille path.pieCircle')].map((x) => getComputedStyle(x).fill));
+  ok('camembert : couleur d\'une part', teintes[1] === 'rgb(22, 22, 22)' && teintes[0] !== teintes[1], teintes.join(' '));
+  await p.locator('.fusain-vignette').last().click(); await p.waitForTimeout(900); }
 // 10 bis. matrice : glisser un point vers le coin supérieur droit
 { const pt = await p.locator('#fusain-feuille [data-fusain="p:0"] circle').first().boundingBox(); const z = await p.locator('#fusain-feuille .fusain-schema g.quadrants').boundingBox();
   await p.mouse.move(pt.x + pt.width / 2, pt.y + pt.height / 2); await p.mouse.down(); await p.mouse.move(z.x + z.width * 0.6, z.y + z.height * 0.5, { steps: 5 }); await p.mouse.move(z.x + z.width * 0.9, z.y + z.height * 0.1, { steps: 5 }); await p.mouse.up(); await p.waitForTimeout(800);

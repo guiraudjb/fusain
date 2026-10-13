@@ -1,6 +1,6 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
 import { h, bouton, champTexte, champSelect } from '../dom.js';
-import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer } from './commun.js';
+import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit } from './commun.js';
 
 // [nom, ouvrant, fermant, libellé] — les ouvrants les plus longs sont testés en premier
 const FORMES = [
@@ -23,6 +23,9 @@ const OUVRANTS = [...new Set(FORMES.map((f) => f[1]))].sort((a, b) => b.length -
 const SENS = [['TD', 'De haut en bas'], ['LR', 'De gauche à droite'], ['BT', 'De bas en haut'], ['RL', 'De droite à gauche']];
 const TRAITS = [['plein', 'Plein'], ['pointille', 'Pointillé'], ['epais', 'Épais'], ['invisible', 'Invisible']];
 const FLECHES = [['fin', 'Flèche'], ['aucune', 'Sans flèche'], ['double', 'Double flèche'], ['rond', 'Extrémité ronde'], ['croix', 'Extrémité en croix']];
+const ESPACEMENTS = [['', 'Normal'], ['compact', 'Resserré'], ['aere', 'Aéré']];
+const VALEURS_ESPACEMENT = { compact: 30, aere: 90 };
+const TRACES = [['', 'Courbes'], ['linear', 'Droits'], ['step', 'En escalier']];
 const MOTS_BRUTS = ['classDef', 'class', 'linkStyle', 'accTitle', 'accDescr'];
 const RESERVES = new Set(['end', 'subgraph', 'direction', 'style', 'click', 'graph', 'flowchart', ...MOTS_BRUTS]);
 const RE_ID = /^[\p{L}\p{N}_]+/u;
@@ -279,6 +282,20 @@ function appliquerFleche(l, type) {
     l.fin = { fin: '>', double: '>', rond: 'o', croix: 'x', aucune: '' }[type];
 }
 
+function espacement(modele) {
+    const n = Number(lireInit(modele.preambule).flowchart?.nodeSpacing);
+    if (!Number.isFinite(n) || n === 0) return '';
+    return n <= 40 ? 'compact' : n >= 70 ? 'aere' : '';
+}
+
+// L'espacement n'est pris en compte que par le moteur de disposition « dagre » : il est choisi avec lui
+function reglerDisposition(modele, reglages, moteur) {
+    const config = lireInit(modele.preambule);
+    config.flowchart = { ...config.flowchart, ...reglages };
+    if (moteur !== undefined) config.layout = moteur;
+    ecrireInit(modele.preambule, config);
+}
+
 const nomNoeud = (n) => (n.texte ?? n.id).replace(/\s+/g, ' ');
 function nomExtremite(modele, id) {
     const n = modele.noeuds.find((x) => x.id === id);
@@ -369,6 +386,9 @@ export function panneau(ctx) {
     blocs.push(h('div', { class: 'fusain-bloc' },
         h('h2', {}, 'Logigramme'),
         champSelect('Sens de lecture', SENS, modele.sens, (v) => appliquer((m) => { m.sens = v; })),
+        h('div', { class: 'fusain-ligne' },
+            champSelect('Espacement', ESPACEMENTS, espacement(modele), (v) => appliquer((m) => reglerDisposition(m, { nodeSpacing: VALEURS_ESPACEMENT[v], rankSpacing: VALEURS_ESPACEMENT[v] }, v ? 'dagre' : ''))),
+            champSelect('Tracé des liens', TRACES, TRACES.some(([t]) => t === lireInit(modele.preambule).flowchart?.curve) ? lireInit(modele.preambule).flowchart.curve : '', (v) => appliquer((m) => reglerDisposition(m, { curve: v })))),
         h('div', { class: 'fusain-actions' },
             bouton('Ajouter une étape', { icone: 'add-line', variante: 'secondary', onclick: () => {
                 let cle;
@@ -405,6 +425,16 @@ export function panneau(ctx) {
                 bouton('Ajouter une étape liée', { icone: 'add-line', variante: 'secondary', onclick: () => {
                     let cle;
                     appliquer((m) => { cle = relier(m, selection, null); }, () => cle);
+                } }),
+                bouton('Dupliquer', { icone: 'stack-line', onclick: () => {
+                    let cle;
+                    appliquer((m) => {
+                        const origine = m.noeuds.find((x) => x.id === id);
+                        const copie = ajouterNoeud(m, origine.groupe, origine.texte ?? origine.id);
+                        copie.forme = origine.forme;
+                        if (m.styles[id]) m.styles[copie.id] = { ...m.styles[id] };
+                        cle = `n:${copie.id}`;
+                    }, () => cle);
                 } }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimerNoeud(m, id), () => null) })),
             autres.length ? champSelect('Relier à…', [['', 'Choisir une destination'], ...autres], '', (v) => {

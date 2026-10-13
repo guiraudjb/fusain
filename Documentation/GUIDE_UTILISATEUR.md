@@ -28,7 +28,7 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Au clavier** — placez le focus sur la page (touche Tab), puis : flèches pour passer d'un élément à l'autre, Entrée ou F2 pour renommer, Suppr pour supprimer, Inser ou « + » pour ajouter un élément lié. Le « plan » en bas de la colonne de droite liste tous les éléments et permet de les sélectionner, y compris avec un lecteur d'écran.
 
-**Logigramme** — sens de lecture, étapes (texte, forme, couleur, groupe), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
+**Logigramme** — sens de lecture, espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), étapes (texte, forme, couleur, groupe, duplication), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
 
 **Diagramme de séquence** — participants (boîte ou personnage), messages, notes, blocs (boucle, alternative…), numérotation. Les ajouts se placent après l'élément sélectionné ; les flèches haut / bas le déplacent.
 
@@ -36,7 +36,7 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Gantt** — titre, format des dates, jours exclus, sections et tâches. Une tâche a un début (une date, ou `after` suivi de l'identifiant d'une autre tâche) et une durée (`5d`, `2w`) ou une date de fin.
 
-**Camembert** — libellés et valeurs ; vous pouvez coller deux colonnes copiées depuis un tableur.
+**Camembert** — libellés, valeurs et couleur de chaque part ; vous pouvez coller deux colonnes copiées depuis un tableur.
 
 **Frise chronologique** — périodes, événements de chaque période, sections. La pastille « + » d'une période lui ajoute un événement.
 

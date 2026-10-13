@@ -677,7 +677,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.4.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.5.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -699,7 +699,7 @@ FUSAIN/
 
 | Domaine | Contenu |
 |---|---|
-| Édition visuelle | Sélection multiple, copier / coller ; réglage des espacements ; couleur de chaque part du camembert ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
+| Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Au tout premier chargement, les modules propres à FUSAIN autres que le point d'entrée ne sont pas couverts par l'attribut d'intégrité du navigateur (limite des modules ES importés) ; ils le sont dès l'installation du service worker, qui vérifie l'empreinte de chaque fichier |

@@ -60,6 +60,38 @@ export function separerPreambule(code) {
     return { preambule, corps: lignes.slice(i) };
 }
 
+// Réglages de rendu propres à un schéma : ils vivent dans une directive « %%{init: …}%% » placée en tête du code.
+// Seule une directive écrite en JSON strict est reprise ; toute autre est laissée intacte.
+const RE_INIT = /^%%\{\s*init\s*:\s*([\s\S]*)\}%%$/;
+
+function rangInit(preambule) {
+    return preambule.findIndex((ligne) => {
+        const m = ligne.trim().match(RE_INIT);
+        if (!m) return false;
+        try { return typeof JSON.parse(m[1]) === 'object'; } catch { return false; }
+    });
+}
+
+export function lireInit(preambule) {
+    const i = rangInit(preambule);
+    return i >= 0 ? JSON.parse(preambule[i].trim().match(RE_INIT)[1]) : {};
+}
+
+export function ecrireInit(preambule, config) {
+    // Les sections vidées de leurs réglages disparaissent de la directive
+    const propre = {};
+    for (const [cle, valeur] of Object.entries(config)) {
+        if (valeur === null || valeur === undefined || valeur === '') continue;
+        if (typeof valeur === 'object' && !Array.isArray(valeur)) {
+            const section = Object.fromEntries(Object.entries(valeur).filter(([, v]) => v !== null && v !== undefined && v !== ''));
+            if (Object.keys(section).length) propre[cle] = section;
+        } else propre[cle] = valeur;
+    }
+    const ligne = Object.keys(propre).length ? `%%{init: ${JSON.stringify(propre)}}%%` : null;
+    const i = rangInit(preambule);
+    if (i >= 0) { if (ligne) preambule[i] = ligne; else preambule.splice(i, 1); } else if (ligne) preambule.push(ligne);
+}
+
 export function deplacer(tableau, index, delta) {
     const cible = index + delta;
     if (cible < 0 || cible >= tableau.length) return index;

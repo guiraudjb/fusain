@@ -1,6 +1,9 @@
 // Camembert : tableau libellé / valeur
-import { h, bouton, champTexte, champCase } from '../dom.js';
-import { echapper, desechapper, separerPreambule, deplacer, actionsListe, plan, marquer } from './commun.js';
+import { h, bouton, champTexte, champCase, champSelect } from '../dom.js';
+import { echapper, desechapper, separerPreambule, deplacer, actionsListe, plan, marquer, lireInit, ecrireInit } from './commun.js';
+
+// Couleurs illustratives du Système de Design de l'État proposées pour les parts
+const TEINTES = [['', 'Couleur du thème'], ['#000091', 'Bleu France'], ['#e1000f', 'Rouge Marianne'], ['#009081', 'Vert menthe'], ['#c8aa39', 'Jaune moutarde'], ['#a558a0', 'Violet glycine'], ['#417dc4', 'Bleu écume'], ['#e4794a', 'Orange terre battue'], ['#68a532', 'Vert bourgeon'], ['#aea397', 'Beige gris galet'], ['#c08c65', 'Brun caramel'], ['#3558a2', 'Bleu cumulus'], ['#b7a73f', 'Vert tilleul'], ['#929292', 'Gris'], ['#161616', 'Noir']];
 
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);
@@ -73,6 +76,11 @@ export function panneau(ctx) {
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Part sélectionnée'),
             champTexte('Libellé', part.nom, (v) => appliquer((m) => { if (v.trim()) m.parts[i].nom = v.trim(); }), { id: 'fusain-champ-texte' }),
+            champSelect('Couleur', TEINTES, lireInit(modele.preambule).themeVariables?.[`pie${i + 1}`] || '', (v) => appliquer((m) => {
+                const config = lireInit(m.preambule);
+                config.themeVariables = { ...config.themeVariables, [`pie${i + 1}`]: v };
+                ecrireInit(m.preambule, config);
+            })),
             champTexte('Valeur', part.valeur, (v) => appliquer((m) => { const n = Number(String(v).replace(',', '.')); if (Number.isFinite(n) && n >= 0) m.parts[i].valeur = n; }), { type: 'number', min: 0, step: 'any' }),
             actionsListe({
                 monter: () => appliquer((m) => {}, (m) => `p:${deplacer(m.parts, i, -1)}`),

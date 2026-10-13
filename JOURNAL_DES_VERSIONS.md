@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.5.0 — 13 octobre 2026 — confort d'édition
+
+- **Logigramme** : espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), duplication d'une étape avec sa forme et sa couleur.
+- **Camembert** : couleur de chaque part, parmi les couleurs illustratives du DSFR.
+- Ces réglages sont enregistrés dans une directive en tête du code Mermaid ; revenus à leur valeur par défaut, ils n'y laissent aucune trace.
+- Constat utile aux utilisateurs avancés : Mermaid 12 dispose les logigrammes avec le moteur ELK, qui ignore `nodeSpacing` et `rankSpacing` ; l'espacement choisi dans FUSAIN bascule donc le schéma sur le moteur « dagre ».
+
 ## 0.4.3 — 13 octobre 2026 — paquet Debian
 
 - `deploiement/construire-deb.sh` construit le paquet **`fusain-server`** (2,3 Mo) : fichiers de l'application sous `/var/www/html/FUSAIN`, site Nginx avec tous les en-têtes de sécurité, certificat auto-signé créé à la première installation. Ni outils, ni tests, ni dépôt ne sont livrés.

@@ -264,6 +264,32 @@ Transition ecologique,Mobilite,150
     max 5
     min 0
 ` },
+    { id: 'treemap', categorie: 'donnees', nom: 'Carte proportionnelle (treemap)', code: `treemap-beta
+"Budget"
+    "Fonctionnement"
+        "Salaires": 400
+        "Locaux": 150
+        "Informatique": 90
+    "Investissement"
+        "Travaux": 200
+        "Équipements": 100
+    "Communication": 50
+` },
+    { id: 'zenuml', categorie: 'processus', nom: 'Séquence ZenUML', code: `zenuml
+    title Dépôt d'une demande
+    @Actor Usager
+    Portail
+    @Database Base
+    Usager->Portail: Dépose sa demande
+    Portail->Base.enregistrer(demande) {
+        return numero
+    }
+    if (dossier complet) {
+        Portail->Usager: Accusé de réception
+    } else {
+        Portail->Usager: Demande de pièces
+    }
+` },
 ];
 
 export const MODELE_INITIAL = MODELES[0];

@@ -2,7 +2,9 @@
   "_commentaire": "Source de la nomenclature : une entrée par bibliothèque embarquée. Les empreintes des fichiers sont calculées et vérifiées par outils/generer.py.",
   "composants": [
     {
-      "nom": "@gouvfr/dsfr", "version": "1.15.4", "licence": "etalab-2.0",
+      "nom": "@gouvfr/dsfr",
+      "version": "1.15.4",
+      "licence": "etalab-2.0",
       "role": "Système de Design de l'État : composants, styles, police Marianne, icônes",
       "purl": "pkg:npm/%40gouvfr/dsfr@1.15.4",
       "archive": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz",
@@ -11,7 +13,9 @@
       "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
     },
     {
-      "nom": "mermaid", "version": "12.1.0", "licence": "MIT",
+      "nom": "mermaid",
+      "version": "12.1.0",
+      "licence": "MIT",
       "role": "Analyse et rendu des diagrammes",
       "purl": "pkg:npm/mermaid@12.1.0",
       "archive": "https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz",
@@ -20,7 +24,20 @@
       "note": "Fichier dist/mermaid.min.js : distribution autonome, qui inclut ses propres dépendances (moteurs de disposition, analyseurs, D3, DOMPurify interne)."
     },
     {
-      "nom": "dompurify", "version": "3.4.17", "licence": "(MPL-2.0 OR Apache-2.0)",
+      "nom": "@mermaid-js/mermaid-zenuml",
+      "version": "1.0.1",
+      "licence": "MIT",
+      "role": "Extension de Mermaid pour les diagrammes de séquence ZenUML, chargée à la demande",
+      "purl": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
+      "archive": "https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz",
+      "archiveSha256": "ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a",
+      "dossier": "libs/mermaid-zenuml-v1.0.1",
+      "note": "Fichier dist/mermaid-zenuml.min.js : distribution autonome, qui inclut @zenuml/core (3.47.9 ou plus récent à la date de construction, 18 septembre 2026), React 19.2.3, marked et l'analyseur ANTLR. Chargé seulement quand une page contient un schéma ZenUML."
+    },
+    {
+      "nom": "dompurify",
+      "version": "3.4.17",
+      "licence": "(MPL-2.0 OR Apache-2.0)",
       "role": "Assainissement du SVG avant insertion dans la page",
       "purl": "pkg:npm/dompurify@3.4.17",
       "archive": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
@@ -29,7 +46,9 @@
       "note": "Fichier dist/purify.min.js."
     },
     {
-      "nom": "jspdf", "version": "4.2.1", "licence": "MIT",
+      "nom": "jspdf",
+      "version": "4.2.1",
+      "licence": "MIT",
       "role": "Génération du fichier PDF",
       "purl": "pkg:npm/jspdf@4.2.1",
       "archive": "https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz",
@@ -38,7 +57,9 @@
       "note": "Fichier dist/jspdf.umd.min.js. Les dépendances optionnelles de jsPDF (html2canvas, canvg, dompurify) ne sont ni embarquées ni chargées : la fonction html() n'est pas utilisée."
     },
     {
-      "nom": "svg2pdf.js", "version": "2.8.1", "licence": "MIT",
+      "nom": "svg2pdf.js",
+      "version": "2.8.1",
+      "licence": "MIT",
       "role": "Conversion vectorielle SVG vers PDF",
       "purl": "pkg:npm/svg2pdf.js@2.8.1",
       "archive": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz",

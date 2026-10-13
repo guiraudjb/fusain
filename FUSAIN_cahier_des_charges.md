@@ -506,6 +506,7 @@ Les deux sont versionnés avec le code, mis à jour dans le même changement que
 |---|---|---|---|---|
 | DSFR | Système de Design de l'État : composants, styles, police Marianne, icônes | 1.15.4 | Etalab-2.0 | Registre npm `@gouvfr/dsfr` |
 | Mermaid | Analyse et rendu des diagrammes | 12.1.0 | MIT | Registre npm `mermaid` |
+| Extension ZenUML de Mermaid | Diagrammes de séquence ZenUML, chargée à la demande (ajoutée en 0.8.0) | 1.0.1 | MIT | Registre npm `@mermaid-js/mermaid-zenuml` |
 | DOMPurify | Assainissement du SVG avant insertion | 3.4.17 | Apache-2.0 ou MPL-2.0 | Registre npm `dompurify` |
 | jsPDF | Génération du fichier PDF | 4.2.1 | MIT | Registre npm `jspdf` |
 | svg2pdf.js | Conversion vectorielle SVG → PDF | 2.8.1 | MIT | Registre npm `svg2pdf.js` |
@@ -589,7 +590,7 @@ Un script d'aide (`outils/verifier-nomenclature`) contrôle que chaque fichier e
 | Réseau | Aucune requête hors origine, vérifiée en recette et garantie par la politique de sécurité de contenu. |
 | Rendu | Schéma de 200 nœuds recalculé en moins d'une seconde sur un poste bureautique standard ; l'interface reste réactive pendant le calcul. |
 | Export | PDF de 10 pages en moins de 10 secondes ; PNG A3 à 300 ppp en moins de 5 secondes. |
-| Poids | Premier chargement inférieur à 10 Mo, dont l'essentiel en cache ensuite (mesuré en 0.1.0 : 8,7 Mo, dont 5,5 Mo pour Mermaid). |
+| Poids | Premier chargement inférieur à 10 Mo, dont l'essentiel en cache ensuite (mesuré en 0.1.0 : 8,7 Mo, dont 5,5 Mo pour Mermaid). Depuis la 0.8.0, l'extension ZenUML ajoute 3,2 Mo : elle n'est pas chargée par la page, mais le service worker la met en cache en arrière-plan pour l'usage hors ligne, ce qui porte le total à 12 Mo environ — écart assumé par rapport à la cible. |
 | Robustesse | Aucune perte de travail en cas de fermeture accidentelle (brouillon) ; une erreur de rendu n'altère jamais le code de la page. |
 | Maintenabilité | Code en modules ES documentés, sans build ; un module par type de diagramme, pour ajouter un type sans toucher aux autres. |
 | Tests | Tests automatisés de l'aller-retour code → modèle → code sur un corpus de schémas, par type : le résultat doit être équivalent à l'entrée. |
@@ -677,7 +678,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.7.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.8.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -685,9 +686,9 @@ FUSAIN/
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
 | Pages | Document multi-pages, pages vierges, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
-| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, depuis la 0.7.0 diagramme C4 (contexte, conteneurs, composants), diagramme de blocs, diagramme d'exigences et diagramme radar, soit vingt et un types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
+| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, depuis la 0.7.0 diagramme C4 (contexte, conteneurs, composants), diagramme de blocs, diagramme d'exigences et diagramme radar, depuis la 0.8.0 carte proportionnelle (treemap) et séquence ZenUML, soit vingt-trois types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
-| Modèles | 22 modèles répartis en quatre catégories, tous éditables visuellement ; page vierge |
+| Modèles | 24 modèles répartis en quatre catégories, tous éditables visuellement ; page vierge |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Trusted Types, analyse statique automatisée, Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |
@@ -699,7 +700,7 @@ FUSAIN/
 
 | Domaine | Contenu |
 |---|---|
-| Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture ; édition visuelle des derniers types Mermaid (déploiement et diagramme dynamique C4, treemap, ZenUML) |
+| Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture ; édition visuelle des dernières écritures Mermaid (déploiement et diagramme dynamique C4) |
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Au tout premier chargement, les modules propres à FUSAIN autres que le point d'entrée ne sont pas couverts par l'attribut d'intégrité du navigateur (limite des modules ES importés) ; ils le sont dès l'installation du service worker, qui vérifie l'empreinte de chaque fichier |

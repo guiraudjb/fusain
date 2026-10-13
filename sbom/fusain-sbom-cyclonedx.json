@@ -1,17 +1,17 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:95879df9-aec3-5184-833a-fb3b67dc24e5",
+  "serialNumber": "urn:uuid:57be0ffa-c8e8-5d53-99ca-3b358bb7956d",
   "version": 1,
   "metadata": {
     "timestamp": "2026-10-13T00:00:00Z",
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.7.0",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.8.0",
       "name": "FUSAIN",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.7.0"
+      "purl": "pkg:github/guiraudjb/fusain@0.8.0"
     },
     "tools": {
       "components": [
@@ -1133,6 +1133,65 @@
     },
     {
       "type": "library",
+      "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
+      "name": "@mermaid-js/mermaid-zenuml",
+      "version": "1.0.1",
+      "description": "Extension de Mermaid pour les diagrammes de séquence ZenUML, chargée à la demande",
+      "purl": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/mermaid-zenuml-v1.0.1"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/mermaid-zenuml.min.js : distribution autonome, qui inclut @zenuml/core (3.47.9 ou plus récent à la date de construction, 18 septembre 2026), React 19.2.3, marked et l'analyseur ANTLR. Chargé seulement quand une page contient un schéma ZenUML."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/mermaid-zenuml-v1.0.1/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ec9fb67dcb25eccc416ed56e1aab819222c805a2a4bfe4cb19e7556bf2ffde80"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/mermaid-zenuml-v1.0.1/mermaid-zenuml.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f75662869d22aac58870e52370fe4c46b89b9710bf4b03df93b3227b5e18e730"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "pkg:npm/dompurify@3.4.17",
       "name": "dompurify",
       "version": "3.4.17",
@@ -1309,10 +1368,11 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.7.0",
+      "ref": "pkg:github/guiraudjb/fusain@0.8.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.1.0",
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
         "pkg:npm/dompurify@3.4.17",
         "pkg:npm/jspdf@4.2.1",
         "pkg:npm/svg2pdf.js@2.8.1"
@@ -1324,6 +1384,10 @@
     },
     {
       "ref": "pkg:npm/mermaid@12.1.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
       "dependsOn": []
     },
     {

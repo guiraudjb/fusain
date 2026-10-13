@@ -212,3 +212,26 @@ test('exigences : les relations suivent le renommage, les deux écritures de fl�
     editeur.renommer(modele, 'n:0', 'Temps de réponse');
     assert.ok(editeur.ecrire(modele).includes('e1 - satisfies -> "Temps de réponse"'));
 });
+
+// ---------- Éditeurs ajoutés en 0.8.0 ----------
+
+test('treemap : une case qui en reçoit d\'autres devient une rubrique, la hiérarchie se relit', () => {
+    const editeur = editeurPour('treemap');
+    const modele = editeur.analyser('treemap-beta\n"A"\n    "f": 4\n"g": 2\n');
+    assert.equal(editeur.relier(modele, 't:1', 't:0.0'), 't:0.0.0');
+    assert.equal(editeur.ecrire(modele), 'treemap-beta\n"A"\n    "f"\n        "g": 2\n');
+    // ranger une rubrique dans l'une de ses propres cases est refusé
+    assert.equal(editeur.relier(modele, 't:0', 't:0.0.0'), null);
+    assert.throws(() => editeur.analyser('treemap-beta\n"A": 3\n    "f": 4\n'), /pas gérée/);
+});
+
+test('ZenUML : blocs imbriqués relus à l\'identique, renommage d\'un participant propagé', () => {
+    const editeur = editeurPour('zenuml');
+    const code = 'zenuml\n    @Actor A\n    A->B.traiter(x) {\n        if (ok) {\n            B->A: oui\n        } else {\n            B->A: non\n        }\n        return fin\n    }\n';
+    const modele = editeur.analyser(code);
+    assert.equal(editeur.ecrire(modele), code);
+    assert.deepEqual(editeur.elements(modele).map((e) => e.cle), ['p:0', 'p:1', 'i:0', 'i:0.0.0', 'i:0.0.0.0.0', 'k:0.0.0.1', 'i:0.0.0.1.0', 'i:0.0.1']);
+    editeur.renommer(modele, 'p:1', 'Service de paie');
+    assert.ok(editeur.ecrire(modele).includes('A->"Service de paie".traiter(x) {') && editeur.ecrire(modele).includes('"Service de paie"->A: non'));
+    assert.throws(() => editeur.analyser('zenuml\n    A->B.m() {\n        x = B->C.n()\n    }\n'), /pas gérée/);
+});

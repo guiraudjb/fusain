@@ -20,9 +20,11 @@ import exigences from './exigences.js';
 import c4 from './c4.js';
 import blocs from './blocs.js';
 import radar from './radar.js';
+import treemap from './treemap.js';
+import zenuml from './zenuml.js';
 
 // Un éditeur peut couvrir plusieurs types voisins (les trois niveaux d'un diagramme C4)
-const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet, exigences, c4, blocs, radar]
+const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet, exigences, c4, blocs, radar, treemap, zenuml]
     .flatMap((e) => (e.types || [e.type]).map((type) => [type, e])));
 
 export function editeurPour(type) {

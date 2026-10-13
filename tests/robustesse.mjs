@@ -23,6 +23,8 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const { typeDiagramme, nettoyerCode } = await import('./js/securite.js');
     const rendu = await import('./js/rendu.js');
     window.__xss = 0;
+    // L'extension ZenUML n'est chargée qu'au premier rendu d'un schéma de ce type
+    await rendu.rendreSchema(MODELES.find((m) => m.id === 'zenuml').code, 'bleu-france');
     const MORCEAUX = ['"', "'", '`', '[', ']', '(', ')', '{', '}', '|', ';', ':', '#', '%%', '-->', '---', '&', '<', '>', '\\', '/', '\n', ' ', ' end ', 'end', 'subgraph x', 'click A', 'style', '<script>window.__xss=1</script>', '<img src=x onerror="window.__xss=1">', '<b>gras</b>', '#quot;', '#59;', '%%{init:{"securityLevel":"loose"}}%%', 'javascript:window.__xss=1', 'é', 'Ω', '😀', '\t', ',', '=', '==>', '-.->', '~~~', '@{', ':::', '$$', '&lt;', 'title', 'section', 'after', 'Note over', 'loop', 'participant'];
     let graine = 12345;
     const alea = (n) => { graine = (graine * 1103515245 + 12345) & 0x7fffffff; return graine % n; };
@@ -30,7 +32,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const echecs = [];
     const comptes = {};
 
-    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar']) {
+    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar', 'treemap', 'zenuml']) {
         const depart = MODELES.find((m) => m.id === type).code;
         const editeur = editeurPour(typeDiagramme(depart));
         comptes[type] = 0;

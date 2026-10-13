@@ -5,8 +5,8 @@
 | Champ | Valeur |
 |---|---|
 | Date | 13 octobre 2026 |
-| Version de FUSAIN | 0.1.0 |
-| Périmètre | Tout ce qui est servi au navigateur : code propre à FUSAIN et cinq bibliothèques embarquées |
+| Version de FUSAIN | 0.8.0 |
+| Périmètre | Tout ce qui est servi au navigateur : code propre à FUSAIN et six bibliothèques embarquées |
 | Format | Ce document (lecture) + `sbom/fusain-sbom-cyclonedx.json` (CycloneDX 1.6, avec l'empreinte SHA-256 de chaque fichier embarqué) |
 | Source | `sbom/composants.json`, tenu à la main ; le reste est calculé par `outils/generer.py` |
 | Dernier contrôle des vulnérabilités | 13 octobre 2026 — OSV.dev, sur les versions exactes : aucune vulnérabilité connue |
@@ -16,6 +16,7 @@
 | # | Date | Contenu |
 |---|---|---|
 | 1 | 13/10/2026 | Version initiale. Cinq bibliothèques embarquées à leur dernière version amont du jour, contrôle OSV.dev sans résultat. |
+| 3 | 13/10/2026 | Ajout de l'extension ZenUML de Mermaid (`@mermaid-js/mermaid-zenuml` 1.0.1), chargée à la demande. Contrôle OSV.dev sur cette version et sur `@zenuml/core` 3.50.1 : aucune vulnérabilité connue. |
 | 2 | 13/10/2026 | Veille outillée (`outils/veille.py`) et planifiée chaque mois ; contrôle rejoué par cet outil : aucune vulnérabilité connue, aucune version plus récente. |
 
 ---
@@ -32,6 +33,7 @@ FUSAIN est un ensemble de fichiers statiques exécutés dans le navigateur. Il n
 |---|---|---|---|---|---|
 | DSFR (`@gouvfr/dsfr`) | 1.15.4 | Système de Design de l'État : styles, script, police Marianne, icônes | Etalab-2.0 | Sous-ensemble de `dist/` : `dsfr.min.css`, `dsfr.module.min.js`, polices WOFF2, favicon, icônes utilisées | `libs/dsfr-v1.15.4/` |
 | Mermaid | 12.1.0 | Analyse et rendu des diagrammes | MIT | `dist/mermaid.min.js` | `libs/mermaid-v12.1.0/` |
+| Extension ZenUML de Mermaid (`@mermaid-js/mermaid-zenuml`) | 1.0.1 | Diagrammes de séquence ZenUML ; chargée seulement quand une page en contient un | MIT | `dist/mermaid-zenuml.min.js`, `LICENSE` | `libs/mermaid-zenuml-v1.0.1/` |
 | DOMPurify | 3.4.17 | Assainissement du SVG avant insertion dans la page | MPL-2.0 ou Apache-2.0 | `dist/purify.min.js` | `libs/dompurify-v3.4.17/` |
 | jsPDF | 4.2.1 | Génération du fichier PDF | MIT | `dist/jspdf.umd.min.js` | `libs/jspdf-v4.2.1/` |
 | svg2pdf.js | 2.8.1 | Conversion vectorielle SVG → PDF | MIT | `dist/svg2pdf.umd.min.js` | `libs/svg2pdf-v2.8.1/` |
@@ -44,6 +46,7 @@ Chaque composant provient de l'archive officielle du registre npm, dont l'emprei
 |---|---|---|
 | DSFR | `https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz` | `e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb` |
 | Mermaid | `https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz` | `3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a` |
+| Extension ZenUML | `https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz` | `ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a` |
 | DOMPurify | `https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz` | `056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7` |
 | jsPDF | `https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz` | `e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a` |
 | svg2pdf.js | `https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz` | `5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a` |
@@ -55,6 +58,7 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 - **Fichiers dérivés** — `libs/dsfr-v1.15.4/fonts-ttf/` contient Marianne Regular et Bold convertis de WOFF2 en TrueType avec fontTools, pour l'incorporation dans les PDF (jsPDF n'accepte que le TrueType). Ces deux fichiers ne figurent pas dans l'archive d'origine ; ils sont à régénérer à chaque mise à jour du DSFR.
 - **DSFR partiel** — seules les icônes réellement utilisées sont embarquées ; `icons.min.css` référence les autres, qui ne sont jamais demandées.
 - **Dépendances incluses dans Mermaid** — `mermaid.min.js` est une distribution autonome qui contient ses propres dépendances (moteurs de disposition, analyseurs, D3, un DOMPurify interne). Elles ne sont pas détaillées ici : leur suivi passe par les avis de sécurité de Mermaid.
+- **Dépendances incluses dans l'extension ZenUML** — `mermaid-zenuml.min.js` (3,2 Mo) est une distribution autonome qui contient `@zenuml/core` (3.47.9 ou plus récent à sa date de construction, le 18 septembre 2026), React 19.2.3, marked et un analyseur ANTLR. Le fichier ne contient ni `eval` ni `new Function`, produit du SVG sans HTML incorporé, et n'émet aucune requête. Il n'est pas chargé au démarrage : `index.html` n'en porte que l'adresse et l'empreinte, et `js/rendu.js` le charge, empreinte contrôlée par le navigateur, à la première page ZenUML.
 - **Dépendances optionnelles de jsPDF** — html2canvas, canvg et dompurify ne sont ni embarquées ni chargées : la fonction `html()` de jsPDF n'est pas utilisée.
 
 ## 3. Hors du produit livré
@@ -128,6 +132,6 @@ Avant toute publication, `python3 outils/generer.py --verifier` doit se terminer
 
 ## 6. Limites
 
-- Les composants inclus dans `mermaid.min.js` ne sont pas énumérés individuellement.
-- Le contrôle automatique des vulnérabilités ne porte que sur les cinq bibliothèques déclarées, pas sur les composants inclus dans `mermaid.min.js`.
+- Les composants inclus dans `mermaid.min.js` et dans `mermaid-zenuml.min.js` ne sont pas énumérés individuellement.
+- Le contrôle automatique des vulnérabilités ne porte que sur les six bibliothèques déclarées, pas sur les composants inclus dans `mermaid.min.js` et `mermaid-zenuml.min.js` (React et `@zenuml/core` sont à surveiller à la main à chaque révision).
 - Aucun audit de sécurité externe n'a encore été mené.

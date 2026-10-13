@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Vingt et un types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences et diagramme radar. Les rares types restants de Mermaid (déploiement C4, treemap…) se modifient par le code (§4).
+Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§4).
 
 **Gestes communs**
 
@@ -67,6 +67,10 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Diagramme d'exigences** — exigences (nature, identifiant, énoncé, risque, méthode de vérification), éléments qui y répondent, et relations typées (contient, satisfait, vérifie, dérive de…).
 
 **Diagramme radar** — un tableau de données : une ligne par axe, une colonne par courbe. Valeurs au centre et au bord, grille en cercles ou en polygones, légende. Chaque courbe prend une couleur différente.
+
+**Carte proportionnelle (treemap)** — des rubriques emboîtées et des cases dont la surface suit la valeur. La pastille « + » d'une case la divise en sous-cases ; glissée sur une autre case, elle y range la première. Une rubrique vaut la somme de ce qu'elle contient.
+
+**Séquence ZenUML** — une autre écriture du diagramme de séquence : participants (personne, base de données, file…), messages, appels avec retour et messages imbriqués, blocs (condition avec « sinon », boucle, option, en parallèle, essai). La pastille « + » d'un message ajoute sa réponse ; celle d'un participant, un message vers un nouveau participant. Ce type s'appuie sur une extension de Mermaid chargée à la première page qui l'utilise.
 
 **Page vierge** — une page sans schéma, pour une page de garde ou un intercalaire : seuls son titre, son sous-titre et son pied de page sont imprimés. Vous pouvez lui donner un schéma plus tard (« Choisir un schéma »).
 

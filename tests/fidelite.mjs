@@ -94,6 +94,14 @@ const CORPUS = [
     'block-beta\n  a b c\n  a --> b --> c',
     'radar-beta\n  title Grades\n  axis m["Math"], s["Science"], e["English"]\n  axis h["History"], g["Geography"], a["Art"]\n  curve a["Alice"]{85, 90, 80, 70, 75, 90}\n  curve b["Bob"]{70, 75, 85, 80, 90, 85}\n\n  max 100\n  min 0',
     'radar-beta\n  axis A, B, C, D, E\n  curve c1{1,2,3,4,5}, c2{5,4,3,2,1}\n  curve c3{ C: 3, A: 1, B: 2, E: 5, D: 4 }\n  graticule polygon\n  ticks 3\n  showLegend false\n  max 5',
+    'treemap-beta\n"Category A"\n    "Item A1": 10\n    "Item A2": 20\n"Category B"\n    "Item B1": 15\n    "Item B2": 25',
+    'treemap\n\'Racine\'\n  \'Branche\'\n    \'Feuille\': 2.5\n    \'Autre\': 1,000\n  \'Vide\'\n  \'Seule\': 3',
+    'treemap-beta\n"Main"\n    "A": 20\n    "B":::important\n        "B1": 10\n        "B2": 15\n    "C": 5\n\nclassDef important fill:#f96,stroke:#333,stroke-width:2px;',
+    'zenuml\n    title Annotators\n    @Actor Alice\n    @Database Bob\n    Alice->Bob: Hi Bob\n    Bob->Alice: Hi Alice',
+    'zenuml\n    title Order Service\n    @Actor Client\n    @Boundary OrderController\n    @Database Orders\n    // Le client passe commande\n    Client->OrderController.post(payload) {\n        OrderController->Orders.save(order) {\n            return id\n        }\n        if (stock > 0) {\n            OrderController->Client: Confirmation\n        } else if (commande partielle) {\n            OrderController->Client: Partiel\n        } else {\n            OrderController->Client: Refus\n        }\n        return "numéro de commande"\n    }',
+    'zenuml\n    A as Alice\n    "Service de paie" as Paie\n    while (reste) {\n        A->"Service de paie": Demande\n    }\n    opt {\n        "Service de paie"->A: Relance\n    }\n    par {\n        A->B: un\n        A->C: deux\n    }\n    try {\n        A->B: essai\n    } catch {\n        A->B: erreur\n    } finally {\n        A->B: fin\n    }',
+    'zenuml\n    Alice->Bob.method() {\n        result = Bob->Carl.compute(1, 2)\n        new Dave()\n        return result\n    }',
+    'zenuml\n    BookLibService.Borrow(id) {\n        User = Session.GetUser()\n        return receipt\n    }',
 ];
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });
 const p = await (await b.newContext({ viewport: { width: 1500, height: 950 } })).newPage();

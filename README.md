@@ -15,12 +15,12 @@
 
 | Fonction | État |
 |---|---|
-| Édition visuelle de 21 types : logigramme, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar | Disponible |
+| Édition visuelle de 23 types : logigramme, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar, treemap, ZenUML | Disponible |
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
-| 22 modèles de départ, page vierge | Disponible |
+| 24 modèles de départ, page vierge | Disponible |
 | Export PDF / PNG / SVG, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
 | Fonctionnement hors ligne | Disponible |
-| Édition visuelle des derniers types Mermaid (déploiement C4, treemap, ZenUML) | À venir |
+| Édition visuelle du déploiement et du diagramme dynamique C4 | À venir |
 
 Le détail de ce qui reste à faire figure dans le [cahier des charges](FUSAIN_cahier_des_charges.md), section « État de réalisation ».
 

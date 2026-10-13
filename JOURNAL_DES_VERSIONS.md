@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.8.0 — 13 octobre 2026 — treemap et ZenUML
+
+- **Carte proportionnelle (treemap)** : édition visuelle des rubriques et des cases (valeur, division en sous-cases, rangement par glisser, ordre).
+- **Séquence ZenUML** : édition visuelle des participants, messages, appels avec retour, messages imbriqués et blocs (condition, boucle, option, parallèle, essai). Créations d'objets, affectations et appels sans émetteur restent en « code seul ».
+- **Nouvelle bibliothèque embarquée** : ZenUML ne fait pas partie de Mermaid ; l'extension officielle `@mermaid-js/mermaid-zenuml` 1.0.1 (3,2 Mo, licence MIT, React inclus) est ajoutée à la nomenclature. Vérifié avant intégration : ni `eval` ni `new Function`, rendu en SVG pur sans HTML incorporé, aucune requête, fonctionnement sous la politique de sécurité et Trusted Types, export PDF vectoriel. Aucune vulnérabilité connue (OSV.dev).
+- **Chargement à la demande** : l'extension n'est lue qu'à la première page ZenUML, avec contrôle de son empreinte par le navigateur ; le temps de démarrage est inchangé. Le service worker la met en cache en arrière-plan, ce qui porte le poids hors ligne de 8,7 à 12 Mo environ.
+- **Défaut corrigé à l'export** : ZenUML place « [ condition ] » en trois textes d'après la largeur d'une autre police ; ils se chevauchaient dans le PDF en Marianne et sont maintenant réunis.
+- Recette étendue : robustesse sur les 23 éditeurs, corpus de fidélité porté à 99 écritures, une modification visuelle vérifiée par nouveau type.
+
 ## 0.7.0 — 13 octobre 2026 — C4, blocs, exigences, radar
 
 - **Quatre éditeurs visuels de plus**, avec leur modèle de départ : diagramme C4 (contexte, conteneurs, composants : éléments internes ou externes, limites imbriquées, relations), diagramme de blocs (colonnes, formes, largeurs, espaces, groupes, liens), diagramme d'exigences (exigences, éléments, relations typées) et diagramme radar (tableau axes × courbes). Vingt et un types en édition visuelle, 22 modèles.

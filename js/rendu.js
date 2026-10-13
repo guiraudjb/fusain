@@ -1,7 +1,7 @@
 // Rendu Mermaid et composition de la page au format d'impression
 import { s } from './dom.js';
 import { dimensions, MM_PAR_PX } from './formats.js';
-import { nettoyerCode, assainirSvg, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
+import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
 
 const POLICE = 'Marianne, Arial, sans-serif';
 
@@ -71,8 +71,28 @@ function nettoyerOrphelins(id) {
     for (const el of document.querySelectorAll(`#${id}, #d${id}, #i${id}`)) el.remove();
 }
 
+// L'extension ZenUML (3 Mo) n'est chargée qu'à la première page qui en a besoin. Son adresse et son empreinte
+// viennent de index.html : le navigateur refuse le fichier s'il ne correspond pas.
+let extensionZenuml = null;
+function chargerZenuml() {
+    extensionZenuml ||= new Promise((resolve, reject) => {
+        const source = document.getElementById('fusain-zenuml');
+        const script = document.createElement('script');
+        script.integrity = source.getAttribute('integrity') || '';
+        script.onload = () => resolve(window['mermaid-zenuml']);
+        script.onerror = () => { extensionZenuml = null; reject(new Error('L\'extension ZenUML n\'a pas pu être chargée.')); };
+        script.src = source.getAttribute('href');
+        document.head.append(script);
+    }).then(async (extension) => {
+        await window.mermaid.registerExternalDiagrams([extension]);
+        themeActif = null; // Mermaid est reconfiguré après l'enregistrement
+    });
+    return extensionZenuml;
+}
+
 async function rendre(code, idTheme) {
     await document.fonts.ready;
+    if (typeDiagramme(code) === 'zenuml') await chargerZenuml();
     configurer(idTheme);
     const propre = nettoyerCode(code);
     if (!propre.trim()) throw new Error('La page ne contient aucun code.');
@@ -91,6 +111,14 @@ async function rendre(code, idTheme) {
         }
         svg.removeAttribute('style');
         remplacerHtmlIncorpore(svg);
+        // ZenUML écrit « [ condition ] » en trois textes placés d'après la largeur d'une autre police : réunis en un seul,
+        // ils ne se chevauchent plus quand la police change (Marianne dans le PDF)
+        for (const groupe of svg.querySelectorAll('g')) {
+            const textes = [...groupe.children];
+            if (textes.length < 2 || !textes.every((e) => e.localName === 'text' && /fragment-(condition|section-label)/.test(e.getAttribute('class') || ''))) continue;
+            textes[0].textContent = textes.map((e) => e.textContent.trim()).join(' ');
+            textes.slice(1).forEach((e) => e.remove());
+        }
         // Libellés de section du parcours usager : blancs par défaut, illisibles sur les fonds clairs du thème
         svg.querySelector('style')?.append(`#${id} text.journey-section{fill:#161616;}`);
         // Courbes d'un radar : Mermaid leur donne à toutes la couleur du thème ; chacune reçoit une couleur de la palette

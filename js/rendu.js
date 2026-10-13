@@ -127,10 +127,10 @@ function remplacerHtmlIncorpore(svg) {
     for (const choix of [...svg.querySelectorAll('switch')]) choix.replaceWith(...choix.childNodes);
 }
 
-// Mermaid suppose des libellés HTML dans les cartes mentales : en SVG, certains ne sont pas centrés
+// Mermaid suppose des libellés HTML dans les cartes mentales et les diagrammes d'états : en SVG, certains ne sont pas centrés
 // sur leur forme. L'écart est mesuré dans le navigateur puis corrigé nœud par nœud.
 function centrerLibelles(svg, l, h) {
-    const noeuds = svg.querySelectorAll('g.mindmap-node');
+    const noeuds = svg.querySelectorAll('g.mindmap-node, g.statediagram-state');
     if (!noeuds.length) return;
     const atelier = document.createElement('div');
     atelier.className = 'fusain-hors-ecran';
@@ -141,7 +141,7 @@ function centrerLibelles(svg, l, h) {
     try {
         const ecarts = [];
         for (const g of noeuds) {
-            const forme = g.querySelector(':scope > :is(circle, rect, path, polygon, ellipse)');
+            const forme = g.querySelector(':scope > :is(circle, rect, path, polygon, ellipse), :scope > g > :is(rect, path)');
             const libelle = g.querySelector(':scope > g.label');
             const texte = libelle?.querySelector('text');
             if (!forme || !texte) continue;

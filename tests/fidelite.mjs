@@ -49,6 +49,12 @@ const CORPUS = [
     'kanban\n  Todo\n    [Create Documentation]\n    docs[Create Blog about the new diagram]\n  id7[In progress]\n    id6[Create renderer]@{ assigned: \'knsv\', priority: \'High\' }',
     'kanban\n  a[À faire]\n    b[Tâche une]\n  c[Fait]',
     'quadrantChart\n    title Reach and engagement of campaigns\n    x-axis Low Reach --> High Reach\n    y-axis Low Engagement --> High Engagement\n    quadrant-1 We should expand\n    quadrant-2 Need to promote\n    quadrant-3 Re-evaluate\n    quadrant-4 May be improved\n    Campaign A: [0.3, 0.6]\n    Campaign B: [0.45, 0.23]',
+    'stateDiagram-v2\n    [*] --> Still\n    Still --> [*]\n    Still --> Moving\n    Moving --> Still\n    Moving --> Crash\n    Crash --> [*]',
+    'stateDiagram-v2\n    direction LR\n    state "En attente de validation" as att\n    [*] --> att\n    att --> ok : valider\n    att --> att : relancer\n    ok : Dossier validé\n    Isole',
+    'stateDiagram-v2\n    [*] --> First\n    state First {\n        [*] --> second\n        second --> [*]\n    }',
+    'stateDiagram-v2\n    state if_state <<choice>>\n    [*] --> IsPositive\n    IsPositive --> if_state\n    if_state --> False: if n < 0\n    if_state --> True : if n >= 0',
+    'stateDiagram-v2\n    State1: The state with a note\n    note right of State1\n        Important information!\n    end note\n    State1 --> State2',
+    'stateDiagram\n    s1 --> s2: Une transition\n    s2 --> s1',
     'quadrantChart\n    x-axis Urgent --> Not Urgent\n    y-axis Not Important --> "Important ❤"\n    Point A: [0.9, 0.0] radius: 12\n    Point B:::class1: [0.8, 0.1]\n    classDef class1 color: #109060',
 ];
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });

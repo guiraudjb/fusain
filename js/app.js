@@ -527,6 +527,7 @@ async function afficherPages(n) {
     const actif = zones.pages.contains(document.activeElement) ? [...zones.pages.querySelectorAll('button')].indexOf(document.activeElement) : -1;
     zones.pages.replaceChildren(liste, bouton('Ajouter une page', { icone: 'add-line', variante: 'secondary', onclick: () => ouvrirModeles('ajouter') }));
     if (actif >= 0) zones.pages.querySelectorAll('button')[actif]?.focus({ preventScroll: true });
+    zones.pages.querySelector('.fusain-vignette[aria-current="true"]')?.scrollIntoView({ block: 'nearest' });
 }
 
 // ---------- Modèles ----------

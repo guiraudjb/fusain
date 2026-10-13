@@ -677,7 +677,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.3.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.4.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -685,7 +685,7 @@ FUSAIN/
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
 | Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
-| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris) : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
+| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Modèles | 18 modèles répartis en quatre catégories |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |

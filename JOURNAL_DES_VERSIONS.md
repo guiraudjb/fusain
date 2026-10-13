@@ -2,6 +2,14 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.4.0 — 13 octobre 2026 — diagramme d'états, écrans étroits
+
+- Édition visuelle du **diagramme d'états** (états, transitions, états initial et final, boucles) : neuf types de schémas s'éditent sans coder. Les états composés, notes et branchements font passer la page en « code seul ».
+- Libellés des états centrés dans leur forme (Mermaid les alignait à gauche en rendu SVG).
+- **Écrans étroits** : plus de défilement horizontal sur téléphone ; en mode code sous 1280 px, les vignettes cèdent la place à l'éditeur et à l'aperçu (la feuille passe de 208 à 388 px de large sur une tablette).
+- La vignette de la page courante reste visible dans la colonne des pages.
+- Essais : le nouvel éditeur est couvert par les libellés hostiles (200 essais), les suites d'opérations aléatoires, la recette Chrome et 6 nouveaux codes du corpus de fidélité (53 au total : 41 réécritures fidèles, 12 passages en « code seul »).
+
 ## 0.3.2 — 13 octobre 2026 — fidélité de la réécriture
 
 **Essai** — `tests/fidelite.mjs` : 47 codes Mermaid d'écritures variées (liens chaînés, groupes imbriqués, formes, styles, blocs de séquence, tâches de Gantt…). Pour chacun, soit l'éditeur visuel le refuse et la page reste en « code seul », soit le code qu'il réécrit doit produire le même schéma (mêmes textes, même nombre de formes, de liens et de groupes). Résultat : 38 réécritures fidèles, 9 passages en « code seul », aucune différence.

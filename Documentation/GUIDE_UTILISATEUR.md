@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Huit types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban et matrice à quadrants. Les autres se modifient par le code (§4).
+Neuf types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants et diagramme d'états. Les autres se modifient par le code (§4).
 
 **Gestes communs**
 
@@ -41,6 +41,8 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Frise chronologique** — périodes, événements de chaque période, sections. La pastille « + » d'une période lui ajoute un événement.
 
 **Tableau Kanban** — colonnes et cartes. Pour changer une carte de colonne, glissez sa pastille « + » sur la colonne voulue.
+
+**Diagramme d'états** — états et transitions (événement ou condition). Cochez « État initial » ou « État final » pour relier un état au point de départ ou d'arrivée ; la pastille « + » crée l'état suivant, ou relie deux états si vous la glissez de l'un à l'autre. Les états composés, notes et branchements se font par le code.
 
 **Matrice à quadrants** — titre, axes, nom des quatre zones, points. C'est le seul schéma où vous placez librement un élément : glissez un point à la souris dans la matrice.
 

@@ -19,6 +19,7 @@ export const THEMES = {
 const ILLUSTRATIVES = ['#000091', '#e1000f', '#009081', '#c8aa39', '#a558a0', '#417dc4', '#e4794a', '#68a532', '#aea397', '#c08c65', '#3558a2', '#b7a73f'];
 
 let themeActif = null;
+let palette = ILLUSTRATIVES;
 
 function configurer(idTheme) {
     if (themeActif === idTheme) return;
@@ -27,6 +28,7 @@ function configurer(idTheme) {
     const camembert = idTheme === 'monochrome' || idTheme === 'contraste'
         ? ['#161616', '#929292', '#3a3a3a', '#cecece', '#666666', '#e5e5e5', '#000000', '#b5b5b5', '#4d4d4d', '#dddddd', '#777777', '#f6f6f6']
         : ILLUSTRATIVES;
+    palette = camembert;
     const variables = {
         primaryColor: t.fond, primaryTextColor: '#161616', primaryBorderColor: t.bord,
         lineColor: t.trait, secondaryColor: t.second, tertiaryColor: t.tiers,
@@ -91,6 +93,8 @@ async function rendre(code, idTheme) {
         remplacerHtmlIncorpore(svg);
         // Libellés de section du parcours usager : blancs par défaut, illisibles sur les fonds clairs du thème
         svg.querySelector('style')?.append(`#${id} text.journey-section{fill:#161616;}`);
+        // Courbes d'un radar : Mermaid leur donne à toutes la couleur du thème ; chacune reçoit une couleur de la palette
+        svg.querySelector('style')?.append(palette.map((c, i) => `#${id} .radarCurve-${i}{fill:${c};stroke:${c};}#${id} .radarLegendBox-${i}{fill:${c};stroke:${c};}`).join(''));
         centrerLibelles(svg, l, h);
         return { svg, l, h, htmlIncorpore: Boolean(svg.querySelector('foreignObject')) };
     } finally {

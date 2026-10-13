@@ -119,7 +119,7 @@ const dl = async (action) => { const [d] = await Promise.all([p.waitForEvent('do
 { const pt = await p.locator('#fusain-feuille [data-fusain="p:0"] circle').first().boundingBox(); const z = await p.locator('#fusain-feuille .fusain-schema g.quadrants').boundingBox();
   await p.mouse.move(pt.x + pt.width / 2, pt.y + pt.height / 2); await p.mouse.down(); await p.mouse.move(z.x + z.width * 0.6, z.y + z.height * 0.5, { steps: 5 }); await p.mouse.move(z.x + z.width * 0.9, z.y + z.height * 0.1, { steps: 5 }); await p.mouse.up(); await p.waitForTimeout(800);
   const cq = await lireCode(); ok('matrice : point déplacé à la souris', /"Cyberattaque": \[0\.(8[5-9]|9\d?), 0\.(8[5-9]|9\d?)\]/.test(cq), cq.split('\n').find(l => l.includes('Cyberattaque'))); }
-// 10 quater. les huit types ajoutés en 0.6.0 : édition visuelle, repérage, et une modification par type
+// 10 quater. les types ajoutés en 0.6.0 et 0.7.0 : édition visuelle, repérage, et une modification par type
 const ajouterModele = async (nom) => {
   await p.click('button:has-text("Visuel")');
   await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);
@@ -134,6 +134,10 @@ for (const [nom, sel, titre, agir, attendu] of [
   ['Architecture technique', '[data-fusain^="n:"]', 'Architecture technique', async () => { await p.locator('#fusain-feuille [data-fusain="n:bdd"]').first().click({ force: true }); await p.waitForTimeout(300); await champPanneau('Icône').selectOption('disk'); }, /service bdd\(disk\)\[Base de donnees\] in si/],
   ['Historique de versions', '[data-fusain^="c:"]', 'Historique de versions', async () => { await p.locator('#fusain-feuille [data-fusain="b:developpement"]').first().click({ force: true }); await p.waitForTimeout(300); await p.click('.fusain-poignee'); }, /checkout developpement\n\s+commit id: "c1"/],
   ['Structure de paquet réseau', '[data-fusain^="p:"]', 'Structure de paquet', async () => { await p.locator('#fusain-feuille [data-fusain="p:0"]').first().click({ force: true }); await p.waitForTimeout(300); const z = champPanneau('Taille (bits)'); await z.fill('8'); await z.press('Tab'); }, /0-7: "Version"\n\s+8-11: "IHL"/],
+  ['Contexte du système (C4)', '[data-fusain^="n:"]', 'Diagramme de contexte (C4)', async () => { await p.locator('#fusain-feuille [data-fusain="n:portail"]').first().click({ force: true }); await p.waitForTimeout(300); await champPanneau('Nature').selectOption('SystemQueue'); }, /SystemQueue\(portail, "Portail des demandes"/],
+  ['Diagramme de blocs', '[data-fusain^="n:"]', 'Diagramme de blocs', async () => { await p.locator('#fusain-feuille [data-fusain="n:accueil"]').first().click({ force: true }); await p.waitForTimeout(300); await p.click('.fusain-poignee'); }, /accueil --> b1/],
+  ['Diagramme d\'exigences', '[data-fusain^="n:"]', 'Diagramme d\'exigences', async () => { await p.locator('#fusain-feuille [data-fusain="n:0"]').first().click({ force: true }); await p.waitForTimeout(300); await champPanneau('Risque').selectOption('low'); }, /disponibilite \{\n\s+id: "EX-1"\n.*\n\s+risk: low/],
+  ['Diagramme radar', '[data-fusain^="s:"]', 'Diagramme radar', async () => { const z = p.locator('#fusain-proprietes .fusain-tableau input[aria-label="Service A, Sobriété"]'); await z.fill('5'); await z.press('Tab'); }, /curve a\["Service A"\]\{4, 3, 5, 5, 4\}/],
 ]) {
   await ajouterModele(nom);
   const n = await p.locator(`#fusain-feuille ${sel}`).count();
@@ -148,11 +152,11 @@ for (const [nom, sel, titre, agir, attendu] of [
 { await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);
   await p.click('.fusain-modele:has(.fusain-modele__nom:text-is("Page vierge"))'); await p.waitForTimeout(1000);
   const pages = await p.evaluate(async () => (await import('./js/etat.js')).etat.doc.pages.map((x) => x.code));
-  ok('page vierge ajoutée', pages.length === 18 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
+  ok('page vierge ajoutée', pages.length === 22 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
     && await p.locator('#fusain-feuille .fusain-schema').count() === 0 && await p.locator('#fusain-erreur .fr-alert').count() === 0);
   await champPanneau('Titre affiché sur la page').fill('Annexes'); await champPanneau('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(700);
   ok('page vierge : titre affiché', (await p.textContent('#fusain-feuille svg.fusain-page')).includes('Annexes')); }
-let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 18, f.split('/').pop());
+let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 22, f.split('/').pop());
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); ok('export PDF', fs.statSync(f).size > 5000, `${f.split('/').pop()} ${fs.statSync(f).size} o`);
 await p.waitForTimeout(1500); console.log('   messages:', (await p.textContent('#fusain-messages')).slice(-200));

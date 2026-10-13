@@ -16,8 +16,14 @@ import classes from './classes.js';
 import architecture from './architecture.js';
 import versions from './versions.js';
 import paquet from './paquet.js';
+import exigences from './exigences.js';
+import c4 from './c4.js';
+import blocs from './blocs.js';
+import radar from './radar.js';
 
-const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet].map((e) => [e.type, e]));
+// Un éditeur peut couvrir plusieurs types voisins (les trois niveaux d'un diagramme C4)
+const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet, exigences, c4, blocs, radar]
+    .flatMap((e) => (e.types || [e.type]).map((type) => [type, e])));
 
 export function editeurPour(type) {
     return EDITEURS.get(type) || null;

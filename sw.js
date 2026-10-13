@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.6.0-36f742ea66';
+const VERSION_CACHE = 'fusain-0.7.0-b7c243acf7';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', '0b5047a0253bafd6618ec2c623d44a8bc8f193b4390829167f8275fc8ee97611'],
-    ['./FUSAIN_cahier_des_charges.md', 'ea261e2131880f221044f6813f55b6805024b2ce7f32488d75967a13f8974247'],
-    ['./JOURNAL_DES_VERSIONS.md', 'f6af351fbb83ce1b6ad4451174485ea445e55a02fef7cf1ae2b3c98483466f9a'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', '9e9901d7f5c47e9a1ed401b3f50b4ac9536a4bab3a99f65fda3b68805c474f69'],
+    ['./FUSAIN_cahier_des_charges.md', '63516ae354fd307cf9b69f72f25180c34a8f99fa526090170341b18e4330a69a'],
+    ['./JOURNAL_DES_VERSIONS.md', '55eef7aa1c66b9f12950709a08eec7f3e5bdf56ad21b1bbefaeb98612840fb3a'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'a0f9fe6e191a619a87dba4276cdf4761c7807169e933ef764726e9ec830cc5aa'],
     ['./css/fusain.css', '77293c7e2b74fadb4636dc8d20a0fdc42dfdd1ff86a1928002f938f8946b3411'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
@@ -20,22 +20,26 @@ const FICHIERS = [
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
     ['./js/confiance.js', '7bc995618b389e99957cff0e4a0518432f1ebef4a6e2accbab4e21f6badbd074'],
     ['./js/diagrammes/architecture.js', 'bc6f9efdef5e9c04589969144dfe72d38eaab8fab20c7dc04aafd2ab4b11dbbb'],
+    ['./js/diagrammes/blocs.js', '9a977fc44de97533048a0105b1f5338d78ad0d3323d5b64cc728860f3b62ef45'],
+    ['./js/diagrammes/c4.js', '00a5e84119055949f6a5a5eec422d0372cb900902153fac4104b475ac1b33afc'],
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
     ['./js/diagrammes/classes.js', '4ca44e5795d360ac03737f514316faae6ff76349cc960724810d6d2f9dfa04aa'],
     ['./js/diagrammes/commun.js', '5a6f1399ec1d6c451a4f985003115928095d2b478f9b6f147c5ce349da2366e6'],
     ['./js/diagrammes/entites.js', '067f339a741e66a75e2911a9dc5f8430691d69e6380ef545fb090a25fbd390c6'],
     ['./js/diagrammes/etats.js', 'e4ac8c0a9d338cf9fe5deadb799bc71daec425bee102c014d0a9159b685d561e'],
+    ['./js/diagrammes/exigences.js', 'a9af2099f7980f3620afc99e5e9c97573b240f128c33c3b466666239c89c2c5c'],
     ['./js/diagrammes/flux.js', 'b47a630674a815cced680a44ecc6b49ea52449e190dd3eae710e52860ecd3eb0'],
     ['./js/diagrammes/frise.js', '34223332b4b649593da06cc6d1741f54366edcb2d26ae88bbad80ea02474a8d4'],
     ['./js/diagrammes/gantt.js', 'b22c669088374d9de3bfe16b4cf2197bca5af9975abd58256d726c13f8ce1da5'],
     ['./js/diagrammes/graphique.js', 'a3578a4bea1d4963882ed23c4e778bae08c0edd782509549e05b067829660f97'],
-    ['./js/diagrammes/index.js', 'e2a2dc20af9ac7c0d51cb2a1095e830684ba8413e3ca61ef82ec74058f27a361'],
+    ['./js/diagrammes/index.js', '5c20e95e23530d38dc42ad2876c8e500999c9961a8f249018d4aabd72ff90026'],
     ['./js/diagrammes/kanban.js', 'c1f4995552f040f945d4cf45d3458b8299382ecb5c4bbd88e7aa16809a5b6fda'],
     ['./js/diagrammes/logigramme.js', '936831ce1d9019d0a472b9f4243ddfa8bb8a8fd12a30921fd154401ae5a323c9'],
     ['./js/diagrammes/mentale.js', 'd27e5699c65bc10e29d9c767da73038403d4356aa14a0fc192b1eb27cc4d5fed'],
     ['./js/diagrammes/paquet.js', '31432b507ad4b22170a58f7c37f94f9b20ccbc93f499e669130f860da6703602'],
     ['./js/diagrammes/parcours.js', 'bd3d62559f465a01bb2512b91999ece92dffdc292b142e476c22adbb4c0c680a'],
     ['./js/diagrammes/quadrant.js', '8250f0f45fc2d8bd700524a5f9bada4d650341630a9195bc5b5ad796fb692778'],
+    ['./js/diagrammes/radar.js', 'c2738c483059db67c6b9fd4acf526bfc054bde59d432047fe7d1c4c154379c3d'],
     ['./js/diagrammes/sequence.js', '0e06abf428c810ed88520160011c7129374ab0ca318abbff9265d2d0021311c8'],
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/dom.js', '8c514120093236dcf7e843d2d073857f0bda91e5252e002be6ab29dbbfd9c957'],
@@ -43,10 +47,10 @@ const FICHIERS = [
     ['./js/export.js', '1b065496714f9e84c6f66a7d5f36b5b133bd6fbb4ef7d77c3a1a7c27f07c9a31'],
     ['./js/fichier.js', '2a25b930069c412777c38d8e14e93af4ae9231817e9b1bbd99fa1bd589df6712'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
-    ['./js/modeles.js', 'fcaf64c5a090f5114239a97523abcd20eb57280719317e083236f3f56e6f2170'],
-    ['./js/rendu.js', '06706cce3a6e3bf62ca8f8ea7c7d38f815b83f849182897ac0922ec1ca29f852'],
+    ['./js/modeles.js', 'eec6f3ba16c396c25473c2b501a394526b15ccd9d3577b02f644faa000f79e39'],
+    ['./js/rendu.js', '3d325f655820c31d2c7827587b2e34b21d3c1038d1272970222a4703b88e6692'],
     ['./js/securite.js', 'c572f2c6c34425f5fddfc88ab6d8701836a8b51c43bb6ba3f5fa130f37092921'],
-    ['./js/version.js', '4294d54177cb5c5a2257a9875904d1fd35b88b98e5fcc98350ae26591926c49a'],
+    ['./js/version.js', '2125558fb220f452e5c8020433bd79c8d28682e518fdeb640c501075a99f5742'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -157,7 +161,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '6f38dd37fa0b2ec30aa56f93523de39f18e530667d56a46aa9692cae6aa7bf37'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '6798dfec05efae3de3501c74a714daba987a3b0666fc676a2586c82a5e87f5f8'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */

@@ -208,6 +208,62 @@ Transition ecologique,Mobilite,150
     96-127: "Adresse source"
     128-159: "Adresse destination"
 ` },
+    { id: 'c4', categorie: 'architecture', nom: 'Contexte du système (C4)', code: `C4Context
+    title Contexte du système de gestion des demandes
+    Person(usager, "Usager", "Dépose et suit sa demande")
+    Person(agent, "Agent instructeur", "Instruit les dossiers")
+    Enterprise_Boundary(administration, "Administration") {
+        System(portail, "Portail des demandes", "Reçoit et suit les demandes")
+        SystemDb(ged, "Gestion documentaire", "Conserve les pièces")
+    }
+    System_Ext(messagerie, "Messagerie", "Envoie les notifications")
+    Rel(usager, portail, "Dépose sa demande", "HTTPS")
+    Rel(agent, portail, "Instruit")
+    Rel(portail, ged, "Archive")
+    Rel(portail, messagerie, "Notifie")
+` },
+    { id: 'blocs', categorie: 'architecture', nom: 'Diagramme de blocs', code: `block-beta
+    columns 3
+    accueil["Accueil"]
+    instruction["Instruction"]
+    decision["Décision"]
+    block:socle:3
+        columns 3
+        annuaire[("Annuaire")]
+        documents[("Documents")]
+        journal[("Journal")]
+    end
+    accueil --> instruction
+    instruction --> decision
+` },
+    { id: 'exigences', categorie: 'projet', nom: 'Diagramme d\'exigences', code: `requirementDiagram
+    requirement disponibilite {
+        id: "EX-1"
+        text: "Le service est disponible 99,5 % du temps"
+        risk: high
+        verifymethod: test
+    }
+    performanceRequirement temps_de_reponse {
+        id: "EX-1.1"
+        text: "Une page s'affiche en moins de 2 secondes"
+        risk: medium
+        verifymethod: test
+    }
+    element supervision {
+        type: "outil"
+        docref: "DOC-12"
+    }
+    disponibilite - contains -> temps_de_reponse
+    supervision - verifies -> disponibilite
+` },
+    { id: 'radar', categorie: 'donnees', nom: 'Diagramme radar', code: `radar-beta
+    title Maturité des services
+    axis securite["Sécurité"], accessibilite["Accessibilité"], performance["Performance"], sobriete["Sobriété"], qualite["Qualité des données"]
+    curve a["Service A"]{4, 3, 5, 2, 4}
+    curve b["Service B"]{3, 5, 3, 4, 2}
+    max 5
+    min 0
+` },
 ];
 
 export const MODELE_INITIAL = MODELES[0];

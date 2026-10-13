@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Dix-sept types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet. Les quelques types restants de Mermaid se modifient par le code (§4).
+Vingt et un types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences et diagramme radar. Les rares types restants de Mermaid (déploiement C4, treemap…) se modifient par le code (§4).
 
 **Gestes communs**
 
@@ -59,6 +59,14 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Historique de versions** — commits, branches et fusions. Les ajouts se placent à la fin de l'historique, sur la « branche de travail ». La pastille « + » d'un commit ou d'une branche y ajoute un commit ; glissée vers une autre branche, elle fusionne la première dans la seconde. FUSAIN refuse les opérations que Mermaid rejetterait (fusion sans rien à fusionner, par exemple).
 
 **Structure de paquet** — une suite de champs, chacun d'une taille en bits ; les positions sont recalculées quand vous ajoutez, déplacez ou redimensionnez un champ.
+
+**Diagramme C4** (contexte, conteneurs, composants) — personnes, systèmes, conteneurs et composants, internes ou externes, rangés dans des limites imbriquables, et reliés par des relations (libellé, technologie, sens du tracé). Une limite vide n'est pas admise : elle disparaît avec son dernier élément.
+
+**Diagramme de blocs** — des blocs rangés en colonnes : choisissez le nombre de colonnes, la forme et la largeur de chaque bloc, insérez des espaces, regroupez des blocs dans un groupe qui a ses propres colonnes, et reliez-les par des liens.
+
+**Diagramme d'exigences** — exigences (nature, identifiant, énoncé, risque, méthode de vérification), éléments qui y répondent, et relations typées (contient, satisfait, vérifie, dérive de…).
+
+**Diagramme radar** — un tableau de données : une ligne par axe, une colonne par courbe. Valeurs au centre et au bord, grille en cercles ou en polygones, légende. Chaque courbe prend une couleur différente.
 
 **Page vierge** — une page sans schéma, pour une page de garde ou un intercalaire : seuls son titre, son sous-titre et son pied de page sont imprimés. Vous pouvez lui donner un schéma plus tard (« Choisir un schéma »).
 

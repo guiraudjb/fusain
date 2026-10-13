@@ -175,3 +175,40 @@ test('écritures avancées des nouveaux types → code seul', () => {
         'journey\n    une ligne sans note\n',
     ]) assert.throws(() => editeurPour(typeDiagramme(code)).analyser(code), /pas gérée/, code);
 });
+
+// ---------- Éditeurs ajoutés en 0.7.0 ----------
+
+test('C4 et blocs : ni limite ni groupe vides, toujours un élément', () => {
+    const c4 = editeurPour('C4Container');
+    assert.equal(c4, editeurPour('C4Context'));
+    const modele = c4.analyser('C4Context\n    Boundary(b, "B") {\n        System(s, "S")\n    }\n    Person(p, "P")\n    Rel(p, s, "x")\n');
+    c4.supprimer(modele, 'n:s');
+    assert.equal(c4.ecrire(modele), 'C4Context\n    Person(p, "P")\n');
+    c4.supprimer(modele, 'n:p');
+    assert.equal(modele.items.length, 1);
+
+    const blocs = editeurPour('block');
+    const b = blocs.analyser('block-beta\n    a["A"]\n    block:g\n        c["C"]\n    end\n    a --> c\n');
+    blocs.supprimer(b, 'n:c');
+    assert.equal(blocs.ecrire(b), 'block-beta\n    a["A"]\n');
+    blocs.supprimer(b, 'n:a');
+    assert.equal(b.enfants.length, 1);
+});
+
+test('radar : valeurs nommées remises dans l\'ordre des axes, valeurs négatives refusées', () => {
+    const radar = editeurPour('radar');
+    const modele = radar.analyser('radar-beta\n    axis a, b, c\n    curve x{ c: 3, a: 1, b: 2 }\n');
+    assert.deepEqual(modele.courbes[0].valeurs, [1, 2, 3]);
+    radar.renommer(modele, 'v:0.1', '-4');
+    assert.deepEqual(modele.courbes[0].valeurs, [1, 2, 3]);
+    radar.supprimer(modele, 'c:0');
+    assert.equal(radar.ecrire(modele), 'radar-beta\n    axis b, c\n    curve x{2, 3}\n');
+});
+
+test('exigences : les relations suivent le renommage, les deux écritures de flèche se lisent', () => {
+    const editeur = editeurPour('requirementDiagram');
+    const modele = editeur.analyser('requirementDiagram\n    requirement r1 {\n    id: 1\n    }\n    element e1 {\n    type: x\n    }\n    r1 <- satisfies - e1\n');
+    assert.deepEqual(modele.relations[0], { de: 'e1', vers: 'r1', type: 'satisfies' });
+    editeur.renommer(modele, 'n:0', 'Temps de réponse');
+    assert.ok(editeur.ecrire(modele).includes('e1 - satisfies -> "Temps de réponse"'));
+});

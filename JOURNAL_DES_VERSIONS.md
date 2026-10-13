@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.7.0 — 13 octobre 2026 — C4, blocs, exigences, radar
+
+- **Quatre éditeurs visuels de plus**, avec leur modèle de départ : diagramme C4 (contexte, conteneurs, composants : éléments internes ou externes, limites imbriquées, relations), diagramme de blocs (colonnes, formes, largeurs, espaces, groupes, liens), diagramme d'exigences (exigences, éléments, relations typées) et diagramme radar (tableau axes × courbes). Vingt et un types en édition visuelle, 22 modèles.
+- **Radar lisible** : Mermaid donnait la même couleur à toutes les courbes ; chacune prend maintenant une couleur de la palette du thème, à l'écran comme à l'export.
+- **Règles de Mermaid reproduites** : pas de limite C4 ni de groupe de blocs vides (ils disparaissent avec leur dernier contenu), toujours au moins un élément, valeurs de radar positives, noms d'exigences uniques et mis entre guillemets s'ils sont aussi des mots du langage.
+- **Constat utile aux utilisateurs avancés** : dans un diagramme de blocs, Mermaid 12.1 échoue au rendu d'un losange relié par un lien ; l'éditeur ne propose donc pas cette forme.
+- Restent en « code seul » : déploiement et diagramme dynamique C4, blocs-flèches, liens en chaîne ou pointillés des blocs, options avancées C4 (`$tags`, `$sprite`).
+- Recette étendue : robustesse sur les 21 éditeurs, 14 écritures de plus au corpus de fidélité (91), une modification visuelle vérifiée par nouveau type.
+
 ## 0.6.0 — 13 octobre 2026 — huit éditeurs visuels de plus, pages vierges
 
 - **Tous les modèles proposés s'éditent désormais sans coder** : parcours usager, graphique (barres et courbes, avec tableau de données), diagramme de flux (Sankey), modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet rejoignent les neuf types existants. Dix-sept types en édition visuelle.

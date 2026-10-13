@@ -62,7 +62,8 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 |---|---|---|
 | Navigateur de l'utilisateur | Socle d'exécution | Relève de l'entité (mise à jour des postes) |
 | Serveur de fichiers (GitHub Pages pour la publication de référence) | Hébergement statique | Relève de l'hébergeur |
-| `outils/generer.py`, tests | Outils de développement (Python 3, Node.js, bibliothèque standard uniquement) | Ne sont jamais servis au navigateur |
+| `outils/generer.py`, `outils/veille.py`, tests | Outils de développement (Python 3, Node.js, bibliothèque standard uniquement) | Ne sont jamais servis au navigateur |
+| Playwright (pilote de navigateur) et axe-core (contrôle d'accessibilité) | Outils de recette, installés à la demande sur le poste de développement ou dans l'intégration continue | Ne figurent pas dans le dépôt et ne sont jamais servis au navigateur |
 
 ## 4. Points d'attention
 
@@ -84,7 +85,9 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 | Avis de sécurité GitHub et notes de version des cinq projets | Mensuelle |
 | Bulletins du CERT-FR | En continu |
 
-Commande de contrôle, à lancer depuis n'importe quel poste connecté (exemple pour Mermaid) :
+Le contrôle est outillé : `python3 outils/veille.py` interroge OSV.dev pour chaque bibliothèque de `sbom/composants.json`, signale les versions plus récentes et sort en erreur si une vulnérabilité est connue. Il est exécuté automatiquement le 1er de chaque mois par GitHub (`.github/workflows/veille.yml`) : en cas de vulnérabilité, l'exécution échoue et le responsable du dépôt en est averti par courriel.
+
+Contrôle manuel équivalent, depuis n'importe quel poste connecté (exemple pour Mermaid) :
 
 ```bash
 curl -s -X POST https://api.osv.dev/v1/query \
@@ -125,5 +128,5 @@ Avant toute publication, `python3 outils/generer.py --verifier` doit se terminer
 ## 6. Limites
 
 - Les composants inclus dans `mermaid.min.js` ne sont pas énumérés individuellement.
-- Le contrôle des vulnérabilités est manuel ; il n'est pas automatisé dans une chaîne d'intégration.
+- Le contrôle automatique des vulnérabilités ne porte que sur les cinq bibliothèques déclarées, pas sur les composants inclus dans `mermaid.min.js`.
 - Aucun audit de sécurité externe n'a encore été mené.

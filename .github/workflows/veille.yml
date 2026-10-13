@@ -1,0 +1,22 @@
+# Veille mensuelle des vulnérabilités sur les bibliothèques embarquées (nomenclature §5.1).
+# L'exécution échoue — et GitHub prévient le responsable du dépôt — si une vulnérabilité est connue.
+name: Veille des vulnérabilités
+
+on:
+  schedule:
+    - cron: '17 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Interrogation d'OSV.dev
+        run: python3 outils/veille.py
+      - name: Cohérence de la nomenclature
+        run: python3 outils/generer.py --verifier

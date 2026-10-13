@@ -1,0 +1,40 @@
+# Recette automatique à chaque modification : cohérence, logique, navigateur, robustesse, fidélité.
+# Les outils installés ici (pilote de navigateur) servent aux essais et ne sont jamais livrés.
+name: Recette
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recette:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Outils d'essai (non livrés)
+        run: |
+          mkdir -p "$RUNNER_TEMP/outils" && cd "$RUNNER_TEMP/outils"
+          npm install --no-save --no-audit --no-fund playwright-core@1.63.0 axe-core@4.14.0
+          echo "PLAYWRIGHT=$RUNNER_TEMP/outils/node_modules/playwright-core/index.mjs" >> "$GITHUB_ENV"
+          echo "AXE=$RUNNER_TEMP/outils/node_modules/axe-core/axe.min.js" >> "$GITHUB_ENV"
+          echo "CHROME=$(which google-chrome)" >> "$GITHUB_ENV"
+          google-chrome --version
+      - name: Pilote Firefox
+        run: |
+          firefox --version || true
+          (geckodriver --port 4444 > "$RUNNER_TEMP/geckodriver.log" 2>&1 &)
+          sleep 2
+      - name: Recette complète
+        run: tests/tout.sh
+      - name: Journal de la dernière étape
+        if: failure()
+        run: cat tests/sortie/derniere-etape.log || true

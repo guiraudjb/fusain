@@ -42,7 +42,10 @@ node --test tests/logique.test.mjs   # tests de logique et de sécurité, sans n
 tests/tout.sh                        # recette complète : logique, Chrome, robustesse, Firefox
 python3 outils/generer.py            # avant chaque publication : intégrité (SRI), liste du cache, nomenclature
 python3 outils/generer.py --verifier # contrôle sans modification (code de sortie 1 en cas d'écart)
+python3 outils/veille.py             # vulnérabilités connues des bibliothèques embarquées (OSV.dev)
 ```
+
+La recette est rejouée par GitHub à chaque modification (`.github/workflows/recette.yml`) et la veille des vulnérabilités le 1er de chaque mois (`veille.yml`).
 
 `outils/generer.py` doit être relancé après toute modification d'un fichier servi : il recalcule les empreintes d'intégrité de `index.html`, la liste et la version du cache du service worker, et la nomenclature CycloneDX.
 

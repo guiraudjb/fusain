@@ -22,7 +22,7 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parent.parent
 # Fichiers servis par l'application, donc mis en cache pour le fonctionnement hors ligne
 DOSSIERS_CACHE = ["css", "js", "libs", "icones", "sbom", "schema", "Documentation"]
-FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md"]
+FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
 EXCLUS = {"sbom/composants.json"}
 
 
@@ -65,13 +65,14 @@ def index_avec_sri():
     return html
 
 
-def sw_genere(html):
+def sw_genere(generes):
     num, _ = version()
     fichiers = fichiers_caches()
     h = hashlib.sha256()
     for f in fichiers:
         h.update(f.encode())
-        h.update(html.encode() if f == "index.html" else (RACINE / f).read_bytes())
+        # Les fichiers produits dans la même passe sont pris dans leur nouvel état
+        h.update(generes[f].encode() if f in generes else (RACINE / f).read_bytes())
     bloc = "/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\nconst FICHIERS = [\n%s\n];\n/* FIN-GENERE */" % (
         num, h.hexdigest()[:10], "\n".join(f"    './{f}'," for f in ["", *fichiers]).replace("'./',", "'./',", 1))
     return re.sub(r"/\* DEBUT-GENERE \*/.*?/\* FIN-GENERE \*/", lambda _: bloc, lire("sw.js"), flags=re.S)
@@ -120,9 +121,9 @@ def principal():
     html = index_avec_sri()
     cibles = {
         "index.html": html,
-        "sw.js": sw_genere(html),
         "sbom/fusain-sbom-cyclonedx.json": json.dumps(nomenclature(), ensure_ascii=False, indent=2) + "\n",
     }
+    cibles["sw.js"] = sw_genere(cibles)
     ecarts = []
     for chemin, contenu in cibles.items():
         fichier = RACINE / chemin

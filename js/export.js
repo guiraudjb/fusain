@@ -141,6 +141,19 @@ function figerStyles(svg) {
     for (const style of svg.querySelectorAll('style')) style.remove();
 }
 
+const ascendantes = new Map();
+let toile = null;
+function ascendante(cs) {
+    const police = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    if (!ascendantes.has(police)) {
+        toile ||= document.createElement('canvas').getContext('2d');
+        toile.font = police;
+        const m = toile.measureText('Hxg');
+        ascendantes.set(police, m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent);
+    }
+    return ascendantes.get(police);
+}
+
 // svg2pdf interprète de façon incomplète les décalages (dy), les lignes de base et les tspans imbriqués.
 // Chaque fragment de texte est donc réécrit à la position exacte calculée par le navigateur.
 function aplatirTextes(svg) {
@@ -163,9 +176,12 @@ function aplatirTextes(svg) {
             for (let n = marcheur.nextNode(); n; n = marcheur.nextNode()) { rangs.set(n, rang); rang += n.data.length; }
             for (const [el, noeud] of feuilles) {
                 const debut = noeud.data.search(/\S/);
-                const point = texte.getStartPositionOfChar(rangs.get(noeud) + debut);
+                const rangCar = rangs.get(noeud) + debut;
                 const cs = getComputedStyle(el);
-                fragments.push({ x: point.x, y: point.y, contenu: noeud.data.trim(), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, opacite: cs.fillOpacity });
+                // La ligne de base est déduite de la boîte du glyphe (haut de boîte + ascendante de la police) :
+                // contrairement à getStartPositionOfChar, ce calcul tient compte de dominant-baseline dans tous les navigateurs.
+                const y = texte.getExtentOfChar(rangCar).y + ascendante(cs);
+                fragments.push({ x: texte.getStartPositionOfChar(rangCar).x, y, contenu: noeud.data.trim(), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, opacite: cs.fillOpacity });
             }
         } catch {
             continue; // texte non affiché : laissé tel quel

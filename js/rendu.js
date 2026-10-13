@@ -62,6 +62,8 @@ function configurer(idTheme) {
 const cache = new Map();
 let file = Promise.resolve();
 let numero = 0;
+// Identifiant propre à cette instance du module : deux instances ne peuvent pas se marcher dessus
+const graine = Math.random().toString(36).slice(2, 8);
 
 function nettoyerOrphelins(id) {
     for (const el of document.querySelectorAll(`#${id}, #d${id}, #i${id}`)) el.remove();
@@ -73,7 +75,7 @@ async function rendre(code, idTheme) {
     const propre = nettoyerCode(code);
     if (!propre.trim()) throw new Error('La page ne contient aucun code.');
     numero += 1;
-    const id = `fusain-schema-${numero}`;
+    const id = `fusain-${graine}-${numero}`;
     try {
         await window.mermaid.parse(propre);
         const { svg: chaine } = await window.mermaid.render(id, propre);
@@ -86,12 +88,43 @@ async function rendre(code, idTheme) {
             svg.setAttribute('viewBox', `0 0 ${l} ${h}`);
         }
         svg.removeAttribute('style');
-        // Mermaid ne centre pas les libellés SVG des cartes mentales (il les suppose en HTML)
+        remplacerHtmlIncorpore(svg);
+        // Libellés de section du parcours usager : blancs par défaut, illisibles sur les fonds clairs du thème
+        svg.querySelector('style')?.append(`#${id} text.journey-section{fill:#161616;}`);
         centrerLibelles(svg, l, h);
         return { svg, l, h, htmlIncorpore: Boolean(svg.querySelector('foreignObject')) };
     } finally {
         nettoyerOrphelins(id);
     }
+}
+
+// Quelques types de schémas (parcours usager…) placent leurs libellés dans du HTML incorporé (foreignObject),
+// que ni la conversion en image ni la conversion en PDF ne savent traiter de façon fiable. Chaque bloc est
+// remplacé par un texte SVG équivalent, centré dans la même boîte et replié à sa largeur.
+let mesure = null;
+function remplacerHtmlIncorpore(svg) {
+    for (const bloc of [...svg.querySelectorAll('foreignObject')]) {
+        const [x, y, l, h] = ['x', 'y', 'width', 'height'].map((n) => parseFloat(bloc.getAttribute(n)) || 0);
+        const contenu = bloc.textContent.replace(/\s+/g, ' ').trim();
+        if (!contenu || l <= 0) { bloc.remove(); continue; }
+        const interne = bloc.querySelector('[style*="font-size"]');
+        const taille = Math.max(8, Math.min(parseFloat(interne?.style.fontSize) || 14, 24));
+        mesure ||= document.createElement('canvas').getContext('2d');
+        mesure.font = `${taille}px ${POLICE}`;
+        const lignes = [''];
+        for (const mot of contenu.split(' ')) {
+            const essai = lignes[lignes.length - 1] ? `${lignes[lignes.length - 1]} ${mot}` : mot;
+            if (lignes[lignes.length - 1] && mesure.measureText(essai).width > l) lignes.push(mot); else lignes[lignes.length - 1] = essai;
+        }
+        const interligne = taille * 1.2;
+        const premier = y + h / 2 - ((lignes.length - 1) * interligne) / 2 + taille * 0.35;
+        const texte = s('text', { 'text-anchor': 'middle', 'font-family': POLICE, 'font-size': taille, fill: '#161616', class: 'fusain-libelle' },
+            lignes.map((ligne, i) => s('tspan', { x: x + l / 2, y: premier + i * interligne }, ligne)));
+        bloc.replaceWith(texte);
+    }
+    // Mermaid double parfois le HTML d'un texte SVG de repli dans un <switch> : une fois le HTML retiré,
+    // le repli est sorti de son enveloppe, que les convertisseurs PDF ne connaissent pas.
+    for (const choix of [...svg.querySelectorAll('switch')]) choix.replaceWith(...choix.childNodes);
 }
 
 // Mermaid suppose des libellés HTML dans les cartes mentales : en SVG, certains ne sont pas centrés
@@ -145,6 +178,8 @@ export function decrireErreur(erreur) {
     const ligne = brut.match(/line\s+(\d+)/i);
     let texte = brut.split('\n').slice(0, 4).join('\n');
     if (/^(Parse|Lexical) error/i.test(brut)) texte = 'La syntaxe du schéma est incorrecte.\n' + brut.split('\n').slice(1, 3).join('\n');
+    if (/Edge limit exceeded/i.test(brut)) texte = `Le schéma dépasse le nombre maximal de liens (${LIENS_MAX}). Répartissez-le sur plusieurs pages.`;
+    if (/Maximum text size/i.test(brut)) texte = 'Le code du schéma dépasse la taille maximale autorisée.';
     if (/No diagram type detected|UnknownDiagramError/i.test(brut)) texte = 'Type de schéma non reconnu : la première ligne doit annoncer le type (flowchart, sequenceDiagram, pie…).';
     return { texte, ligne: ligne ? Number(ligne[1]) : null };
 }

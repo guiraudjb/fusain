@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.11.1-ab6cb67656';
+const VERSION_CACHE = 'fusain-0.12.0-4e3049c0eb';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', 'ffd8481140382db858cdb083bdd24f3172ea6816545c0bc94801a4d7606c54e1'],
-    ['./FUSAIN_cahier_des_charges.md', '456a0baf446bf5d63ffeb676c00aa951639fbe3ef512d7bb1e7c48914d2cfa77'],
-    ['./JOURNAL_DES_VERSIONS.md', '8690db9de54d65e5307538b65c8332000275f93e2edf81e353d71b08917f7dd0'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', '1f767b9600d74895cd649d8a2e39890ce85b6e12aed5a6add02ffb8b97f7eca3'],
+    ['./FUSAIN_cahier_des_charges.md', '23bd34fc66cf037534236dd1b3e6d597d10aa8d748a52b6c5f92da2b4fbadc8a'],
+    ['./JOURNAL_DES_VERSIONS.md', 'b08ede22f138ec184340b0ea2f1d759ae2f77daa628e11b53e44a549370c90c2'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'd49126064eb6f5c5f88f4e33f090b34c3316f89193b102491e69eae8e02c0f6a'],
     ['./css/fusain.css', '0c3dfacc404d132e45dce92089ee0b94db512d4a2e53edf76eac19bfcc4314cf'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
@@ -45,7 +45,7 @@ const FICHIERS = [
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
     ['./js/diagrammes/classes.js', '4ca44e5795d360ac03737f514316faae6ff76349cc960724810d6d2f9dfa04aa'],
     ['./js/diagrammes/commun.js', '5a6f1399ec1d6c451a4f985003115928095d2b478f9b6f147c5ce349da2366e6'],
-    ['./js/diagrammes/diapo.js', '3b06ed29ac6c0277d7ccf6f4a6402f26744872bc978626a4d993fd82928b57d8'],
+    ['./js/diagrammes/diapo.js', '2c4c800a2603d6a7f9ec9692cb8e06fad3c4350ddbea50852b0b065119ad175e'],
     ['./js/diagrammes/entites.js', '067f339a741e66a75e2911a9dc5f8430691d69e6380ef545fb090a25fbd390c6'],
     ['./js/diagrammes/etats.js', 'e4ac8c0a9d338cf9fe5deadb799bc71daec425bee102c014d0a9159b685d561e'],
     ['./js/diagrammes/exigences.js', 'a9af2099f7980f3620afc99e5e9c97573b240f128c33c3b466666239c89c2c5c'],
@@ -55,7 +55,7 @@ const FICHIERS = [
     ['./js/diagrammes/graphique.js', 'a3578a4bea1d4963882ed23c4e778bae08c0edd782509549e05b067829660f97'],
     ['./js/diagrammes/index.js', '636f8d37872f1068ef1cb8db33689651e884dfcb6f2b2fafef3122d89e763710'],
     ['./js/diagrammes/kanban.js', 'c1f4995552f040f945d4cf45d3458b8299382ecb5c4bbd88e7aa16809a5b6fda'],
-    ['./js/diagrammes/logigramme.js', 'db6414d2e8343755ec7f397159cfadc60dbaf1397fd09484f6aad1437bcceac7'],
+    ['./js/diagrammes/logigramme.js', '372937e362f006eed4ce2cb781a3a89745f6e196f3363d3837d6757ad2d2cc15'],
     ['./js/diagrammes/mentale.js', 'd27e5699c65bc10e29d9c767da73038403d4356aa14a0fc192b1eb27cc4d5fed'],
     ['./js/diagrammes/paquet.js', '31432b507ad4b22170a58f7c37f94f9b20ccbc93f499e669130f860da6703602'],
     ['./js/diagrammes/parcours.js', 'bd3d62559f465a01bb2512b91999ece92dffdc292b142e476c22adbb4c0c680a'],
@@ -65,7 +65,7 @@ const FICHIERS = [
     ['./js/diagrammes/treemap.js', 'f61c53e054b4e2c2999da379518115ddd898bdda702833291b8814e4f5a75c90'],
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/diagrammes/zenuml.js', '2af815e497545725741b2ffbbc7eb38c821941c20d4a7c587cb9ae48f7ebc49f'],
-    ['./js/diapo.js', '2f82c9fe1e7a18d7ec2e6079dca16c8e175170d5ea3a46c8789654e443ccf9cd'],
+    ['./js/diapo.js', 'ad2e583965e50443acc38b361d5d9e5216f73bec8f581fe394869b6e9bfb105b'],
     ['./js/dom.js', '8c514120093236dcf7e843d2d073857f0bda91e5252e002be6ab29dbbfd9c957'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
     ['./js/export.js', '8b932df21aa83c7822769968dc28404e3857e412ca710c03908dab69bc64bc04'],
@@ -73,10 +73,10 @@ const FICHIERS = [
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
     ['./js/icones.js', '0659879af168a36cc8137d3a4901b5c91e34373751a7fa946d127b1ce7fc3bac'],
     ['./js/illustrations.js', '9fc9af6eb7298523b72ab66ee843eb6ef35c758ce27c230d7d5a043a9d133eec'],
-    ['./js/modeles.js', '4b7786c951e11d083cebc085e98c30be5d63c4ae51ce881bd67b163728ace7e3'],
+    ['./js/modeles.js', '461418bd392700acb69bdd3d478560aa19942b4a71db3ba5a14af0251583aa7b'],
     ['./js/rendu.js', 'b39f7624bbe8f1b1e4ac810d3fea7caaaeb9ffbc815ab2c8697b34f0628037b7'],
-    ['./js/securite.js', 'c572f2c6c34425f5fddfc88ab6d8701836a8b51c43bb6ba3f5fa130f37092921'],
-    ['./js/version.js', 'f7411b33d3bec443da96cb6f52e247c78c2d95bada334e3ea0feea588eefdbb1'],
+    ['./js/securite.js', 'b972bb2f200e484363286868df7c527ca344b11893d74fc80f449e386894dd7c'],
+    ['./js/version.js', 'b031381c74682a2c8898570cd8ebb817c22283d047f479b24caa80cf71476aa6'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -190,7 +190,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', 'd9cf3ec9587bde76eb0ba580166131d8c99ec515236cbcb0c827db7a351493e0'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '33b5af8f2d60f86e2a792a72582cdd5251c8eace91905ba5522b4909c2555442'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */

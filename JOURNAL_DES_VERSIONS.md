@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.12.0 — 13 octobre 2026 — icônes dans le logigramme et les diapositives
+
+- Essai préalable, type par type, de ce que Mermaid sait dessiner avec nos jeux d'icônes : seuls le logigramme (étape-icône) et l'architecture les prennent ; carte mentale, Kanban, frise, blocs, états, séquence et C4 ne le permettent pas.
+- **Logigramme** : une étape peut être représentée par une icône du DSFR ou une icône illustrée, son texte dessous. Nouveau modèle « Logigramme illustré ».
+- **Diapositives de texte** : icône par élément dans le sommaire, les colonnes, les chiffres clés, la frise et les blocs ; bloc « icône » dans le texte libre.
+- **Filtre du code resserré** : l'écriture `@{ icon: … }` n'est admise que pour les icônes embarquées (`dsfr:`, `illus:`) ; toute autre icône et toute image restent retirées avant le rendu. Au passage, le filtre délimite désormais le bloc `@{ … }` en tenant compte des guillemets : une accolade dans un libellé ne permettait pas de charger une image (la politique de sécurité l'aurait bloquée), mais laissait l'instruction arriver jusqu'à Mermaid.
+
 ## 0.11.1 — 13 octobre 2026 — 87 icônes illustrées générées pour FUSAIN
 
 - **87 nouvelles icônes illustrées**, générées localement avec Krea 2 pour les thèmes absents du DSFR et de SimpleCarto : justice et droit (13), éducation et formation (11), santé et action sociale (14), ressources humaines et organisation (15), gestion de projet et pilotage (14), logiciels et données (20). Le jeu illustré compte 380 icônes en 18 thèmes, pour 2,6 Mo.

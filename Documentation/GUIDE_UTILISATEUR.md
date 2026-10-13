@@ -28,7 +28,7 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Au clavier** — placez le focus sur la page (touche Tab), puis : flèches pour passer d'un élément à l'autre, Entrée ou F2 pour renommer, Suppr pour supprimer, Inser ou « + » pour ajouter un élément lié. Le « plan » en bas de la colonne de droite liste tous les éléments et permet de les sélectionner, y compris avec un lecteur d'écran.
 
-**Logigramme** — sens de lecture, espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), étapes (texte, forme, couleur, groupe, duplication), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
+**Logigramme** — une étape peut être représentée par une icône (« Représenter par une icône… », parmi les icônes du DSFR et les icônes illustrées) : son texte s'affiche alors dessous. Sens de lecture, espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), étapes (texte, forme, couleur, groupe, duplication), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
 
 **Diagramme de séquence** — participants (boîte ou personnage), messages, notes, blocs (boucle, alternative…), numérotation. Les ajouts se placent après l'élément sélectionné ; les flèches haut / bas le déplacent.
 
@@ -85,7 +85,8 @@ En plus des schémas, une page peut être une **diapositive de texte** : page de
 - Deux astérisques autour d'un passage le mettent en **gras** (`**important**`). Un retour à la ligne dans un champ est repris sur la diapositive.
 - « Mise en page » change de modèle en conservant les textes qui y ont leur place.
 - La diapositive remplit la zone utile de la page : le rendu de référence est l'A3 paysage ; sur un autre format, elle est mise à l'échelle.
-- Les images ne sont pas prises en charge.
+- Icônes : dans le sommaire, les colonnes, les chiffres clés, la frise et les blocs, chaque élément peut recevoir une icône (« Ajouter une icône… ») ; dans le texte libre, « Icône » ajoute un bloc icône. Ce sont les mêmes jeux que pour les schémas : icônes du DSFR et icônes illustrées.
+- Les images libres (photos, logos) ne sont pas prises en charge.
 
 ## 4. La page
 

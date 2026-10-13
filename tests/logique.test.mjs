@@ -314,3 +314,37 @@ test('icônes illustrées : index cohérent, empreintes exactes, images PNG seul
     const code = 'architecture-beta\n    service a(illus:routeur)[Routeur]\n';
     assert.equal(editeur.ecrire(editeur.analyser(code)), code);
 });
+
+// ---------- Icônes dans le logigramme et les diapositives (0.12.0) ----------
+
+test('logigramme : étape-icône relue à l\'identique, seules les icônes embarquées franchissent le filtre', () => {
+    const code = 'flowchart LR\n    a@{ icon: "illus:serveur", label: "Serveur #quot;A#quot; }", pos: "b" }\n    b["B"]\n    a --> b\n';
+    const modele = logigramme.analyser(code);
+    assert.equal(modele.noeuds[0].icone, 'illus:serveur');
+    assert.equal(modele.noeuds[0].texte, 'Serveur "A" }');
+    assert.equal(logigramme.ecrire(modele), code);
+    assert.throws(() => logigramme.analyser('flowchart LR\n    a@{ icon: "fa:user", label: "x", pos: "b" }\n'), /pas gérée/);
+    const filtre = nettoyerCode('flowchart LR\n A@{ label: "}", img: "https://exemple.invalid/i.png", icon: "fa:user" } --> B@{ icon: "dsfr:user-line", label: "ok", pos: "b" }');
+    assert.ok(!/img|fa:user|exemple\.invalid/.test(filtre) && filtre.includes('icon: "dsfr:user-line"'), filtre);
+});
+
+test('diapositive : icône d\'un élément et bloc icône, sans confusion avec un texte entre crochets', () => {
+    const editeur = editeurPour('diapo');
+    const code = 'diapo chiffres\n- [illus:equipe] 42 | Agents\n- 7 | Sites\n';
+    const modele = editeur.analyser(code);
+    assert.equal(modele.items[0].icone, 'illus:equipe');
+    assert.deepEqual([...modele.items[0]], ['42', 'Agents']);
+    assert.equal(editeur.ecrire(modele), code);
+    // un texte saisi qui ressemble à une icône reste un texte
+    editeur.renommer(modele, 'e:1.0', '[dsfr:user-line] 7');
+    const relu = editeur.analyser(editeur.ecrire(modele));
+    assert.equal(relu.items[1].icone, '');
+    assert.equal(relu.items[1][0], '[dsfr:user-line] 7');
+    // une mise en page sans icône lit les crochets comme du texte
+    assert.equal(editeur.analyser('diapo texte-colonnes\n- [dsfr:user-line] x\n').items[0][0], '[dsfr:user-line] x');
+    const libre = editeur.analyser('diapo libre\n[dsfr:flag-line]\nTexte\n');
+    assert.deepEqual(libre.blocs.map((b) => [b.t, b.texte]), [['icone', 'dsfr:flag-line'], ['p', 'Texte']]);
+    editeur.renommer(libre, 'b:0', '<script>');
+    editeur.renommer(libre, 'b:1', '[illus:serveur]');
+    assert.deepEqual(editeur.analyser(editeur.ecrire(libre)).blocs.map((b) => [b.t, b.texte]), [['icone', 'dsfr:flag-line'], ['p', '[illus:serveur]']]);
+});

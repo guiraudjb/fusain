@@ -54,6 +54,8 @@ function lireDirective(texte) {
     return JSON.parse(json);
 }
 
+const ICONE_EMBARQUEE = /^"(dsfr|illus):[a-z0-9-]+"$/;
+
 // Rend un code dont les directives de configuration sont réduites à une liste blanche.
 // Le code enregistré n'est pas modifié : le filtrage s'applique au moment du rendu.
 export function nettoyerCode(code) {
@@ -70,7 +72,10 @@ export function nettoyerCode(code) {
     }
 
     // Formes étendues « @{ img: "…" } » : Mermaid chargerait l'image dès le rendu, avant tout assainissement
-    texte = texte.replace(/@\{[^}]*\}/g, (bloc) => bloc.replace(/\b(img|icon)\s*:\s*("[^"]*"|'[^']*'|[^,}\s]+)\s*,?/g, ''));
+    // Seules les icônes embarquées par FUSAIN sont admises (« dsfr:nom », « illus:nom »). Le bloc est délimité en tenant
+    // compte des guillemets, pour qu'une accolade dans un libellé ne le termine pas avant l'heure.
+    texte = texte.replace(/@\{(?:"[^"]*"|'[^']*'|[^}"'])*\}/g, (bloc) => bloc.replace(/\b(img|icon)\s*:\s*("[^"]*"|'[^']*'|[^,}\s]+)\s*,?/g,
+        (entier, cle, valeur) => (cle === 'icon' && ICONE_EMBARQUEE.test(valeur) ? entier : '')));
 
     // Directives %%{ ... }%%
     return texte.replace(/%%\{([\s\S]*?)\}%%/g, (_, contenu) => {

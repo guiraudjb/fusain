@@ -102,6 +102,8 @@ const CORPUS = [
     'zenuml\n    A as Alice\n    "Service de paie" as Paie\n    while (reste) {\n        A->"Service de paie": Demande\n    }\n    opt {\n        "Service de paie"->A: Relance\n    }\n    par {\n        A->B: un\n        A->C: deux\n    }\n    try {\n        A->B: essai\n    } catch {\n        A->B: erreur\n    } finally {\n        A->B: fin\n    }',
     'zenuml\n    Alice->Bob.method() {\n        result = Bob->Carl.compute(1, 2)\n        new Dave()\n        return result\n    }',
     'zenuml\n    BookLibService.Borrow(id) {\n        User = Session.GetUser()\n        return receipt\n    }',
+    'flowchart LR\n    a@{ icon: "dsfr:user-line", label: "Usager", pos: "b" }\n    b@{ icon: "illus:serveur", label: "Serveur", pos: "b" }\n    c{"Choix"}\n    a --> b\n    b -->|"oui"| c',
+    'flowchart LR\n    a@{ icon: "fa:user", label: "Usager" } --> b@{ shape: cyl }',
 ];
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });
 const p = await (await b.newContext({ viewport: { width: 1500, height: 950 } })).newPage();

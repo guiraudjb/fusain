@@ -23,6 +23,18 @@ export const MODELES = [
     D --> A
     C --> E
 ` },
+    { id: 'logigramme-icones', categorie: 'processus', nom: 'Logigramme illustré', code: `flowchart LR
+    usager@{ icon: "illus:utilisateur", label: "Usager", pos: "b" }
+    portail@{ icon: "dsfr:computer-line", label: "Portail", pos: "b" }
+    agent@{ icon: "illus:administrateur", label: "Agent instructeur", pos: "b" }
+    decision{"Dossier complet ?"}
+    base@{ icon: "illus:base-de-donnees", label: "Archivage", pos: "b" }
+    usager -->|"Dépose"| portail
+    portail --> agent
+    agent --> decision
+    decision -->|"Oui"| base
+    decision -->|"Non"| usager
+` },
     { id: 'sequence', categorie: 'processus', nom: 'Diagramme de séquence', code: `sequenceDiagram
     actor U as Usager
     participant A as Agent

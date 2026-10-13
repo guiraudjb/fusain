@@ -1,5 +1,6 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
-import { h, bouton, champTexte, champSelect } from '../dom.js';
+import { h, bouton, champTexte, champSelect, message } from '../dom.js';
+import { choisirIcone } from '../icones.js';
 import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit } from './commun.js';
 
 // [nom, ouvrant, fermant, libellé] — les ouvrants les plus longs sont testés en premier
@@ -31,6 +32,8 @@ const RESERVES = new Set(['end', 'subgraph', 'direction', 'style', 'click', 'gra
 const RE_ID = /^[\p{L}\p{N}_]+/u;
 const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
 const RE_LIEN = /^([<ox])?(-{2,}|={2,}|-\.+-|~{3,})([>ox])?/;
+
+const RE_ICONE = /^@\{ icon: "((?:dsfr|illus):[a-z0-9-]+)", label: "([^"]*)", pos: "b" \}/;
 
 class Inconnu extends Error {}
 
@@ -75,7 +78,12 @@ function lireEnonce(texte, modele, groupe) {
             noeud.forme = forme[0];
             pos = apres + forme[2].length;
         } else if (texte.startsWith('@{', pos)) {
-            throw new Inconnu('syntaxe de forme étendue');
+            // Seule forme étendue gérée : l'étape représentée par une icône embarquée, telle que FUSAIN l'écrit
+            const icone = texte.slice(pos).match(RE_ICONE);
+            if (!icone) throw new Inconnu('syntaxe de forme étendue');
+            noeud.icone = icone[1];
+            noeud.texte = desechapper(icone[2]).replace(/#92;/g, '\\');
+            pos += icone[0].length;
         }
         const classe = texte.slice(pos).match(/^:::([\w-]+)/);
         if (classe) { noeud.classe = classe[1]; pos += classe[0].length; }
@@ -196,6 +204,8 @@ export function analyser(code) {
 // ---------- Écriture ----------
 
 function ecrireNoeud(n) {
+    // Étape représentée par une icône : le texte passe dessous. La barre oblique inverse s'écrit par son code.
+    if (n.icone) return `${n.id}@{ icon: "${n.icone}", label: "${echapper(n.texte ?? n.id).replace(/\\/g, '#92;')}", pos: "b" }${n.classe ? `:::${n.classe}` : ''}`;
     const forme = FORMES.find((f) => f[0] === n.forme) || FORMES.find((f) => f[0] === 'rectangle');
     const corps = n.texte === null && n.forme === 'rectangle' ? '' : `${forme[1]}"${echapper(n.texte ?? n.id)}"${forme[2]}`;
     return n.id + corps + (n.classe ? `:::${n.classe}` : '');
@@ -317,7 +327,8 @@ export function elements(modele) {
 // Associe chaque élément du SVG rendu à son élément du modèle
 export function reperer(svg, modele) {
     const prefixe = `${svg.id}-`;
-    for (const g of svg.querySelectorAll('g.node')) {
+    // Une étape-icône n'a pas la classe « node » des autres étapes
+    for (const g of svg.querySelectorAll('g.node, g.icon-shape')) {
         const m = g.id.startsWith(prefixe) && g.id.slice(prefixe.length).match(/^flowchart-(.+)-\d+$/);
         if (m && modele.noeuds.some((n) => n.id === m[1])) marquer(g, `n:${m[1]}`);
     }
@@ -415,7 +426,11 @@ export function panneau(ctx) {
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Étape sélectionnée'),
             champTexte('Texte', n.texte ?? n.id, (v) => maj((x) => { x.texte = v.trim() || x.id; }), { multiligne: true, id: 'fusain-champ-texte' }),
-            champSelect('Forme', FORMES.map((f) => [f[0], f[3]]), n.forme, (v) => maj((x) => { x.forme = v; if (x.texte === null) x.texte = x.id; })),
+            n.icone ? h('p', { class: 'fusain-aide' }, `Étape représentée par l'icône « ${n.icone.split(':')[1]} » : le texte s'affiche dessous.`)
+                : champSelect('Forme', FORMES.map((f) => [f[0], f[3]]), n.forme, (v) => maj((x) => { x.forme = v; if (x.texte === null) x.texte = x.id; })),
+            h('div', { class: 'fusain-actions' },
+                bouton(n.icone ? 'Changer d\'icône…' : 'Représenter par une icône…', { icone: 'layout-grid-line', onclick: () => choisirIcone(n.icone || '', (val) => maj((x) => { x.icone = val; if (x.texte === null) x.texte = x.id; })).catch((e) => message('Icônes indisponibles', e.message, 'error')) }),
+                n.icone ? bouton('Retirer l\'icône', { icone: 'close-line', onclick: () => maj((x) => { x.icone = null; }) }) : null),
             modele.groupes.length ? champSelect('Groupe', [['', 'Aucun'], ...modele.groupes.map((g) => [g.id, g.titre])], n.groupe || '', (v) => maj((x) => { x.groupe = v || null; })) : null,
             h('p', { class: 'fr-label fusain-champ' }, 'Couleur'),
             nuancier(modele.styles[id]?.fill, (fond, bord) => maj((x, m) => {
@@ -433,6 +448,7 @@ export function panneau(ctx) {
                         const origine = m.noeuds.find((x) => x.id === id);
                         const copie = ajouterNoeud(m, origine.groupe, origine.texte ?? origine.id);
                         copie.forme = origine.forme;
+                        copie.icone = origine.icone || null;
                         if (m.styles[id]) m.styles[copie.id] = { ...m.styles[id] };
                         cle = `n:${copie.id}`;
                     }, () => cle);

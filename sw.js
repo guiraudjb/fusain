@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.11.0-064c0161b1';
+const VERSION_CACHE = 'fusain-0.11.1-ab6cb67656';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./Documentation/GUIDE_UTILISATEUR.md', 'ffd8481140382db858cdb083bdd24f3172ea6816545c0bc94801a4d7606c54e1'],
     ['./FUSAIN_cahier_des_charges.md', '456a0baf446bf5d63ffeb676c00aa951639fbe3ef512d7bb1e7c48914d2cfa77'],
-    ['./JOURNAL_DES_VERSIONS.md', '82ee5178246a7cb56a628d34c89b7b5c1a829fd28964668b527552f759b12e88'],
+    ['./JOURNAL_DES_VERSIONS.md', '8690db9de54d65e5307538b65c8332000275f93e2edf81e353d71b08917f7dd0'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'd49126064eb6f5c5f88f4e33f090b34c3316f89193b102491e69eae8e02c0f6a'],
     ['./css/fusain.css', '0c3dfacc404d132e45dce92089ee0b94db512d4a2e53edf76eac19bfcc4314cf'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
@@ -18,18 +18,24 @@ const FICHIERS = [
     ['./icones/illustrees/agriculture.json', '4b1f076ef42b3c0518e2d6b5f8ba3d0e7a5fd88f973ddcf2555cc6f13dea5852'],
     ['./icones/illustrees/cadastre.json', 'cb1e7457b87f67b85c37c718e41ea257167ed092c649d24fdb2e595ff76bfd91'],
     ['./icones/illustrees/economie.json', 'c0372bb665d2e2fc8bac8d445e236cc94c142a1c18a1ef8d198604bc91708c6f'],
+    ['./icones/illustrees/education.json', '4066bd2038fcabd23674fcb187f47fa76aff80494c7d2c9430c603bd3123f3a5'],
     ['./icones/illustrees/energie.json', 'b79396c259ad9e36803642a8d948f538fb811238852a9262cc7f19a13a8cf12a'],
     ['./icones/illustrees/environnement.json', '5fa2db92f5b50427450cd6b5f02d5c35f61bf340800e48a3a561ba85dd44c17b'],
     ['./icones/illustrees/finances.json', 'dbbdf95621c07d7d540d59f0473407cd3c44a4694bc25056264076c9de8dc86e'],
     ['./icones/illustrees/guerre.json', '597f185899bab5f0925ded8e46437b60c65ef8571f3ac65dba321e399321ecc2'],
-    ['./icones/illustrees/index.json', 'b5cfed8e544f6876a6b17811be36884976140000e253504ea6e895427b350314'],
+    ['./icones/illustrees/index.json', 'e815da6d4cd4f570aa58f66f19873bd5cfd058075e71ff496678c8a04d2c3cd7'],
     ['./icones/illustrees/informatique.json', 'f1e0adb37d3cff83d854af0f861260b110d6b6062e61414ea50348e24db16469'],
+    ['./icones/illustrees/justice.json', '1730967dd195424d574e9c4a77030bbe60f7ada4fa40cc5f0182716fa71361fb'],
+    ['./icones/illustrees/logiciel.json', '060e7bafa30f0ab66ce12b68a4289ee4be05bcb7a02adcc9815517aa961a790c'],
     ['./icones/illustrees/meteo.json', 'b1c5ae6f6ce125b9a0e3b54711914c727a04f9d1033d0ebf07074758673f23dd'],
+    ['./icones/illustrees/projet.json', '7868414cfa3bf97d28a231706e8ab734ac0e6dce9f35b406d520b795378834b3'],
+    ['./icones/illustrees/ressources-humaines.json', '5d935f576281b88e9288c98fd9ca484169e9069f11ca7ef8fd2ec675c43037d8'],
+    ['./icones/illustrees/sante-social.json', 'df915b1849f7d03e956322ba0bbee460a7fd17f96b0df5eb172f93da71178f39'],
     ['./icones/illustrees/secours.json', 'c33d8495f55ae073a403533159ba1d0c7859989875600e5a3f46a70fb14a9a07'],
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
-    ['./', '693035e13fe3c8b3c29dd24d053561f38d8b2a13f6af0c8c90b7e4ffa89ba9da'],
-    ['./index.html', '693035e13fe3c8b3c29dd24d053561f38d8b2a13f6af0c8c90b7e4ffa89ba9da'],
+    ['./', 'c454a3072189652cc72d02265b2d04dd861c4ce0a699ded859d017bf67ffdb43'],
+    ['./index.html', 'c454a3072189652cc72d02265b2d04dd861c4ce0a699ded859d017bf67ffdb43'],
     ['./js/app.js', '59e42ce8de3bbcb1a6c6df7c88beee174837415f26c0f74f3fdc2bb4c7a30887'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
     ['./js/confiance.js', '9b6028042a8bd5274e3531a15e9728392772a718fbee6be2948478dc77885981'],
@@ -70,7 +76,7 @@ const FICHIERS = [
     ['./js/modeles.js', '4b7786c951e11d083cebc085e98c30be5d63c4ae51ce881bd67b163728ace7e3'],
     ['./js/rendu.js', 'b39f7624bbe8f1b1e4ac810d3fea7caaaeb9ffbc815ab2c8697b34f0628037b7'],
     ['./js/securite.js', 'c572f2c6c34425f5fddfc88ab6d8701836a8b51c43bb6ba3f5fa130f37092921'],
-    ['./js/version.js', '151f4176d8126800cf159a1d1b35c90bfe62403b6ce5182bd54bf4a6701ce71d'],
+    ['./js/version.js', 'f7411b33d3bec443da96cb6f52e247c78c2d95bada334e3ea0feea588eefdbb1'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -184,7 +190,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '79ee1c3eb65c0b39970e29fb799da93d691377095b3380b28ad470d69d8c86c9'],
+    ['./sbom/fusain-sbom-cyclonedx.json', 'd9cf3ec9587bde76eb0ba580166131d8c99ec515236cbcb0c827db7a351493e0'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */

@@ -1,0 +1,15 @@
+{
+ "interface-api": 1,
+ "fiche-de-paie": 1,
+ "validation": 1,
+ "microservices": 0,
+ "recette-et-tests": 0,
+ "indicateur": 0,
+ "medecin": 0,
+ "teleconsultation": 0,
+ "enseignant": 1,
+ "magistrat": 0,
+ "comite-de-pilotage": 0,
+ "algorithme": 0,
+ "examen": 0
+}

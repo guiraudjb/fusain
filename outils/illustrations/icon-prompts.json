@@ -20,7 +20,7 @@
    "theme": "justice",
    "theme_label": "Justice & droit",
    "label_fr": "Code de lois",
-   "subject": "a thick red law book with a section sign on the cover"
+   "subject": "a thick red law book with a small golden scales of justice emblem on the cover"
   },
   {
    "id": "magistrat",
@@ -139,7 +139,7 @@
    "theme": "education",
    "theme_label": "Éducation & formation",
    "label_fr": "Examen",
-   "subject": "an exam paper with a grade and a pencil"
+   "subject": "an exam answer sheet with a column of check boxes and check marks, next to a red pencil"
   },
   {
    "id": "formation-en-ligne",
@@ -510,7 +510,7 @@
    "theme": "logiciel",
    "theme_label": "Logiciels & données",
    "label_fr": "Algorithme",
-   "subject": "a flowchart with a diamond and arrows"
+   "subject": "a flowchart diagram made of three rectangular boxes and one diamond shape connected by arrows"
   },
   {
    "id": "tableau-de-bord",

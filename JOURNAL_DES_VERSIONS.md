@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.3.1 — 13 octobre 2026 — accessibilité
+
+- **Contrôle automatique** avec axe-core (`tests/accessibilite.mjs`, règles WCAG 2.1 A et AA automatisables) sur neuf états de l'interface : édition visuelle, sélection d'une étape et d'un lien, mode code avec et sans erreur, trois modales, thème sombre. Défauts trouvés et corrigés : absence de titre de niveau 1, hiérarchie des titres rompue par les alertes. Résultat : aucune règle en défaut.
+- **Parcours au clavier seul** ajouté à la recette : sélectionner une étape, lui ajouter une étape liée, la nommer, la renommer sur place, la supprimer — sans souris.
+- Limite : un contrôle automatique ne couvre qu'une partie du RGAA ; l'audit manuel et la déclaration d'accessibilité restent à faire.
+
 ## 0.3.0 — 13 octobre 2026 — pages, accessibilité, chemin de mise à jour
 
 - **Sous-titre** de page et **description accessible** du schéma (lue par les lecteurs d'écran, conservée dans l'export SVG), valables pour tous les types de schémas.

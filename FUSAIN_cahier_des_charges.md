@@ -702,7 +702,7 @@ FUSAIN/
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Les modules propres à FUSAIN autres que le point d'entrée ne portent pas d'attribut d'intégrité (limite des modules ES importés) |
-| Accessibilité | Audit RGAA et déclaration d'accessibilité |
+| Accessibilité | Audit RGAA manuel et déclaration d'accessibilité (le contrôle automatique axe-core et le parcours au clavier sont en place et sans défaut) |
 | Déploiement | Paquet Debian (l'exemple de configuration Nginx est livré dans `deploiement/`) |
 | Recette | Essais sur Safari (les recettes automatisées portent sur Chrome et Firefox) |
 

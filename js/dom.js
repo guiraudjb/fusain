@@ -90,7 +90,7 @@ export function annoncer(texte) {
 export function message(titre, texte = '', type = 'info', duree = 6000) {
     const zone = document.getElementById('fusain-messages');
     const alerte = h('div', { class: `fr-alert fr-alert--${type} fr-alert--sm`, role: type === 'error' ? 'alert' : 'status' },
-        h('h3', { class: 'fr-alert__title' }, titre), texte ? h('p', {}, texte) : null,
+        h('p', { class: 'fr-alert__title' }, titre), texte ? h('p', {}, texte) : null,
         h('button', { type: 'button', class: 'fr-btn--close fr-btn', title: 'Masquer le message', onclick: () => alerte.remove() }, 'Masquer le message'));
     zone.append(alerte);
     if (duree) setTimeout(() => alerte.remove(), duree);

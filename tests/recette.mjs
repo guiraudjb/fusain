@@ -50,6 +50,19 @@ c = await lireCode(); ok('suppression clavier', !/n1/.test(c));
 // 7. annuler / rétablir
 await p.click('button[title^="Annuler"]'); await p.waitForTimeout(700); c = await lireCode(); ok('annuler', /n1/.test(c));
 await p.screenshot({ path: OUT + '/e2e-logigramme.png' });
+// 7 ter. parcours au clavier seul : sélectionner, ajouter une étape liée, la nommer, renommer sur place, supprimer
+{ await p.focus('#fusain-feuille svg.fusain-page'); await p.keyboard.press('Escape'); await p.keyboard.press('ArrowRight'); await p.waitForTimeout(200);
+  const premiere = await p.evaluate(() => document.querySelector('#fusain-feuille .fusain-sel')?.getAttribute('data-fusain'));
+  await p.keyboard.press('Insert'); await p.waitForTimeout(900);
+  const dansChamp = await p.evaluate(() => document.activeElement?.id === 'fusain-champ-texte' && document.activeElement.selectionEnd - document.activeElement.selectionStart > 0);
+  await p.keyboard.type('Étape clavier'); await p.keyboard.press('Tab'); await p.waitForTimeout(800);
+  let cc = await lireCode();
+  ok('clavier : étape liée ajoutée et nommée sans souris', premiere === 'n:A' && dansChamp && /A --> n\d+/.test(cc) && cc.includes('["Étape clavier"]'), `${premiere} ${dansChamp}`);
+  const cle = await p.evaluate(() => document.querySelector('#fusain-feuille .fusain-sel')?.getAttribute('data-fusain'));
+  await p.focus('#fusain-feuille svg.fusain-page'); await p.keyboard.press('F2'); await p.waitForTimeout(200); await p.keyboard.press('Control+a'); await p.keyboard.type('Renommée au clavier'); await p.keyboard.press('Enter'); await p.waitForTimeout(800);
+  cc = await lireCode(); ok('clavier : renommage sur place', cc.includes('["Renommée au clavier"]'), cle);
+  await p.click(`#fusain-feuille [data-fusain="${cle}"]`); await p.focus('#fusain-feuille svg.fusain-page'); await p.keyboard.press('Delete'); await p.waitForTimeout(800);
+  cc = await lireCode(); ok('clavier : suppression', !cc.includes('Renommée au clavier')); }
 // 7 bis. page : titre, sous-titre et description accessible
 { const champ = (libelle) => p.locator(`#fusain-proprietes .fusain-champ:has(label:text-is("${libelle}")) :is(input, textarea)`);
   await champ('Titre affiché sur la page').fill('Circuit de traitement'); await champ('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(600);

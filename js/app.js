@@ -164,7 +164,7 @@ function afficherFeuille(page, schema, erreur) {
     zones.erreur.hidden = !erreur;
     if (erreur) {
         zones.erreur.append(h('div', { class: 'fr-alert fr-alert--error fr-alert--sm' },
-            h('h3', { class: 'fr-alert__title' }, erreur.ligne ? `Erreur dans le code, vers la ligne ${Math.min(erreur.ligne, page.code.split('\n').length)}` : 'Erreur dans le code'),
+            h('h2', { class: 'fr-alert__title' }, erreur.ligne ? `Erreur dans le code, vers la ligne ${Math.min(erreur.ligne, page.code.split('\n').length)}` : 'Erreur dans le code'),
             h('p', {}, erreur.texte.split('\n').flatMap((l, i) => (i ? [h('br'), l] : [l]))),
             ui.mode !== 'code' ? h('p', {}, bouton('Corriger dans le code', { variante: 'secondary', onclick: () => changerMode('code') })) : null));
     }

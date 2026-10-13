@@ -19,6 +19,12 @@ etape "Cohérence intégrité / cache / nomenclature" python3 outils/generer.py 
 etape "Logique et sécurité (sans navigateur)" filtre node --test tests/logique.test.mjs
 etape "Recette Chrome" filtre node tests/recette.mjs "$SORTIE"
 etape "Robustesse et corpus malveillant" filtre node tests/robustesse.mjs 200
+# Accessibilité : nécessite axe-core (outil de test, non livré) — AXE=/chemin/vers/axe.min.js
+if [ -n "${AXE:-}" ] && [ -f "$AXE" ]; then
+    etape "Accessibilité (axe-core)" filtre node tests/accessibilite.mjs "$AXE"
+else
+    echo; echo "== Accessibilité : ignorée (variable AXE non définie)"
+fi
 # Chemin de mise à jour : copie jetable de la dernière version validée (HEAD), servie sur un second port
 COPIE="$SORTIE/copie-maj"
 if [ ! -e "$COPIE" ] || [ -f "$COPIE/sw.js" ]; then

@@ -253,7 +253,7 @@ Un bouton « Effacer les données locales » est disponible dans la modale « À
 
 - Bibliothèque de modèles pré-remplis couvrant tous les types Mermaid, classés par usage (processus et structure, architecture, gestion de projet, analyse et données), reprise et étendue à partir de celle de PLUME.
 - Chaque modèle indique s'il est éditable en mode visuel.
-- Une nouvelle page démarre toujours d'un modèle ou d'un schéma vide du type choisi : jamais d'une page de code blanche.
+- Une nouvelle page démarre d'un modèle, ou d'une **page vierge** (sans schéma : seuls le titre, le sous-titre et le pied de page sont imprimés), à laquelle un schéma peut être donné ensuite.
 
 ### 5.6 Habillage
 
@@ -677,15 +677,15 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.5.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.6.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
 | Domaine | Contenu |
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
-| Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
-| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
+| Pages | Document multi-pages, pages vierges, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
+| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, soit dix-sept types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Modèles | 18 modèles répartis en quatre catégories |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
@@ -699,7 +699,7 @@ FUSAIN/
 
 | Domaine | Contenu |
 |---|---|
-| Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
+| Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture ; édition visuelle des derniers types Mermaid (exigences, C4, blocs, radar, treemap) |
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Au tout premier chargement, les modules propres à FUSAIN autres que le point d'entrée ne sont pas couverts par l'attribut d'intégrité du navigateur (limite des modules ES importés) ; ils le sont dès l'installation du service worker, qui vérifie l'empreinte de chaque fichier |

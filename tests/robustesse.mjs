@@ -30,7 +30,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const echecs = [];
     const comptes = {};
 
-    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats']) {
+    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet']) {
         const depart = MODELES.find((m) => m.id === type).code;
         const editeur = editeurPour(typeDiagramme(depart));
         comptes[type] = 0;

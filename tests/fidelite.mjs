@@ -56,6 +56,30 @@ const CORPUS = [
     'stateDiagram-v2\n    State1: The state with a note\n    note right of State1\n        Important information!\n    end note\n    State1 --> State2',
     'stateDiagram\n    s1 --> s2: Une transition\n    s2 --> s1',
     'quadrantChart\n    x-axis Urgent --> Not Urgent\n    y-axis Not Important --> "Important ❤"\n    Point A: [0.9, 0.0] radius: 12\n    Point B:::class1: [0.8, 0.1]\n    classDef class1 color: #109060',
+    'journey\n    title My working day\n    section Go to work\n      Make tea: 5: Me\n      Go upstairs: 3: Me\n      Do work: 1: Me, Cat\n    section Go home\n      Go downstairs: 5: Me\n      Sit down: 5: Me',
+    'journey\n    Sans section: 3\n    section A\n    section B\n      Tâche: 4: Moi, Toi',
+    'xychart-beta\n    title "Sales Revenue"\n    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]\n    y-axis "Revenue (in $)" 4000 --> 11000\n    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]',
+    'xychart-beta horizontal\n    title Sans guillemets\n    x-axis "Trimestre" ["T1", "T2"]\n    y-axis Volume\n    bar "Série" [1.5, -2]\n    line [3, 4]',
+    'xychart-beta\n    line [1, 2, 4, 8]',
+    'xychart-beta\n    x-axis "temps" 0 --> 10\n    line [1, 2, 4]',
+    'sankey-beta\n\nAgricultural waste,Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144',
+    'sankey-beta\n\n"Avec, virgule",B,10\n"Avec ""guillemets""",B,5\n\nB,C,15',
+    'erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ LINE-ITEM : contains\n    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses',
+    'erDiagram\n    direction LR\n    CAR ||--o{ NAMED-DRIVER : allows\n    CAR {\n        string registrationNumber PK\n        string make\n        string model\n        string[] parts\n    }\n    PERSON ||--o{ NAMED-DRIVER : is\n    PERSON {\n        string driversLicense PK "The license #"\n        string(99) firstName "Only 99 characters are allowed"\n        string lastName\n        string phone UK\n        int age\n    }\n    NAMED-DRIVER {\n        string carRegistrationNumber PK, FK\n        string driverLicence PK, FK\n    }',
+    'erDiagram\n    p[Person] {\n        string firstName\n    }\n    a["Customer Account"] {\n        string email\n    }\n    p ||--o| a : has',
+    'erDiagram\n    CAR 1 to zero or more NAMED-DRIVER : allows\n    PERSON many(0) optionally to 0+ NAMED-DRIVER : is',
+    'classDiagram\n    Animal <|-- Duck\n    Animal <|-- Fish\n    Animal : +int age\n    Animal : +String gender\n    Animal: +isMammal()\n    class Duck{\n        +String beakColor\n        +swim()\n        +quack()\n    }\n    class Fish{\n        -int sizeInFeet\n        -canEat()\n    }',
+    'classDiagram\n    direction LR\n    class Shape["Forme géométrique"] {\n        <<interface>>\n        noOfVertices\n        draw()\n    }\n    class Color\n    <<enumeration>> Color\n    Shape "1" *-- "many" Color : contient\n    Shape ..> Color\n    Shape o-- Color\n    Color ..|> Shape\n    Color <--> Shape\n    Color .. Shape',
+    'classDiagram\n    class Square~Shape~{\n        int id\n        List~int~ position\n    }\n    note for Square "une note"\n    namespace Formes {\n        class Triangle\n    }',
+    'classDiagram\n    class A\n    class B\n    A --> B\n    click A href "https://exemple.invalid"\n    link B "https://exemple.invalid"',
+    'architecture-beta\n    group api(cloud)[API]\n\n    service db(database)[Database] in api\n    service disk1(disk)[Storage] in api\n    service disk2(disk)[Storage] in api\n    service server(server)[Server] in api\n\n    db:L -- R:server\n    disk1:T -- B:server\n    disk2:T -- B:db',
+    'architecture-beta\n    group pub(internet)[Public]\n    group priv(cloud)[Prive] in pub\n    service a(server)[A] in priv\n    service b(disk)[B]\n    service c[C]\n    a:R --> L:b\n    b:B <--> T:c\n    a:B -[Flux]- T:c',
+    'architecture-beta\n    service left_disk(disk)[Disk]\n    service top_disk(disk)[Disk]\n    junction junctionCenter\n    left_disk:R -- L:junctionCenter\n    top_disk:B -- T:junctionCenter',
+    'gitGraph\n    commit\n    commit\n    branch develop\n    checkout develop\n    commit\n    commit\n    checkout main\n    merge develop\n    commit\n    commit',
+    'gitGraph TB:\n    commit id: "Alpha"\n    commit id: "Beta" type: HIGHLIGHT tag: "v1.0"\n    branch "ma branche"\n    commit id: "Gamma" type: REVERSE msg: "annule"\n    switch main\n    commit id: "Delta"\n    merge "ma branche" id: "Fusion" tag: "v2.0" type: HIGHLIGHT',
+    'gitGraph\n    commit id: "ZERO"\n    branch develop order: 2\n    commit id:"A"\n    checkout main\n    commit id:"ONE"\n    cherry-pick id:"A"',
+    'packet-beta\n    0-15: "Source Port"\n    16-31: "Destination Port"\n    32-63: "Sequence Number"\n    64-95: "Acknowledgment Number"\n    96-99: "Data Offset"\n    100-105: "Reserved"\n    106: "URG"\n    107: "ACK"\n    108-111: "Flags"\n    112-127: "Window"',
+    'packet\n    title Paquet relatif\n    +8: "Type"\n    +16: "Longueur"\n    24-70: "Données"',
 ];
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });
 const p = await (await b.newContext({ viewport: { width: 1500, height: 950 } })).newPage();
@@ -69,9 +93,9 @@ const resultats = await p.evaluate(async (CORPUS) => {
     const rendu = await import('./js/rendu.js');
     // Empreinte d'un schéma rendu : ce qu'un lecteur y voit
     const empreinte = (svg) => {
-        const textes = [...svg.querySelectorAll('text')].map((t) => t.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean).sort();
+        const textes = [...svg.querySelectorAll('text')].map((t) => t.textContent.replace(/\s+/g, ' ').trim().replace(/^\d+-[0-9a-f]{7}$/, 'identifiant automatique')).filter(Boolean).sort();
         const compte = (sel) => svg.querySelectorAll(sel).length;
-        return JSON.stringify({ textes, noeuds: compte('g.node'), liens: compte('path.flowchart-link, line.messageLine0, line.messageLine1, path.messageLine0, path.messageLine1'), groupes: compte('g.cluster'), parts: compte('path.pieCircle'), taches: compte('rect.task, rect[class*="task"]'), points: compte('g.data-point') });
+        return JSON.stringify({ textes, noeuds: compte('g.node'), liens: compte('path.flowchart-link, line.messageLine0, line.messageLine1, path.messageLine0, path.messageLine1'), groupes: compte('g.cluster'), parts: compte('path.pieCircle'), taches: compte('rect.task, rect[class*="task"]'), points: compte('g.data-point'), formes: compte('rect, circle, polygon'), traits: compte('path, line') });
     };
     const sortie = [];
     for (const [i, code] of CORPUS.entries()) {

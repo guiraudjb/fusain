@@ -161,6 +161,8 @@ function centrerLibelles(svg, l, h) {
 
 // Les rendus sont mis en file : Mermaid ne supporte pas les appels concurrents
 export function rendreSchema(code, idTheme) {
+    // Page vierge : aucun schéma, seule la mise en page (titre, pied de page) est composée
+    if (!String(code).trim()) return Promise.resolve(null);
     const cle = `${idTheme}\n${code}`;
     if (cache.has(cle)) return Promise.resolve(cache.get(cle));
     const tache = file.then(() => rendre(code, idTheme));

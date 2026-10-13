@@ -15,12 +15,12 @@
 
 | Fonction | État |
 |---|---|
-| Édition visuelle : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états | Disponible |
+| Édition visuelle de 17 types : logigramme, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau | Disponible |
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
 | 18 modèles de départ | Disponible |
 | Export PDF / PNG / SVG, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
 | Fonctionnement hors ligne | Disponible |
-| Édition visuelle des autres types (classes, entité-relation, parcours…) | À venir |
+| Édition visuelle des derniers types Mermaid (exigences, C4, blocs, radar…) | À venir |
 
 Le détail de ce qui reste à faire figure dans le [cahier des charges](FUSAIN_cahier_des_charges.md), section « État de réalisation ».
 

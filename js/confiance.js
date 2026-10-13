@@ -14,7 +14,16 @@
     };
     try {
         window.trustedTypes.createPolicy('default', {
-            createHTML: function (html) { return window.DOMPurify.sanitize(String(html), reglages); },
+            createHTML: function (html) {
+                var texte = String(html);
+                // Un fragment SVG nu (« <g>…</g> », icône d'un schéma d'architecture) serait vidé s'il était lu comme
+                // du HTML : il est assaini dans une enveloppe <svg>, qui est ensuite retirée.
+                if (/^\s*<(g|path|rect|circle|ellipse|line|polygon|polyline|text|tspan|defs)[\s>]/i.test(texte)) {
+                    var propre = window.DOMPurify.sanitize('<svg>' + texte + '</svg>', reglages);
+                    return /^<svg>[\s\S]*<\/svg>$/.test(propre) ? propre.slice(5, -6) : '';
+                }
+                return window.DOMPurify.sanitize(texte, reglages);
+            },
             createScript: function () { throw new TypeError('FUSAIN : création de script à partir de texte refusée.'); },
             createScriptURL: function (url) {
                 var cible = new URL(String(url), document.baseURI);

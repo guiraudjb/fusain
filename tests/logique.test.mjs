@@ -122,3 +122,56 @@ test('noms de fichiers nettoyés', () => {
     assert.equal(nomFichierSur('Été 2026 / ../../etc'), 'Ete-2026-etc');
     assert.equal(nomFichierSur('///'), 'document');
 });
+
+// ---------- Éditeurs ajoutés en 0.6.0 ----------
+
+test('tous les modèles proposés ont un éditeur visuel', () => {
+    for (const m of MODELES) assert.ok(editeurPour(typeDiagramme(m.code)), `sans éditeur : ${m.id}`);
+});
+
+test('historique de versions : une opération que Mermaid refuserait n\'est jamais écrite', () => {
+    const editeur = editeurPour('gitGraph');
+    const modele = editeur.analyser('gitGraph\n    commit id: "a"\n    branch x\n    commit id: "b"\n    checkout main\n    merge x\n');
+    // supprimer la branche emporte son commit et sa fusion
+    editeur.supprimer(modele, 'b:x');
+    assert.equal(editeur.ecrire(modele), 'gitGraph\n    commit id: "a"\n    checkout main\n');
+    // une branche qui pointe sur le même commit que main n'a rien à fusionner
+    const memeTete = editeur.analyser('gitGraph\n    commit id: "a"\n    branch y\n    checkout main\n');
+    assert.equal(editeur.relier(memeTete, 'b:y', 'b:main'), null);
+    assert.equal(memeTete.ops.length, 3);
+    // un libellé de commit reste unique
+    const deux = editeur.analyser('gitGraph\n    commit id: "a"\n    commit id: "b"\n');
+    editeur.renommer(deux, 'c:1', 'a');
+    assert.ok(editeur.ecrire(deux).includes('commit id: "b"'));
+});
+
+test('diagramme de flux : ni circuit, ni accent, ni schéma vide', () => {
+    const editeur = editeurPour('sankey');
+    const modele = editeur.analyser('sankey-beta\n\nA,B,10\nB,C,5\n');
+    assert.equal(editeur.relier(modele, 'n:2', 'n:0'), null, 'C → A fermerait un circuit');
+    editeur.renommer(modele, 'n:0', 'Santé "publique"');
+    assert.ok(editeur.ecrire(modele).includes('"Sante ""publique""",B,10'));
+    editeur.supprimer(modele, 'l:0');
+    editeur.supprimer(modele, 'l:0');
+    assert.equal(modele.flux.length, 1);
+});
+
+test('structure de paquet : les positions suivent les tailles', () => {
+    const editeur = editeurPour('packet');
+    const modele = editeur.analyser('packet-beta\n    0-3: "a"\n    4-7: "b"\n    +8: "c"\n');
+    modele.champs[0].bits = 1;
+    assert.equal(editeur.ecrire(modele), 'packet-beta\n    0: "a"\n    1-4: "b"\n    5-12: "c"\n');
+    assert.throws(() => editeur.analyser('packet-beta\n    0-3: "a"\n    8-9: "trou"\n'), /pas gérée/);
+});
+
+test('écritures avancées des nouveaux types → code seul', () => {
+    for (const code of [
+        'classDiagram\n    class A~T~\n',
+        'classDiagram\n    note for A "x"\n',
+        'erDiagram\n    A 1 to many B : x\n',
+        'architecture-beta\n    junction j\n',
+        'gitGraph\n    commit id: "a"\n    cherry-pick id: "a"\n',
+        'xychart-beta\n    x-axis 0 --> 10\n    line [1, 2]\n',
+        'journey\n    une ligne sans note\n',
+    ]) assert.throws(() => editeurPour(typeDiagramme(code)).analyser(code), /pas gérée/, code);
+});

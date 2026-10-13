@@ -7,7 +7,7 @@ const RE_ID = /^[\p{L}\p{N}_]+$/u;
 const EXTREMITE = '[*]';
 // Guillemets, deux-points et points-virgules structurent la syntaxe : ils sont retirés ou encodés
 const propreNom = (t) => String(t).replace(/"/g, '#quot;').replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
-const propreTexte = (t) => String(t).replace(/[;\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+const propreTexte = (t) => String(t).replace(/[;\n\r\t]/g, ' ').replace(/:{2,}/g, ':').replace(/\s+/g, ' ').replace(/^[: ]+/, '').trim();
 const lireNom = (t) => t.replace(/#quot;/g, '"');
 
 class Inconnu extends Error {}

@@ -7,13 +7,13 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 | Zone | Rôle |
 |---|---|
 | Barre d'outils | Nouveau, Ouvrir, Enregistrer, Exporter, Annuler / Rétablir, zoom, bascule Visuel / Code, Modèles |
-| Colonne de gauche | Les pages du document. « Ajouter une page » propose un modèle de départ |
+| Colonne de gauche | Les pages du document. « Ajouter une page » propose une page vierge ou un modèle de départ |
 | Centre | La page, à ses proportions réelles. Le cadre en pointillés montre les marges (il n'est pas exporté) |
 | Colonne de droite | Les propriétés de l'élément sélectionné, puis celles de la page et du document |
 
 ## 2. Construire un schéma sans coder
 
-Neuf types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants et diagramme d'états. Les autres se modifient par le code (§4).
+Dix-sept types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet. Les quelques types restants de Mermaid se modifient par le code (§4).
 
 **Gestes communs**
 
@@ -43,6 +43,24 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Tableau Kanban** — colonnes et cartes. Pour changer une carte de colonne, glissez sa pastille « + » sur la colonne voulue.
 
 **Diagramme d'états** — états et transitions (événement ou condition). Cochez « État initial » ou « État final » pour relier un état au point de départ ou d'arrivée ; la pastille « + » crée l'état suivant, ou relie deux états si vous la glissez de l'un à l'autre. Les états composés, notes et branchements se font par le code.
+
+**Parcours usager** — sections et étapes ; chaque étape a une note de satisfaction de 1 à 5 et des acteurs séparés par des virgules.
+
+**Graphique** — un tableau de données dans la colonne de droite : une ligne par catégorie, une colonne par série (barres ou courbe). Un clic sur une barre sélectionne sa valeur. Titres des axes, valeurs minimale et maximale, barres horizontales.
+
+**Diagramme de flux (Sankey)** — des postes reliés par des flux chiffrés. La pastille « + » d'un poste crée un flux sortant ; glissée vers un autre poste, elle les relie. Un flux ne peut pas revenir vers son origine. Mermaid n'accepte pas les accents dans ce type de schéma : FUSAIN les retire des noms.
+
+**Modèle de données** — entités, attributs (type, nom, clé, commentaire) et associations avec la cardinalité de chaque côté. Un clic sur un attribut le sélectionne ; un clic sur le titre sélectionne l'entité.
+
+**Diagramme de classes** — classes, stéréotype, attributs et méthodes, relations (héritage, composition, agrégation, flèche, trait plein ou pointillé, multiplicités). Notes, espaces de noms et génériques se font par le code.
+
+**Architecture technique** — services (nom, icône), groupes imbriquables et liaisons. Pour chaque liaison, vous choisissez le côté de départ et d'arrivée : c'est ce qui guide le placement.
+
+**Historique de versions** — commits, branches et fusions. Les ajouts se placent à la fin de l'historique, sur la « branche de travail ». La pastille « + » d'un commit ou d'une branche y ajoute un commit ; glissée vers une autre branche, elle fusionne la première dans la seconde. FUSAIN refuse les opérations que Mermaid rejetterait (fusion sans rien à fusionner, par exemple).
+
+**Structure de paquet** — une suite de champs, chacun d'une taille en bits ; les positions sont recalculées quand vous ajoutez, déplacez ou redimensionnez un champ.
+
+**Page vierge** — une page sans schéma, pour une page de garde ou un intercalaire : seuls son titre, son sous-titre et son pied de page sont imprimés. Vous pouvez lui donner un schéma plus tard (« Choisir un schéma »).
 
 **Matrice à quadrants** — titre, axes, nom des quatre zones, points. C'est le seul schéma où vous placez librement un élément : glissez un point à la souris dans la matrice.
 

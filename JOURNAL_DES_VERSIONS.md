@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.6.0 — 13 octobre 2026 — huit éditeurs visuels de plus, pages vierges
+
+- **Tous les modèles proposés s'éditent désormais sans coder** : parcours usager, graphique (barres et courbes, avec tableau de données), diagramme de flux (Sankey), modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet rejoignent les neuf types existants. Dix-sept types en édition visuelle.
+- **Pages vierges** : « Ajouter une page » propose une page sans schéma (page de garde, intercalaire) ; un schéma peut lui être donné ensuite.
+- **Défaut corrigé — icônes d'architecture absentes** : la politique Trusted Types lisait comme du HTML le fragment SVG de chaque icône et le vidait. Les fragments SVG sont maintenant assainis dans une enveloppe `<svg>`, sans rien céder sur le filtrage.
+- **Règles de Mermaid reproduites pour ne jamais écrire un schéma invalide** : pas de circuit ni d'accent dans un diagramme de flux, pas de fusion impossible dans un historique de versions (branche inconnue, mêmes têtes, branche sans commit propre), au moins une classe, une série, un flux.
+- **Défauts trouvés par les essais de robustesse** : un membre de classe contenant « ) » sans « ( » faisait échouer Mermaid ; `#` dans un nom de poste d'un diagramme de flux ; et, sur un éditeur existant, une transition d'état dont le texte se réduit à « : » (trouvé en portant les essais à 400 tirages).
+- Recette étendue : robustesse sur les dix-sept éditeurs, 24 écritures de plus au corpus de fidélité (77 au total), une modification visuelle vérifiée par nouveau type, présence des icônes, page vierge.
+
 ## 0.5.0 — 13 octobre 2026 — confort d'édition
 
 - **Logigramme** : espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), duplication d'une étape avec sa forme et sa couleur.

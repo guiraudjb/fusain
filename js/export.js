@@ -56,7 +56,8 @@ function preparerImage(c, { schemaSeul, transparent, ppp }) {
     let svg = c.svg;
     let lpx = Math.round(c.l / 25.4 * ppp);
     let hpx = Math.round(c.h / 25.4 * ppp);
-    if (schemaSeul) {
+    // Une page vierge n'a pas de schéma : l'option « schéma seul » y exporte la page
+    if (schemaSeul && c.schema) {
         svg = c.schema.svg.cloneNode(true);
         lpx = Math.round(c.schema.l * ppp / 96);
         hpx = Math.round(c.schema.h * ppp / 96);
@@ -84,9 +85,10 @@ export async function exporterSVG(doc, indices, options) {
     const composees = await pagesComposees(doc, indices);
     const base = nomDocument(doc);
     for (const c of composees) {
-        const svg = options.schemaSeul ? c.schema.svg : c.svg;
-        const largeur = options.schemaSeul ? `${c.schema.l}px` : `${c.l}mm`;
-        const hauteur = options.schemaSeul ? `${c.schema.h}px` : `${c.h}mm`;
+        const seul = options.schemaSeul && c.schema;
+        const svg = seul ? c.schema.svg : c.svg;
+        const largeur = seul ? `${c.schema.l}px` : `${c.l}mm`;
+        const hauteur = seul ? `${c.schema.h}px` : `${c.h}mm`;
         const chaine = await svgAutonome(svg, largeur, hauteur);
         const suffixe = doc.pages.length > 1 ? `_page-${deuxChiffres(c.index + 1)}` : '';
         telecharger(new Blob([chaine], { type: 'image/svg+xml;charset=utf-8' }), `${base}${suffixe}.svg`);
@@ -105,6 +107,12 @@ function couleur(valeur) {
     return m ? { rgb: `rgb(${m[1]}, ${m[2]}, ${m[3]})`, alpha: Number(m[4]) } : { rgb: valeur, alpha: 1 };
 }
 
+function couleurMoyenne(degrade) {
+    const teintes = [...(degrade?.querySelectorAll('stop') || [])].map((arret) => getComputedStyle(arret).stopColor.match(/[\d.]+/g)?.slice(0, 3).map(Number)).filter(Boolean);
+    if (!teintes.length) return null;
+    return `rgb(${[0, 1, 2].map((i) => Math.round(teintes.reduce((somme, c) => somme + c[i], 0) / teintes.length)).join(', ')})`;
+}
+
 // svg2pdf ne lit pas les feuilles de style de Mermaid de façon fiable : les styles calculés par le
 // navigateur sont recopiés en attributs de présentation, puis les feuilles sont retirées.
 function figerStyles(svg) {
@@ -115,6 +123,9 @@ function figerStyles(svg) {
         if (cs.display === 'none' && !el.closest('defs')) { releves.push([el, null]); continue; }
         const attrs = {};
         for (const p of PRESENTATION) attrs[p] = cs.getPropertyValue(p);
+        // Un trait en dégradé (flux d'un diagramme de Sankey) n'est pas rendu par svg2pdf : il prend la couleur moyenne du dégradé
+        const degrade = attrs.stroke.match(/^url\(["']?#([^"')]+)["']?\)/);
+        if (degrade) attrs.stroke = couleurMoyenne(svg.querySelector(`[id="${CSS.escape(degrade[1])}"]`)) || 'none';
         releves.push([el, attrs]);
     }
     for (const [el, attrs] of releves) {
@@ -181,7 +192,7 @@ function aplatirTextes(svg) {
                 // La ligne de base est déduite de la boîte du glyphe (haut de boîte + ascendante de la police) :
                 // contrairement à getStartPositionOfChar, ce calcul tient compte de dominant-baseline dans tous les navigateurs.
                 const y = texte.getExtentOfChar(rangCar).y + ascendante(cs);
-                fragments.push({ x: texte.getStartPositionOfChar(rangCar).x, y, contenu: noeud.data.trim(), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, opacite: cs.fillOpacity });
+                fragments.push({ x: texte.getStartPositionOfChar(rangCar).x, y, contenu: noeud.data.trim().replace(/\s+/g, ' '), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, opacite: cs.fillOpacity });
             }
         } catch {
             continue; // texte non affiché : laissé tel quel
@@ -236,7 +247,7 @@ export async function exporterPDF(doc, indices) {
     try {
         for (const [n, c] of composees.entries()) {
             if (n > 0) pdf.addPage([c.l, c.h], orientation(c));
-            let vectoriel = !c.schema.htmlIncorpore;
+            let vectoriel = !c.schema?.htmlIncorpore;
             if (vectoriel) {
                 try {
                     c.svg.setAttribute('width', `${c.l}mm`);

@@ -118,3 +118,35 @@ export function plan(elements, selection, selectionner) {
 export function marquer(el, cle) {
     if (el) el.setAttribute('data-fusain', cle);
 }
+
+// Une écriture valide pour Mermaid mais non gérée par l'éditeur visuel : la page passe en « code seul »
+export class Inconnu extends Error {}
+
+// Lit le corps ligne à ligne ; les lignes vides et les commentaires sont ignorés
+export function parLigne(lignes, preambule, lire) {
+    lignes.forEach((brute, n) => {
+        const ligne = brute.trim();
+        if (!ligne || ligne.startsWith('%%')) return;
+        try { lire(ligne); } catch (e) {
+            if (e instanceof Inconnu) throw new Error(`Ligne ${n + 2 + preambule.length} : cette écriture n'est pas gérée par l'édition visuelle (${e.message}).`);
+            throw e;
+        }
+    });
+}
+
+// Un lien est fin : une copie invisible et large du tracé le rend facile à viser
+export function marquerLien(chemin, cle) {
+    marquer(chemin, cle);
+    const touche = chemin.cloneNode(false);
+    for (const a of ['id', 'marker-end', 'marker-start']) touche.removeAttribute(a);
+    touche.setAttribute('class', 'fusain-touche');
+    marquer(touche, cle);
+    chemin.after(touche);
+}
+
+// Premier nom libre de la forme « prefixe1 », « prefixe2 »…
+export function nomLibre(prefixe, pris) {
+    let n = 1;
+    while (pris(`${prefixe}${n}`)) n += 1;
+    return `${prefixe}${n}`;
+}

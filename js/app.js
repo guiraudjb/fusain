@@ -103,7 +103,8 @@ function zoomer(valeur) {
 function analyserPage() {
     const page = pageCourante();
     const editeur = editeurPour(typeDiagramme(page.code));
-    vue = { editeur, modele: null, motif: '' };
+    vue = { editeur, modele: null, motif: '', vierge: !page.code.trim() };
+    if (vue.vierge) return;
     if (!editeur) {
         vue.motif = 'L\'édition visuelle n\'est pas encore disponible pour ce type de schéma : il se modifie par le code.';
         return;
@@ -278,7 +279,7 @@ function renommerSurPlace(cle) {
         termine = true;
         const texte = saisie.value;
         saisie.remove();
-        if (valider && texte !== valeur.replace(/\n/g, ' ')) appliquer((m) => editeur.renommer(m, cle, texte));
+        if (valider && texte !== valeur.replace(/\n/g, ' ')) { let nouvelle; appliquer((m) => { nouvelle = editeur.renommer(m, cle, texte); }, () => nouvelle || cle); }
         zones.feuille.querySelector('svg.fusain-page')?.focus({ preventScroll: true });
     };
     saisie.addEventListener('keydown', (e) => {
@@ -454,6 +455,13 @@ function afficherPanneau() {
     if (ui.mode === 'visuel') {
         if (vue.modele) {
             blocs.push(...vue.editeur.panneau({ modele: vue.modele, selection: ui.selection, appliquer, selectionner }));
+        } else if (vue.vierge) {
+            blocs.push(h('div', { class: 'fusain-bloc' },
+                h('h2', {}, 'Page vierge'),
+                h('p', { class: 'fr-text--sm' }, 'Cette page ne contient pas de schéma : seuls son titre, son sous-titre et son pied de page sont imprimés.'),
+                h('div', { class: 'fusain-actions' },
+                    bouton('Choisir un schéma', { icone: 'layout-grid-line', variante: 'secondary', onclick: () => ouvrirModeles('remplacer') }),
+                    bouton('Écrire du code', { icone: 'code-s-slash-line', onclick: () => changerMode('code') }))));
         } else {
             blocs.push(h('div', { class: 'fusain-bloc' },
                 h('h2', {}, 'Page en « code seul »'),
@@ -562,6 +570,9 @@ function ouvrirModeles(action) {
         h('p', { class: 'fr-text--sm' }, action === 'ajouter'
             ? 'Choisissez le schéma de départ de la nouvelle page.'
             : 'Le schéma de la page courante sera remplacé par le modèle choisi (annulable avec Ctrl+Z).'),
+        action === 'ajouter' ? h('div', { class: 'fusain-modeles' }, h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ajouterPage('', ''); } },
+            h('span', { class: 'fusain-modele__nom' }, 'Page vierge'),
+            h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon' }, 'Sans schéma'))) : null,
         CATEGORIES.map(([id, nom]) => [
             h('h2', { class: 'fr-h6 fr-mb-1w' }, nom),
             h('div', { class: 'fusain-modeles' }, MODELES.filter((m) => m.categorie === id).map((m) => h('button', { type: 'button', class: 'fusain-modele', onclick: () => {

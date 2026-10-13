@@ -72,6 +72,7 @@ function changerMode(mode) {
     validerCodeEnAttente();
     ui.mode = mode;
     zones.code.hidden = mode !== 'code';
+    document.querySelector('.fusain-corps').classList.toggle('fusain-mode-code', mode === 'code');
     rafraichir();
     if (mode === 'code') zones.zoneCode.focus();
 }

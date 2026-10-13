@@ -17,7 +17,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
     background: var(--background-alt-grey);
     border-bottom: 1px solid var(--border-default-grey);
 }
-.fusain-barre__groupe { display: flex; align-items: center; gap: .25rem; }
+.fusain-barre__groupe { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; min-width: 0; }
 .fusain-barre__groupe + .fusain-barre__groupe { padding-left: .75rem; border-left: 1px solid var(--border-default-grey); }
 .fusain-barre .fr-btn { margin: 0; }
 .fusain-barre__zoom { min-width: 3.5rem; text-align: center; font-size: .875rem; }
@@ -33,6 +33,16 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 @media (max-width: 62em) {
     .fusain-corps { grid-template-columns: 7rem minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 40%); }
     .fusain-proprietes { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border-default-grey); }
+}
+
+/* En mode code sur un écran étroit, les vignettes cèdent la place à l'éditeur et à l'aperçu */
+@media (max-width: 80em) and (min-width: 62.0625em) {
+    .fusain-corps.fusain-mode-code { grid-template-columns: minmax(0, 1fr) 17rem; }
+    .fusain-corps.fusain-mode-code .fusain-pages { display: none; }
+}
+@media (max-width: 36em) {
+    .fusain-barre__groupe + .fusain-barre__groupe { padding-left: 0; border-left: 0; }
+    .fusain-code { flex-basis: 55%; min-width: 0; }
 }
 
 /* ---------- Vignettes ---------- */
@@ -101,6 +111,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-plan__element:hover { background: var(--background-alt-grey); }
 .fusain-plan__element[aria-current="true"] { background: var(--background-alt-blue-france); box-shadow: inset 3px 0 0 var(--border-active-blue-france); font-weight: 700; }
 .fusain-plan__brut { font-family: ui-monospace, monospace; color: var(--text-mention-grey); }
+.fusain-proprietes p.fr-label { font-size: .8125rem; margin-bottom: .125rem; }
 .fusain-couleurs { display: flex; flex-wrap: wrap; gap: .25rem; }
 .fusain-couleur { width: 1.75rem; height: 1.75rem; padding: 0; border: 2px solid var(--border-default-grey); cursor: pointer; }
 .fusain-couleur[aria-pressed="true"] { outline: 3px solid #0a76f6; outline-offset: 1px; }

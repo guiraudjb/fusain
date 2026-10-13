@@ -11,9 +11,12 @@ const RE_MESSAGE = /^(.+?)\s*(<<-->>|<<->>|-->>|->>|--x|-x|--\)|-\)|-->|->)\s*([
 const RE_NOTE = /^Note\s+(over|left of|right of)\s+([^:]+?)\s*:\s*(.*)$/i;
 const POSITIONS = [['over', 'Au-dessus de'], ['left of', 'À gauche de'], ['right of', 'À droite de']];
 const BLOCS = [['loop', 'Boucle'], ['alt', 'Alternative'], ['opt', 'Optionnel'], ['par', 'En parallèle'], ['critical', 'Section critique'], ['break', 'Interruption']];
-const OUVRE = new Set([...BLOCS.map((b) => b[0]), 'rect', 'box']);
+const OUVRE = new Set([...BLOCS.map((b) => b[0]), 'rect']);
 const MILIEU = new Set(['else', 'and', 'option']);
-const MOTS_BRUTS = new Set([...OUVRE, ...MILIEU, 'end', 'activate', 'deactivate', 'title', 'create', 'destroy', 'accTitle', 'accDescr']);
+const MOTS_BRUTS = new Set([...OUVRE, ...MILIEU, 'end', 'activate', 'deactivate', 'title', 'accTitle', 'accDescr']);
+// Ces instructions lient la déclaration d'un participant à sa place dans le code : l'éditeur visuel, qui regroupe
+// les déclarations en tête, en changerait le sens
+const NON_GERES = new Set(['box', 'create', 'destroy']);
 
 // Le point-virgule sépare les instructions : il est encodé dans les textes
 const coder = (t) => String(t).replace(/;/g, '#59;').replace(/\r?\n/g, '<br/>');
@@ -51,6 +54,7 @@ export function analyser(code) {
             return;
         }
         const mot = ligne.match(/^[A-Za-z]+/)?.[0] || '';
+        if (NON_GERES.has(mot) && /\s/.test(ligne[mot.length] || ' ')) throw new Error(`Ligne ${n + 2 + preambule.length} : l'instruction « ${mot} » n'est pas gérée par l'édition visuelle.`);
         if (MOTS_BRUTS.has(mot) && (ligne.length === mot.length || /\s/.test(ligne[mot.length]))) { modele.items.push({ t: 'brut', ligne }); return; }
         m = ligne.match(RE_MESSAGE);
         if (!m) throw new Error(`Ligne ${n + 2 + preambule.length} : cette écriture n'est pas gérée par l'édition visuelle.`);

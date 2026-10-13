@@ -2,6 +2,16 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.3.2 — 13 octobre 2026 — fidélité de la réécriture
+
+**Essai** — `tests/fidelite.mjs` : 47 codes Mermaid d'écritures variées (liens chaînés, groupes imbriqués, formes, styles, blocs de séquence, tâches de Gantt…). Pour chacun, soit l'éditeur visuel le refuse et la page reste en « code seul », soit le code qu'il réécrit doit produire le même schéma (mêmes textes, même nombre de formes, de liens et de groupes). Résultat : 38 réécritures fidèles, 9 passages en « code seul », aucune différence.
+
+**Corrections** — trois écritures étaient acceptées à tort et réécrites en changeant le schéma ; elles passent désormais en « code seul » :
+
+- libellés au format Markdown (entre accents graves) dans les logigrammes et les cartes mentales ;
+- participants regroupés par `box` dans un diagramme de séquence ;
+- participants créés ou détruits en cours de séquence (`create`, `destroy`).
+
 ## 0.3.1 — 13 octobre 2026 — accessibilité
 
 - **Contrôle automatique** avec axe-core (`tests/accessibilite.mjs`, règles WCAG 2.1 A et AA automatisables) sur neuf états de l'interface : édition visuelle, sélection d'une étape et d'un lien, mode code avec et sans erreur, trois modales, thème sombre. Défauts trouvés et corrigés : absence de titre de niveau 1, hiérarchie des titres rompue par les alertes. Résultat : aucune règle en défaut.

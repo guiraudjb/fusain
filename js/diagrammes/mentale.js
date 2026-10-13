@@ -18,6 +18,7 @@ function lireNoeud(ligne) {
     const id = ligne.match(/^[\p{L}\p{N}_-]+/u)?.[0] || '';
     const reste = ligne.slice(id.length);
     const forme = FORMES.find((f) => reste.startsWith(f[1]) && reste.endsWith(f[2]) && reste.length >= f[1].length + f[2].length);
+    if (forme && /^"?`[\s\S]*`"?$/.test(reste.slice(forme[1].length, reste.length - forme[2].length).trim())) throw new Error('texte au format Markdown non géré');
     if (forme) return { texte: desechapper(sansGuillemets(reste.slice(forme[1].length, reste.length - forme[2].length))), forme: forme[0], extras: [], enfants: [] };
     if (!TEXTE_NU.test(ligne)) throw new Error('écriture de nœud non gérée');
     return { texte: ligne, forme: 'defaut', extras: [], enfants: [] };

@@ -67,6 +67,7 @@ function lireEnonce(texte, modele, groupe) {
             }
             const forme = candidates.find((f) => texte.startsWith(f[2], apres));
             if (!forme) throw new Inconnu('forme non fermée');
+            if (/^`[\s\S]*`$/.test(libelle.trim())) throw new Inconnu('texte au format Markdown');
             noeud.texte = desechapper(libelle);
             noeud.forme = forme[0];
             pos = apres + forme[2].length;
@@ -112,6 +113,7 @@ function lireEnonce(texte, modele, groupe) {
             lien.texte = desechapper(sansGuillemets(texte.slice(pos + 1, fin)));
             pos = fin + 1;
         }
+        if (/^`[\s\S]*`$/.test(lien.texte.trim())) throw new Inconnu('texte au format Markdown');
         lien.longueur = Math.max(1, Math.min(lien.longueur, 6));
         return lien;
     };

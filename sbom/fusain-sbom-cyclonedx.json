@@ -1,17 +1,17 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:8fedbe64-10e0-528a-8afa-7fa3fb811c0d",
+  "serialNumber": "urn:uuid:4832b6fc-a293-5c7b-807b-b3cb0fbaa49b",
   "version": 1,
   "metadata": {
     "timestamp": "2026-10-13T00:00:00Z",
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.3.1",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.3.2",
       "name": "FUSAIN",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.3.1"
+      "purl": "pkg:github/guiraudjb/fusain@0.3.2"
     },
     "tools": {
       "components": [
@@ -1309,7 +1309,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.3.1",
+      "ref": "pkg:github/guiraudjb/fusain@0.3.2",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.1.0",

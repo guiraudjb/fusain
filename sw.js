@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.4.2-2924861cd8';
+const VERSION_CACHE = 'fusain-0.4.3-65f8c51a9c';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./Documentation/GUIDE_UTILISATEUR.md', '29857eb31978a2b0664acceb11ee73f9d88558d061b7da7457b48f2744af293a'],
-    ['./FUSAIN_cahier_des_charges.md', '223dfb064bb4117057908f0337cfb645eedece9996cb956f007088f6e16af76e'],
-    ['./JOURNAL_DES_VERSIONS.md', '48b4924fc8302cfdeba71e9d5c10ca95e419a3ae4bee3e31158f244e4170e661'],
+    ['./FUSAIN_cahier_des_charges.md', '51f30086dbfbb240b6341a9bb2ec05013078a1c52529cd6507455ae4fad93188'],
+    ['./JOURNAL_DES_VERSIONS.md', '7fedcc79a8b0174616aa7b1a67f1a601b1a056ef95de1a81f2172a6d3d1ea6ba'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'a0f9fe6e191a619a87dba4276cdf4761c7807169e933ef764726e9ec830cc5aa'],
     ['./css/fusain.css', '5091c5480f9e5994ad84ab3a8ff1468b386190a00942b632724bbf2c391f046c'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
@@ -38,7 +38,7 @@ const FICHIERS = [
     ['./js/modeles.js', 'fcaf64c5a090f5114239a97523abcd20eb57280719317e083236f3f56e6f2170'],
     ['./js/rendu.js', 'eddefc80866e0c9217c054cb748ef026f5521d7a8c589a0aa5868347d1a0d2b8'],
     ['./js/securite.js', 'c572f2c6c34425f5fddfc88ab6d8701836a8b51c43bb6ba3f5fa130f37092921'],
-    ['./js/version.js', 'dc9d518beaba6bf2deed43c008b4903e8dd2c9e8d227ef5328c8d2dac29baeed'],
+    ['./js/version.js', '5592a9564c9aeee89a45d2d1600794addb2551dc6b7a8e2a6e955285d0ad4a8a'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -149,7 +149,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '6021525b9d0dec667f4bf2e4acd7cda7273c8caa69ad66b9b5ea2ac703ac6520'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '7a211e9ded6b06ce730b6d4912ca659aceef60fb12cc17e00c5aeaf11019f9da'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */

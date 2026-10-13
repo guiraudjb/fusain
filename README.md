@@ -53,6 +53,15 @@ La recette est rejouée par GitHub à chaque modification (`.github/workflows/re
 
 Pour un déploiement en production, `deploiement/nginx-fusain.conf` fournit une configuration Nginx posant tous les en-têtes de sécurité.
 
+Sur Debian, le paquet `fusain-server` fait l'ensemble (fichiers, site Nginx, certificat auto-signé de première installation) :
+
+```bash
+deploiement/construire-deb.sh                      # produit tests/sortie/fusain-server_<version>_all.deb
+sudo apt install ./fusain-server_<version>_all.deb
+```
+
+Remplacez ensuite `/etc/fusain/tls/fusain.pem` et `fusain.key` par le certificat de votre organisation. Le paquet désactive le site par défaut de Nginx.
+
 Signaler une vulnérabilité : ouvrir un avis privé depuis l'onglet « Security » du dépôt. Les principes de sécurité (politique de sécurité de contenu, assainissement du SVG, validation des fichiers) sont décrits au §7 du cahier des charges.
 
 ## Licences

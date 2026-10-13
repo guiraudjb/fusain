@@ -2,6 +2,11 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.4.3 — 13 octobre 2026 — paquet Debian
+
+- `deploiement/construire-deb.sh` construit le paquet **`fusain-server`** (2,3 Mo) : fichiers de l'application sous `/var/www/html/FUSAIN`, site Nginx avec tous les en-têtes de sécurité, certificat auto-signé créé à la première installation. Ni outils, ni tests, ni dépôt ne sont livrés.
+- **Validé en conteneur Debian 13.7** (Nginx 1.26.3) : installation par `apt`, configuration Nginx valide, sept en-têtes de sécurité présents, application chargée et fonctionnelle, encadrement par un site tiers bloqué, purge sans résidu.
+
 ## 0.4.2 — 13 octobre 2026 — intégrité de tous les fichiers
 
 - Le service worker **vérifie l'empreinte SHA-256 de chaque fichier** avant de le mettre en cache (144 fichiers, empreintes produites par `outils/generer.py`). Un fichier altéré ou une publication incomplète fait échouer l'installation : la version précédente reste en service, sans bandeau de mise à jour. Cela couvre aussi les modules que l'attribut d'intégrité du navigateur ne protège pas.

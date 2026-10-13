@@ -605,7 +605,7 @@ Les valeurs chiffrées sont des cibles, à confirmer par mesure à l'issue du pr
 - **Livrable** : un dossier de fichiers statiques, déposable sur tout serveur de fichiers en HTTPS (obligatoire pour le service worker).
 - **Publication de référence** : GitHub Pages, depuis la branche `main` du dépôt — <https://guiraudjb.github.io/fusain/>. Cet hébergement ne permet pas de poser d'en-têtes HTTP : la politique de sécurité de contenu y est délivrée par balise `<meta>`, sans `frame-ancestors` ni les autres en-têtes du §7.1. Il convient à la démonstration et à l'usage courant ; un déploiement en production dans une entité soumise à NIS2 se fait sur un serveur maîtrisé.
 - **Configuration serveur** : un exemple pour Nginx est fourni (`deploiement/nginx-fusain.conf`, validé sur Nginx 1.30), limité au service des fichiers et aux en-têtes de sécurité (§7.1), avec les règles de cache adaptées (service worker et page d'entrée jamais mis en cache par le serveur, autres fichiers à longue durée).
-- **Paquet Debian optionnel** (`fusain-server`), dans la continuité de TRACE et SILLON : installe les fichiers et la configuration Nginx ; aucune base de données, aucun service à démarrer.
+- **Paquet Debian optionnel** (`fusain-server`), dans la continuité de TRACE et SILLON : installe les fichiers et la configuration Nginx ; aucune base de données, aucun service à démarrer. Il se construit par `deploiement/construire-deb.sh` ; à l'installation, il crée un certificat auto-signé (à remplacer par celui de l'organisation), active le site et désactive le site par défaut de Nginx. Validé par installation puis purge sur Debian 13.
 - **Structure du dépôt**
 
 ```
@@ -691,6 +691,7 @@ FUSAIN/
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Trusted Types, analyse statique automatisée, Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |
+| Déploiement | Exemple de configuration Nginx et script de construction du paquet Debian `fusain-server`, tous deux validés en conteneur |
 | Nomenclature | Document de lecture, fichier CycloneDX 1.6 avec empreinte de chaque fichier, script de génération et de vérification |
 | Tests | Tests de logique et de sécurité sans navigateur ; recette automatisée dans Chrome et dans Firefox ; essais de libellés hostiles et corpus de codes malveillants ; mesures de montée en charge (`tests/tout.sh`, `tests/charge.mjs`) |
 
@@ -703,6 +704,5 @@ FUSAIN/
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Au tout premier chargement, les modules propres à FUSAIN autres que le point d'entrée ne sont pas couverts par l'attribut d'intégrité du navigateur (limite des modules ES importés) ; ils le sont dès l'installation du service worker, qui vérifie l'empreinte de chaque fichier |
 | Accessibilité | Audit RGAA manuel et déclaration d'accessibilité (le contrôle automatique axe-core et le parcours au clavier sont en place et sans défaut) |
-| Déploiement | Paquet Debian (l'exemple de configuration Nginx est livré dans `deploiement/`) |
 | Recette | Essais sur Safari (les recettes automatisées portent sur Chrome et Firefox) |
 

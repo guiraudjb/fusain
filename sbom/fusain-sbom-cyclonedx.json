@@ -1,0 +1,1342 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:1e8d7c52-c82b-5677-9e6f-ca143be3d3f3",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-10-13T00:00:00Z",
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.1.0",
+      "name": "FUSAIN",
+      "version": "0.1.0",
+      "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
+      "purl": "pkg:github/guiraudjb/fusain@0.1.0"
+    },
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "outils/generer.py"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "name": "@gouvfr/dsfr",
+      "version": "1.15.4",
+      "description": "Système de Design de l'État : composants, styles, police Marianne, icônes",
+      "purl": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "etalab-2.0"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/dsfr-v1.15.4"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/LICENSE.md",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/dsfr.min.css",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "bb265a569c57d8f299c12c3da9cff202c3771498eeafc4bd3d2bb0a1ca641907"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/dsfr.module.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d175528740a8aaa4dc9fa8bb7ad3b2fee406c9396eb7fdd1b19d18c0c5eb8a9f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/android-chrome-192x192.png",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e098d117ce30de01cd0be16a1877dfb454c45b0f15e21892ebc577b3a766785f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/android-chrome-512x512.png",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ad302dfb0b7f20f244a6c8cc677d1c9d374ff2ce5b1c4b3f723174fdc18ebb26"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/apple-touch-icon.png",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e3082a759b2a9039011915af1403d8063ef09903eb87743b5414bf2a32c65b46"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/favicon.ico",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0e0a5e52d40c658c20a212c3c4ea998ad8f83860ff55c5339bd487b2a2f583d8"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/favicon.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "43b3c67695e85c2cf766f07c5a6abb04ebbec4f76efd2f5d6be48e38f00000a3"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/favicon/manifest.webmanifest",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e70ffdb719c14392b75e6645e03628b3e493720477811c03bb666ae13f889928"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Bold.ttf",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0f5d00140d035d33fb5fa8927a7fd124d2c6ff4eba8b683dfa72488cc42bfe50"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular.ttf",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e21f2ef744eb05a33d1414970c07c0849e8af592df86130ae3b83917e7067f70"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Bold.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "03736567d99c2c360bad2c21026ca4741b15ca1e9ab533f272162a65f94cfbfb"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Bold_Italic.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "88ef0db9fe03890ef6adc786894829a7b9c7461f7efcf2af86f3a1657e3509a4"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Light.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "83dbbaae1c48d6c318c751ed49a2a683b83f78d305aaae0fddc46fae95079f49"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Light_Italic.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "88d5f6f0ec08d795850feded6e028c04d5d7015e30d5a8767d7b69c9327fb7bf"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Medium.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "04e63da6c3f525e8f39f3aeedcfabd85f9a6a48e33e35030cfa79c0987e577dc"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Medium_Italic.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5ee24277992f8a006323319c6d585a4de816ceb52c5b7e89d5050ee3d8b94632"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Regular.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "812177facf2d71a85e7aa216f87fd46f5ce5189bee57171a0d0f654dba12b14f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Marianne-Regular_Italic.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7c5db58e865103de356f28653298edc018a64d29ce4238e57b597124ce78c41e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Spectral-ExtraBold.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "28d8fc6af204f2d007524006636ef3f561a820c85e40aac54f385a44852050b0"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/fonts/Spectral-Regular.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "9c4f16b44fec4a8ca1c9f38d7a6f91645715945b0201ba9275fd5000197bee8e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-down-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e76f6586d5b400ffb85bdc8639d9ae707bc41641cb6960a87f21131e04f7b73b"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-down-s-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "fe793b4ca3825525eb6393308d7983821c149a2a01b1bae85a6b3f045bdaec25"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-go-back-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4fd1b2de4b718ab03a090cacc20e22b00303a7197a5a6a38976765f6f967e9e8"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-go-forward-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "da744a6f9d422370cfe8ec56b34d69969d3479992a9c9c4ef7d652506d74752c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-left-right-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "25fa545f1c4c27dd9c87921d77d2f85bd3a3080a259ecea4d2c8d63d84912f6b"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-left-s-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "c49a2a965c9c727579da90bfd4137fd287e7bb876e585b32d3e9956e93c725f9"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-right-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "2929a4704a947bad8f1bb7cd2e442b4df9f6cd201a86c5e38302586c9db5bbda"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-right-s-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "463f726e6247030b3975cb6ed2fae40f2a70a9a4af6d74a2729ff02671dc8939"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-down-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "457895476620d22dd211d3b6b18daac6c009ed922e06fe30f1caf695b77fd14c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "c3947a0b7f4b018baf72d2b9edd988f391bc8de9e3c03b24733747c4cd2b5cd1"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-s-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "2dc8b949dbc8e6678e461d010e77b395a9117d77cc3933ce862af7adc7b4dfd6"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/fr--arrow-left-s-first-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7331cf73cabfa6a4e8c2c432976ef777b82615efb89bd19967dcac8d81e275b3"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/arrows/fr--arrow-right-s-last-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "a629ae8ec7f1ab494b91dd410e5f6b9ca3f6fe0b236e66e6a4213cc5bab13c2f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/business/briefcase-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "42dcb7598d7df0fa2c8b7c911111bde76dc52af63829b0a7c475a42f8efd3f9e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/business/links-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "b7eb38d044c1212219d2a962f613172c04ea1c1fb36dada645fbef927add3cc9"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/business/mail-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "1bb2cd61617c604d4d1095b277cc7b3af7b64dfdf14bec1e0be79deae8e45db1"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/business/stack-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "bb254d59d9db21becce224ac53463ea07966532edef4e88d7f7e4e4c92d6ff7c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/design/drag-move-2-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "12d9adb8cf3b31185cfd3e6fe8df25e02c186e9aaf42db58ea77f8cc0b3b0a90"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/design/layout-grid-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "00e3a66670b7c2bc780ab225e18de7a3f7034a41ecdd5adfa49ceb40ff2e8a66"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/development/code-s-slash-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "24d0114025006f9a6dea23efca7a5f26a8b4dab7bec99590a83523a0a7844acc"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/device/save-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8060b2784c702754018950c221907e9e595547ea276f32b695d7df93aeb55a3e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/document/file-add-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "46f6c0fd042d7fbb551ba7dc7884d820682220caa6009be80b20697629815fd4"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/editor/align-left.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "932f93531a97ef89086ee12de4e15eb13232019f18106053795fea283e0714bc"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/editor/fr--quote-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0c4ddd62d7a843a779b1b4d12615cd4df9bd3fdabc8d0b3e8c1f90ff87b089f1"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/editor/translate-2.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "60e448fa1c27a6c877ef0b1bcc62da6d2561c03f0c5a53b7d6d60230369f0134"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/bluesky-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8cb461fb076aaa9e170b0d6acf26373e2a0f0689c30a121d9bc5e165509b3b30"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/bluesky-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ac14234e6c432c8ac468a706847de7ffdf11e96d1fb85fff31747d6706f939b1"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/facebook-circle-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5904580648a1f585b6b6c787942971c95c071f0fa268342cfc25ec8a984fee52"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/facebook-circle-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "b49f738cf1e01fb51e892ac4f1e3f82805cc6c64663d9bbd23ce920c97077b46"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/fr--dailymotion-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e1cd797ad3ef3d2814ef4317e5bdcc229e5e74c168952fe63f6f9a47bad3fa2d"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/fr--tiktok-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e8dd4ea9aef84c14ca0a3565dba54bf8a32b56ea404fb8cddd395c0c1c20975f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/github-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "12669cdd9398dfe820e8d8de94a2769ec6e72d5a0d998ad51a26d9e646f73893"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/instagram-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6d1aa63e8b03dded021d24ae7483a095fb891485298ca02c294609fe14400c07"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/linkedin-box-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "816b040e570b60c1a1b6b35ad3a41687feb70bea751ab2ef2b2cef9f1bbf4ae8"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/linkedin-box-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "9a75017f1236a9d07af69fb7099069c6a39d91594bb6e506522d468e03bed65a"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/mastodon-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "32767418278172894f8510bea21f94a872e94e121421b35a73dedd7beb3f2b9f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/mastodon-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d9da698b72cbc154aca3e8dcfb3ae04132f0e1f40179602d122c425332f9830f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/snapchat-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6033648b4ed35dcddfa99a17b0978bbbccee9eef3cb503df3125dfe77bd4f899"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/telegram-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "a5ac234dd40157d533d7cc5665dec4db66080338e5e6f1d4a8d6823bf4b55009"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/threads-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "960b0c6f4340f4da7cb06cd98cabe7049b392094a1d5187eaa0077885d54db8c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/threads-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "c94c4bc0c3b60736e415ce21cc9338f53af8a68b5ef632c8e139c6823900edb2"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/twitch-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7818ec2f978753c7c13a67aab8198ecef55642c209bd630a9c3a2427a40e4cf9"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/twitter-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "14843b6a59005e81e96fed982289a721674f19a04e3f620b3caea966fcfce3d2"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/twitter-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "3c31c70239eb5d058595545b0575bd34e5b3b49834c513255d5b1d49efb2a501"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/twitter-x-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "810e32e97342902c3f194f81955bbc00b319a0cf21d7a7ed38886ecd68f20fb5"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/twitter-x-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5e045451f8059154a162bc662b5b751e17d7fcb5d20e2a6e552037dabdd9b05c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/vimeo-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "63bf8f5c214d08cbbd9ccdf66ca120babacf31bdc08c0fb7ac7fcc8b8e5ba83f"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/logo/youtube-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7785aadce1ac446e3ca08285a234d74090bf90bc4df7a0ae376ec23dc698672c"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/media/fullscreen-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ea359d0f8927113c92c8c2c90cb8108972cb64ae9c645adc053f2fdd0fee6f79"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/add-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "975f2a32fe531fe04f21ae4cb423a12c3f7e83686ae5e02ad4a23aa23a165115"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/check-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "48d8bc7fcf0384da161f00ff6ad311427d4c15606d1f3f0bd1674dc0df24824a"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/checkbox-circle-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "2468f84af7c0d7790beb5d383dd32a22b40db5a7288ddf72f8ce2470eb4656ba"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/close-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0be127f1a5ee06cad6cc4dd668cfc27ee58d6f3e6841ad9dd0abfef3d9216b3a"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/delete-bin-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d400ad2c98a2903808944037b805b2452ae781c3a64e71a2de94249c5bd0f829"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/download-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "c54611e93741549b5048d52731023d7837f0bd594b8cf1105606948efe97b896"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/error-warning-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "74e7bea45e2e2dad4643d8aa920796bf914f89da63cab9eca1c9eff21b8e0fc4"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/external-link-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e6f54f5ea8ae2921980b307fa4b770105f9a607d055f88bbd8abc2207b5076c8"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--alert-warning-2-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7e41c29aea2545404006d26dd51289b6a45df585a281634607b0d88044395758"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--alert-warning-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "7adadac583514d1e165e5211c292bdb2948531e5ce7838a74e0aa5f553759055"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--error-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "86b989f89f360bca2c58f4dbeab64531af8bea9147a10f590fc3f7171b9579bf"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--info-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5cbeb3f6f593c75522d66f52a09b55c531fc48028d18aa13563c9bb574570004"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--success-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5f95ff9be7ee7e6baf914c9ce63896904a0c9cd7a0e9ee79ad6e1407d9cf305e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--theme-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e940c7c5ec9ff5caaad54af4217865a9a18ede167a6684baf084f64afca478e6"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/fr--warning-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ad92b318a907668848ffb334b356248e00ae3c81d246e8a43901ba3d71aabc5d"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/information-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8e956b48ad6c024714ce1ecebd72d7cc305ab96b833edb1feda0064231298177"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/menu-2-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "9f3a66cbc3c1d8657b863150ce203d96c837d7683cdc6ac890d125c9715d91f3"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/menu-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "58fea24bf69496215839f310e6297d93df3bfb7803766f3ad6bc42d798610690"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/question-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "410cb77b3065e98a443c0b51f7d3dc0f2c8ddeb3162ed2af25bde2769d77c8ef"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/search-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "76087cdca3df81def893a678bf5908c91f9c6ab3010c3bd303f9c3a72fa91e7b"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/upload-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "49e7696343c320139c0bac82ccc13dfd09937d02545892735b8dd24454d8c31a"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/zoom-in-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "65fb1437bbbaee2bf246761ae2e794cc944811a2bf09100f70cd58a5174f3da9"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/system/zoom-out-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "fb74655147ae2d43e8ddbeb8a2b44c9655cbf620c74ccb3e1b8e5ebfae03f454"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/user/account-circle-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f7dadd07638c7511ef04c8000aa0dbdcb5f544a69d1940841b56a904fd211da3"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/user/team-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "58f6e6f0d3bc13839b4031ab793eed0e1ce70780c7715686eea6178058501a1e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/weather/flashlight-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ae4ec0360a98adef902a6a2d25a90b4259dd94c56e6b7a8fa2e627d51f705864"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/weather/heavy-showers-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ca20a6c6f2aab99c08d30bc1d2a22adf5379fca380d9b3ccdf7d4a574e5b5196"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/weather/moon-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4c8c16657636d3b323f6cd0469c3aff9bb7cb14e96f47039458cd384e84b9366"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/weather/sun-line.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4c9a08998c5014c8007cd608735954b445e73ce8f296e13bdb195d6bb956931b"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icons/weather/typhoon-fill.svg",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "199ddb1f2383c0d705610e7bad4457c8893e4b42dc76c11f542820229e2c8188"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/utility/icons/icons.min.css",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4932083897a9e000445734f6d39ff6e530edd1a7668fddfa1861f075767cefe6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/mermaid@12.1.0",
+      "name": "mermaid",
+      "version": "12.1.0",
+      "description": "Analyse et rendu des diagrammes",
+      "purl": "pkg:npm/mermaid@12.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/mermaid-v12.1.0"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/mermaid.min.js : distribution autonome, qui inclut ses propres dépendances (moteurs de disposition, analyseurs, D3, DOMPurify interne)."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/mermaid-v12.1.0/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "ec9fb67dcb25eccc416ed56e1aab819222c805a2a4bfe4cb19e7556bf2ffde80"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/mermaid-v12.1.0/mermaid.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6484afc32872a3aa16cac9a76ba1816a1ed4cc870a6593cc2e17757750f518b2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/dompurify@3.4.17",
+      "name": "dompurify",
+      "version": "3.4.17",
+      "description": "Assainissement du SVG avant insertion dans la page",
+      "purl": "pkg:npm/dompurify@3.4.17",
+      "licenses": [
+        {
+          "expression": "(MPL-2.0 OR Apache-2.0)"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/dompurify-v3.4.17"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/purify.min.js."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/dompurify-v3.4.17/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dompurify-v3.4.17/purify.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/jspdf@4.2.1",
+      "name": "jspdf",
+      "version": "4.2.1",
+      "description": "Génération du fichier PDF",
+      "purl": "pkg:npm/jspdf@4.2.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/jspdf-v4.2.1"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/jspdf.umd.min.js. Les dépendances optionnelles de jsPDF (html2canvas, canvg, dompurify) ne sont ni embarquées ni chargées : la fonction html() n'est pas utilisée."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/jspdf-v4.2.1/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "dc388ec35ff463288cdde3588a36fd4ed12a45deff053243b37309acc9ef583b"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/jspdf-v4.2.1/jspdf.umd.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/svg2pdf.js@2.8.1",
+      "name": "svg2pdf.js",
+      "version": "2.8.1",
+      "description": "Conversion vectorielle SVG vers PDF",
+      "purl": "pkg:npm/svg2pdf.js@2.8.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/svg2pdf-v2.8.1"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/svg2pdf.umd.min.js."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/svg2pdf-v2.8.1/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:github/guiraudjb/fusain@0.1.0",
+      "dependsOn": [
+        "pkg:npm/%40gouvfr/dsfr@1.15.4",
+        "pkg:npm/mermaid@12.1.0",
+        "pkg:npm/dompurify@3.4.17",
+        "pkg:npm/jspdf@4.2.1",
+        "pkg:npm/svg2pdf.js@2.8.1"
+      ]
+    },
+    {
+      "ref": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/mermaid@12.1.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/dompurify@3.4.17",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/jspdf@4.2.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/svg2pdf.js@2.8.1",
+      "dependsOn": []
+    }
+  ]
+}

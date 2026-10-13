@@ -1,0 +1,50 @@
+{
+  "_commentaire": "Source de la nomenclature : une entrée par bibliothèque embarquée. Les empreintes des fichiers sont calculées et vérifiées par outils/generer.py.",
+  "composants": [
+    {
+      "nom": "@gouvfr/dsfr", "version": "1.15.4", "licence": "etalab-2.0",
+      "role": "Système de Design de l'État : composants, styles, police Marianne, icônes",
+      "purl": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "archive": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz",
+      "archiveSha256": "e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb",
+      "dossier": "libs/dsfr-v1.15.4",
+      "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
+    },
+    {
+      "nom": "mermaid", "version": "12.1.0", "licence": "MIT",
+      "role": "Analyse et rendu des diagrammes",
+      "purl": "pkg:npm/mermaid@12.1.0",
+      "archive": "https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz",
+      "archiveSha256": "3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a",
+      "dossier": "libs/mermaid-v12.1.0",
+      "note": "Fichier dist/mermaid.min.js : distribution autonome, qui inclut ses propres dépendances (moteurs de disposition, analyseurs, D3, DOMPurify interne)."
+    },
+    {
+      "nom": "dompurify", "version": "3.4.17", "licence": "(MPL-2.0 OR Apache-2.0)",
+      "role": "Assainissement du SVG avant insertion dans la page",
+      "purl": "pkg:npm/dompurify@3.4.17",
+      "archive": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
+      "archiveSha256": "056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7",
+      "dossier": "libs/dompurify-v3.4.17",
+      "note": "Fichier dist/purify.min.js."
+    },
+    {
+      "nom": "jspdf", "version": "4.2.1", "licence": "MIT",
+      "role": "Génération du fichier PDF",
+      "purl": "pkg:npm/jspdf@4.2.1",
+      "archive": "https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz",
+      "archiveSha256": "e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a",
+      "dossier": "libs/jspdf-v4.2.1",
+      "note": "Fichier dist/jspdf.umd.min.js. Les dépendances optionnelles de jsPDF (html2canvas, canvg, dompurify) ne sont ni embarquées ni chargées : la fonction html() n'est pas utilisée."
+    },
+    {
+      "nom": "svg2pdf.js", "version": "2.8.1", "licence": "MIT",
+      "role": "Conversion vectorielle SVG vers PDF",
+      "purl": "pkg:npm/svg2pdf.js@2.8.1",
+      "archive": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz",
+      "archiveSha256": "5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a",
+      "dossier": "libs/svg2pdf-v2.8.1",
+      "note": "Fichier dist/svg2pdf.umd.min.js."
+    }
+  ]
+}

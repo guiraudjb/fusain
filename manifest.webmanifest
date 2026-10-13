@@ -1,0 +1,16 @@
+{
+  "name": "FUSAIN — Fabrique Universelle de Schémas Accessibles, Intuitifs et Normés",
+  "short_name": "FUSAIN",
+  "description": "Éditeur visuel de diagrammes Mermaid au format A4 ou A3. Tous les traitements s'exécutent dans le navigateur.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000091",
+  "icons": [
+    { "src": "icones/fusain-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icones/fusain-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icones/fusain.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

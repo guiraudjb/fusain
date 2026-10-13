@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Politique de sécurité de contenu : repli <meta> (cahier des charges §7.1).
+         Sur un serveur maîtrisé, la même politique est à délivrer par en-tête HTTP,
+         complétée de frame-ancestors 'none' (sans effet dans une balise meta). -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#000091">
+    <meta name="description" content="FUSAIN — éditeur visuel de diagrammes Mermaid au format A4 ou A3. Tous les traitements s'exécutent dans le navigateur.">
+    <title>FUSAIN — Fabrique Universelle de Schémas Accessibles, Intuitifs et Normés</title>
+    <link rel="icon" href="./icones/fusain.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icones/fusain-192.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="stylesheet" href="./libs/dsfr-v1.15.4/dsfr.min.css" integrity="sha384-pSuXpWGkpqKPyjAvU65RYbgM3zqf8TFZLBvox8Ykh2FqYyjnDbN7H+QUVrYIhOTa">
+    <link rel="stylesheet" href="./libs/dsfr-v1.15.4/utility/icons/icons.min.css" integrity="sha384-S+ttVpcWWHLn1CEGnBmT+A2KKDlXcNJ/vo6Qh/XYK7/0Lo+X/gM2k1vf5fDkssFu">
+    <link rel="stylesheet" href="./css/fusain.css" integrity="sha384-ICI7FFu4dupLcPNyeNVmBSqSCudpOOvf7hS7vlxMIORsy1kTOBPeSqkiJAxdebsY">
+</head>
+<body>
+    <div class="fr-skiplinks">
+        <nav class="fr-container" role="navigation" aria-label="Accès rapide">
+            <ul class="fr-skiplinks__list">
+                <li><a class="fr-link" href="#fusain-scene">Schéma</a></li>
+                <li><a class="fr-link" href="#fusain-proprietes">Propriétés</a></li>
+                <li><a class="fr-link" href="#fusain-pages">Pages</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <header role="banner" class="fr-header fusain-entete">
+        <div class="fr-header__body">
+            <div class="fr-container--fluid fr-px-2w">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand">
+                        <div class="fr-header__brand-top">
+                            <div class="fr-header__logo">
+                                <p class="fr-logo">République<br>Française</p>
+                            </div>
+                            <div class="fr-header__navbar">
+                                <button type="button" class="fr-btn--menu fr-btn" data-fr-opened="false" aria-controls="fusain-menu" aria-haspopup="menu" id="fusain-btn-menu" title="Menu">Menu</button>
+                            </div>
+                        </div>
+                        <div class="fr-header__service">
+                            <p class="fr-header__service-title">FUSAIN <span class="fr-badge fr-badge--sm fr-badge--green-emeraude">Bêta</span></p>
+                            <p class="fr-header__service-tagline">Fabrique Universelle de Schémas Accessibles, Intuitifs et Normés</p>
+                        </div>
+                    </div>
+                    <div class="fr-header__tools">
+                        <div class="fr-header__tools-links">
+                            <ul class="fr-btns-group">
+                                <li><button type="button" class="fr-btn fr-icon-moon-line" data-action="theme">Thème sombre</button></li>
+                                <li><button type="button" class="fr-btn fr-icon-information-line" data-action="apropos">À propos</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fr-header__menu fr-modal" id="fusain-menu" aria-labelledby="fusain-btn-menu">
+            <div class="fr-container">
+                <button type="button" class="fr-btn--close fr-btn" aria-controls="fusain-menu" title="Fermer">Fermer</button>
+                <div class="fr-header__menu-links"></div>
+            </div>
+        </div>
+    </header>
+
+    <div id="fusain-bandeau"></div>
+
+    <main class="fusain-app" id="fusain-app">
+        <div class="fusain-barre" role="toolbar" aria-label="Barre d'outils" id="fusain-barre"></div>
+
+        <div class="fusain-corps">
+            <nav class="fusain-pages" id="fusain-pages" aria-label="Pages du document" tabindex="-1"></nav>
+
+            <section class="fusain-centre" aria-label="Espace de travail">
+                <div class="fusain-code" id="fusain-code" hidden>
+                    <div class="fusain-code__entete">
+                        <label class="fr-label" for="fusain-code-zone">Code Mermaid de la page</label>
+                        <p class="fr-badge fr-badge--sm" id="fusain-code-etat"></p>
+                    </div>
+                    <div class="fusain-code__editeur">
+                        <div class="fusain-code__lignes" id="fusain-code-lignes" aria-hidden="true"></div>
+                        <textarea id="fusain-code-zone" class="fusain-code__zone" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off"></textarea>
+                    </div>
+                </div>
+                <div class="fusain-scene" id="fusain-scene" tabindex="-1">
+                    <div class="fusain-erreur" id="fusain-erreur" role="alert" hidden></div>
+                    <div class="fusain-feuille" id="fusain-feuille"></div>
+                </div>
+            </section>
+
+            <aside class="fusain-proprietes" id="fusain-proprietes" aria-label="Propriétés" tabindex="-1"></aside>
+        </div>
+    </main>
+
+    <div class="fusain-messages" id="fusain-messages" aria-live="polite"></div>
+    <p class="fr-sr-only" id="fusain-annonce" role="status" aria-live="polite"></p>
+    <div id="fusain-modales"></div>
+    <input type="file" id="fusain-fichier" accept=".json,.mmd,.txt,application/json,text/plain" hidden>
+
+    <script src="./libs/dompurify-v3.4.17/purify.min.js" integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx"></script>
+    <script src="./libs/mermaid-v12.1.0/mermaid.min.js" integrity="sha384-EbBpjO7rlR6eqZEcG7GaPpyk9H9WrMyPWX4d3KvPYltgt8Z8l0z6R56B1qP40pR4"></script>
+    <script src="./libs/jspdf-v4.2.1/jspdf.umd.min.js" integrity="sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3"></script>
+    <script src="./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js" integrity="sha384-7hc/mtl4lyRUMzYFqHxwNbYZwh27MESE5AWa2nEuVChLn8bCQcrn18OgGv9uHgzz"></script>
+    <script type="module" src="./libs/dsfr-v1.15.4/dsfr.module.min.js" integrity="sha384-jKJord+a+yLY2qxYzr9YPM3D51W5+Np9Me4TM6BlIh4z5g6xhr3S4B44CIeN8rQ9"></script>
+    <script type="module" src="./js/app.js" integrity="sha384-XF709Rb3KGPikJqDauDpkej5ldiUBscRMJPlHtM4YlitK49nYyL2189nSTTDZg2J"></script>
+</body>
+</html>

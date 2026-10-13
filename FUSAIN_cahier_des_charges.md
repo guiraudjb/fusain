@@ -8,9 +8,9 @@
 
 | Champ | Valeur |
 |---|---|
-| Version | 1.0 |
+| Version | 1.1 |
 | Date | 13 octobre 2026 |
-| Statut | Avant-projet — en cours de validation |
+| Statut | Avant-projet — en cours de validation. Développement engagé : voir §14 pour l'état de réalisation de la version 0.1.0 |
 | Objet | Éditeur visuel de diagrammes Mermaid, mis en page au format A4 ou A3 |
 | Stack technique | HTML, CSS et JavaScript natifs (modules ES), DSFR, Mermaid — application web progressive, sans serveur applicatif, sans étape de build |
 | Lieu d'exécution | Navigateur de l'utilisateur, exclusivement |
@@ -32,6 +32,7 @@
 11. [Déploiement](#11-déploiement)
 12. [Phasage](#12-phasage)
 13. [Annexes](#13-annexes)
+14. [État de réalisation](#14-état-de-réalisation)
 
 ---
 
@@ -387,7 +388,15 @@ Content-Security-Policy:
 | L'application ne peut pas être encadrée par un site tiers (détournement de clic) | `frame-ancestors 'none'` (en-tête uniquement : sans effet dans une balise `<meta>`) |
 | Les écritures dangereuses dans le DOM sont bloquées par le navigateur | `require-trusted-types-for 'script'` |
 
-Deux points sont à trancher lors du prototype (§12, phase 0), car ils dépendent du comportement réel de Mermaid : le besoin éventuel de `style-src 'unsafe-inline'` (Mermaid insère une feuille de style dans le SVG produit) et la compatibilité avec Trusted Types. Tout assouplissement retenu est justifié par écrit dans ce document, et `script-src` n'est en aucun cas assoupli.
+**Écarts retenus à l'issue du prototype (version 0.1.0)**, par rapport à la politique cible ci-dessus :
+
+| Directive | Valeur appliquée | Justification |
+|---|---|---|
+| `style-src` | `'self' 'unsafe-inline'` | Mermaid insère une feuille de style dans chaque SVG et pose des styles en ligne. Compensation : les feuilles de style du SVG sont filtrées (`@import` et `url()` externes retirés) et aucune ressource externe ne peut être chargée (`img-src`, `font-src`, `connect-src`). |
+| `require-trusted-types-for` | Non activée | Compatibilité de Mermaid et du DSFR non vérifiée à ce stade ; reste un objectif. |
+| `font-src` | `'self' data:` | Polices incorporées dans les images exportées. |
+
+`script-src` reste `'self'`, sans exception : vérifié en recette, l'application fonctionne sans script en ligne ni évaluation dynamique.
 
 **Autres en-têtes** : `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`, `Permissions-Policy` désactivant caméra, micro, géolocalisation et capteurs, `Strict-Transport-Security`.
 
@@ -493,13 +502,13 @@ Les deux sont versionnés avec le code, mis à jour dans le même changement que
 
 | Composant | Rôle | Version | Licence | Provenance |
 |---|---|---|---|---|
-| DSFR | Système de Design de l'État : composants, styles, police Marianne, icônes | ≥ 1.15.2 | Etalab-2.0 | Registre npm `@gouvfr/dsfr` |
-| Mermaid | Analyse et rendu des diagrammes | ≥ 11.16.1 | MIT | Registre npm `mermaid` |
-| DOMPurify | Assainissement du SVG avant insertion | ≥ 3.3.1 | Apache-2.0 ou MPL-2.0 | Registre npm `dompurify` |
-| jsPDF | Génération du fichier PDF | À figer | MIT | Registre npm `jspdf` |
-| svg2pdf.js | Conversion vectorielle SVG → PDF | À figer | MIT | Registre npm `svg2pdf.js` |
+| DSFR | Système de Design de l'État : composants, styles, police Marianne, icônes | 1.15.4 | Etalab-2.0 | Registre npm `@gouvfr/dsfr` |
+| Mermaid | Analyse et rendu des diagrammes | 12.1.0 | MIT | Registre npm `mermaid` |
+| DOMPurify | Assainissement du SVG avant insertion | 3.4.17 | Apache-2.0 ou MPL-2.0 | Registre npm `dompurify` |
+| jsPDF | Génération du fichier PDF | 4.2.1 | MIT | Registre npm `jspdf` |
+| svg2pdf.js | Conversion vectorielle SVG → PDF | 2.8.1 | MIT | Registre npm `svg2pdf.js` |
 
-Les minimums indiqués pour DSFR et Mermaid sont les versions auditées dans SILLON, qui intègrent les correctifs de sécurité connus à cette date. Pour chaque composant, la version exacte est figée au démarrage du développement, après contrôle de la dernière version amont et des vulnérabilités publiées. La nomenclature consigne alors, par fichier embarqué : version exacte, empreinte SHA-256, URL de l'archive d'origine, licence, date du dernier contrôle.
+Versions figées le 13 octobre 2026 : dernières versions amont à cette date, contrôlées sur OSV.dev (aucune vulnérabilité connue). La nomenclature consigne, par fichier embarqué : version exacte, empreinte SHA-256, URL de l'archive d'origine, licence, date du dernier contrôle.
 
 Sont également recensés, bien qu'ils ne soient pas des dépendances embarquées :
 
@@ -578,7 +587,7 @@ Un script d'aide (`outils/verifier-nomenclature`) contrôle que chaque fichier e
 | Réseau | Aucune requête hors origine, vérifiée en recette et garantie par la politique de sécurité de contenu. |
 | Rendu | Schéma de 200 nœuds recalculé en moins d'une seconde sur un poste bureautique standard ; l'interface reste réactive pendant le calcul. |
 | Export | PDF de 10 pages en moins de 10 secondes ; PNG A3 à 300 ppp en moins de 5 secondes. |
-| Poids | Premier chargement inférieur à 6 Mo, dont l'essentiel en cache ensuite. |
+| Poids | Premier chargement inférieur à 10 Mo, dont l'essentiel en cache ensuite (mesuré en 0.1.0 : 8,7 Mo, dont 5,5 Mo pour Mermaid). |
 | Robustesse | Aucune perte de travail en cas de fermeture accidentelle (brouillon) ; une erreur de rendu n'altère jamais le code de la page. |
 | Maintenabilité | Code en modules ES documentés, sans build ; un module par type de diagramme, pour ajouter un type sans toucher aux autres. |
 | Tests | Tests automatisés de l'aller-retour code → modèle → code sur un corpus de schémas, par type : le résultat doit être équivalent à l'entrée. |
@@ -592,6 +601,7 @@ Les valeurs chiffrées sont des cibles, à confirmer par mesure à l'issue du pr
 ## 11. Déploiement
 
 - **Livrable** : un dossier de fichiers statiques, déposable sur tout serveur de fichiers en HTTPS (obligatoire pour le service worker).
+- **Publication de référence** : GitHub Pages, depuis la branche `main` du dépôt — <https://guiraudjb.github.io/fusain/>. Cet hébergement ne permet pas de poser d'en-têtes HTTP : la politique de sécurité de contenu y est délivrée par balise `<meta>`, sans `frame-ancestors` ni les autres en-têtes du §7.1. Il convient à la démonstration et à l'usage courant ; un déploiement en production dans une entité soumise à NIS2 se fait sur un serveur maîtrisé.
 - **Configuration serveur** : un exemple pour Nginx est fourni, limité au service des fichiers et aux en-têtes de sécurité (§7.1), avec les règles de cache adaptées (service worker et page d'entrée jamais mis en cache par le serveur, autres fichiers à longue durée).
 - **Paquet Debian optionnel** (`fusain-server`), dans la continuité de TRACE et SILLON : installe les fichiers et la configuration Nginx ; aucune base de données, aucun service à démarrer.
 - **Structure du dépôt**
@@ -660,3 +670,38 @@ FUSAIN/
 | 6 | **Types Mermaid en version bêta** (architecture, bloc, paquet, Sankey, graphique XY…) | Syntaxe susceptible de changer entre versions | Disponibles en mode code uniquement, signalés comme expérimentaux dans les modèles |
 | 7 | **Ajustements à la souris sur le Gantt et la séquence** | Complexité de la correspondance entre position à l'écran et élément du modèle | Prioriser la grille et le panneau de propriétés ; manipulation directe en second temps |
 | 8 | **Postes durablement hors ligne** | Version vulnérable conservée | Documenter la limite ; afficher l'ancienneté de la version dans « À propos » |
+
+---
+
+## 14. État de réalisation
+
+État de la version 0.1.0 (13 octobre 2026) au regard de ce cahier des charges.
+
+### 14.1 Réalisé
+
+| Domaine | Contenu |
+|---|---|
+| Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
+| Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, pied de page avec jetons, quatre modes d'ajustement, alerte de lisibilité |
+| Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
+| Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
+| Modèles | 18 modèles répartis en quatre catégories |
+| Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
+| Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
+| Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |
+| Nomenclature | Document de lecture, fichier CycloneDX 1.6 avec empreinte de chaque fichier, script de génération et de vérification |
+| Tests | Tests de logique et de sécurité sans navigateur ; recette automatisée dans Chrome |
+
+### 14.2 Reste à faire pour la V1
+
+| Domaine | Contenu |
+|---|---|
+| Édition visuelle | Sélection multiple, copier / coller ; réglage des espacements ; couleur de chaque part du camembert ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
+| Pages | Sous-titre ; titre et description accessibles du schéma (`accTitle`, `accDescr`) depuis l'interface |
+| Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
+| Sécurité | Trusted Types ; délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués) ; analyse statique automatisée ; audit externe |
+| Intégrité | Les modules propres à FUSAIN autres que le point d'entrée ne portent pas d'attribut d'intégrité (limite des modules ES importés) |
+| Accessibilité | Audit RGAA et déclaration d'accessibilité |
+| Déploiement | Exemple de configuration Nginx avec en-têtes ; paquet Debian |
+| Recette | Essais sur Firefox et Safari (la recette automatisée n'a porté que sur Chrome) ; mesures de performance |
+

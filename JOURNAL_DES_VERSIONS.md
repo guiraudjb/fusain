@@ -2,6 +2,16 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.1.2 — 13 octobre 2026 — robustesse et sécurité
+
+**Essais** — nouvelle recette `tests/robustesse.mjs` : des libellés aléatoires hostiles (guillemets, crochets, balises, mots réservés, directives) sont injectés par les cinq éditeurs visuels, 400 essais par type ; le code produit doit rester valide pour Mermaid, se relire à l'identique et conserver le même nombre d'éléments. S'y ajoute un corpus de 14 codes malveillants, rendus puis inspectés. `tests/tout.sh` enchaîne désormais toutes les recettes.
+
+**Corrections**
+
+- Un libellé commençant par un accent grave rendait le schéma invalide (Mermaid y voyait une « chaîne Markdown ») : l'accent grave et la tabulation sont maintenant encodés.
+- Gantt : un nom de tâche commençant par un mot-clé (`title`, `click`, `section`…) était lu comme une instruction : il est mis entre guillemets français.
+- Sécurité : la forme étendue `@{ img: "https://…" }` faisait demander l'image par Mermaid pendant le rendu, avant tout assainissement. La politique de sécurité de contenu bloquait déjà la requête ; l'instruction est désormais retirée du code avant le rendu.
+
 ## 0.1.1 — 13 octobre 2026 — montée en charge et essais croisés
 
 **Mesures** (`tests/charge.mjs`, Chrome, poste de développement)

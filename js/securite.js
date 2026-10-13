@@ -69,6 +69,9 @@ export function nettoyerCode(code) {
         texte = garde + texte.slice(tete[0].length);
     }
 
+    // Formes étendues « @{ img: "…" } » : Mermaid chargerait l'image dès le rendu, avant tout assainissement
+    texte = texte.replace(/@\{[^}]*\}/g, (bloc) => bloc.replace(/\b(img|icon)\s*:\s*("[^"]*"|'[^']*'|[^,}\s]+)\s*,?/g, ''));
+
     // Directives %%{ ... }%%
     return texte.replace(/%%\{([\s\S]*?)\}%%/g, (_, contenu) => {
         const m = contenu.match(/^\s*(init|initialize)\s*:\s*([\s\S]*)$/);

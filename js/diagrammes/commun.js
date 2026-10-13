@@ -31,11 +31,12 @@ export function nuancier(fondActuel, surChoix) {
 
 // Texte d'un libellé Mermaid : guillemets et retours à la ligne ne peuvent pas « sortir » du libellé (§7.3)
 export function echapper(texte) {
-    return String(texte).replace(/"/g, '#quot;').replace(/\r?\n/g, '<br/>');
+    // L'accent grave ouvrirait une « chaîne Markdown » de Mermaid ; la tabulation n'est pas admise dans un libellé
+    return String(texte).replace(/\t/g, ' ').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
 }
 
 export function desechapper(texte) {
-    return String(texte).replace(/#quot;/g, '"').replace(/<br\s*\/?>/gi, '\n');
+    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n');
 }
 
 export function sansGuillemets(texte) {

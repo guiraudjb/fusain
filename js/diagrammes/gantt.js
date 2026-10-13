@@ -5,6 +5,9 @@ import { separerPreambule, deplacer, actionsListe, plan, marquer } from './commu
 const ETATS = ['done', 'active', 'crit', 'milestone'];
 const NOMS_ETATS = { done: 'Terminée', active: 'En cours', crit: 'Critique', milestone: 'Jalon' };
 const REGLAGES = ['dateFormat', 'axisFormat', 'excludes', 'tickInterval', 'todayMarker', 'weekday', 'includes'];
+// Un nom de tâche qui commence par un mot-clé de Mermaid serait lu comme une instruction : il est mis entre guillemets français
+const MOT_CLE_EN_TETE = /^(title|section|click|dateFormat|axisFormat|excludes|includes|todayMarker|tickInterval|weekday|weekend|inclusiveEndDates|topAxis|displayMode|accTitle|accDescr|gantt)(\s|$)/i;
+const nomTache = (t) => { const n = propre(t) || 'Tâche'; return MOT_CLE_EN_TETE.test(n) ? `« ${n} »` : n; };
 const propre = (t) => String(t).replace(/[\n:;#]/g, ' ').replace(/\s+/g, ' ').trim();
 
 function lireTache(nom, meta) {
@@ -27,7 +30,8 @@ export function analyser(code) {
         const ligne = brute.trim();
         if (!ligne) return;
         if (ligne.startsWith('%%')) { modele.lignes.push({ t: 'brut', ligne }); return; }
-        const mot = ligne.match(/^[A-Za-z]+/)?.[0] || '';
+        // Un mot-clé n'en est un que s'il est suivi d'un espace : « titleX » est un nom de tâche
+        const mot = ligne.match(/^([A-Za-z]+)(?=\s|$)/)?.[1] || '';
         const reste = ligne.slice(mot.length).trim();
         try {
             if (mot === 'title' && reste) { modele.titre = reste; return; }
@@ -56,7 +60,7 @@ export function ecrire(modele) {
         else if (l.t === 'section') lignes.push(`    section ${propre(l.nom) || 'Section'}`);
         else {
             const meta = [...l.etats, l.id, l.debut, l.fin].map((x) => String(x).replace(/[,\n;]/g, ' ').trim()).filter(Boolean);
-            lignes.push(`    ${propre(l.nom) || 'Tâche'} :${meta.join(', ')}`);
+            lignes.push(`    ${nomTache(l.nom)} :${meta.join(', ')}`);
         }
     }
     return lignes.join('\n') + '\n';

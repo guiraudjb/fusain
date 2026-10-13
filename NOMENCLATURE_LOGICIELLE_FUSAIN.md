@@ -16,6 +16,7 @@
 | # | Date | Contenu |
 |---|---|---|
 | 1 | 13/10/2026 | Version initiale. Cinq bibliothèques embarquées à leur dernière version amont du jour, contrôle OSV.dev sans résultat. |
+| 5 | 13/10/2026 | Ajout des icônes illustrées (`icones/illustrees/`) : images produites localement avec le modèle Krea 2, sans bibliothèque nouvelle. |
 | 4 | 13/10/2026 | Ajout d'un fichier dérivé du DSFR : `icones-dsfr.json`, les tracés des 1 038 icônes de `dist/icons` de l'archive 1.15.4 (empreinte de l'archive revérifiée), produit par `outils/icones.py`. Aucun nouveau composant. |
 | 3 | 13/10/2026 | Ajout de l'extension ZenUML de Mermaid (`@mermaid-js/mermaid-zenuml` 1.0.1), chargée à la demande. Contrôle OSV.dev sur cette version et sur `@zenuml/core` 3.50.1 : aucune vulnérabilité connue. |
 | 2 | 13/10/2026 | Veille outillée (`outils/veille.py`) et planifiée chaque mois ; contrôle rejoué par cet outil : aucune vulnérabilité connue, aucune version plus récente. |
@@ -62,6 +63,10 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 - **Dépendances incluses dans Mermaid** — `mermaid.min.js` est une distribution autonome qui contient ses propres dépendances (moteurs de disposition, analyseurs, D3, un DOMPurify interne). Elles ne sont pas détaillées ici : leur suivi passe par les avis de sécurité de Mermaid.
 - **Dépendances incluses dans l'extension ZenUML** — `mermaid-zenuml.min.js` (3,2 Mo) est une distribution autonome qui contient `@zenuml/core` (3.47.9 ou plus récent à sa date de construction, le 18 septembre 2026), React 19.2.3, marked et un analyseur ANTLR. Le fichier ne contient ni `eval` ni `new Function`, produit du SVG sans HTML incorporé, et n'émet aucune requête. Il n'est pas chargé au démarrage : `index.html` n'en porte que l'adresse et l'empreinte, et `js/rendu.js` le charge, empreinte contrôlée par le navigateur, à la première page ZenUML.
 - **Dépendances optionnelles de jsPDF** — html2canvas, canvg et dompurify ne sont ni embarquées ni chargées : la fonction `html()` de jsPDF n'est pas utilisée.
+
+### 2.3 Icônes illustrées
+
+`icones/illustrees/` contient des images PNG de 192 px, une par icône, regroupées par thème dans des fichiers JSON ; `index.json` porte l'empreinte de chaque fichier de thème et est lui-même contrôlé par `index.html`. Ce ne sont pas des bibliothèques : ces images ont été produites sur le poste du mainteneur avec le modèle de génération d'images Krea 2 (poids sous « community license » de l'éditeur), détourées avec rembg, à partir de descriptions conservées dans `outils/illustrations/icon-prompts.json` et dans le dépôt SimpleCarto. Ni le modèle ni les outils de génération ne sont livrés ou exécutés par l'application. **Point à vérifier avant une diffusion large** : les conditions de la licence du modèle pour la redistribution des images produites.
 
 ## 3. Hors du produit livré
 

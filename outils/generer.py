@@ -63,7 +63,7 @@ def index_avec_sri():
     html = re.sub(r'<script\b[^>]*\b(src)="\./((?:libs|js)/[^"]+)"[^>]*>', remplacer, html)
     html = re.sub(r'<link\b[^>]*rel="stylesheet"[^>]*\b(href)="\./((?:libs|css)/[^"]+)"[^>]*>', remplacer, html)
     # Bibliothèque chargée à la demande : la balise ne déclenche aucun chargement, elle porte l'adresse et l'empreinte
-    html = re.sub(r'<link\b[^>]*rel="fusain-extension"[^>]*\b(href)="\./(libs/[^"]+)"[^>]*>', remplacer, html)
+    html = re.sub(r'<link\b[^>]*rel="fusain-extension"[^>]*\b(href)="\./((?:libs|icones)/[^"]+)"[^>]*>', remplacer, html)
     return html
 
 

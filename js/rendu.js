@@ -4,6 +4,7 @@ import { dimensions, MM_PAR_PX } from './formats.js';
 import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
 import { rendreDiapo } from './diapo.js';
 import { PREFIXE, jeuPourMermaid } from './icones.js';
+import { PREFIXE_ILLUS, jeuPourMermaid as jeuIllustre, incorporerImages } from './illustrations.js';
 
 const POLICE = 'Marianne, Arial, sans-serif';
 
@@ -27,7 +28,7 @@ let iconesDeclarees = false;
 
 function configurer(idTheme) {
     // Les icônes du DSFR sont déclarées à Mermaid une fois ; il ne lit le fichier que si un schéma en utilise une
-    if (!iconesDeclarees) { iconesDeclarees = true; window.mermaid.registerIconPacks([{ name: PREFIXE, loader: jeuPourMermaid }]); }
+    if (!iconesDeclarees) { iconesDeclarees = true; window.mermaid.registerIconPacks([{ name: PREFIXE, loader: jeuPourMermaid }, { name: PREFIXE_ILLUS, loader: jeuIllustre }]); }
     if (themeActif === idTheme) return;
     themeActif = idTheme;
     const t = THEMES[idTheme] || THEMES['bleu-france'];
@@ -108,6 +109,8 @@ async function rendre(code, idTheme) {
         await window.mermaid.parse(propre);
         const { svg: chaine } = await window.mermaid.render(id, propre);
         const svg = assainirSvg(chaine);
+        // Icônes illustrées : posées ici, après l'assainissement, à partir des fichiers embarqués
+        await incorporerImages(svg);
         const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
         let [, , l, h] = vb.length === 4 && vb.every(Number.isFinite) ? vb : [0, 0, 0, 0];
         if (!(l > 0 && h > 0)) {

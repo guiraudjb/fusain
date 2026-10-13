@@ -288,3 +288,29 @@ test('jeu d\'icônes du DSFR : 1 038 icônes, noms uniques, tracés sans autre c
     const code = 'architecture-beta\n    service a(dsfr:user-line)[Usager]\n    service b(blank)[B]\n';
     assert.equal(editeur.ecrire(editeur.analyser(code)), code);
 });
+
+// ---------- Icônes illustrées (0.11.0) ----------
+
+test('icônes illustrées : index cohérent, empreintes exactes, images PNG seulement', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { createHash } = await import('node:crypto');
+    const dossier = new URL('../icones/illustrees/', import.meta.url);
+    const { themes } = JSON.parse(readFileSync(new URL('index.json', dossier), 'utf8'));
+    const ids = themes.flatMap((t) => t.icones.map(([id]) => id));
+    assert.ok(ids.length >= 293);
+    assert.equal(new Set(ids).size, ids.length);
+    for (const theme of themes) {
+        const brut = readFileSync(new URL(theme.fichier, dossier));
+        assert.equal(`sha384-${createHash('sha384').update(brut).digest('base64')}`, theme.integrite, theme.id);
+        const { icones } = JSON.parse(brut.toString('utf8'));
+        assert.deepEqual(Object.keys(icones), theme.icones.map(([id]) => id));
+        for (const [id, png] of Object.entries(icones)) {
+            assert.ok(/^[a-z0-9-]+$/.test(id) && /^[A-Za-z0-9+/]+=*$/.test(png), id);
+            // signature d'un fichier PNG
+            assert.equal(Buffer.from(png.slice(0, 12), 'base64').subarray(0, 8).toString('hex'), '89504e470d0a1a0a', id);
+        }
+    }
+    const editeur = editeurPour('architecture');
+    const code = 'architecture-beta\n    service a(illus:routeur)[Routeur]\n';
+    assert.equal(editeur.ecrire(editeur.analyser(code)), code);
+});

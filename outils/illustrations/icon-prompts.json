@@ -1,0 +1,614 @@
+{
+ "style": "flat vector icon of {subject}, simple bold shapes, thick dark outline, limited color palette, centered, isolated on plain white background, no text, no shadow, app icon style",
+ "icons": [
+  {
+   "id": "balance-de-la-justice",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Balance de la justice",
+   "subject": "the scales of justice, a golden balance with two pans"
+  },
+  {
+   "id": "marteau-de-juge",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Marteau de juge",
+   "subject": "a wooden judge gavel on its sound block"
+  },
+  {
+   "id": "code-de-lois",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Code de lois",
+   "subject": "a thick red law book with a section sign on the cover"
+  },
+  {
+   "id": "magistrat",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Magistrat",
+   "subject": "a judge wearing a black robe with a white collar band"
+  },
+  {
+   "id": "avocat",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Avocat",
+   "subject": "a lawyer in a black robe holding a folder"
+  },
+  {
+   "id": "etablissement-penitentiaire",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Établissement pénitentiaire",
+   "subject": "a prison building with a watchtower and barred windows"
+  },
+  {
+   "id": "menottes",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Menottes",
+   "subject": "a pair of steel handcuffs"
+  },
+  {
+   "id": "contrat-signe",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Contrat signé",
+   "subject": "a paper contract with a signature and a fountain pen"
+  },
+  {
+   "id": "sceau-officiel",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Sceau officiel",
+   "subject": "a round red wax seal on a document with a ribbon"
+  },
+  {
+   "id": "amende",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Amende",
+   "subject": "a traffic fine ticket with a euro sign"
+  },
+  {
+   "id": "mediation",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Médiation",
+   "subject": "two people shaking hands with a mediator standing between them"
+  },
+  {
+   "id": "casier-judiciaire",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Casier judiciaire",
+   "subject": "a file folder with a fingerprint on its cover"
+  },
+  {
+   "id": "texte-reglementaire",
+   "theme": "justice",
+   "theme_label": "Justice & droit",
+   "label_fr": "Texte réglementaire",
+   "subject": "an official scroll document with a small tricolor ribbon"
+  },
+  {
+   "id": "salle-de-classe",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Salle de classe",
+   "subject": "a green chalkboard with chalk writing and a teacher desk"
+  },
+  {
+   "id": "enseignant",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Enseignant",
+   "subject": "a teacher pointing at a board with a stick"
+  },
+  {
+   "id": "eleve",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Élève",
+   "subject": "a pupil wearing a school backpack"
+  },
+  {
+   "id": "diplome",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Diplôme",
+   "subject": "a rolled diploma tied with a red ribbon"
+  },
+  {
+   "id": "toque-de-diplome",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Toque de diplômé",
+   "subject": "a black graduation cap with a yellow tassel"
+  },
+  {
+   "id": "livre-ouvert",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Livre ouvert",
+   "subject": "an open book with a bookmark"
+  },
+  {
+   "id": "examen",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Examen",
+   "subject": "an exam paper with a grade and a pencil"
+  },
+  {
+   "id": "formation-en-ligne",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Formation en ligne",
+   "subject": "a laptop showing a graduation cap on its screen"
+  },
+  {
+   "id": "bus-scolaire",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Bus scolaire",
+   "subject": "a yellow school bus seen from the side"
+  },
+  {
+   "id": "laboratoire-de-sciences",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Laboratoire de sciences",
+   "subject": "a microscope next to a flask and a test tube"
+  },
+  {
+   "id": "cantine",
+   "theme": "education",
+   "theme_label": "Éducation & formation",
+   "label_fr": "Restauration scolaire",
+   "subject": "a lunch tray with a plate, a glass and an apple"
+  },
+  {
+   "id": "medecin",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Médecin",
+   "subject": "a doctor in a white coat with a stethoscope"
+  },
+  {
+   "id": "infirmier",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Infirmier",
+   "subject": "a nurse in blue scrubs holding a clipboard"
+  },
+  {
+   "id": "pharmacie",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Pharmacie",
+   "subject": "a pharmacy storefront with a green cross sign"
+  },
+  {
+   "id": "carte-de-sante",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Carte de santé",
+   "subject": "a green health insurance smart card with a chip"
+  },
+  {
+   "id": "vaccin",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Vaccin",
+   "subject": "a syringe next to a small vaccine vial"
+  },
+  {
+   "id": "maison-de-retraite",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Maison de retraite",
+   "subject": "a retirement home building with an elderly person with a cane in front"
+  },
+  {
+   "id": "aide-a-domicile",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Aide à domicile",
+   "subject": "a caregiver helping an elderly person in an armchair"
+  },
+  {
+   "id": "fauteuil-roulant",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Fauteuil roulant",
+   "subject": "a wheelchair seen from the side"
+  },
+  {
+   "id": "famille",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Famille",
+   "subject": "a family of two adults and two children holding hands"
+  },
+  {
+   "id": "dossier-medical",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Dossier médical",
+   "subject": "a medical folder with a heartbeat line on its cover"
+  },
+  {
+   "id": "teleconsultation",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Téléconsultation",
+   "subject": "a computer screen showing a doctor in a video call"
+  },
+  {
+   "id": "laboratoire-d-analyses",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Laboratoire d'analyses",
+   "subject": "a rack of blood sample test tubes"
+  },
+  {
+   "id": "don-du-sang",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Don du sang",
+   "subject": "a blood bag with a red drop"
+  },
+  {
+   "id": "aide-sociale",
+   "theme": "sante-social",
+   "theme_label": "Santé & action sociale",
+   "label_fr": "Aide sociale",
+   "subject": "two open hands holding a small house and a heart"
+  },
+  {
+   "id": "recrutement",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Recrutement",
+   "subject": "a resume document under a magnifying glass"
+  },
+  {
+   "id": "entretien",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Entretien",
+   "subject": "two people sitting face to face at a desk talking"
+  },
+  {
+   "id": "contrat-de-travail",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Contrat de travail",
+   "subject": "an employment contract with a handshake icon on it"
+  },
+  {
+   "id": "fiche-de-paie",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Fiche de paie",
+   "subject": "a payslip document with lines of numbers and a euro coin"
+  },
+  {
+   "id": "reunion",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Réunion",
+   "subject": "four people sitting around a meeting table"
+  },
+  {
+   "id": "formation-professionnelle",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Formation professionnelle",
+   "subject": "an instructor in front of a flip chart with seated adults"
+  },
+  {
+   "id": "organigramme",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Organigramme",
+   "subject": "an organization chart with boxes connected by lines"
+  },
+  {
+   "id": "badge-d-acces",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Badge d'accès",
+   "subject": "an employee access badge on a lanyard"
+  },
+  {
+   "id": "conges",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Congés",
+   "subject": "a calendar page with a palm tree and a sun"
+  },
+  {
+   "id": "depart-en-retraite",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Départ en retraite",
+   "subject": "an elderly person waving goodbye next to a cardboard box of belongings"
+  },
+  {
+   "id": "dialogue-social",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Dialogue social",
+   "subject": "two speech bubbles above a round negotiation table"
+  },
+  {
+   "id": "equipe",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Équipe",
+   "subject": "a group of five diverse coworkers standing together"
+  },
+  {
+   "id": "mobilite-professionnelle",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Mobilité professionnelle",
+   "subject": "a person carrying a briefcase walking along an arrow path"
+  },
+  {
+   "id": "evaluation",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Évaluation",
+   "subject": "a checklist clipboard with three stars"
+  },
+  {
+   "id": "qualite-de-vie-au-travail",
+   "theme": "ressources-humaines",
+   "theme_label": "Ressources humaines & organisation",
+   "label_fr": "Qualité de vie au travail",
+   "subject": "a smiling office worker with a coffee cup and a plant"
+  },
+  {
+   "id": "feuille-de-route",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Feuille de route",
+   "subject": "a folded road map with a dotted route and pins"
+  },
+  {
+   "id": "livrable",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Livrable",
+   "subject": "a cardboard package with a green check mark"
+  },
+  {
+   "id": "risque",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Risque",
+   "subject": "a yellow warning triangle with an exclamation mark"
+  },
+  {
+   "id": "budget-du-projet",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Budget du projet",
+   "subject": "a calculator next to a stack of coins"
+  },
+  {
+   "id": "planning",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Planning",
+   "subject": "a wall calendar with colored bars across the days"
+  },
+  {
+   "id": "comite-de-pilotage",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Comité de pilotage",
+   "subject": "a ship steering wheel with three people silhouettes behind it"
+  },
+  {
+   "id": "validation",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Validation",
+   "subject": "a rubber stamp marking a green check on a document"
+  },
+  {
+   "id": "audit",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Audit",
+   "subject": "a clipboard with a checklist under a magnifying glass"
+  },
+  {
+   "id": "indicateur",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Indicateur",
+   "subject": "a dashboard gauge with a needle in the green zone"
+  },
+  {
+   "id": "idee",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Idée",
+   "subject": "a glowing yellow light bulb"
+  },
+  {
+   "id": "atelier",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Atelier",
+   "subject": "a board covered with colorful sticky notes"
+  },
+  {
+   "id": "recette-et-tests",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Recette et tests",
+   "subject": "a checklist with a small bug and a check mark"
+  },
+  {
+   "id": "mise-en-service",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Mise en service",
+   "subject": "a small rocket taking off"
+  },
+  {
+   "id": "retour-d-experience",
+   "theme": "projet",
+   "theme_label": "Gestion de projet & pilotage",
+   "label_fr": "Retour d'expérience",
+   "subject": "two circular arrows around a speech bubble"
+  },
+  {
+   "id": "interface-api",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Interface (API)",
+   "subject": "two plugs connecting together with a small spark"
+  },
+  {
+   "id": "microservices",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Microservices",
+   "subject": "a honeycomb of colored hexagons connected by lines"
+  },
+  {
+   "id": "file-de-messages",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "File de messages",
+   "subject": "a conveyor belt carrying envelopes in a row"
+  },
+  {
+   "id": "memoire-cache",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Mémoire cache",
+   "subject": "a memory chip with a lightning bolt"
+  },
+  {
+   "id": "intelligence-artificielle",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Intelligence artificielle",
+   "subject": "a brain made of circuit board lines"
+  },
+  {
+   "id": "algorithme",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Algorithme",
+   "subject": "a flowchart with a diamond and arrows"
+  },
+  {
+   "id": "tableau-de-bord",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Tableau de bord",
+   "subject": "a screen showing a bar chart, a pie chart and a line chart"
+  },
+  {
+   "id": "entrepot-de-donnees",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Entrepôt de données",
+   "subject": "a warehouse building with database cylinders inside"
+  },
+  {
+   "id": "flux-de-donnees",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Flux de données",
+   "subject": "pipes with small glowing cubes flowing through them"
+  },
+  {
+   "id": "chiffrement",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Chiffrement",
+   "subject": "a document locked with a padlock and a key"
+  },
+  {
+   "id": "code-source",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Code source",
+   "subject": "a code editor window with angle brackets and colored lines"
+  },
+  {
+   "id": "anomalie-logicielle",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Anomalie logicielle",
+   "subject": "a red bug insect on a computer screen"
+  },
+  {
+   "id": "automate-logiciel",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Automate logiciel",
+   "subject": "a small friendly robot typing on a keyboard"
+  },
+  {
+   "id": "messagerie-electronique",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Messagerie électronique",
+   "subject": "an envelope with an at sign"
+  },
+  {
+   "id": "site-web",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Site web",
+   "subject": "a web browser window with a globe and an address bar"
+  },
+  {
+   "id": "application-mobile",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Application mobile",
+   "subject": "a smartphone showing a grid of colorful app tiles"
+  },
+  {
+   "id": "signature-electronique",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Signature électronique",
+   "subject": "a tablet with a handwritten signature and a stylus"
+  },
+  {
+   "id": "identite-numerique",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Identité numérique",
+   "subject": "an identity card with a fingerprint and a shield"
+  },
+  {
+   "id": "donnees-ouvertes",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Données ouvertes",
+   "subject": "an open padlock with data cubes coming out"
+  },
+  {
+   "id": "archivage-numerique",
+   "theme": "logiciel",
+   "theme_label": "Logiciels & données",
+   "label_fr": "Archivage numérique",
+   "subject": "an archive box with a hard drive inside"
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+Icônes illustrées de FUSAIN
+Générées localement avec le modèle Krea 2 (checkpoint Turbo), détourées avec rembg, réduites à 192 px et 128 couleurs.
+Une partie vient du dépôt SimpleCarto (icons/pictograms-k2), l'autre de outils/illustrations/ de ce dépôt.
+Aucune œuvre tierce n'est reprise ; les descriptions qui ont servi à les produire sont dans icon-prompts.json.

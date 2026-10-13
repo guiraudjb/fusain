@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.11.0 — 13 octobre 2026 — icônes illustrées de SimpleCarto
+
+- **293 icônes illustrées en couleur**, reprises de SimpleCarto (générées localement avec Krea 2), utilisables dans les schémas d'architecture (`illus:nom`) : informatique et réseaux, énergie, transports, finances publiques, cadastre, secours, bâtiments et services publics, environnement, agriculture, économie, météo, défense.
+- **Fenêtre de choix commune** aux deux jeux (DSFR au trait, illustrées en couleur) ; les icônes illustrées se cherchent en français, par nom ou par thème.
+- **Poids maîtrisé** : chaque image est ramenée de 256 px et 44 Ko à 192 px, 128 couleurs et environ 5 Ko, soit 2 Mo pour le jeu, en un fichier par thème lu à la demande.
+- **Sécurité inchangée** : Mermaid ne reçoit jamais d'image. Il dessine un emplacement vide qui porte le nom de l'icône ; FUSAIN y pose l'image après l'assainissement du schéma, à partir de ses seuls fichiers embarqués, dont l'empreinte est contrôlée. Le schéma produit par Mermaid ne peut toujours contenir aucune image.
+- Exports PDF et PNG vérifiés avec ces images.
+- En cours : génération avec Krea 2 de 87 icônes pour les thèmes absents du DSFR et de SimpleCarto (justice, éducation, santé et action sociale, ressources humaines, gestion de projet, logiciels et données) ; l'outillage est dans `outils/illustrations/`.
+
 ## 0.10.0 — 13 octobre 2026 — icônes du DSFR pour l'architecture technique
 
 - Constat : Mermaid n'embarque que six icônes d'architecture (serveur, base de données, disque, nuage, Internet, carré plein) ; tout autre nom donne un « ? ». Ses jeux étendus se téléchargent depuis Internet, ce que FUSAIN interdit.

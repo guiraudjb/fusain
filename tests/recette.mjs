@@ -156,13 +156,26 @@ for (const [nom, sel, titre, agir, attendu] of [
 { const n = await p.locator('.fusain-vignette').count();
   for (let i = 0; i < n; i += 1) { if ((await p.locator('.fusain-vignette').nth(i).textContent()).includes('Architecture')) await p.locator('.fusain-vignette').nth(i).click(); }
   await p.waitForTimeout(1200); await p.locator('#fusain-feuille [data-fusain="n:web"]').first().click({ force: true }); await p.waitForTimeout(400);
-  await p.click('#fusain-proprietes button:has-text("Icônes du DSFR")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone');
+  await p.click('#fusain-proprietes button:has-text("Autres icônes")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone');
   const total = await p.locator('#fusain-modale-icones .fusain-icone').count();
   await p.fill('#fusain-icones-recherche', 'computer line'); await p.waitForTimeout(300);
   await p.locator('#fusain-modale-icones .fusain-icone[title="computer-line"]').click(); await p.waitForTimeout(1800);
   const ca = await lireCode();
   ok('architecture : icône du DSFR choisie et dessinée', total === 1038 && /service web\(dsfr:computer-line\)\[Serveur web\] in si/.test(ca)
     && await p.locator('#fusain-feuille .architecture-service svg path[transform]').count() >= 1 && await p.locator('#fusain-erreur .fr-alert').count() === 0, `${total} icônes proposées`);
+  // icône illustrée : choisie dans l'autre jeu, posée en image, exportable en PNG
+  await p.locator('#fusain-feuille [data-fusain="n:bdd"]').first().click({ force: true }); await p.waitForTimeout(400);
+  await p.click('#fusain-proprietes button:has-text("Autres icônes")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone');
+  await p.selectOption('#fusain-icones-jeu', 'illus'); await p.waitForTimeout(600);
+  await p.fill('#fusain-icones-recherche', 'base de données'); await p.waitForTimeout(800);
+  await p.locator('#fusain-modale-icones .fusain-icone[title="Base de données"]').click(); await p.waitForTimeout(2000);
+  const ci = await lireCode();
+  ok('architecture : icône illustrée choisie et posée en image', /service bdd\(illus:base-de-donnees\)/.test(ci) && await p.locator('#fusain-feuille .architecture-service image').count() === 1 && await p.locator('#fusain-erreur .fr-alert').count() === 0);
+  await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
+  await p.check('#exp-format-png', { force: true }); await p.check('#exp-portee-page', { force: true });
+  const fi = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button'));
+  ok('architecture : export PNG avec icône illustrée', fs.statSync(fi).size > 5000, `${fs.statSync(fi).size} o`);
+  await p.waitForTimeout(800);
   await p.locator('.fusain-vignette').last().click(); await p.waitForTimeout(900); }
 // 10 quinquies. page vierge
 { await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);

@@ -142,8 +142,9 @@ export function panneau(ctx) {
     if (v.bloc) {
         const groupe = selection.startsWith('g:');
         const modifier = (fonction) => appliquer((m) => fonction(viser(m, selection).bloc));
-        const dsfr = v.bloc.icone.startsWith(`${PREFIXE}:`);
-        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, dsfr ? `DSFR : ${v.bloc.icone.slice(PREFIXE.length + 1)}` : v.bloc.icone], ...ICONES];
+        // Une icône choisie dans la fenêtre (« dsfr:nom », « illus:nom ») s'ajoute à la liste courte
+        const [jeu, nomIcone] = v.bloc.icone.includes(':') ? v.bloc.icone.split(':') : ['', v.bloc.icone];
+        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, jeu === PREFIXE ? `DSFR : ${nomIcone}` : jeu === 'illus' ? `Illustrée : ${nomIcone}` : v.bloc.icone], ...ICONES];
         const autres = modele.services.filter((s) => s !== v.bloc).map((s) => [`n:${s.id}`, s.nom || s.id]);
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, groupe ? 'Groupe sélectionné' : 'Service sélectionné'),
@@ -152,7 +153,7 @@ export function panneau(ctx) {
                 champSelect('Icône', icones, v.bloc.icone, (val) => modifier((x) => { x.icone = val; })),
                 champSelect(groupe ? 'Dans le groupe' : 'Groupe', groupesPossibles(modele, v.bloc), v.bloc.parent, (val) => modifier((x) => { x.parent = val; }))),
             h('div', { class: 'fusain-actions' },
-                bouton('Icônes du DSFR…', { icone: 'layout-grid-line', onclick: () => choisirIcone(v.bloc.icone, (val) => modifier((x) => { x.icone = val; })).catch((e) => message('Icônes indisponibles', e.message, 'error')) }),
+                bouton('Autres icônes…', { icone: 'layout-grid-line', onclick: () => choisirIcone(v.bloc.icone, (val) => modifier((x) => { x.icone = val; })).catch((e) => message('Icônes indisponibles', e.message, 'error')) }),
                 groupe ? null : bouton('Ajouter un service relié', { icone: 'add-line', variante: 'secondary', onclick: () => { let cle; appliquer((m) => { cle = relier(m, selection, null); }, () => cle); } }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimer(m, selection), () => null) })),
             groupe || !autres.length ? null : champSelect('Liaison vers…', [['', 'Choisir un service'], ...autres], '', (val) => {

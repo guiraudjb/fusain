@@ -54,7 +54,7 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Diagramme de classes** — classes, stéréotype, attributs et méthodes, relations (héritage, composition, agrégation, flèche, trait plein ou pointillé, multiplicités). Notes, espaces de noms et génériques se font par le code.
 
-**Architecture technique** — services (nom, icône), groupes imbriquables et liaisons. Pour chaque liaison, vous choisissez le côté de départ et d'arrivée : c'est ce qui guide le placement.
+**Architecture technique** — services (nom, icône), groupes imbriquables et liaisons. L'icône se choisit parmi les six de Mermaid (serveur, base de données, disque, nuage, Internet, carré plein) ou, par le bouton « Icônes du DSFR… », parmi les 1 038 icônes du Système de Design de l'État : recherche par nom (en anglais : `user`, `mail`, `computer`…) ou par catégorie. Dans le code, une icône du DSFR s'écrit `dsfr:nom`. Pour chaque liaison, vous choisissez le côté de départ et d'arrivée : c'est ce qui guide le placement.
 
 **Historique de versions** — commits, branches et fusions. Les ajouts se placent à la fin de l'historique, sur la « branche de travail ». La pastille « + » d'un commit ou d'une branche y ajoute un commit ; glissée vers une autre branche, elle fusionne la première dans la seconde. FUSAIN refuse les opérations que Mermaid rejetterait (fusion sans rien à fusionner, par exemple).
 

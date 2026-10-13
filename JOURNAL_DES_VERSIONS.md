@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.10.0 — 13 octobre 2026 — icônes du DSFR pour l'architecture technique
+
+- Constat : Mermaid n'embarque que six icônes d'architecture (serveur, base de données, disque, nuage, Internet, carré plein) ; tout autre nom donne un « ? ». Ses jeux étendus se téléchargent depuis Internet, ce que FUSAIN interdit.
+- **Les 1 038 icônes du DSFR sont embarquées** et utilisables dans les schémas d'architecture (`dsfr:nom` dans le code), dessinées comme celles de Mermaid : en blanc sur carré bleu. Elles viennent de l'archive officielle 1.15.4, déjà à la nomenclature (empreinte revérifiée) ; `outils/icones.py` n'en garde que les tracés, dans un fichier de 334 Ko lu à la première utilisation.
+- **Fenêtre de choix** : recherche par nom (noms du DSFR, en anglais) et par catégorie. L'icône « carré plein » (`blank`) est ajoutée à la liste courte.
+- Aucune requête externe, export PDF vectoriel vérifié.
+
 ## 0.9.0 — 13 octobre 2026 — diapositives de texte
 
 - **Nouveau type de page : la diapositive de texte.** Treize mises en page : page de titre (deux variantes), sommaire (deux variantes), intercalaire (deux variantes), une colonne, deux ou trois colonnes, texte en colonnes, chiffres clés, frise d'étapes, texte et blocs, texte libre (titres, paragraphes, puces, tableau).

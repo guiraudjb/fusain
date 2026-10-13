@@ -1,8 +1,9 @@
 // Architecture technique : services, groupes et liaisons
-import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
+import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
 import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { PREFIXE, choisirIcone } from '../icones.js';
 
-const ICONES = [['server', 'Serveur'], ['database', 'Base de données'], ['disk', 'Disque'], ['cloud', 'Nuage'], ['internet', 'Internet'], ['', 'Sans icône']];
+const ICONES = [['server', 'Serveur'], ['database', 'Base de données'], ['disk', 'Disque'], ['cloud', 'Nuage'], ['internet', 'Internet'], ['blank', 'Carré plein'], ['', 'Sans icône']];
 const COTES = [['L', 'Gauche'], ['R', 'Droite'], ['T', 'Haut'], ['B', 'Bas']];
 const RE_BLOC = /^(group|service)\s+([A-Za-z0-9_]+)(?:\(([A-Za-z0-9_:-]+)\))?(?:\[(.+)\])?(?:\s+in\s+([A-Za-z0-9_]+))?$/;
 const RE_LIEN = /^([A-Za-z0-9_]+):([TBLR])\s+(<)?-(?:-|\[(.+)\]-)(>)?\s+([TBLR]):([A-Za-z0-9_]+)$/;
@@ -141,7 +142,8 @@ export function panneau(ctx) {
     if (v.bloc) {
         const groupe = selection.startsWith('g:');
         const modifier = (fonction) => appliquer((m) => fonction(viser(m, selection).bloc));
-        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, v.bloc.icone], ...ICONES];
+        const dsfr = v.bloc.icone.startsWith(`${PREFIXE}:`);
+        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, dsfr ? `DSFR : ${v.bloc.icone.slice(PREFIXE.length + 1)}` : v.bloc.icone], ...ICONES];
         const autres = modele.services.filter((s) => s !== v.bloc).map((s) => [`n:${s.id}`, s.nom || s.id]);
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, groupe ? 'Groupe sélectionné' : 'Service sélectionné'),
@@ -150,6 +152,7 @@ export function panneau(ctx) {
                 champSelect('Icône', icones, v.bloc.icone, (val) => modifier((x) => { x.icone = val; })),
                 champSelect(groupe ? 'Dans le groupe' : 'Groupe', groupesPossibles(modele, v.bloc), v.bloc.parent, (val) => modifier((x) => { x.parent = val; }))),
             h('div', { class: 'fusain-actions' },
+                bouton('Icônes du DSFR…', { icone: 'layout-grid-line', onclick: () => choisirIcone(v.bloc.icone, (val) => modifier((x) => { x.icone = val; })).catch((e) => message('Icônes indisponibles', e.message, 'error')) }),
                 groupe ? null : bouton('Ajouter un service relié', { icone: 'add-line', variante: 'secondary', onclick: () => { let cle; appliquer((m) => { cle = relier(m, selection, null); }, () => cle); } }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimer(m, selection), () => null) })),
             groupe || !autres.length ? null : champSelect('Liaison vers…', [['', 'Choisir un service'], ...autres], '', (val) => {

@@ -3,23 +3,23 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.9.0-490f9158f1';
+const VERSION_CACHE = 'fusain-0.10.0-efb5f438e5';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', '75bee68bde8495282635c578e981946c1927b60ad95485cdade14fef8fcc011b'],
-    ['./FUSAIN_cahier_des_charges.md', 'a7bea560e09324d86ec32d383e0653a93bd7c5a7c4ce2dd012fba2c2dc4a7fe8'],
-    ['./JOURNAL_DES_VERSIONS.md', '2a06de719449fb80816b13350d33341874c8ed685a3c04b69f6163dd8e6a4b75'],
-    ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '317c5f4e56109f5c0dc6456b77a64a746d43b7b60fc80bfe44d52af942e02dc6'],
-    ['./css/fusain.css', '77293c7e2b74fadb4636dc8d20a0fdc42dfdd1ff86a1928002f938f8946b3411'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', 'b59d696b1a1b5e9743c48c4c78e82e04f374c08a61ab046008483556fd8a6463'],
+    ['./FUSAIN_cahier_des_charges.md', 'c18bbb36ee386fd3c12764c1e582717efed9b2e4785a9dc80f23a70c2e18a397'],
+    ['./JOURNAL_DES_VERSIONS.md', 'de2d90ef33afef65a4eb8826574aa6eac6d2635ae21e7a9d353569fb7aed6a7b'],
+    ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '9ab321caf8afeb3c934d7ccf08aa512adf2f84956bd274f5773d5db144c63153'],
+    ['./css/fusain.css', 'b44636340650e0386154b070cc4cea3c6fc6d4bca3e7c9bad8562cc76ef37a08'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
     ['./icones/fusain-512.png', '5305d17891b39cef137db3273833527db43460ba67be57d569888016df709a1a'],
     ['./icones/fusain.svg', 'd08a962fa1876ac73c1d7991d1850d5673ea70bf960953c69b4d9f89c7dc01ef'],
-    ['./', 'dd66988d831bb8e5f5833fb64bf8c5a149197b495b90150afeded520715bfb39'],
-    ['./index.html', 'dd66988d831bb8e5f5833fb64bf8c5a149197b495b90150afeded520715bfb39'],
+    ['./', 'f689fe6134493a3b5cd75922114f4890041abe48f7b8f6f0af6ac0b2dc670089'],
+    ['./index.html', 'f689fe6134493a3b5cd75922114f4890041abe48f7b8f6f0af6ac0b2dc670089'],
     ['./js/app.js', '59e42ce8de3bbcb1a6c6df7c88beee174837415f26c0f74f3fdc2bb4c7a30887'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
     ['./js/confiance.js', '9b6028042a8bd5274e3531a15e9728392772a718fbee6be2948478dc77885981'],
-    ['./js/diagrammes/architecture.js', 'bc6f9efdef5e9c04589969144dfe72d38eaab8fab20c7dc04aafd2ab4b11dbbb'],
+    ['./js/diagrammes/architecture.js', 'd9098b8f21f5220917f8167ba849e71e3f3353cdcfda81528b448f57198fa7e5'],
     ['./js/diagrammes/blocs.js', '9a977fc44de97533048a0105b1f5338d78ad0d3323d5b64cc728860f3b62ef45'],
     ['./js/diagrammes/c4.js', '00a5e84119055949f6a5a5eec422d0372cb900902153fac4104b475ac1b33afc'],
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
@@ -51,10 +51,11 @@ const FICHIERS = [
     ['./js/export.js', '8b932df21aa83c7822769968dc28404e3857e412ca710c03908dab69bc64bc04'],
     ['./js/fichier.js', '2a25b930069c412777c38d8e14e93af4ae9231817e9b1bbd99fa1bd589df6712'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
+    ['./js/icones.js', '81ddba72063758f279829fe842238b5e8462a7204e519d71de83d2d9363b7c22'],
     ['./js/modeles.js', '4b7786c951e11d083cebc085e98c30be5d63c4ae51ce881bd67b163728ace7e3'],
-    ['./js/rendu.js', '8dea560fb9e5dc151a9da7a30657d44af9e7b5d62605843d18c2c2104b4b226d'],
+    ['./js/rendu.js', 'f70e4df7642cbc3b1d740fa8d28349457e30aac81ce9bcf401ef9403fa9f71c0'],
     ['./js/securite.js', 'c572f2c6c34425f5fddfc88ab6d8701836a8b51c43bb6ba3f5fa130f37092921'],
-    ['./js/version.js', '9506ff7af21773043cb8b4bd2f24276dc4b32784761093877db7bb3ae0c39fa2'],
+    ['./js/version.js', '60471c7a7ee147ed7c39051a25aeeeb0b8ac23cfbf2eb1fd12a7e06f9df36293'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -78,6 +79,7 @@ const FICHIERS = [
     ['./libs/dsfr-v1.15.4/fonts/Marianne-Regular_Italic.woff2', '7c5db58e865103de356f28653298edc018a64d29ce4238e57b597124ce78c41e'],
     ['./libs/dsfr-v1.15.4/fonts/Spectral-ExtraBold.woff2', '28d8fc6af204f2d007524006636ef3f561a820c85e40aac54f385a44852050b0'],
     ['./libs/dsfr-v1.15.4/fonts/Spectral-Regular.woff2', '9c4f16b44fec4a8ca1c9f38d7a6f91645715945b0201ba9275fd5000197bee8e'],
+    ['./libs/dsfr-v1.15.4/icones-dsfr.json', 'c85a8d6a3f6f988748d8ee7a416fbe67ce24cb4adda23f8e2e519689f6dcfc2c'],
     ['./libs/dsfr-v1.15.4/icons/arrows/arrow-down-line.svg', 'e76f6586d5b400ffb85bdc8639d9ae707bc41641cb6960a87f21131e04f7b73b'],
     ['./libs/dsfr-v1.15.4/icons/arrows/arrow-down-s-line.svg', 'fe793b4ca3825525eb6393308d7983821c149a2a01b1bae85a6b3f045bdaec25'],
     ['./libs/dsfr-v1.15.4/icons/arrows/arrow-go-back-line.svg', '4fd1b2de4b718ab03a090cacc20e22b00303a7197a5a6a38976765f6f967e9e8'],
@@ -167,7 +169,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', 'b0c96275db57d888978c065a94ce655f919118970f243ae5a3eaa00b74f39b59'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '0af5ddc77ea1657383325de0d333dd15d0ffaf90a2406c30a3f8f5b407e8ce0e'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */

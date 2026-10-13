@@ -273,3 +273,18 @@ test('chaque icône utilisée par un bouton est embarquée', async () => {
     for (const fichier of lister(`${racine}js`)) for (const m of readFileSync(fichier, 'utf8').matchAll(/icone: '([a-z0-9-]+-(?:line|fill))'/g)) if (!embarquees.has(m[1])) absentes.add(`${m[1]} (${fichier.split('/js/')[1]})`);
     assert.deepEqual([...absentes], []);
 });
+
+// ---------- Icônes du DSFR (0.10.0) ----------
+
+test('jeu d\'icônes du DSFR : 1 038 icônes, noms uniques, tracés sans autre contenu', async () => {
+    const { readFileSync } = await import('node:fs');
+    const jeu = JSON.parse(readFileSync(new URL('../libs/dsfr-v1.15.4/icones-dsfr.json', import.meta.url), 'utf8'));
+    const noms = Object.values(jeu.categories).flatMap((c) => Object.keys(c));
+    assert.equal(noms.length, 1038);
+    assert.equal(new Set(noms).size, noms.length);
+    for (const categorie of Object.values(jeu.categories)) for (const [nom, trace] of Object.entries(categorie)) assert.ok(/^[a-z0-9-]+$/.test(nom) && /^[MmLlHhVvCcSsQqTtAaZz0-9eE\s,.+-]+$/.test(trace), nom);
+    // une icône du DSFR se lit et se réécrit dans un schéma d'architecture
+    const editeur = editeurPour('architecture');
+    const code = 'architecture-beta\n    service a(dsfr:user-line)[Usager]\n    service b(blank)[B]\n';
+    assert.equal(editeur.ecrire(editeur.analyser(code)), code);
+});

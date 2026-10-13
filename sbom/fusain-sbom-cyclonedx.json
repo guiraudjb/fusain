@@ -1,17 +1,17 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:aa731237-a049-5898-bb9b-c379bc00be94",
+  "serialNumber": "urn:uuid:450725ae-66d2-5c02-a798-3507dc6d7adb",
   "version": 1,
   "metadata": {
     "timestamp": "2026-10-13T00:00:00Z",
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.9.0",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.10.0",
       "name": "FUSAIN",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.9.0"
+      "purl": "pkg:github/guiraudjb/fusain@0.10.0"
     },
     "tools": {
       "components": [
@@ -267,6 +267,16 @@
             {
               "alg": "SHA-256",
               "content": "9c4f16b44fec4a8ca1c9f38d7a6f91645715945b0201ba9275fd5000197bee8e"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/dsfr-v1.15.4/icones-dsfr.json",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "c85a8d6a3f6f988748d8ee7a416fbe67ce24cb4adda23f8e2e519689f6dcfc2c"
             }
           ]
         },
@@ -1368,7 +1378,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.9.0",
+      "ref": "pkg:github/guiraudjb/fusain@0.10.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.1.0",

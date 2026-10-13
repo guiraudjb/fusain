@@ -16,6 +16,7 @@
 | # | Date | Contenu |
 |---|---|---|
 | 1 | 13/10/2026 | Version initiale. Cinq bibliothèques embarquées à leur dernière version amont du jour, contrôle OSV.dev sans résultat. |
+| 4 | 13/10/2026 | Ajout d'un fichier dérivé du DSFR : `icones-dsfr.json`, les tracés des 1 038 icônes de `dist/icons` de l'archive 1.15.4 (empreinte de l'archive revérifiée), produit par `outils/icones.py`. Aucun nouveau composant. |
 | 3 | 13/10/2026 | Ajout de l'extension ZenUML de Mermaid (`@mermaid-js/mermaid-zenuml` 1.0.1), chargée à la demande. Contrôle OSV.dev sur cette version et sur `@zenuml/core` 3.50.1 : aucune vulnérabilité connue. |
 | 2 | 13/10/2026 | Veille outillée (`outils/veille.py`) et planifiée chaque mois ; contrôle rejoué par cet outil : aucune vulnérabilité connue, aucune version plus récente. |
 
@@ -56,6 +57,7 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 ### 2.2 Particularités
 
 - **Fichiers dérivés** — `libs/dsfr-v1.15.4/fonts-ttf/` contient Marianne Regular et Bold convertis de WOFF2 en TrueType avec fontTools, pour l'incorporation dans les PDF (jsPDF n'accepte que le TrueType). Ces deux fichiers ne figurent pas dans l'archive d'origine ; ils sont à régénérer à chaque mise à jour du DSFR.
+- **Icônes du DSFR pour les schémas** — `libs/dsfr-v1.15.4/icones-dsfr.json` (334 Ko) regroupe les tracés des 1 038 icônes du dossier `dist/icons` de l'archive, par catégorie. C'est un fichier dérivé, reconstruit par `python3 outils/icones.py <dist/icons>` ; le script refuse toute icône qui contiendrait autre chose que des tracés. Il n'est lu qu'à la première utilisation (fenêtre de choix, ou schéma d'architecture citant une icône `dsfr:`), avec contrôle de son empreinte.
 - **DSFR partiel** — seules les icônes réellement utilisées sont embarquées ; `icons.min.css` référence les autres, qui ne sont jamais demandées.
 - **Dépendances incluses dans Mermaid** — `mermaid.min.js` est une distribution autonome qui contient ses propres dépendances (moteurs de disposition, analyseurs, D3, un DOMPurify interne). Elles ne sont pas détaillées ici : leur suivi passe par les avis de sécurité de Mermaid.
 - **Dépendances incluses dans l'extension ZenUML** — `mermaid-zenuml.min.js` (3,2 Mo) est une distribution autonome qui contient `@zenuml/core` (3.47.9 ou plus récent à sa date de construction, le 18 septembre 2026), React 19.2.3, marked et un analyseur ANTLR. Le fichier ne contient ni `eval` ni `new Function`, produit du SVG sans HTML incorporé, et n'émet aucune requête. Il n'est pas chargé au démarrage : `index.html` n'en porte que l'adresse et l'empreinte, et `js/rendu.js` le charge, empreinte contrôlée par le navigateur, à la première page ZenUML.

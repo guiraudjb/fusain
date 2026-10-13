@@ -152,6 +152,18 @@ for (const [nom, sel, titre, agir, attendu] of [
   if (nom === 'Architecture technique') ok('architecture : icônes dessinées', await p.locator('#fusain-feuille .architecture-service svg path').count() >= 3);
   await p.screenshot({ path: `${OUT}/e2e-v6-${nom.split(' ').pop().replace(/\W/g, '').toLowerCase()}.png` });
 }
+// 10 sexies. architecture : icônes du DSFR (fenêtre de choix, rendu, aucune requête externe)
+{ const n = await p.locator('.fusain-vignette').count();
+  for (let i = 0; i < n; i += 1) { if ((await p.locator('.fusain-vignette').nth(i).textContent()).includes('Architecture')) await p.locator('.fusain-vignette').nth(i).click(); }
+  await p.waitForTimeout(1200); await p.locator('#fusain-feuille [data-fusain="n:web"]').first().click({ force: true }); await p.waitForTimeout(400);
+  await p.click('#fusain-proprietes button:has-text("Icônes du DSFR")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone');
+  const total = await p.locator('#fusain-modale-icones .fusain-icone').count();
+  await p.fill('#fusain-icones-recherche', 'computer line'); await p.waitForTimeout(300);
+  await p.locator('#fusain-modale-icones .fusain-icone[title="computer-line"]').click(); await p.waitForTimeout(1800);
+  const ca = await lireCode();
+  ok('architecture : icône du DSFR choisie et dessinée', total === 1038 && /service web\(dsfr:computer-line\)\[Serveur web\] in si/.test(ca)
+    && await p.locator('#fusain-feuille .architecture-service svg path[transform]').count() >= 1 && await p.locator('#fusain-erreur .fr-alert').count() === 0, `${total} icônes proposées`);
+  await p.locator('.fusain-vignette').last().click(); await p.waitForTimeout(900); }
 // 10 quinquies. page vierge
 { await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);
   await p.click('.fusain-modele:has(.fusain-modele__nom:text-is("Page vierge"))'); await p.waitForTimeout(1000);

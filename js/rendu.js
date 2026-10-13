@@ -3,6 +3,7 @@ import { s } from './dom.js';
 import { dimensions, MM_PAR_PX } from './formats.js';
 import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
 import { rendreDiapo } from './diapo.js';
+import { PREFIXE, jeuPourMermaid } from './icones.js';
 
 const POLICE = 'Marianne, Arial, sans-serif';
 
@@ -22,7 +23,11 @@ const ILLUSTRATIVES = ['#000091', '#e1000f', '#009081', '#c8aa39', '#a558a0', '#
 let themeActif = null;
 let palette = ILLUSTRATIVES;
 
+let iconesDeclarees = false;
+
 function configurer(idTheme) {
+    // Les icônes du DSFR sont déclarées à Mermaid une fois ; il ne lit le fichier que si un schéma en utilise une
+    if (!iconesDeclarees) { iconesDeclarees = true; window.mermaid.registerIconPacks([{ name: PREFIXE, loader: jeuPourMermaid }]); }
     if (themeActif === idTheme) return;
     themeActif = idTheme;
     const t = THEMES[idTheme] || THEMES['bleu-france'];

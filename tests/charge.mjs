@@ -26,9 +26,9 @@ const resultats = await p.evaluate(async () => {
 
     // Document de 30 pages dans l'application
     const doc = etat.nouveauDocument(graphe(40));
-    for (let i = 1; i < 30; i += 1) doc.pages.push({ ...etat.nouvellePage(graphe(20 + i), `Page ${i + 1}`), format: i % 2 ? 'A3' : 'A4' });
-    await chrono('chargement document 30 pages', async () => { etat.charger(doc); await new Promise((r) => setTimeout(r, 50)); while (document.querySelectorAll('.fusain-vignette').length < 30) await new Promise((r) => setTimeout(r, 50)); });
-    await chrono('modification sur document 30 pages', async () => {
+    for (let i = 1; i < 100; i += 1) doc.pages.push({ ...etat.nouvellePage(graphe(20 + i), `Page ${i + 1}`), format: i % 2 ? 'A3' : 'A4' });
+    await chrono('ouverture d\'un document de 100 pages (page et vignettes visibles prêtes)', async () => { etat.charger(doc); await new Promise((r) => setTimeout(r, 50)); while (document.querySelectorAll('.fusain-vignette').length < 100 || !document.querySelector('.fusain-vignette__image svg') || !document.querySelector('#fusain-feuille [data-fusain="n:n39"]')) await new Promise((r) => setTimeout(r, 30)); return document.querySelectorAll('.fusain-vignette__image svg').length + ' vignettes rendues sur 100'; });
+    await chrono('modification d\'une page de ce document', async () => {
         etat.modifier((d) => { d.pages[0].code = graphe(41); });
         const debut = performance.now();
         while (!document.querySelector('#fusain-feuille [data-fusain="n:n40"]') && performance.now() - debut < 20000) await new Promise((r) => setTimeout(r, 20));

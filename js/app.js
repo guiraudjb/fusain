@@ -511,21 +511,46 @@ function ajouterPage(code, nom) {
     });
 }
 
-async function afficherPages(n) {
-    const total = etat.doc.pages.length;
+// Les vignettes ne sont rendues que lorsqu'elles deviennent visibles : un document de 100 pages s'ouvre
+// aussi vite qu'un document d'une page.
+let observateurVignettes = null;
+
+async function remplirVignette(cadre, n) {
+    const i = Number(cadre.dataset.index);
+    const page = etat.doc.pages[i];
+    if (!page || n !== jeton) return;
+    let schema = null;
+    try { schema = await rendreSchema(page.code, etat.doc.document.theme); } catch { schema = derniersRendus.get(page.id) || null; }
+    if (n !== jeton || !cadre.isConnected) return;
+    const { svg } = composerPage(page, schema, { index: i, total: etat.doc.pages.length });
+    svg.setAttribute('aria-hidden', 'true');
+    cadre.replaceChildren(svg);
+}
+
+function afficherPages(n) {
+    observateurVignettes?.disconnect();
+    observateurVignettes = new IntersectionObserver((entrees) => {
+        for (const entree of entrees) {
+            if (!entree.isIntersecting) continue;
+            observateurVignettes.unobserve(entree.target);
+            remplirVignette(entree.target, n);
+        }
+    }, { root: zones.pages, rootMargin: '300px' });
+
     const liste = h('ol', { class: 'fusain-vignettes' });
     for (const [i, page] of etat.doc.pages.entries()) {
-        let schema = null;
-        try { schema = await rendreSchema(page.code, etat.doc.document.theme); } catch { schema = derniersRendus.get(page.id) || null; }
-        if (n !== jeton) return;
-        const { svg } = composerPage(page, schema, { index: i, total });
-        svg.setAttribute('aria-hidden', 'true');
+        const { l, h: haut } = dimensions(page);
+        const cadre = h('span', { class: 'fusain-vignette__image', 'data-index': i });
+        cadre.style.aspectRatio = `${l} / ${haut}`;
+        cadre.style.width = l > haut ? '100%' : `${Math.round((l / haut) * 100)}%`;
         liste.append(h('li', {}, h('button', { type: 'button', class: 'fusain-vignette', 'aria-current': String(i === etat.index), onclick: () => { validerCodeEnAttente(); ui.selection = null; allerPage(i); } },
-            h('span', { class: 'fusain-vignette__image' }, svg),
-            h('span', { class: 'fusain-vignette__nom' }, `${i + 1}. ${page.nom}`))));
+            cadre, h('span', { class: 'fusain-vignette__nom' }, `${i + 1}. ${page.nom}`))));
+        observateurVignettes.observe(cadre);
     }
     const actif = zones.pages.contains(document.activeElement) ? [...zones.pages.querySelectorAll('button')].indexOf(document.activeElement) : -1;
+    const defilement = zones.pages.scrollTop;
     zones.pages.replaceChildren(liste, bouton('Ajouter une page', { icone: 'add-line', variante: 'secondary', onclick: () => ouvrirModeles('ajouter') }));
+    zones.pages.scrollTop = defilement;
     if (actif >= 0) zones.pages.querySelectorAll('button')[actif]?.focus({ preventScroll: true });
     zones.pages.querySelector('.fusain-vignette[aria-current="true"]')?.scrollIntoView({ block: 'nearest' });
 }

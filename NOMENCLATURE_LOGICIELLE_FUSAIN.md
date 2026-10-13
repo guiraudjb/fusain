@@ -16,6 +16,7 @@
 | # | Date | Contenu |
 |---|---|---|
 | 1 | 13/10/2026 | Version initiale. Cinq bibliothèques embarquées à leur dernière version amont du jour, contrôle OSV.dev sans résultat. |
+| 2 | 13/10/2026 | Veille outillée (`outils/veille.py`) et planifiée chaque mois ; contrôle rejoué par cet outil : aucune vulnérabilité connue, aucune version plus récente. |
 
 ---
 

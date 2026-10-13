@@ -14,7 +14,7 @@ trap 'kill $SERVEUR 2>/dev/null' EXIT
 sleep 1
 echecs=0
 etape() { echo; echo "== $1"; shift; "$@" || echecs=$((echecs + 1)); }
-filtre() { "$@" > "$SORTIE/derniere-etape.log" 2>&1; code=$?; grep -E 'ECHEC|pageerror|✖|^ℹ (pass|fail)|erreurs console' "$SORTIE/derniere-etape.log"; echo "   $(grep -c '^OK' "$SORTIE/derniere-etape.log") contrôles réussis"; return $code; }
+filtre() { "$@" > "$SORTIE/derniere-etape.log" 2>&1; code=$?; grep -E 'ECHEC|pageerror|✖|^ℹ (pass|fail)|erreurs console' "$SORTIE/derniere-etape.log"; echo "   $(grep -c -E '^(OK|✔)' "$SORTIE/derniere-etape.log") contrôles réussis"; return $code; }
 etape "Cohérence intégrité / cache / nomenclature" python3 outils/generer.py --verifier
 etape "Logique et sécurité (sans navigateur)" filtre node --test tests/logique.test.mjs
 etape "Recette Chrome" filtre node tests/recette.mjs "$SORTIE"

@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.4.1 — 13 octobre 2026 — intégration continue, longs documents
+
+- **Intégration continue** (`.github/workflows/recette.yml`) : à chaque modification, GitHub rejoue les sept étapes de la recette — cohérence de la nomenclature, logique, Chrome, robustesse, fidélité, accessibilité, chemin de mise à jour, Firefox. Première exécution réussie sur Chrome 154 et Firefox 157.
+- **Veille des vulnérabilités outillée** : `outils/veille.py` interroge OSV.dev pour chaque bibliothèque embarquée et signale les versions plus récentes ; GitHub l'exécute le 1er de chaque mois et prévient en cas de vulnérabilité. Contrôle du jour : aucune vulnérabilité connue.
+- **Longs documents** : les vignettes ne sont rendues que lorsqu'elles deviennent visibles. Un document de 100 pages s'ouvre en 0,3 s (il fallait 5,2 s pour 30 pages).
+
 ## 0.4.0 — 13 octobre 2026 — diagramme d'états, écrans étroits
 
 - Édition visuelle du **diagramme d'états** (états, transitions, états initial et final, boucles) : neuf types de schémas s'éditent sans coder. Les états composés, notes et branchements font passer la page en « code seul ».

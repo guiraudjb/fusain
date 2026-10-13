@@ -69,7 +69,7 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 | # | Constat | Sévérité | Suite |
 |---|---|---|---|
 | 1 | La politique de sécurité de contenu autorise les styles en ligne (`style-src 'unsafe-inline'`) : Mermaid insère une feuille de style dans chaque SVG | À noter | Les scripts restent strictement limités à l'origine ; les feuilles de style du SVG sont filtrées (`@import` et `url()` externes retirés) |
-| 2 | Sur GitHub Pages, la politique est délivrée par balise `<meta>` : `frame-ancestors` et les autres en-têtes HTTP de sécurité ne peuvent pas y être posés | Attention | Pour un usage en production, servir FUSAIN depuis un serveur maîtrisé avec les en-têtes du cahier des charges §7.1 |
+| 2 | Sur GitHub Pages, la politique est délivrée par balise `<meta>` : `frame-ancestors` et les autres en-têtes HTTP de sécurité ne peuvent pas y être posés | Attention | Pour un usage en production, servir FUSAIN depuis un serveur maîtrisé : `deploiement/nginx-fusain.conf` pose tous les en-têtes du cahier des charges §7.1 |
 | 3 | Mermaid 12 est une version majeure récente | À noter | Recette complète rejouée à chaque montée de version |
 | 4 | Aucune licence n'est encore fixée pour le code propre à FUSAIN ; le DSFR (Etalab-2.0) est réservé aux entités administratives | À noter | À trancher avant toute diffusion hors de l'administration |
 | 5 | Un poste resté hors ligne conserve l'ancienne version jusqu'à sa prochaine connexion | À noter | Limite inhérente au fonctionnement hors ligne ; la version est affichée dans « À propos » |

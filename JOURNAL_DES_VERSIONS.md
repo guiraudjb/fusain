@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.2.1 — 13 octobre 2026 — durcissement
+
+- **Trusted Types activé** : dans les navigateurs qui le prennent en charge, toute écriture de HTML — y compris par Mermaid et le DSFR — passe par DOMPurify, et la création de script à partir de texte est refusée. Aucune régression sur les recettes Chrome et Firefox.
+- **Analyse statique** ajoutée aux tests : aucune écriture HTML directe, aucune exécution dynamique, aucun script ni gestionnaire en ligne dans le code de FUSAIN.
+- **Exemple de configuration Nginx** (`deploiement/nginx-fusain.conf`) posant la politique complète par en-têtes HTTP. Validé dans un conteneur Nginx 1.30 : en-têtes présents, encadrement par un site tiers bloqué, dossiers internes (`.git`, `outils`, `tests`) non servis, méthodes autres que GET / HEAD refusées.
+
 ## 0.2.0 — 13 octobre 2026 — trois nouveaux éditeurs visuels
 
 - Édition visuelle de la **frise chronologique**, du **tableau Kanban** et de la **matrice à quadrants** : huit types de schémas s'éditent désormais sans coder.

@@ -6,7 +6,7 @@
     <!-- Politique de sécurité de contenu : repli <meta> (cahier des charges §7.1).
          Sur un serveur maîtrisé, la même politique est à délivrer par en-tête HTTP,
          complétée de frame-ancestors 'none' (sans effet dans une balise meta). -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types default dompurify 'allow-duplicates'">
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#000091">
     <meta name="description" content="FUSAIN — éditeur visuel de diagrammes Mermaid au format A4 ou A3. Tous les traitements s'exécutent dans le navigateur.">
@@ -101,6 +101,7 @@
     <input type="file" id="fusain-fichier" accept=".json,.mmd,.txt,application/json,text/plain" hidden>
 
     <script src="./libs/dompurify-v3.4.17/purify.min.js" integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx"></script>
+    <script src="./js/confiance.js" integrity="sha384-SlpS8vr/n+CBGxsF394Qmo0/sa3x73zCANSHVQ54HwQisAOowvldswAnpPf3C3lM"></script>
     <script src="./libs/mermaid-v12.1.0/mermaid.min.js" integrity="sha384-EbBpjO7rlR6eqZEcG7GaPpyk9H9WrMyPWX4d3KvPYltgt8Z8l0z6R56B1qP40pR4"></script>
     <script src="./libs/jspdf-v4.2.1/jspdf.umd.min.js" integrity="sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3"></script>
     <script src="./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js" integrity="sha384-7hc/mtl4lyRUMzYFqHxwNbYZwh27MESE5AWa2nEuVChLn8bCQcrn18OgGv9uHgzz"></script>

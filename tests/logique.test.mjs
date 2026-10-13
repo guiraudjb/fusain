@@ -95,6 +95,20 @@ test('fichier : aller-retour et refus des entrées hostiles', () => {
     assert.throws(() => lireJson('{'), /JSON valide/);
 });
 
+test('analyse statique : aucune écriture HTML ni exécution dynamique dans le code de FUSAIN', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const INTERDITS = [/\.innerHTML\s*=/, /\.outerHTML\s*=/, /insertAdjacentHTML/, /document\.write/, /\beval\s*\(/, /new\s+Function\s*\(/, /setTimeout\s*\(\s*['"`]/, /setInterval\s*\(\s*['"`]/, /\son[a-z]+\s*=\s*["']/];
+    const fichiers = [...readdirSync('js').filter((f) => f.endsWith('.js')).map((f) => `js/${f}`), ...readdirSync('js/diagrammes').map((f) => `js/diagrammes/${f}`), 'sw.js'];
+    for (const f of fichiers) {
+        const code = readFileSync(f, 'utf8').split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
+        for (const motif of INTERDITS) assert.ok(!motif.test(code), `${f} contient une construction interdite : ${motif}`);
+    }
+    const html = readFileSync('index.html', 'utf8');
+    assert.ok(!/<script(?![^>]*\bsrc=)[^>]*>/.test(html), 'aucun script en ligne dans index.html');
+    assert.ok(!/\son[a-z]+\s*=/.test(html.replace(/<meta[^>]*>/g, '')), 'aucun gestionnaire en ligne dans index.html');
+    assert.ok(/require-trusted-types-for 'script'/.test(html) && /script-src 'self';/.test(html));
+});
+
 test('noms de fichiers nettoyés', () => {
     assert.equal(nomFichierSur('Été 2026 / ../../etc'), 'Ete-2026-etc');
     assert.equal(nomFichierSur('///'), 'document');

@@ -48,6 +48,8 @@ python3 outils/generer.py --verifier # contrôle sans modification (code de sort
 
 ## Sécurité
 
+Pour un déploiement en production, `deploiement/nginx-fusain.conf` fournit une configuration Nginx posant tous les en-têtes de sécurité.
+
 Signaler une vulnérabilité : ouvrir un avis privé depuis l'onglet « Security » du dépôt. Les principes de sécurité (politique de sécurité de contenu, assainissement du SVG, validation des fichiers) sont décrits au §7 du cahier des charges.
 
 ## Licences

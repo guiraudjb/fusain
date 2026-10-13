@@ -2,7 +2,7 @@
 // La liste ci-dessous est produite par outils/generer.py : rien n'est mis en cache dynamiquement.
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.2.0-154e6ca686';
+const VERSION_CACHE = 'fusain-0.2.1-639fd1a3db';
 const FICHIERS = [
     './',
     './Documentation/GUIDE_UTILISATEUR.md',
@@ -16,6 +16,7 @@ const FICHIERS = [
     './index.html',
     './js/app.js',
     './js/brouillon.js',
+    './js/confiance.js',
     './js/diagrammes/camembert.js',
     './js/diagrammes/commun.js',
     './js/diagrammes/frise.js',

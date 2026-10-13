@@ -102,6 +102,17 @@ for (const e of bilan.echecs.filter((x) => x.erreur)) console.log('   ', JSON.st
 for (const [i, etat] of bilan.corpus) { if (etat.startsWith('DÉFAUT')) mauvais += 1; console.log(etat.startsWith('DÉFAUT') ? 'ECHEC' : 'OK   ', `corpus malveillant n°${i + 1} : ${etat}`); }
 if (bilan.xss) mauvais += 1;
 console.log(bilan.xss ? 'ECHEC' : 'OK   ', 'aucun script injecté ne s\'est exécuté');
+// Trusted Types : une écriture HTML directe est assainie par le navigateur, un script créé par texte est refusé
+const confiance = await p.evaluate(() => {
+    if (!window.trustedTypes) return 'non pris en charge par ce navigateur';
+    const d = document.createElement('div');
+    d.innerHTML = '<img src="https://exemple.invalid/x.png" onerror="window.__xss=1"><b>ok</b>';
+    let script = 'accepté';
+    try { const s = document.createElement('script'); s.textContent = 'window.__xss=1'; document.body.append(s); } catch { script = 'refusé'; }
+    return d.innerHTML === '<img><b>ok</b>' && script === 'refusé' && !window.__xss ? 'actif' : `DÉFAUT : ${d.innerHTML} / script ${script}`;
+});
+if (confiance.startsWith('DÉFAUT')) mauvais += 1;
+console.log(confiance.startsWith('DÉFAUT') ? 'ECHEC' : 'OK   ', 'Trusted Types :', confiance);
 if (externes.length) mauvais += 1;
 console.log(externes.length ? 'ECHEC' : 'OK   ', 'aucune requête hors origine', externes.slice(0, 3).join(' '));
 await b.close();

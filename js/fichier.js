@@ -66,7 +66,7 @@ export function valider(brut) {
     const vus = new Set();
     const pages = brut.pages.map((p, i) => {
         const nom = `page ${i + 1}`;
-        objet(p, nom, ['id', 'nom', 'format', 'orientation', 'margesMm', 'titre', 'piedDePage', 'ajustement', 'type', 'code']);
+        objet(p, nom, ['id', 'nom', 'format', 'orientation', 'margesMm', 'titre', 'sousTitre', 'piedDePage', 'description', 'ajustement', 'type', 'code']);
         const a = objet(p.ajustement, `${nom} / ajustement`, ['mode', 'echelle', 'alignement']);
         chaine(p.id, `${nom} / id`, 40, { vide: false });
         if (!/^[A-Za-z0-9_-]+$/.test(p.id) || vus.has(p.id)) refuser(`Identifiant de page invalide ou en double (${nom}).`);
@@ -82,6 +82,9 @@ export function valider(brut) {
             orientation: parmi(p.orientation, ORIENTATIONS, `${nom} / orientation`),
             margesMm: nombre(p.margesMm, `${nom} / marges`, 0, 50),
             titre: chaine(p.titre, `${nom} / titre`, 200),
+            // Champs apparus avec la version 2 du format : absents d'un fichier plus ancien, ils sont vides
+            sousTitre: p.sousTitre === undefined ? '' : chaine(p.sousTitre, `${nom} / sous-titre`, 200),
+            description: p.description === undefined ? '' : chaine(p.description, `${nom} / description`, 1000),
             piedDePage: chaine(p.piedDePage, `${nom} / pied de page`, 200),
             ajustement: {
                 mode: parmi(a.mode, MODES_AJUSTEMENT, `${nom} / mode d'ajustement`),
@@ -115,7 +118,7 @@ export function serialiser(doc) {
         document: { ...doc.document },
         pages: doc.pages.map((p) => ({
             id: p.id, nom: p.nom, format: p.format, orientation: p.orientation, margesMm: p.margesMm,
-            titre: p.titre, piedDePage: p.piedDePage, ajustement: { ...p.ajustement },
+            titre: p.titre, sousTitre: p.sousTitre, piedDePage: p.piedDePage, description: p.description, ajustement: { ...p.ajustement },
             type: typeDiagramme(p.code), code: p.code,
         })),
     };

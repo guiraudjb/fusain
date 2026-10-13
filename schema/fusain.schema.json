@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://guiraudjb.github.io/fusain/schema/fusain.schema.json",
   "title": "Document FUSAIN",
-  "description": "Format de sauvegarde de FUSAIN, version 1. Le fichier ne contient que du texte, des nombres et des listes fermées : ni HTML, ni SVG, ni script. La validation appliquée par l'application (js/fichier.js) est la référence.",
+  "description": "Format de sauvegarde de FUSAIN, version 2. Le fichier ne contient que du texte, des nombres et des listes fermées : ni HTML, ni SVG, ni script. La validation appliquée par l'application (js/fichier.js) est la référence.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "formatVersion", "application", "document", "pages"],
   "properties": {
     "format": { "const": "fusain" },
-    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 1 },
+    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 2, "description": "2 depuis FUSAIN 0.3.0 (ajout de sousTitre et description). Un fichier de version 1 reste lisible." },
     "application": { "type": "string", "maxLength": 20 },
     "document": {
       "type": "object",
@@ -34,6 +34,8 @@
           "orientation": { "enum": ["portrait", "paysage"] },
           "margesMm": { "type": "number", "minimum": 0, "maximum": 50 },
           "titre": { "type": "string", "maxLength": 200 },
+          "sousTitre": { "type": "string", "maxLength": 200 },
+          "description": { "type": "string", "maxLength": 1000, "description": "Description accessible du schéma, reprise dans le SVG (élément desc)" },
           "piedDePage": { "type": "string", "maxLength": 200, "description": "Jetons remplacés à l'affichage : {n}, {total}, {date}" },
           "ajustement": {
             "type": "object",

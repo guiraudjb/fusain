@@ -55,6 +55,36 @@ const bilan = await p.evaluate(async (ESSAIS) => {
         }
     }
 
+    // Suites d'opérations aléatoires (ajouts, liaisons, suppressions, renommages) : le schéma doit rester valide à chaque pas
+    comptes.operations = 0;
+    const visuels = MODELES.filter((m) => editeurPour(typeDiagramme(m.code)));
+    for (let essai = 0; essai < ESSAIS; essai += 1) {
+        const depart = visuels[alea(visuels.length)];
+        const editeur = editeurPour(typeDiagramme(depart.code));
+        let code = depart.code;
+        const journal = [];
+        try {
+            for (let pas = 0; pas < 12; pas += 1) {
+                const modele = editeur.analyser(code);
+                const cles = editeur.elements(modele).map((e) => e.cle);
+                if (!cles.length) break;
+                const cle = cles[alea(cles.length)];
+                const choix = alea(10);
+                if (choix < 2) { journal.push(`supprimer ${cle}`); editeur.supprimer(modele, cle); }
+                else if (choix < 5 && editeur.relier && editeur.peutRelier(cle)) { journal.push(`relier ${cle}`); editeur.relier(modele, cle, null); }
+                else if (choix < 7 && editeur.relier && editeur.peutRelier(cle)) { const vers = cles[alea(cles.length)]; journal.push(`relier ${cle} → ${vers}`); editeur.relier(modele, cle, vers); }
+                else { const t = texte(); journal.push(`renommer ${cle}`); editeur.renommer(modele, cle, t); }
+                code = editeur.ecrire(modele);
+                const relu = editeur.ecrire(editeur.analyser(code));
+                if (relu !== code) throw new Error('relecture différente');
+                if (editeur.elements(editeur.analyser(code)).length) await window.mermaid.parse(nettoyerCode(code));
+            }
+            comptes.operations += 1;
+        } catch (e) {
+            if (echecs.length < 12) echecs.push({ type: depart.id, journal, erreur: String(e.message).split('\n')[0].slice(0, 160), code: code.slice(0, 500) });
+        }
+    }
+
     // Corpus de codes malveillants : rendu complet puis inspection du SVG final
     const CORPUS = [
         'flowchart LR\n  A["<img src=x onerror=window.__xss=1>"] --> B["<script>window.__xss=1</script>"]',
@@ -97,7 +127,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
 }, ESSAIS);
 
 let mauvais = 0;
-for (const [type, n] of Object.entries(bilan.comptes)) { if (n !== ESSAIS) mauvais += 1; console.log(n === ESSAIS ? 'OK   ' : 'ECHEC', `libellés hostiles — ${type} : ${n}/${ESSAIS}`); }
+for (const [type, n] of Object.entries(bilan.comptes)) { if (n !== ESSAIS) mauvais += 1; console.log(n === ESSAIS ? 'OK   ' : 'ECHEC', type === 'operations' ? `suites de 12 opérations aléatoires : ${n}/${ESSAIS}` : `libellés hostiles — ${type} : ${n}/${ESSAIS}`); }
 for (const e of bilan.echecs.filter((x) => x.erreur)) console.log('   ', JSON.stringify(e));
 for (const [i, etat] of bilan.corpus) { if (etat.startsWith('DÉFAUT')) mauvais += 1; console.log(etat.startsWith('DÉFAUT') ? 'ECHEC' : 'OK   ', `corpus malveillant n°${i + 1} : ${etat}`); }
 if (bilan.xss) mauvais += 1;

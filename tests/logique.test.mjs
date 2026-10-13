@@ -93,6 +93,15 @@ test('fichier : aller-retour et refus des entrées hostiles', () => {
     refuse((o) => { o.pages.push({ ...o.pages[0] }); }, /en double/);
     assert.throws(() => lireJson(texte.replace('"format": "fusain",', '"format": "fusain", "__proto__": {"a": 1},')), /interdits/);
     assert.throws(() => lireJson('{'), /JSON valide/);
+    // Un fichier de la version 1 du format (sans sous-titre ni description) reste lisible
+    const ancien = JSON.parse(texte);
+    ancien.formatVersion = 1;
+    delete ancien.pages[0].sousTitre;
+    delete ancien.pages[0].description;
+    const relu = lireJson(JSON.stringify(ancien));
+    assert.equal(relu.formatVersion, 2);
+    assert.equal(relu.pages[0].sousTitre, '');
+    assert.equal(relu.pages[0].description, '');
 });
 
 test('analyse statique : aucune écriture HTML ni exécution dynamique dans le code de FUSAIN', async () => {

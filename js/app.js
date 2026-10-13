@@ -117,6 +117,7 @@ function analyserPage() {
 
 async function rafraichir() {
     const n = ++jeton;
+    zones.scene.setAttribute('aria-busy', 'true');
     const page = pageCourante();
     majBarre();
     analyserPage();
@@ -132,6 +133,7 @@ async function rafraichir() {
     }
     if (n !== jeton) return;
 
+    zones.scene.removeAttribute('aria-busy');
     afficherFeuille(page, schema, erreur);
     afficherCode(erreur);
     afficherPanneau();
@@ -148,6 +150,7 @@ function afficherFeuille(page, schema, erreur) {
     svg.setAttribute('aria-label', visuel
         ? `Schéma de la page ${page.nom}. Flèches pour parcourir les éléments, Entrée pour renommer, Suppr pour supprimer, Inser pour ajouter un élément lié.`
         : `Aperçu de la page ${page.nom}`);
+    if (visuel) svg.querySelector('title')?.remove(); // en édition, le titre natif s'afficherait en infobulle sur tout le schéma
     const interne = svg.querySelector('.fusain-schema');
     if (visuel && interne) vue.editeur.reperer(interne, vue.modele);
     zones.feuille.classList.toggle('fusain-visuel', Boolean(visuel));
@@ -417,6 +420,7 @@ function blocPage() {
             champSelect('Format', Object.keys(FORMATS).map((f) => [f, f]), page.format, (v) => majPage((p) => { p.format = v; })),
             champSelect('Orientation', [['portrait', 'Portrait'], ['paysage', 'Paysage']], page.orientation, (v) => majPage((p) => { p.orientation = v; }))),
         champTexte('Titre affiché sur la page', page.titre, (v) => majPage((p) => { p.titre = v.trim().slice(0, 200); })),
+        champTexte('Sous-titre', page.sousTitre, (v) => majPage((p) => { p.sousTitre = v.trim().slice(0, 200); })),
         champTexte('Pied de page', page.piedDePage, (v) => majPage((p) => { p.piedDePage = v.trim().slice(0, 200); }), { placeholder: 'Service — page {n}/{total} — {date}' }),
         h('div', { class: 'fusain-ligne' },
             champSelect('Taille du schéma', [['page', 'Ajuster à la page'], ['largeur', 'Toute la largeur'], ['hauteur', 'Toute la hauteur'], ['manuel', 'Échelle manuelle']], a.mode, (v) => majPage((p) => { p.ajustement.mode = v; })),
@@ -424,6 +428,7 @@ function blocPage() {
         h('div', { class: 'fusain-ligne' },
             champSelect('Position verticale', [['haut', 'En haut'], ['centre', 'Au centre'], ['bas', 'En bas']], a.alignement, (v) => majPage((p) => { p.ajustement.alignement = v; })),
             champTexte('Marges (mm)', page.margesMm, (v) => majPage((p) => { p.margesMm = Math.max(0, Math.min(50, Number(v) || 0)); }), { type: 'number', min: 0, max: 50, step: 1 })),
+        champTexte('Description du schéma (lecteurs d\'écran, export SVG)', page.description, (v) => majPage((p) => { p.description = v.trim().slice(0, 1000); }), { multiligne: true, placeholder: 'Ce que montre le schéma, en une ou deux phrases' }),
         h('div', { class: 'fusain-actions' },
             bouton('Monter la page', { icone: 'arrow-up-line', seulIcone: true, disabled: etat.index === 0, onclick: () => deplacerPage(-1) }),
             bouton('Descendre la page', { icone: 'arrow-down-line', seulIcone: true, disabled: etat.index === total - 1, onclick: () => deplacerPage(1) }),

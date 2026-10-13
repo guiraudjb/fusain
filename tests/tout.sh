@@ -19,6 +19,16 @@ etape "Cohérence intégrité / cache / nomenclature" python3 outils/generer.py 
 etape "Logique et sécurité (sans navigateur)" filtre node --test tests/logique.test.mjs
 etape "Recette Chrome" filtre node tests/recette.mjs "$SORTIE"
 etape "Robustesse et corpus malveillant" filtre node tests/robustesse.mjs 200
+# Chemin de mise à jour : copie jetable de la dernière version validée (HEAD), servie sur un second port
+COPIE="$SORTIE/copie-maj"
+if [ ! -e "$COPIE" ] || [ -f "$COPIE/sw.js" ]; then
+    mkdir -p "$COPIE" && git archive HEAD | tar -x -C "$COPIE"
+    (cd "$COPIE" && exec python3 -m http.server 8766 --bind 127.0.0.1) >/dev/null 2>&1 &
+    SERVEUR2=$!
+    sleep 1
+    etape "Mise à jour d'un poste (ancienne version en cache)" filtre node tests/mise-a-jour.mjs "$COPIE"
+    kill $SERVEUR2 2>/dev/null
+fi
 if curl -s -m 2 http://127.0.0.1:4444/status >/dev/null; then
     FUSAIN_SORTIE="$SORTIE" etape "Recette Firefox" filtre node tests/firefox.mjs
 else

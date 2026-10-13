@@ -48,6 +48,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-feuille { position: relative; margin: 0 auto; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .25); }
 .fusain-feuille > svg.fusain-page { display: block; width: 100%; height: 100%; }
 .fusain-feuille > svg.fusain-page:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
+.fusain-scene[aria-busy="true"] { cursor: progress; }
+.fusain-scene[aria-busy="true"] .fusain-feuille { opacity: .85; transition: opacity .2s .3s; }
 .fusain-erreur { max-width: 50rem; margin: 0 auto 1rem; }
 
 .fusain-marges { fill: none; stroke: #6a6af4; stroke-width: .25; stroke-dasharray: 1.5 1.5; pointer-events: none; }

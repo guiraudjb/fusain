@@ -46,7 +46,9 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 ## 3. La page
 
-Dans la colonne de droite, bloc « Page » : format (A4, A3), orientation, marges, titre, pied de page, taille et position du schéma. Le pied de page accepte les jetons `{n}`, `{total}` et `{date}`.
+Dans la colonne de droite, bloc « Page » : format (A4, A3), orientation, marges, titre, sous-titre, pied de page, taille et position du schéma.
+
+La **description du schéma** n'est pas imprimée : elle est lue par les lecteurs d'écran et conservée dans l'export SVG. Renseignez-la en une ou deux phrases pour les personnes qui ne voient pas le schéma. Le pied de page accepte les jetons `{n}`, `{total}` et `{date}`.
 
 FUSAIN vous avertit si le texte devient trop petit pour être lu une fois imprimé : passez en A3, changez d'orientation ou allégez le schéma.
 

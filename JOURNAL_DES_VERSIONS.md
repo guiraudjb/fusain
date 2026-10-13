@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.3.0 — 13 octobre 2026 — pages, accessibilité, chemin de mise à jour
+
+- **Sous-titre** de page et **description accessible** du schéma (lue par les lecteurs d'écran, conservée dans l'export SVG), valables pour tous les types de schémas.
+- **Format de fichier en version 2** pour porter ces deux champs. Les fichiers de version 1 s'ouvrent sans intervention ; une version plus ancienne de FUSAIN refuse proprement un fichier plus récent en invitant à se mettre à jour.
+- Indicateur d'occupation pendant le calcul d'un grand schéma.
+- **Essais** : suites de 12 opérations aléatoires (ajouts, liaisons, suppressions, renommages) sur les huit éditeurs — 300 suites, le schéma reste valide à chaque pas. Nouveau test du **chemin de mise à jour** (`tests/mise-a-jour.mjs`) : un poste ayant l'ancienne version en cache voit le bandeau, se met à jour, retrouve son travail et n'a plus que le nouveau cache.
+
 ## 0.2.1 — 13 octobre 2026 — durcissement
 
 - **Trusted Types activé** : dans les navigateurs qui le prennent en charge, toute écriture de HTML — y compris par Mermaid et le DSFR — passe par DOMPurify, et la création de script à partir de texte est refusée. Aucune régression sur les recettes Chrome et Firefox.

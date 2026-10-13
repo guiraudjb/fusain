@@ -311,7 +311,7 @@ Version et date, guide utilisateur, déclaration d'accessibilité, nomenclature 
 ```json
 {
   "format": "fusain",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "application": "1.0.0",
   "document": {
     "titre": "Circuit de traitement des demandes",
@@ -327,6 +327,8 @@ Version et date, guide utilisateur, déclaration d'accessibilité, nomenclature 
       "orientation": "paysage",
       "margesMm": 15,
       "titre": "Circuit de traitement",
+      "sousTitre": "Version de travail",
+      "description": "Le dossier est instruit s'il est complet, sinon des pièces sont demandées.",
       "piedDePage": "DDFiP — page {n}/{total}",
       "ajustement": { "mode": "page", "echelle": 100, "alignement": "centre" },
       "type": "flowchart",
@@ -348,7 +350,7 @@ Version et date, guide utilisateur, déclaration d'accessibilité, nomenclature 
 | Taille maximale d'un code | 50 000 caractères par page |
 | Valeurs énumérées | `format` (`A4`, `A3`), `orientation` (`portrait`, `paysage`), `ajustement.mode`, `theme`, `type` : listes fermées, toute autre valeur entraîne le refus |
 | Champs inconnus | Refusés (pas de champ libre) |
-| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version |
+| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version. Version 2 depuis FUSAIN 0.3.0 (ajout de `sousTitre` et `description`) : un fichier de version 1 reste lisible, ces champs y sont vides |
 
 Le schéma JSON formel (JSON Schema) est livré avec l'application et sert à la fois de documentation et de référence pour la validation à la restauration.
 
@@ -675,14 +677,14 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 13 octobre 2026 (version 0.2.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 13 octobre 2026 (version 0.3.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
 | Domaine | Contenu |
 |---|---|
 | Architecture | Fichiers statiques, modules ES sans build, bibliothèques embarquées, aucun script en ligne, service worker à cache pré-rempli et versionné, manifeste, fonctionnement hors ligne |
-| Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, pied de page avec jetons, quatre modes d'ajustement, alerte de lisibilité |
+| Pages | Document multi-pages, A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
 | Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris) : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Modèles | 18 modèles répartis en quatre catégories |
@@ -697,7 +699,6 @@ FUSAIN/
 | Domaine | Contenu |
 |---|---|
 | Édition visuelle | Sélection multiple, copier / coller ; réglage des espacements ; couleur de chaque part du camembert ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
-| Pages | Sous-titre ; titre et description accessibles du schéma (`accTitle`, `accDescr`) depuis l'interface |
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
 | Intégrité | Les modules propres à FUSAIN autres que le point d'entrée ne portent pas d'attribut d'intégrité (limite des modules ES importés) |

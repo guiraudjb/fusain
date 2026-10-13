@@ -196,7 +196,7 @@ export function texteDePied(page, index, total) {
 export function zoneUtile(page) {
     const { l, h } = dimensions(page);
     const m = page.margesMm;
-    const haut = m + (page.titre ? 11 : 0);
+    const haut = m + (page.titre ? 11 : 0) + (page.sousTitre ? 7 : 0);
     const bas = h - m - (page.piedDePage ? 6 : 0);
     return { x: m, y: haut, l: Math.max(10, l - 2 * m), h: Math.max(10, bas - haut) };
 }
@@ -206,10 +206,16 @@ export function composerPage(page, schema, { index = 0, total = 1, guides = fals
     const { l, h } = dimensions(page);
     const zone = zoneUtile(page);
     const svg = s('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${l} ${h}`, class: 'fusain-page' },
+        // Titre et description accessibles : lus par les lecteurs d'écran, conservés dans l'export SVG
+        s('title', {}, page.titre || page.nom),
+        page.description ? s('desc', {}, page.description) : null,
         s('rect', { class: 'fusain-fond', x: 0, y: 0, width: l, height: h, fill: '#ffffff' }));
 
     if (page.titre) {
         svg.append(s('text', { x: l / 2, y: page.margesMm + 6, 'text-anchor': 'middle', 'font-family': POLICE, 'font-size': 7, 'font-weight': 700, fill: '#161616' }, page.titre));
+    }
+    if (page.sousTitre) {
+        svg.append(s('text', { x: l / 2, y: page.margesMm + (page.titre ? 13 : 5), 'text-anchor': 'middle', 'font-family': POLICE, 'font-size': 4.2, fill: '#3a3a3a' }, page.sousTitre));
     }
     if (page.piedDePage) {
         svg.append(s('text', { x: l / 2, y: h - page.margesMm, 'text-anchor': 'middle', 'font-family': POLICE, 'font-size': 3.2, fill: '#3a3a3a' }, texteDePied(page, index, total)));

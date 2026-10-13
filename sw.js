@@ -2,7 +2,7 @@
 // La liste ci-dessous est produite par outils/generer.py : rien n'est mis en cache dynamiquement.
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.2.1-639fd1a3db';
+const VERSION_CACHE = 'fusain-0.3.0-f8c6600378';
 const FICHIERS = [
     './',
     './Documentation/GUIDE_UTILISATEUR.md',

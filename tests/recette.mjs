@@ -50,6 +50,14 @@ c = await lireCode(); ok('suppression clavier', !/n1/.test(c));
 // 7. annuler / rétablir
 await p.click('button[title^="Annuler"]'); await p.waitForTimeout(700); c = await lireCode(); ok('annuler', /n1/.test(c));
 await p.screenshot({ path: OUT + '/e2e-logigramme.png' });
+// 7 bis. page : titre, sous-titre et description accessible
+{ const champ = (libelle) => p.locator(`#fusain-proprietes .fusain-champ:has(label:text-is("${libelle}")) :is(input, textarea)`);
+  await champ('Titre affiché sur la page').fill('Circuit de traitement'); await champ('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(600);
+  await champ('Sous-titre').fill('Version de travail'); await champ('Sous-titre').press('Tab'); await p.waitForTimeout(600);
+  await champ('Description du schéma (lecteurs d\'écran, export SVG)').fill('Le dossier est instruit s\'il est complet.'); await p.keyboard.press('Tab'); await p.waitForTimeout(800);
+  const page = await p.evaluate(() => { const s = document.querySelector('#fusain-feuille svg.fusain-page'); return { desc: s.querySelector(':scope > desc')?.textContent, textes: [...s.querySelectorAll(':scope > text')].map((t) => t.textContent) }; });
+  ok('titre, sous-titre et description sur la page', page.desc === 'Le dossier est instruit s\'il est complet.' && page.textes.includes('Circuit de traitement') && page.textes.includes('Version de travail'), JSON.stringify(page));
+  await p.screenshot({ path: OUT + '/e2e-page.png' }); }
 // 8. mode code : erreur
 await p.click('button:has-text("Code")'); await p.waitForTimeout(300);
 await p.fill('#fusain-code-zone', 'flowchart LR\n  A -->'); await p.waitForTimeout(1200);

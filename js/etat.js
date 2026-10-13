@@ -20,7 +20,7 @@ export function idPage() {
 export function nouvellePage(code, nom = 'Page') {
     return {
         id: idPage(), nom, format: 'A4', orientation: 'paysage', margesMm: 15,
-        titre: '', piedDePage: '',
+        titre: '', sousTitre: '', piedDePage: '', description: '',
         ajustement: { mode: 'page', echelle: 100, alignement: 'centre' },
         code,
     };

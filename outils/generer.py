@@ -69,12 +69,18 @@ def sw_genere(generes):
     num, _ = version()
     fichiers = fichiers_caches()
     h = hashlib.sha256()
+    lignes = []
     for f in fichiers:
-        h.update(f.encode())
         # Les fichiers produits dans la même passe sont pris dans leur nouvel état
-        h.update(generes[f].encode() if f in generes else (RACINE / f).read_bytes())
-    bloc = "/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\nconst FICHIERS = [\n%s\n];\n/* FIN-GENERE */" % (
-        num, h.hexdigest()[:10], "\n".join(f"    './{f}'," for f in ["", *fichiers]).replace("'./',", "'./',", 1))
+        contenu = generes[f].encode() if f in generes else (RACINE / f).read_bytes()
+        h.update(f.encode())
+        h.update(contenu)
+        empreinte_fichier = hashlib.sha256(contenu).hexdigest()
+        if f == "index.html":
+            lignes.append(f"    ['./', '{empreinte_fichier}'],")
+        lignes.append(f"    ['./{f}', '{empreinte_fichier}'],")
+    bloc = "/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\n// [chemin, empreinte SHA-256] de chaque fichier de la version\nconst FICHIERS = [\n%s\n];\n/* FIN-GENERE */" % (
+        num, h.hexdigest()[:10], "\n".join(lignes))
     return re.sub(r"/\* DEBUT-GENERE \*/.*?/\* FIN-GENERE \*/", lambda _: bloc, lire("sw.js"), flags=re.S)
 
 

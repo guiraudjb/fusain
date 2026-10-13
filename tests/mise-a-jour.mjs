@@ -32,4 +32,11 @@ if (bandeau) {
   ok('travail toujours présent après la mise à jour', (await p.textContent('#fusain-proprietes')).includes('Travail en cours'));
   ok('bandeau retiré', await p.locator('#fusain-bandeau .fr-notice').count() === 0);
 }
+// Publication incomplète ou fichier altéré : la nouvelle version ne doit pas s'installer, l'ancienne reste en service
+fs.writeFileSync(dir + '/js/version.js', fs.readFileSync(dir + '/js/version.js', 'utf8').replace(/VERSION = '[^']+'/, "VERSION = '9.9.10'"));
+execSync('python3 outils/generer.py', { cwd: dir });
+fs.appendFileSync(dir + '/js/modeles.js', '\n// fichier altéré après le calcul des empreintes\n');
+await p.reload(); await p.waitForSelector('html[data-fusain-pret]'); await p.waitForTimeout(6000);
+const apres = await p.evaluate(async () => ({ caches: (await caches.keys()).join(','), version: (await import('./js/version.js')).VERSION, bandeau: document.querySelectorAll('#fusain-bandeau .fr-notice').length }));
+ok('version altérée refusée : pas de bandeau, ancien cache conservé, ancienne version en service', apres.bandeau === 0 && apres.caches.includes('9.9.9') && !apres.caches.includes('9.9.10') && apres.version === '9.9.9', JSON.stringify(apres));
 await b.close();

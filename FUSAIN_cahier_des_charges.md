@@ -444,7 +444,7 @@ Le fichier ne pouvant contenir ni HTML, ni SVG, ni structure de modèle (§4.3, 
 
 - Bibliothèques tierces embarquées à version figée ; empreinte SHA-256 de chaque fichier consignée dans la nomenclature et vérifiée à l'intégration (§8).
 - Attribut d'intégrité (SRI) sur chaque script et feuille de style chargés par la page.
-- Le service worker ne met en cache que la liste fermée des fichiers de la version ; il ne sert rien qui vienne d'un autre domaine.
+- Le service worker ne met en cache que la liste fermée des fichiers de la version, après avoir vérifié l'empreinte SHA-256 de chacun : un fichier altéré ou une publication incomplète fait échouer l'installation, et la version précédente reste en service. Il ne sert rien qui vienne d'un autre domaine.
 - Aucune dépendance n'est récupérée à l'exécution.
 
 ### 7.7 Vie privée
@@ -701,7 +701,7 @@ FUSAIN/
 | Édition visuelle | Sélection multiple, copier / coller ; réglage des espacements ; couleur de chaque part du camembert ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture |
 | Fichiers | Enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent |
 | Sécurité | Délai maximal de rendu (seuls les plafonds de taille et de nombre de liens sont appliqués)  ; audit externe |
-| Intégrité | Les modules propres à FUSAIN autres que le point d'entrée ne portent pas d'attribut d'intégrité (limite des modules ES importés) |
+| Intégrité | Au tout premier chargement, les modules propres à FUSAIN autres que le point d'entrée ne sont pas couverts par l'attribut d'intégrité du navigateur (limite des modules ES importés) ; ils le sont dès l'installation du service worker, qui vérifie l'empreinte de chaque fichier |
 | Accessibilité | Audit RGAA manuel et déclaration d'accessibilité (le contrôle automatique axe-core et le parcours au clavier sont en place et sans défaut) |
 | Déploiement | Paquet Debian (l'exemple de configuration Nginx est livré dans `deploiement/`) |
 | Recette | Essais sur Safari (les recettes automatisées portent sur Chrome et Firefox) |

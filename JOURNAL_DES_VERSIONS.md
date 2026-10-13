@@ -2,6 +2,11 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.4.2 — 13 octobre 2026 — intégrité de tous les fichiers
+
+- Le service worker **vérifie l'empreinte SHA-256 de chaque fichier** avant de le mettre en cache (144 fichiers, empreintes produites par `outils/generer.py`). Un fichier altéré ou une publication incomplète fait échouer l'installation : la version précédente reste en service, sans bandeau de mise à jour. Cela couvre aussi les modules que l'attribut d'intégrité du navigateur ne protège pas.
+- Essai ajouté au test du chemin de mise à jour : une version dont un fichier a été modifié après le calcul des empreintes est refusée.
+
 ## 0.4.1 — 13 octobre 2026 — intégration continue, longs documents
 
 - **Intégration continue** (`.github/workflows/recette.yml`) : à chaque modification, GitHub rejoue les sept étapes de la recette — cohérence de la nomenclature, logique, Chrome, robustesse, fidélité, accessibilité, chemin de mise à jour, Firefox. Première exécution réussie sur Chrome 154 et Firefox 157.

@@ -26,10 +26,10 @@ if [ -n "${AXE:-}" ] && [ -f "$AXE" ]; then
 else
     echo; echo "== Accessibilité : ignorée (variable AXE non définie)"
 fi
-# Chemin de mise à jour : copie jetable de la dernière version validée (HEAD), servie sur un second port
+# Chemin de mise à jour : copie jetable des fichiers suivis (dans leur état courant), servie sur un second port
 COPIE="$SORTIE/copie-maj"
 if [ ! -e "$COPIE" ] || [ -f "$COPIE/sw.js" ]; then
-    mkdir -p "$COPIE" && git archive HEAD | tar -x -C "$COPIE"
+    mkdir -p "$COPIE" && git ls-files -z | xargs -0 tar -cf - | tar -x -C "$COPIE"
     (cd "$COPIE" && exec python3 -m http.server 8766 --bind 127.0.0.1) >/dev/null 2>&1 &
     SERVEUR2=$!
     sleep 1

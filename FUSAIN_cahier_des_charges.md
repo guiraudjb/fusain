@@ -152,7 +152,7 @@ Conséquences :
 ### 4.4 Application web progressive
 
 - Manifeste d'application (nom, icônes, couleurs DSFR, mode d'affichage autonome) : installable sur le poste.
-- Service worker propre à FUSAIN, avec **cache pré-rempli et versionné** : la liste exhaustive des fichiers et leur version sont déclarées dans le service worker ; rien n'est mis en cache dynamiquement.
+- Service worker propre à FUSAIN, avec **cache pré-rempli et versionné** : la liste exhaustive des fichiers et leur version sont déclarées dans le service worker. Seuls les fonds de carte volumineux (contours des communes, relief, réseaux, depuis la 0.14.0) sont hors du préchargement : ils figurent dans la même liste fermée, avec leur empreinte, et n'entrent dans le cache qu'à leur premier usage, après vérification.
 - Fonctionnement **complet hors ligne** après la première visite, exports compris.
 - À la publication d'une nouvelle version, un bandeau DSFR « Une nouvelle version est disponible » propose le rechargement ; la mise à jour n'interrompt jamais un travail en cours.
 - Le numéro de version et la date de publication sont visibles dans la modale « À propos ».
@@ -254,6 +254,7 @@ Un bouton « Effacer les données locales » est disponible dans la modale « À
 - Bibliothèque de modèles pré-remplis couvrant tous les types Mermaid, classés par usage (processus et structure, architecture, gestion de projet, analyse et données), reprise et étendue à partir de celle de PLUME.
 - Chaque modèle indique s'il est éditable en mode visuel.
 - Une page peut aussi être une **diapositive de texte** (depuis la 0.9.0). Ce n'est pas un schéma Mermaid : son code est un format propre à FUSAIN (« diapo » suivi d'une mise en page, puis des lignes « champ: texte » et « - élément »), dessiné par FUSAIN en SVG. Les textes sont écrits comme du texte, jamais interprétés comme du HTML ; le style n'est pas réglable, il est celui de la charte.
+- Une page peut aussi être une **carte thématique** (depuis la 0.14.0), dessinée par le moteur de SimpleCarto repris dans FUSAIN : échelles monde, région du monde, France, région (par départements ou par communes), département, EPCI et commune ; données par territoire saisies ou importées d'un CSV (somme, part, ratio, évolution), palettes, étiquettes placées sans chevauchement, légende, fonds de relief, cours d'eau, voies ferrées et routes nationales, épingles, pictogrammes et annotations. Son code est un format propre à FUSAIN (« carte » suivi de l'échelle, puis des lignes « option: valeur » et « - code | valeur »). Les fonds viennent de l'IGN, de l'INSEE et de Natural Earth (`cartes/LICENCE.txt`).
 - Une nouvelle page démarre d'un modèle, ou d'une **page vierge** (sans schéma : seuls le titre, le sous-titre et le pied de page sont imprimés), à laquelle un schéma peut être donné ensuite.
 
 ### 5.6 Habillage
@@ -302,6 +303,8 @@ Tous les exports sont produits dans le navigateur et remis à l'utilisateur par 
 ### 5.10 Modale « À propos »
 
 Version et date, guide utilisateur, déclaration d'accessibilité, nomenclature logicielle (§8.2), licences, effacement des données locales.
+
+Les documents joints en Markdown (guide utilisateur, cahier des charges, nomenclature) s'affichent mis en forme dans une modale. FUSAIN les met en forme lui-même, en construisant la page nœud par nœud (§7.3) : aucune bibliothèque n'est ajoutée et aucun passage du document n'est interprété comme du HTML.
 
 ---
 
@@ -422,7 +425,7 @@ Content-Security-Policy:
 | Écriture du code depuis le mode visuel | Les libellés saisis sont échappés selon la syntaxe Mermaid (guillemets, crochets, caractères de structure). Un libellé ne peut pas « sortir » de son nœud pour injecter une instruction. |
 | Collage | Seul le texte brut du presse-papiers est lu ; le HTML collé est ignoré. |
 | Fonctions d'exécution dynamique | `eval`, `new Function`, `setTimeout` avec une chaîne : interdits dans le code de FUSAIN. |
-| Liens vers l'extérieur | Limités à la modale « À propos », avec `rel="noopener noreferrer"`. |
+| Liens vers l'extérieur | Limités à la modale « À propos » et aux documents qu'elle affiche, avec `rel="noopener noreferrer"`. |
 
 ### 7.4 Restauration d'un fichier
 
@@ -446,7 +449,8 @@ Le fichier ne pouvant contenir ni HTML, ni SVG, ni structure de modèle (§4.3, 
 - Bibliothèques tierces embarquées à version figée ; empreinte SHA-256 de chaque fichier consignée dans la nomenclature et vérifiée à l'intégration (§8).
 - Attribut d'intégrité (SRI) sur chaque script et feuille de style chargés par la page.
 - Le service worker ne met en cache que la liste fermée des fichiers de la version, après avoir vérifié l'empreinte SHA-256 de chacun : un fichier altéré ou une publication incomplète fait échouer l'installation, et la version précédente reste en service. Il ne sert rien qui vienne d'un autre domaine.
-- Aucune dépendance n'est récupérée à l'exécution.
+- Les fonds de carte lus à la demande (§4.4) suivent la même règle : leur empreinte SHA-256 est déclarée dans le service worker, qui la vérifie avant de les mettre en cache, et la page les lit avec l'empreinte SRI du catalogue `cartes/index.json`, lui-même contrôlé par `index.html`.
+- Aucune dépendance n'est récupérée ailleurs que sur le serveur de FUSAIN.
 
 ### 7.7 Vie privée
 
@@ -508,6 +512,8 @@ Les deux sont versionnés avec le code, mis à jour dans le même changement que
 | DSFR | Système de Design de l'État : composants, styles, police Marianne, icônes | 1.15.4 | Etalab-2.0 | Registre npm `@gouvfr/dsfr` |
 | Mermaid | Analyse et rendu des diagrammes | 12.1.0 | MIT | Registre npm `mermaid` |
 | Extension ZenUML de Mermaid | Diagrammes de séquence ZenUML, chargée à la demande (ajoutée en 0.8.0) | 1.0.1 | MIT | Registre npm `@mermaid-js/mermaid-zenuml` |
+| D3 | Projections, tracés et placement des étiquettes des cartes, chargé à la demande (ajouté en 0.14.0) | 7.9.0 | ISC | Registre npm `d3` |
+| topojson-client | Lecture des fonds de carte TopoJSON, chargé à la demande (ajouté en 0.14.0) | 3.1.0 | ISC | Registre npm `topojson-client` |
 | DOMPurify | Assainissement du SVG avant insertion | 3.4.17 | Apache-2.0 ou MPL-2.0 | Registre npm `dompurify` |
 | jsPDF | Génération du fichier PDF | 4.2.1 | MIT | Registre npm `jspdf` |
 | svg2pdf.js | Conversion vectorielle SVG → PDF | 2.8.1 | MIT | Registre npm `svg2pdf.js` |
@@ -591,7 +597,7 @@ Un script d'aide (`outils/verifier-nomenclature`) contrôle que chaque fichier e
 | Réseau | Aucune requête hors origine, vérifiée en recette et garantie par la politique de sécurité de contenu. |
 | Rendu | Schéma de 200 nœuds recalculé en moins d'une seconde sur un poste bureautique standard ; l'interface reste réactive pendant le calcul. |
 | Export | PDF de 10 pages en moins de 10 secondes ; PNG A3 à 300 ppp en moins de 5 secondes. |
-| Poids | Premier chargement inférieur à 10 Mo, dont l'essentiel en cache ensuite (mesuré en 0.1.0 : 8,7 Mo, dont 5,5 Mo pour Mermaid). Depuis la 0.8.0, l'extension ZenUML ajoute 3,2 Mo : elle n'est pas chargée par la page, mais le service worker la met en cache en arrière-plan pour l'usage hors ligne, ce qui porte le total à 12 Mo environ — écart assumé par rapport à la cible. |
+| Poids | Premier chargement inférieur à 10 Mo, dont l'essentiel en cache ensuite (mesuré en 0.1.0 : 8,7 Mo, dont 5,5 Mo pour Mermaid). Depuis la 0.8.0, l'extension ZenUML ajoute 3,2 Mo : elle n'est pas chargée par la page, mais le service worker la met en cache en arrière-plan pour l'usage hors ligne, ce qui porte le total à 12 Mo environ — écart assumé par rapport à la cible. Depuis la 0.14.0, D3, le client TopoJSON et les fonds préchargés des cartes ajoutent 1 Mo ; les fonds lus à la demande (15 Mo au total) ne sont téléchargés que s'ils servent, par région pour les communes. |
 | Robustesse | Aucune perte de travail en cas de fermeture accidentelle (brouillon) ; une erreur de rendu n'altère jamais le code de la page. |
 | Maintenabilité | Code en modules ES documentés, sans build ; un module par type de diagramme, pour ajouter un type sans toucher aux autres. |
 | Tests | Tests automatisés de l'aller-retour code → modèle → code sur un corpus de schémas, par type : le résultat doit être équivalent à l'entrée. |
@@ -690,7 +696,8 @@ FUSAIN/
 | Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, depuis la 0.7.0 diagramme C4 (contexte, conteneurs, composants), diagramme de blocs, diagramme d'exigences et diagramme radar, depuis la 0.8.0 carte proportionnelle (treemap) et séquence ZenUML, soit vingt-trois types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Icônes | Depuis la 0.12.0, le même menu d'icônes sert aux étapes du logigramme et aux diapositives de texte. Schémas d'architecture : les six icônes de Mermaid et les 1 038 icônes du DSFR, embarquées dans un fichier dérivé chargé à la demande, et, depuis la 0.11.0, des icônes illustrées en couleur (celles de SimpleCarto et celles générées pour FUSAIN avec Krea 2), avec fenêtre de choix commune. Les icônes illustrées sont des images : FUSAIN les pose lui-même dans le schéma après l'assainissement, à partir de ses seuls fichiers embarqués |
-| Modèles | 24 modèles de schémas et 13 de diapositives ; répartis en quatre catégories, tous éditables visuellement ; page vierge |
+| Cartes | Depuis la 0.14.0, cartes thématiques au moteur de SimpleCarto : huit échelles du monde à la commune, import CSV avec calculs, palettes, étiquettes, légende, fonds IGN, épingles, pictogrammes et annotations glissés à la souris ; fonds communaux lus à la demande et conservés hors ligne |
+| Modèles | 24 modèles de schémas, 13 de diapositives et 5 de cartes ; répartis en cinq catégories, tous éditables visuellement ; page vierge |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Trusted Types, analyse statique automatisée, Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |

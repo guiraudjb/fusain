@@ -1,7 +1,7 @@
 // Sauvegarde et restauration au format JSON (cahier des charges §5.9, §6 et §7.4)
 import { VERSION, VERSION_FORMAT } from './version.js';
 import { FORMATS, ORIENTATIONS, MODES_AJUSTEMENT, ALIGNEMENTS } from './formats.js';
-import { TAILLE_MAX_CODE, typeDiagramme, nomFichierSur } from './securite.js';
+import { TAILLE_MAX_CODE, TAILLE_MAX_CARTE, typeDiagramme, nomFichierSur } from './securite.js';
 import { THEMES } from './rendu.js';
 
 export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
@@ -91,7 +91,7 @@ export function valider(brut) {
                 echelle: nombre(a.echelle, `${nom} / échelle`, 10, 400),
                 alignement: parmi(a.alignement, ALIGNEMENTS, `${nom} / alignement`),
             },
-            code: chaine(p.code, `${nom} / code`, TAILLE_MAX_CODE),
+            code: chaine(p.code, `${nom} / code`, typeof p.code === 'string' && typeDiagramme(p.code) === 'carte' ? TAILLE_MAX_CARTE : TAILLE_MAX_CODE),
         };
     });
 

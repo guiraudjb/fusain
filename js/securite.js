@@ -1,6 +1,8 @@
 // Sécurité : filtrage du code Mermaid et assainissement du SVG (cahier des charges §7.2 et §7.3)
 
 export const TAILLE_MAX_CODE = 50000;
+// Une carte porte une ligne par territoire : jusqu'à plusieurs milliers de communes
+export const TAILLE_MAX_CARTE = 400000;
 export const LIENS_MAX = 500;
 
 const CLES_INTERDITES = new Set([

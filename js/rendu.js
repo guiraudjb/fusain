@@ -3,6 +3,7 @@ import { s } from './dom.js';
 import { dimensions, MM_PAR_PX } from './formats.js';
 import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
 import { rendreDiapo } from './diapo.js';
+import { rendreCarte } from './carte.js';
 import { PREFIXE, jeuPourMermaid } from './icones.js';
 import { PREFIXE_ILLUS, jeuPourMermaid as jeuIllustre, incorporerImages } from './illustrations.js';
 
@@ -204,13 +205,14 @@ function centrerLibelles(svg, l, h) {
 export function rendreSchema(code, idTheme, page = null) {
     // Page vierge : aucun schéma, seule la mise en page (titre, pied de page) est composée
     if (!String(code).trim()) return Promise.resolve(null);
-    // Une diapositive de texte n'est pas un schéma Mermaid : elle est dessinée aux proportions de la zone utile de sa page
-    const diapo = typeDiagramme(code) === 'diapo';
+    // Une diapositive de texte ou de carte n'est pas un schéma Mermaid : elle est dessinée aux proportions de la zone utile de sa page
+    const type = typeDiagramme(code);
+    const diapo = type === 'diapo' || type === 'carte';
     const zone = diapo && page ? zoneUtile(page) : null;
     const rapport = zone ? Math.round((zone.h / zone.l) * 1000) / 1000 : undefined;
-    const cle = diapo ? `diapo ${rapport}\n${code}` : `${idTheme}\n${code}`;
+    const cle = diapo ? `${type} ${rapport}\n${code}` : `${idTheme}\n${code}`;
     if (cache.has(cle)) return Promise.resolve(cache.get(cle));
-    const tache = diapo ? Promise.resolve().then(() => rendreDiapo(code, rapport)) : file.then(() => rendre(code, idTheme));
+    const tache = diapo ? Promise.resolve().then(() => (type === 'carte' ? rendreCarte(code, rapport) : rendreDiapo(code, rapport))) : file.then(() => rendre(code, idTheme));
     if (!diapo) file = tache.catch(() => {});
     return tache.then((resultat) => {
         cache.set(cle, resultat);

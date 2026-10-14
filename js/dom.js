@@ -109,7 +109,7 @@ export function modale(id, titre, contenu, pied = []) {
                         h('div', { class: 'fr-modal__header' },
                             h('button', { type: 'button', class: 'fr-btn--close fr-btn', 'aria-controls': id, title: 'Fermer' }, 'Fermer')),
                         h('div', { class: 'fr-modal__content' }, h('h1', { id: idTitre, class: 'fr-modal__title' }, titre), contenu),
-                        pied.length ? h('div', { class: 'fr-modal__footer' }, h('div', { class: 'fr-btns-group fr-btns-group--right fr-btns-group--inline-lg' }, pied)) : null)))));
+                        pied.length ? h('div', { class: 'fr-modal__footer' }, h('div', { class: 'fr-btns-group fr-btns-group--right fr-btns-group--inline-lg fr-btns-group--icon-left' }, pied)) : null)))));
     document.getElementById('fusain-modales').append(dialogue);
     return dialogue;
 }

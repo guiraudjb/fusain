@@ -122,6 +122,21 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-messages .fr-alert { background-color: var(--background-default-grey); box-shadow: 0 4px 12px rgba(0, 0, 0, .25); }
 #fusain-bandeau .fr-notice__body { display: flex; align-items: center; gap: 1rem; }
 
+/* ---------- Document mis en forme (guide, cahier des charges, nomenclature) ---------- */
+#fusain-modale-document .fr-col-12 { flex: 0 0 100%; width: 100%; max-width: 100%; }
+.fusain-document { font-size: .875rem; line-height: 1.5rem; overflow-wrap: anywhere; }
+.fusain-document h2 { font-size: 1.375rem; line-height: 1.75rem; margin: 1.5rem 0 .75rem; }
+.fusain-document h3 { font-size: 1.125rem; line-height: 1.5rem; margin: 1.25rem 0 .5rem; }
+.fusain-document h4, .fusain-document h5, .fusain-document h6 { font-size: 1rem; line-height: 1.5rem; margin: 1rem 0 .5rem; }
+.fusain-document :is(h2, h3, h4, h5, h6):focus { outline: none; }
+.fusain-document p, .fusain-document ul, .fusain-document ol { margin-bottom: .75rem; }
+.fusain-document code { font-size: .8125rem; padding: 0 .25rem; background: var(--background-alt-grey); overflow-wrap: anywhere; }
+.fusain-document pre { margin-bottom: 1rem; padding: .75rem; overflow-x: auto; background: var(--background-alt-grey); }
+.fusain-document pre code { padding: 0; background: none; overflow-wrap: normal; }
+.fusain-document blockquote { margin: 0 0 .75rem; padding-left: 1rem; border-left: 4px solid var(--border-default-grey); }
+.fusain-document .fr-table { margin-bottom: 1rem; overflow-x: auto; }
+.fusain-document .fr-table td, .fusain-document .fr-table th { vertical-align: top; }
+
 /* ---------- Modale des modèles ---------- */
 .fusain-modeles { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .5rem; margin-bottom: 1rem; }
 .fusain-modele { text-align: left; padding: .5rem .75rem; border: 1px solid var(--border-default-grey); background: var(--background-default-grey); cursor: pointer; color: var(--text-default-grey); }

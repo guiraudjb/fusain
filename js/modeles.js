@@ -1,6 +1,25 @@
 // Bibliothèque de modèles de départ (cahier des charges §5.5)
 
 import { DISPOSITIONS, codeInitial } from './diagrammes/diapo.js';
+import { codeInitial as carteInitiale } from './diagrammes/carte.js';
+
+// Population municipale 2022 (INSEE, recensement repris dans ADMIN EXPRESS 2025), pour les cartes d'exemple
+const POPULATION_DEPARTEMENTS = `
+01:671289 02:525558 03:334715 04:167179 05:141677 06:1114579 07:333229 08:267204 09:155339 10:311076 11:377773 12:279736 13:2069811 14:704605
+15:144399 16:351603 17:668160 18:299496 19:240120 21:537577 22:609598 23:115529 24:416325 25:548662 26:521432 27:601305 28:432950 29:927912 2A:166045
+2B:185231 30:764010 31:1456261 32:192649 33:1674980 34:1217331 35:1109232 36:216809 37:616326 38:1291380 39:258405 40:428427 41:328953 42:772041
+43:228161 44:1473156 45:687063 46:175620 47:332226 48:76503 49:828151 50:496815 51:564107 52:169865 53:305437 54:732898 55:180745 56:776103 57:1050721
+58:202299 59:2616909 60:830725 61:276144 62:1460184 63:664385 64:699473 65:231453 66:492964 67:1156963 68:767800 69:1907982 70:233920 71:549136
+72:566129 73:445288 74:849583 75:2113705 76:1260205 77:1452399 78:1470778 79:375415 80:565540 81:396168 82:264924 83:1108364 84:568702 85:706343
+86:438688 87:372438 88:358700 89:333896 90:140082 91:1324546 92:1647435 93:1681725 94:1419531 95:1270845 971:383569 972:361019 973:288382 974:881348
+976:256518 NR:48099`;
+const POPULATION_METROPOLE_LYON = `
+69003:3013 69029:42850 69033:2951 69034:43479 69040:6124 69044:5272 69046:4670 69063:4604 69068:2541 69069:12170 69071:1186 69072:8980 69081:18019
+69085:1549 69087:3070 69088:7005 69089:15664 69091:20943 69096:9941 69100:8909 69116:3933 69117:3193 69123:520774 69127:3711 69142:6554 69143:7807
+69149:37928 69153:1394 69163:3620 69168:1546 69191:6113 69194:7405 69199:19549 69202:21893 69204:21329 69205:5370 69207:3037 69233:1241 69244:22819
+69250:4460 69256:52448 69259:66701 69260:5175 69266:162207 69271:11214 69273:11196 69275:29905 69276:9727 69278:5632 69279:6109 69282:36437
+69283:13716 69284:3270 69286:31479 69290:49193 69292:7039 69293:2418 69296:3131`;
+const paires = (texte) => texte.trim().split(/\s+/).map((p) => { const [code, valeur] = p.split(':'); return [code, Number(valeur)]; });
 
 export const CATEGORIES = [
     ['processus', 'Processus et structure'],
@@ -8,6 +27,7 @@ export const CATEGORIES = [
     ['donnees', 'Analyse et données'],
     ['architecture', 'Ingénierie et architecture'],
     ['diapos', 'Diapositives de texte (charte de l\'État)'],
+    ['cartes', 'Cartes (moteur de SimpleCarto)'],
 ];
 
 export const MODELES = [
@@ -307,6 +327,12 @@ Transition ecologique,Mobilite,150
 ` },
     // Diapositives de texte : une page par mise en page, reprises des diapositives libres de VALOR
     ...Object.entries(DISPOSITIONS).map(([id, d]) => ({ id: `diapo-${id}`, categorie: 'diapos', nom: d.nom, code: codeInitial(id) })),
+    // Cartes : une par échelle demandée, avec des données réelles là où le fond les fournit
+    { id: 'carte-monde', categorie: 'cartes', nom: 'Monde', code: carteInitiale('monde', '', [], { etiquettes: 'aucune' }) },
+    { id: 'carte-region-du-monde', categorie: 'cartes', nom: 'Région du monde', code: carteInitiale('region-du-monde', 'UEURO', [], { 'taille-etiquettes': 9 }) },
+    { id: 'carte-france', categorie: 'cartes', nom: 'France (départements)', code: carteInitiale('france', '', paires(POPULATION_DEPARTEMENTS), { etiquettes: 'aucune' }) },
+    { id: 'carte-region', categorie: 'cartes', nom: 'Région (départements)', code: carteInitiale('region', '53', paires(POPULATION_DEPARTEMENTS).filter(([c]) => ['22', '29', '35', '56'].includes(c)), { etiquettes: 'nom-valeur', 'taille-etiquettes': 14 }) },
+    { id: 'carte-epci', categorie: 'cartes', nom: 'EPCI (communes)', code: carteInitiale('epci', '200046977', paires(POPULATION_METROPOLE_LYON), { etiquettes: 'aucune' }) },
 ];
 
 export const MODELE_INITIAL = MODELES[0];

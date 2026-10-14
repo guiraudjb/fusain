@@ -16,7 +16,7 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="stylesheet" href="./libs/dsfr-v1.15.4/dsfr.min.css" integrity="sha384-pSuXpWGkpqKPyjAvU65RYbgM3zqf8TFZLBvox8Ykh2FqYyjnDbN7H+QUVrYIhOTa">
     <link rel="stylesheet" href="./libs/dsfr-v1.15.4/utility/icons/icons.min.css" integrity="sha384-S+ttVpcWWHLn1CEGnBmT+A2KKDlXcNJ/vo6Qh/XYK7/0Lo+X/gM2k1vf5fDkssFu">
-    <link rel="stylesheet" href="./css/fusain.css" integrity="sha384-WT+TPTzBwXGmOENytK++mHZKNNk6gOMifOD4IwcCM4LSREDbKCNkoRbVS7uRMF5H">
+    <link rel="stylesheet" href="./css/fusain.css" integrity="sha384-eiacDF3ecQGqFzM78kN9lg93/NDal6bqQM7T37s654PPcOxkglLo/jsnJJ5FczUU">
 </head>
 <body>
     <div class="fr-skiplinks">
@@ -102,16 +102,20 @@
     <input type="file" id="fusain-fichier" accept=".json,.mmd,.txt,application/json,text/plain" hidden>
 
     <script src="./libs/dompurify-v3.4.17/purify.min.js" integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx"></script>
-    <script src="./js/confiance.js" integrity="sha384-XfbevqnEtwHDmYAJGF6OU4qN79KAZ8DJ+udhb66yDQGzwhNOO8Oprf/L6TOI2qyz"></script>
+    <script src="./js/confiance.js" integrity="sha384-0zSIN/PFtxzhQ36k7fComEtAcEggQ+kiUEYgciM/IkqFeGMfRo7qxD+6jiKmbvXk"></script>
     <script src="./libs/mermaid-v12.1.0/mermaid.min.js" integrity="sha384-EbBpjO7rlR6eqZEcG7GaPpyk9H9WrMyPWX4d3KvPYltgt8Z8l0z6R56B1qP40pR4"></script>
     <!-- Extension ZenUML de Mermaid : déclarée ici pour son empreinte, chargée seulement quand une page en a besoin (js/rendu.js) -->
     <!-- Icônes du DSFR pour les schémas d'architecture : même principe, lues à la première utilisation (js/icones.js) -->
     <link rel="fusain-extension" id="fusain-icones" href="./libs/dsfr-v1.15.4/icones-dsfr.json" integrity="sha384-R63ByrvoWH+lhU4ZVX5SlPGf0k2mrpK7hnq8CL9lQ/otWzOcZ6CjsBHtYQycA1Kb">
     <link rel="fusain-extension" id="fusain-illustrations" href="./icones/illustrees/index.json" integrity="sha384-lP+MoXRCur9RwGrPAI/E4efH0eM7zK/kxXqzavPdNYYjYILtTtSAGBdeEgf1a1Tk">
+    <!-- Cartes : D3, client TopoJSON et catalogue des fonds de carte, lus à la première carte (js/geo.js) -->
+    <link rel="fusain-extension" id="fusain-d3" href="./libs/d3-v7.9.0/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i">
+    <link rel="fusain-extension" id="fusain-topojson" href="./libs/topojson-client-v3.1.0/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67">
+    <link rel="fusain-extension" id="fusain-cartes" href="./cartes/index.json" integrity="sha384-2aSRiIAiVleX90DRw7WGIJ1Bf6Cl55mShh2VB+LTv5Lkzg9rPEPCh+rZsUQs3Cl6">
     <link rel="fusain-extension" id="fusain-zenuml" href="./libs/mermaid-zenuml-v1.0.1/mermaid-zenuml.min.js" integrity="sha384-0eYxYR32H2yKdNQgDXFSft9JyJx9jClfEFSiJQHZzy93z0DG4M7o9kQIPKQH/sYg">
     <script src="./libs/jspdf-v4.2.1/jspdf.umd.min.js" integrity="sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3"></script>
     <script src="./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js" integrity="sha384-7hc/mtl4lyRUMzYFqHxwNbYZwh27MESE5AWa2nEuVChLn8bCQcrn18OgGv9uHgzz"></script>
     <script type="module" src="./libs/dsfr-v1.15.4/dsfr.module.min.js" integrity="sha384-jKJord+a+yLY2qxYzr9YPM3D51W5+Np9Me4TM6BlIh4z5g6xhr3S4B44CIeN8rQ9"></script>
-    <script type="module" src="./js/app.js" integrity="sha384-Zq64tyIu/U2loQTvfoitfcWSDJLpM1sd45coJIivs1UYkc0bjc5YR8lDrBzFFVZO"></script>
+    <script type="module" src="./js/app.js" integrity="sha384-RzMIILDXMT9vHSjt7gST8TzyFgBuj9h164WEVrFC8YWL7LempPlUMTQxXVnXPMn7"></script>
 </body>
 </html>

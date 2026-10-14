@@ -1,17 +1,17 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:38b2b37c-c671-5f17-a10b-75c91f14093b",
+  "serialNumber": "urn:uuid:033995fe-811d-5da3-bb65-f51dc95cd249",
   "version": 1,
   "metadata": {
     "timestamp": "2026-10-14T00:00:00Z",
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.12.1",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.14.0",
       "name": "FUSAIN",
-      "version": "0.12.1",
+      "version": "0.14.0",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.12.1"
+      "purl": "pkg:github/guiraudjb/fusain@0.14.0"
     },
     "tools": {
       "components": [
@@ -1374,18 +1374,138 @@
           ]
         }
       ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/d3@7.9.0",
+      "name": "d3",
+      "version": "7.9.0",
+      "description": "Projections, tracés géographiques, échelles de couleurs et placement des étiquettes des cartes, chargé à la demande",
+      "purl": "pkg:npm/d3@7.9.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7e36605710a2ba54846797c8c6d888911341b215ae53257dc32a49a0b824355e"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/d3/-/d3-7.9.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/d3-v7.9.0"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/d3.min.js, identique à celui de SimpleCarto, et LICENSE. Chargé seulement quand une page contient une carte."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/d3-v7.9.0/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/d3-v7.9.0/d3.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/topojson-client@3.1.0",
+      "name": "topojson-client",
+      "version": "3.1.0",
+      "description": "Lecture des fonds de carte au format TopoJSON, chargé à la demande",
+      "purl": "pkg:npm/topojson-client@3.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "889fadb422f6236d0f8337a236ce6499f258b75e44b81733b13bd971067322bf"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "libs/topojson-client-v3.1.0"
+        },
+        {
+          "name": "fusain:note",
+          "value": "Fichier dist/topojson-client.min.js et LICENSE. SimpleCarto embarque le paquet complet topojson 3.0.2 ; seule la partie client est utile à FUSAIN."
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "libs/topojson-client-v3.1.0/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "libs/topojson-client-v3.1.0/topojson-client.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.12.1",
+      "ref": "pkg:github/guiraudjb/fusain@0.14.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.1.0",
         "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
         "pkg:npm/dompurify@3.4.17",
         "pkg:npm/jspdf@4.2.1",
-        "pkg:npm/svg2pdf.js@2.8.1"
+        "pkg:npm/svg2pdf.js@2.8.1",
+        "pkg:npm/d3@7.9.0",
+        "pkg:npm/topojson-client@3.1.0"
       ]
     },
     {
@@ -1410,6 +1530,14 @@
     },
     {
       "ref": "pkg:npm/svg2pdf.js@2.8.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/d3@7.9.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/topojson-client@3.1.0",
       "dependsOn": []
     }
   ]

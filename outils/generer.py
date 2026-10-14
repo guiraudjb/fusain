@@ -21,9 +21,12 @@ from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
 # Fichiers servis par l'application, donc mis en cache pour le fonctionnement hors ligne
-DOSSIERS_CACHE = ["css", "js", "libs", "icones", "sbom", "schema", "Documentation"]
+DOSSIERS_CACHE = ["css", "js", "libs", "icones", "sbom", "schema", "Documentation", "cartes"]
 FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
 EXCLUS = {"sbom/composants.json"}
+# Fonds de carte volumineux : hors du préchargement, téléchargés à la première carte qui en a besoin, mais vérifiés
+# par le service worker avant d'entrer dans son cache, comme le reste
+A_LA_DEMANDE = ("cartes/communes/", "cartes/calques/")
 
 
 def lire(chemin):
@@ -52,6 +55,10 @@ def fichiers_caches():
     return sorted(f for f in liste if f not in EXCLUS)
 
 
+def fichiers_a_la_demande():
+    return [f for f in fichiers_caches() if f.startswith(A_LA_DEMANDE)]
+
+
 def index_avec_sri():
     html = lire("index.html")
 
@@ -63,15 +70,16 @@ def index_avec_sri():
     html = re.sub(r'<script\b[^>]*\b(src)="\./((?:libs|js)/[^"]+)"[^>]*>', remplacer, html)
     html = re.sub(r'<link\b[^>]*rel="stylesheet"[^>]*\b(href)="\./((?:libs|css)/[^"]+)"[^>]*>', remplacer, html)
     # Bibliothèque chargée à la demande : la balise ne déclenche aucun chargement, elle porte l'adresse et l'empreinte
-    html = re.sub(r'<link\b[^>]*rel="fusain-extension"[^>]*\b(href)="\./((?:libs|icones)/[^"]+)"[^>]*>', remplacer, html)
+    html = re.sub(r'<link\b[^>]*rel="fusain-extension"[^>]*\b(href)="\./((?:libs|icones|cartes)/[^"]+)"[^>]*>', remplacer, html)
     return html
 
 
 def sw_genere(generes):
     num, _ = version()
-    fichiers = fichiers_caches()
+    fichiers = [f for f in fichiers_caches() if not f.startswith(A_LA_DEMANDE)]
     h = hashlib.sha256()
     lignes = []
+    demande = [f"    ['./{f}', '{empreinte(f).hexdigest()}']," for f in fichiers_a_la_demande()]
     for f in fichiers:
         # Les fichiers produits dans la même passe sont pris dans leur nouvel état
         contenu = generes[f].encode() if f in generes else (RACINE / f).read_bytes()
@@ -81,8 +89,9 @@ def sw_genere(generes):
         if f == "index.html":
             lignes.append(f"    ['./', '{empreinte_fichier}'],")
         lignes.append(f"    ['./{f}', '{empreinte_fichier}'],")
-    bloc = "/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\n// [chemin, empreinte SHA-256] de chaque fichier de la version\nconst FICHIERS = [\n%s\n];\n/* FIN-GENERE */" % (
-        num, h.hexdigest()[:10], "\n".join(lignes))
+    bloc = ("/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\n// [chemin, empreinte SHA-256] de chaque fichier de la version\nconst FICHIERS = [\n%s\n];\n"
+            "// Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement\nconst A_LA_DEMANDE = [\n%s\n];\n/* FIN-GENERE */") % (
+        num, h.hexdigest()[:10], "\n".join(lignes), "\n".join(demande))
     return re.sub(r"/\* DEBUT-GENERE \*/.*?/\* FIN-GENERE \*/", lambda _: bloc, lire("sw.js"), flags=re.S)
 
 

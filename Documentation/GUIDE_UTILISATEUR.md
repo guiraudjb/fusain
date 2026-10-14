@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§5).
+Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§6).
 
 **Gestes communs**
 
@@ -88,7 +88,21 @@ En plus des schémas, une page peut être une **diapositive de texte** : page de
 - Icônes : dans le sommaire, les colonnes, les chiffres clés, la frise et les blocs, chaque élément peut recevoir une icône (« Ajouter une icône… ») ; dans le texte libre, « Icône » ajoute un bloc icône. Ce sont les mêmes jeux que pour les schémas : icônes du DSFR et icônes illustrées.
 - Les images libres (photos, logos) ne sont pas prises en charge.
 
-## 4. La page
+## 4. Cartes
+
+Une page peut aussi être une **carte thématique**, avec le moteur de SimpleCarto : « Ajouter une page », rubrique « Cartes ». Cinq modèles servent de point de départ : monde, région du monde, France (départements), région (départements) et EPCI (communes) ; le panneau propose aussi la région détaillée à la commune, le département et la commune seule.
+
+- **Échelle et zone** : en tête du panneau. Selon l'échelle, choisissez la région du monde (ou « Pays ayant des données »), la région, le département, l'EPCI ou la commune.
+- **Données** : « Importer un fichier CSV… » lit un fichier séparé par des points-virgules, des virgules ou des tabulations. Indiquez la colonne des codes (INSEE pour les communes et départements, SIREN pour les EPCI, ISO à trois lettres pour les pays) et le calcul : valeur (somme par territoire), part du total, ratio de deux colonnes ou évolution de l'une à l'autre. À l'échelle des départements, un code de commune est ramené à son département. Seuls les territoires de la carte sont gardés.
+- Un **clic sur un territoire** le sélectionne : vous pouvez saisir ou corriger sa valeur, lui donner une étiquette à la place de son nom. Le double-clic modifie l'étiquette sur place.
+- **Couleurs** : dégradé Bleu France, deux palettes divergentes (vert-jaune-rouge et l'inverse) ou une palette personnalisée de deux ou trois couleurs ; couleurs du fond, des territoires voisins et des territoires sans donnée ; légende des valeurs.
+- **Étiquettes** : nom, valeur, ou les deux, placées sans chevauchement ; elles peuvent être limitées à certains noms ou codes, ou aux territoires dont la valeur de filtre passe un seuil (« >= 1000 »).
+- **Fonds de carte** (France métropolitaine) : relief, cours d'eau, voies ferrées, routes nationales.
+- **Épingles** (un point ou une icône à une latitude et une longitude, avec libellé et légende), **pictogrammes** (icônes du DSFR ou illustrées) et **annotations** (bulle de texte et flèche) : ajoutez-les depuis le panneau, puis glissez-les à la souris sur la carte ; pour une annotation, la bulle et la pointe de la flèche se déplacent séparément.
+
+Les contours des communes et les fonds de carte sont téléchargés à la première carte qui en a besoin, puis restent disponibles hors ligne. Comme dans SimpleCarto, les départements et régions d'outre-mer sont dessinés en encarts rapprochés de la métropole.
+
+## 5. La page
 
 Dans la colonne de droite, bloc « Page » : format (A4, A3), orientation, marges, titre, sous-titre, pied de page, taille et position du schéma.
 
@@ -98,7 +112,7 @@ FUSAIN vous avertit si le texte devient trop petit pour être lu une fois imprim
 
 Chaque page a son propre format : un même document peut mêler A4 et A3.
 
-## 5. Le mode code
+## 6. Le mode code
 
 Le bouton « Code » affiche le code Mermaid de la page à côté de l'aperçu, mis à jour pendant la frappe. En cas d'erreur, le dernier aperçu valide reste affiché et le message indique la ligne concernée.
 
@@ -106,7 +120,7 @@ L'étiquette au-dessus de l'éditeur indique si la page reste éditable visuelle
 
 Pour quitter la zone de code au clavier : Échap, puis Tab.
 
-## 6. Enregistrer et exporter
+## 7. Enregistrer et exporter
 
 - **Enregistrer** produit un fichier `.fusain.json` contenant tout le document. C'est votre sauvegarde : conservez-le.
 - **Ouvrir** recharge un tel fichier (ou glissez-le sur la fenêtre). Un fichier `.mmd` ou `.txt` contenant du code Mermaid est ajouté comme nouvelle page.
@@ -114,7 +128,7 @@ Pour quitter la zone de code au clavier : Échap, puis Tab.
 
 Le brouillon conservé automatiquement par le navigateur est une commodité, pas une sauvegarde : il disparaît si vous effacez les données du navigateur.
 
-## 7. Raccourcis
+## 8. Raccourcis
 
 | Touches | Effet |
 |---|---|
@@ -122,6 +136,6 @@ Le brouillon conservé automatiquement par le navigateur est une commodité, pas
 | Ctrl+S | Enregistrer |
 | Ctrl+O | Ouvrir |
 
-## 8. Hors ligne
+## 9. Hors ligne
 
 Après une première visite, FUSAIN fonctionne sans réseau et peut être installé comme une application depuis le menu du navigateur. Quand une nouvelle version est publiée, un bandeau propose la mise à jour.

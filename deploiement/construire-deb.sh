@@ -18,7 +18,7 @@ WWW="$PAQUET/var/www/html/FUSAIN"
 mkdir -p "$PAQUET/DEBIAN" "$WWW" "$PAQUET/etc/nginx/sites-available" "$PAQUET/usr/share/doc/fusain-server"
 
 # Seuls les fichiers servis par l'application sont livrés : ni outils, ni tests, ni dépôt
-cp -r index.html manifest.webmanifest sw.js css js libs icones sbom schema Documentation \
+cp -r index.html manifest.webmanifest sw.js css js libs icones cartes sbom schema Documentation \
       FUSAIN_cahier_des_charges.md NOMENCLATURE_LOGICIELLE_FUSAIN.md JOURNAL_DES_VERSIONS.md "$WWW/"
 rm -f "$WWW/sbom/composants.json"
 cp README.md "$PAQUET/usr/share/doc/fusain-server/"

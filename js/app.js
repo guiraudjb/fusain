@@ -10,6 +10,7 @@ import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './br
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
 import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
+import { rendreMarkdown } from './markdown.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -300,6 +301,7 @@ function brancherDeplacement() {
         const { editeur, modele } = vue;
         const marque = e.target.closest?.('[data-fusain]');
         if (ui.mode !== 'visuel' || !modele || !editeur.deplacer || !marque || e.button !== 0) return;
+        if (editeur.deplacable && !editeur.deplacable(marque.getAttribute('data-fusain'))) return;
         const zone = editeur.zoneDeplacement(zones.feuille.querySelector('.fusain-schema'));
         if (!zone) return;
         glisse = { cle: marque.getAttribute('data-fusain'), x: e.clientX, y: e.clientY, bouge: false, zone: zone.getBoundingClientRect() };
@@ -675,8 +677,26 @@ function ouvrirExport() {
 
 // ---------- À propos ----------
 
+// Les documents joints sont mis en forme dans une modale ; le lien garde son adresse, pour l'ouverture dans un nouvel onglet
+async function ouvrirDocument(chemin, titre) {
+    try {
+        const reponse = await fetch(chemin);
+        if (!reponse.ok) throw new Error(`document introuvable (${reponse.status})`);
+        const contenu = rendreMarkdown(await reponse.text());
+        const retour = bouton('Retour à « À propos »', { variante: 'secondary', taille: 'md', icone: 'arrow-go-back-line', onclick: ouvrirAPropos });
+        ouvrirModale(modale('fusain-modale-document', titre, contenu, [retour]));
+    } catch (e) {
+        message('Document illisible', `${titre} : ${e.message}.`, 'error', 12000);
+    }
+}
+
 function ouvrirAPropos() {
     const lien = (href, texte) => h('a', { class: 'fr-link', href, target: '_blank', rel: 'noopener noreferrer' }, texte);
+    const document_ = (href, texte) => h('a', { class: 'fr-link', href, onclick: (e) => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        e.preventDefault();
+        ouvrirDocument(href, texte);
+    } }, texte);
     const raccourcis = [
         ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer en JSON'], ['Ctrl+O', 'Ouvrir un fichier'],
         ['Flèches', 'Parcourir les éléments du schéma'], ['Entrée ou F2', 'Renommer l\'élément sélectionné'],
@@ -687,9 +707,9 @@ function ouvrirAPropos() {
         h('p', { class: 'fr-text--sm' }, 'Fabrique Universelle de Schémas Accessibles, Intuitifs et Normés. Tous les traitements (rendu, mise en page, export, sauvegarde) s\'exécutent dans votre navigateur : aucun schéma, aucun texte ne quitte votre poste.'),
         h('h2', { class: 'fr-h6' }, 'Documentation'),
         h('ul', {},
-            h('li', {}, lien('./Documentation/GUIDE_UTILISATEUR.md', 'Guide utilisateur')),
-            h('li', {}, lien('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
-            h('li', {}, lien('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+            h('li', {}, document_('./Documentation/GUIDE_UTILISATEUR.md', 'Guide utilisateur')),
+            h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
+            h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
         h('h2', { class: 'fr-h6' }, 'Raccourcis clavier'),
         h('div', { class: 'fr-table fr-table--sm' }, h('table', {}, h('tbody', {}, raccourcis.map(([touche, effet]) => h('tr', {}, h('td', {}, h('kbd', {}, touche)), h('td', {}, effet)))))),
         h('h2', { class: 'fr-h6' }, 'Données locales'),

@@ -28,8 +28,10 @@
             createScriptURL: function (url) {
                 var cible = new URL(String(url), document.baseURI);
                 if (cible.origin === location.origin && /\/sw\.js$/.test(cible.pathname)) return cible.href;
-                // Seule bibliothèque chargée à la demande : l'extension ZenUML, avec contrôle de son empreinte (js/rendu.js)
+                // Bibliothèques chargées à la demande, avec contrôle de leur empreinte : l'extension ZenUML (js/rendu.js),
+                // D3 et le client TopoJSON pour les cartes (js/geo.js)
                 if (cible.origin === location.origin && /\/libs\/mermaid-zenuml-v[0-9.]+\/mermaid-zenuml\.min\.js$/.test(cible.pathname)) return cible.href;
+                if (cible.origin === location.origin && /\/libs\/(d3-v[0-9.]+\/d3|topojson-client-v[0-9.]+\/topojson-client)\.min\.js$/.test(cible.pathname)) return cible.href;
                 throw new TypeError('FUSAIN : chargement de script refusé (' + cible.href + ').');
             },
         });

@@ -3,14 +3,20 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.12.1-c0e54aa239';
+const VERSION_CACHE = 'fusain-0.14.0-16808cee98';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', '1f767b9600d74895cd649d8a2e39890ce85b6e12aed5a6add02ffb8b97f7eca3'],
-    ['./FUSAIN_cahier_des_charges.md', '23bd34fc66cf037534236dd1b3e6d597d10aa8d748a52b6c5f92da2b4fbadc8a'],
-    ['./JOURNAL_DES_VERSIONS.md', '848fc321cc9129005777aeebb86497f63c14bf2bc7e2bcbd74490ce0083c6340'],
-    ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'd49126064eb6f5c5f88f4e33f090b34c3316f89193b102491e69eae8e02c0f6a'],
-    ['./css/fusain.css', '0c3dfacc404d132e45dce92089ee0b94db512d4a2e53edf76eac19bfcc4314cf'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', '097ed9da6e39769cd0aec9f492ba858f65ce263f4894aef1d4caa9b8c1165a28'],
+    ['./FUSAIN_cahier_des_charges.md', '5790663ca747c4568b34ac4d80d57ca3c04ae1894f6a9bca0df5b0fcf29130ca'],
+    ['./JOURNAL_DES_VERSIONS.md', '791f8dcfd0d2064ae42f820c1fd60c78e17e2a49ed454035ca250656006cd785'],
+    ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'c03ee569bf854a8480a2191915cee53c8e28032d4592ce478e23e417bed0ccec'],
+    ['./cartes/LICENCE.txt', '80974e28b9d7994e04a4757c74aa1c669460bb3d0a8458492f54858cc415158e'],
+    ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
+    ['./cartes/epci.json', '70aae5470b7f9f1e94f8222cec912ee533ec88349d4fc5b27de3d9b1db257332'],
+    ['./cartes/index.json', 'e39c23dfbcb6ab0e51b2d142825bedd1e55f9dce0ef4f6faff3fff8615ba3465'],
+    ['./cartes/monde.json', 'd3a4565c2e995afa458d4b2a71351295c9c391c068bdc6d10efc3177794d84e0'],
+    ['./cartes/regions-du-monde.json', '5d5472cd7eb79f1538e61855cd14dbeef92e4d74497d3c1b5666ca72ecdce2a1'],
+    ['./css/fusain.css', 'd381a150a1c86d89d868960313188330ca95aab0073384b2b3ac3bfbb0e96398'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
     ['./icones/fusain-512.png', '5305d17891b39cef137db3273833527db43460ba67be57d569888016df709a1a'],
     ['./icones/fusain.svg', 'd08a962fa1876ac73c1d7991d1850d5673ea70bf960953c69b4d9f89c7dc01ef'],
@@ -34,15 +40,17 @@ const FICHIERS = [
     ['./icones/illustrees/secours.json', 'c33d8495f55ae073a403533159ba1d0c7859989875600e5a3f46a70fb14a9a07'],
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
-    ['./', 'c454a3072189652cc72d02265b2d04dd861c4ce0a699ded859d017bf67ffdb43'],
-    ['./index.html', 'c454a3072189652cc72d02265b2d04dd861c4ce0a699ded859d017bf67ffdb43'],
-    ['./js/app.js', '59e42ce8de3bbcb1a6c6df7c88beee174837415f26c0f74f3fdc2bb4c7a30887'],
+    ['./', '9d0ce3a11b8a588d1b8422059e537e569f9345a1654785aede209c8796807d3d'],
+    ['./index.html', '9d0ce3a11b8a588d1b8422059e537e569f9345a1654785aede209c8796807d3d'],
+    ['./js/app.js', '4a6e04b4852926f78800a7ef748c45b4ac35ebe782967162130278f32ad0d956'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
-    ['./js/confiance.js', '9b6028042a8bd5274e3531a15e9728392772a718fbee6be2948478dc77885981'],
+    ['./js/carte.js', 'c0986d8ccbfc12616bfa4e13bdef27af3fd6932de3e51a538d5302bd4d59dae8'],
+    ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
     ['./js/diagrammes/architecture.js', '4b5b75f8a7ae0194fa90346006ca61e0b63a2fce3914283dd1be736ccae1f929'],
     ['./js/diagrammes/blocs.js', '9a977fc44de97533048a0105b1f5338d78ad0d3323d5b64cc728860f3b62ef45'],
     ['./js/diagrammes/c4.js', '00a5e84119055949f6a5a5eec422d0372cb900902153fac4104b475ac1b33afc'],
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
+    ['./js/diagrammes/carte.js', 'a9ae329776ff6394ded8c21d48c47376310988b617190e8ec9fa89dc093fcab8'],
     ['./js/diagrammes/classes.js', '4ca44e5795d360ac03737f514316faae6ff76349cc960724810d6d2f9dfa04aa'],
     ['./js/diagrammes/commun.js', '5a6f1399ec1d6c451a4f985003115928095d2b478f9b6f147c5ce349da2366e6'],
     ['./js/diagrammes/diapo.js', '2c4c800a2603d6a7f9ec9692cb8e06fad3c4350ddbea50852b0b065119ad175e'],
@@ -53,7 +61,7 @@ const FICHIERS = [
     ['./js/diagrammes/frise.js', '34223332b4b649593da06cc6d1741f54366edcb2d26ae88bbad80ea02474a8d4'],
     ['./js/diagrammes/gantt.js', 'b22c669088374d9de3bfe16b4cf2197bca5af9975abd58256d726c13f8ce1da5'],
     ['./js/diagrammes/graphique.js', 'a3578a4bea1d4963882ed23c4e778bae08c0edd782509549e05b067829660f97'],
-    ['./js/diagrammes/index.js', '636f8d37872f1068ef1cb8db33689651e884dfcb6f2b2fafef3122d89e763710'],
+    ['./js/diagrammes/index.js', 'a37807762cbc35c97761c44e60115af2ff8b10ad5734ed507866ddd7890dd0bf'],
     ['./js/diagrammes/kanban.js', 'c1f4995552f040f945d4cf45d3458b8299382ecb5c4bbd88e7aa16809a5b6fda'],
     ['./js/diagrammes/logigramme.js', '372937e362f006eed4ce2cb781a3a89745f6e196f3363d3837d6757ad2d2cc15'],
     ['./js/diagrammes/mentale.js', 'd27e5699c65bc10e29d9c767da73038403d4356aa14a0fc192b1eb27cc4d5fed'],
@@ -66,17 +74,21 @@ const FICHIERS = [
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/diagrammes/zenuml.js', '2af815e497545725741b2ffbbc7eb38c821941c20d4a7c587cb9ae48f7ebc49f'],
     ['./js/diapo.js', 'ad2e583965e50443acc38b361d5d9e5216f73bec8f581fe394869b6e9bfb105b'],
-    ['./js/dom.js', '8c514120093236dcf7e843d2d073857f0bda91e5252e002be6ab29dbbfd9c957'],
+    ['./js/dom.js', '5fcda744fa2c0fb3542c7f52b2c8c2274f90cf1e9645a9d3364d27900b4fd01c'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
     ['./js/export.js', '8b932df21aa83c7822769968dc28404e3857e412ca710c03908dab69bc64bc04'],
-    ['./js/fichier.js', '2a25b930069c412777c38d8e14e93af4ae9231817e9b1bbd99fa1bd589df6712'],
+    ['./js/fichier.js', '9f8be26e831b0338419583703e5a2b1b9c839195bbf238e672b0fc8a3f4fb0f6'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
+    ['./js/geo.js', '8d9aa01631390db1d1e83ff7869803fa29bf2a82849edc98bd6e74211342f99a'],
     ['./js/icones.js', '0659879af168a36cc8137d3a4901b5c91e34373751a7fa946d127b1ce7fc3bac'],
     ['./js/illustrations.js', '9fc9af6eb7298523b72ab66ee843eb6ef35c758ce27c230d7d5a043a9d133eec'],
-    ['./js/modeles.js', '461418bd392700acb69bdd3d478560aa19942b4a71db3ba5a14af0251583aa7b'],
-    ['./js/rendu.js', 'b39f7624bbe8f1b1e4ac810d3fea7caaaeb9ffbc815ab2c8697b34f0628037b7'],
-    ['./js/securite.js', 'b972bb2f200e484363286868df7c527ca344b11893d74fc80f449e386894dd7c'],
-    ['./js/version.js', 'c87de4282f1e4544bfbd17b4a13036f97fc3e798f6fc5207573e9c15c1d802b7'],
+    ['./js/markdown.js', '460de07eb055b1f3615b63649418f17c5ccc424fcaa9d37cf65b6f9033f0f601'],
+    ['./js/modeles.js', '8aa31c9b195a0b7300c16fd08273124e4f990e42595814172b57d3c2b111137e'],
+    ['./js/rendu.js', 'c7f545ef0fdefd8120c9f4eb03bd7b321877509e379955de85f57325b2e9ce37'],
+    ['./js/securite.js', 'd76de55bb8fd6b4bce36d31af62d2fc811646318999eecae0d94e5173f0908fe'],
+    ['./js/version.js', '87aedd24ae9651ffc1d18ed3e00d2573b540192a4f091d05608b132d8bc50324'],
+    ['./libs/d3-v7.9.0/LICENSE', '3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4'],
+    ['./libs/d3-v7.9.0/d3.min.js', 'f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -189,21 +201,61 @@ const FICHIERS = [
     ['./libs/mermaid-zenuml-v1.0.1/mermaid-zenuml.min.js', 'f75662869d22aac58870e52370fe4c46b89b9710bf4b03df93b3227b5e18e730'],
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
+    ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
+    ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', 'a0b85e1e9927baa0621887b5c4ef58e22a99d15f4161a38ab138c23f86a912d7'],
+    ['./sbom/fusain-sbom-cyclonedx.json', 'c21ebfc88c361d6eefa633f810b38863bbba7eeec4ccd6981a3329f5aa2ab2d8'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
+];
+// Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement
+const A_LA_DEMANDE = [
+    ['./cartes/calques/hydro.json', '7577091d8eac0152b73c771faa2b73df22eef19ed57252e86c6fe212364e0549'],
+    ['./cartes/calques/rail.json', 'c3ac8988dd84fbb70cf5a10b110aaeb2ecf8027dad56c7284395ba194adf790d'],
+    ['./cartes/calques/relief.png', 'ec088ab9c14ba59917edd6f1c8f63d6201d9a921858350419dc47f589e27c185'],
+    ['./cartes/calques/routes.json', '1bbc6b7d19c5ad9f96d1f39a3aaee62d8c241a21dc23ea5f62b7638751d43580'],
+    ['./cartes/communes/01.json', '71874784c40a254d8c63e06df2239b80c5edc5a4d174bfaab7024f1df2c3aab7'],
+    ['./cartes/communes/02.json', '3eea38113a3daf3ac2f8c7445b2dd8c841c4935b32979896057d06e1a1d1aa12'],
+    ['./cartes/communes/03.json', '3820a0d0a8a59b45cbb9a1b15644fc50f57d95d278610455c554b9877a449768'],
+    ['./cartes/communes/04.json', 'eeadf552c854e732f7254a6c296f9879e29d01bbd22844012a84b3bbc90bfeb4'],
+    ['./cartes/communes/06.json', '56c32d259b0b0c7418d99a03c74471493562a62f9510e9187698faa196e86606'],
+    ['./cartes/communes/11.json', '39a9df850726ac3fd7d993dacc6854e7ad5c82754635e6b1a7810cc7943ce8d9'],
+    ['./cartes/communes/24.json', 'b4135a2fc7aee9035ba4a1cdfa20028340206aa36b23977a028fea989031d622'],
+    ['./cartes/communes/27.json', 'cac8b549409e4be8290bf966bbfb18aff4029c52da689d55254c703633d1be74'],
+    ['./cartes/communes/28.json', '6aedf71c06d75b781ba5358a1c80c2ad3ce929fe3d4d42ba4946654a6ebded1f'],
+    ['./cartes/communes/32.json', 'cbc9a61504e3dd1a774c4aceb1c7151c5d700ebd23c226b953696e8b5a101f81'],
+    ['./cartes/communes/44.json', '9f5034ea1d415df0cded5814dcbefbb5afdd4db1fe81f8d97bb2998dc1cd8b94'],
+    ['./cartes/communes/52.json', 'ba804068f89648cfb86acc8830cbb7640776c01f42b0c4e08dd2eef5405b2fe9'],
+    ['./cartes/communes/53.json', 'efcf594529947654cbb8082b71ee8722de60466281717b5a23079d5d324143b6'],
+    ['./cartes/communes/75.json', '0bcf1a8e4b328427700d3f445b6ed8411c3141499c948ba18d95a0d6acaae038'],
+    ['./cartes/communes/76.json', '9d5c8a1786a867cdb2c0e9161169fbe958d15d17ad6966d2b6b646962b01b482'],
+    ['./cartes/communes/84.json', 'e92b17ba4e893ee071783c34d4ecbf18a425ccd5eb9c9d15987097fe6b5b64ce'],
+    ['./cartes/communes/93.json', '151d0dc3d83865c99be316daf565845e77fdf9e572db9253a312cf2ac6f43db6'],
+    ['./cartes/communes/94.json', 'dc222e814599bf6f5a4523a4b2ed89bfa45e463d77a03f5988fc45c03458ee45'],
 ];
 /* FIN-GENERE */
 
+const CACHE_DONNEES = 'fusain-donnees';
+const EMPREINTES_A_LA_DEMANDE = new Map(A_LA_DEMANDE.map(([chemin, empreinte]) => [new URL(chemin, self.location).pathname, empreinte]));
+
 // Chaque fichier est vérifié avant d'entrer dans le cache : si un seul ne correspond pas à son empreinte
 // (fichier altéré, publication incomplète), l'installation échoue et la version précédente reste en service.
-async function telechargerVerifie(cache, [chemin, attendue]) {
+async function telechargerVerifie(cache, [chemin, attendue], cle = chemin) {
     const reponse = await fetch(new Request(chemin, { cache: 'reload' }));
     if (!reponse.ok) throw new Error(`FUSAIN : ${chemin} introuvable (${reponse.status})`);
     const condense = await crypto.subtle.digest('SHA-256', await reponse.clone().arrayBuffer());
     const empreinte = [...new Uint8Array(condense)].map((o) => o.toString(16).padStart(2, '0')).join('');
     if (empreinte !== attendue) throw new Error(`FUSAIN : intégrité non vérifiée pour ${chemin}`);
-    await cache.put(chemin, reponse);
+    await cache.put(cle, reponse.clone());
+    return reponse;
+}
+
+// Fond de carte lu à la demande : rangé sous une clé qui porte son empreinte, il reste valable d'une version à l'autre
+// tant que le fichier ne change pas
+const cleDonnees = (chemin, empreinte) => `${chemin}?empreinte=${empreinte}`;
+async function servirALaDemande(chemin, empreinte) {
+    const cache = await caches.open(CACHE_DONNEES);
+    const cle = cleDonnees(chemin, empreinte);
+    return (await cache.match(cle)) || telechargerVerifie(cache, [chemin, empreinte], cle);
 }
 
 self.addEventListener('install', (evenement) => {
@@ -217,7 +269,13 @@ self.addEventListener('install', (evenement) => {
 self.addEventListener('activate', (evenement) => {
     evenement.waitUntil(
         caches.keys()
-            .then((cles) => Promise.all(cles.filter((c) => c.startsWith('fusain-') && c !== VERSION_CACHE).map((c) => caches.delete(c))))
+            .then((cles) => Promise.all(cles.filter((c) => c.startsWith('fusain-') && c !== VERSION_CACHE && c !== CACHE_DONNEES).map((c) => caches.delete(c))))
+            // Les fonds de carte qui n'appartiennent plus à la version sont retirés
+            .then(() => caches.open(CACHE_DONNEES))
+            .then(async (cache) => {
+                const valides = new Set([...EMPREINTES_A_LA_DEMANDE].map(([chemin, empreinte]) => new URL(cleDonnees(chemin, empreinte), self.location).href));
+                await Promise.all((await cache.keys()).filter((r) => !valides.has(r.url)).map((r) => cache.delete(r)));
+            })
             .then(() => self.clients.claim()),
     );
 });
@@ -232,6 +290,11 @@ self.addEventListener('fetch', (evenement) => {
     const url = new URL(requete.url);
     // Seules les lectures de la même origine sont servies : rien ne sort, rien d'extérieur n'entre
     if (requete.method !== 'GET' || url.origin !== self.location.origin) return;
+    const empreinte = EMPREINTES_A_LA_DEMANDE.get(url.pathname);
+    if (empreinte) {
+        evenement.respondWith(servirALaDemande(url.pathname, empreinte));
+        return;
+    }
     evenement.respondWith(
         caches.open(VERSION_CACHE).then(async (cache) => {
             // Seule l'adresse de l'application rend la page d'entrée : les documents joints (guide, cahier des charges,

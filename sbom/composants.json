@@ -66,6 +66,28 @@
       "archiveSha256": "5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a",
       "dossier": "libs/svg2pdf-v2.8.1",
       "note": "Fichier dist/svg2pdf.umd.min.js."
+    },
+    {
+      "nom": "d3",
+      "version": "7.9.0",
+      "licence": "ISC",
+      "role": "Projections, tracés géographiques, échelles de couleurs et placement des étiquettes des cartes, chargé à la demande",
+      "purl": "pkg:npm/d3@7.9.0",
+      "archive": "https://registry.npmjs.org/d3/-/d3-7.9.0.tgz",
+      "archiveSha256": "7e36605710a2ba54846797c8c6d888911341b215ae53257dc32a49a0b824355e",
+      "dossier": "libs/d3-v7.9.0",
+      "note": "Fichier dist/d3.min.js, identique à celui de SimpleCarto, et LICENSE. Chargé seulement quand une page contient une carte."
+    },
+    {
+      "nom": "topojson-client",
+      "version": "3.1.0",
+      "licence": "ISC",
+      "role": "Lecture des fonds de carte au format TopoJSON, chargé à la demande",
+      "purl": "pkg:npm/topojson-client@3.1.0",
+      "archive": "https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz",
+      "archiveSha256": "889fadb422f6236d0f8337a236ce6499f258b75e44b81733b13bd971067322bf",
+      "dossier": "libs/topojson-client-v3.1.0",
+      "note": "Fichier dist/topojson-client.min.js et LICENSE. SimpleCarto embarque le paquet complet topojson 3.0.2 ; seule la partie client est utile à FUSAIN."
     }
   ]
 }

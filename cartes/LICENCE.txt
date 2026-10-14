@@ -1,0 +1,11 @@
+Données géographiques des diapositives de carte de FUSAIN, reprises de SimpleCarto (outils/cartes.py).
+
+- Contours des communes, arrondissements municipaux, départements et régions : IGN, ADMIN EXPRESS 2025,
+  Licence Ouverte / Open Licence 2.0 (Etalab). Arrondissements municipaux : geo.api.gouv.fr, même licence.
+- Composition des EPCI au 1er janvier 2025 : INSEE, Licence Ouverte / Open Licence 2.0 (Etalab).
+- Hydrographie, voies ferrées et routes nationales : IGN, BD TOPO, Licence Ouverte / Open Licence 2.0 (Etalab).
+- Relief (estompage) : IGN, Géoplateforme, Licence Ouverte / Open Licence 2.0 (Etalab).
+- Pays du monde : Natural Earth, 1:110 000 000, domaine public ; noms français : paquet iso-codes (LGPL-2.1).
+- Regroupements de pays (régions du monde) : SimpleCarto.
+
+Les fichiers ont été simplifiés (propriétés réduites, découpage par région) ; les tracés ne sont pas modifiés.

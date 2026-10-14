@@ -36,6 +36,8 @@ FUSAIN est un ensemble de fichiers statiques exécutés dans le navigateur. Il n
 | DSFR (`@gouvfr/dsfr`) | 1.15.4 | Système de Design de l'État : styles, script, police Marianne, icônes | Etalab-2.0 | Sous-ensemble de `dist/` : `dsfr.min.css`, `dsfr.module.min.js`, polices WOFF2, favicon, icônes utilisées | `libs/dsfr-v1.15.4/` |
 | Mermaid | 12.1.0 | Analyse et rendu des diagrammes | MIT | `dist/mermaid.min.js` | `libs/mermaid-v12.1.0/` |
 | Extension ZenUML de Mermaid (`@mermaid-js/mermaid-zenuml`) | 1.0.1 | Diagrammes de séquence ZenUML ; chargée seulement quand une page en contient un | MIT | `dist/mermaid-zenuml.min.js`, `LICENSE` | `libs/mermaid-zenuml-v1.0.1/` |
+| D3 | 7.9.0 | Projections, tracés, échelles de couleurs et placement des étiquettes des cartes ; chargé seulement quand une page contient une carte | ISC | `dist/d3.min.js`, `LICENSE` | `libs/d3-v7.9.0/` |
+| topojson-client | 3.1.0 | Lecture des fonds de carte TopoJSON ; chargé avec D3 | ISC | `dist/topojson-client.min.js`, `LICENSE` | `libs/topojson-client-v3.1.0/` |
 | DOMPurify | 3.4.17 | Assainissement du SVG avant insertion dans la page | MPL-2.0 ou Apache-2.0 | `dist/purify.min.js` | `libs/dompurify-v3.4.17/` |
 | jsPDF | 4.2.1 | Génération du fichier PDF | MIT | `dist/jspdf.umd.min.js` | `libs/jspdf-v4.2.1/` |
 | svg2pdf.js | 2.8.1 | Conversion vectorielle SVG → PDF | MIT | `dist/svg2pdf.umd.min.js` | `libs/svg2pdf-v2.8.1/` |
@@ -49,6 +51,8 @@ Chaque composant provient de l'archive officielle du registre npm, dont l'emprei
 | DSFR | `https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz` | `e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb` |
 | Mermaid | `https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz` | `3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a` |
 | Extension ZenUML | `https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz` | `ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a` |
+| D3 | `https://registry.npmjs.org/d3/-/d3-7.9.0.tgz` | `7e36605710a2ba54846797c8c6d888911341b215ae53257dc32a49a0b824355e` |
+| topojson-client | `https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz` | `889fadb422f6236d0f8337a236ce6499f258b75e44b81733b13bd971067322bf` |
 | DOMPurify | `https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz` | `056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7` |
 | jsPDF | `https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz` | `e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a` |
 | svg2pdf.js | `https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz` | `5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a` |
@@ -64,7 +68,13 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 - **Dépendances incluses dans l'extension ZenUML** — `mermaid-zenuml.min.js` (3,2 Mo) est une distribution autonome qui contient `@zenuml/core` (3.47.9 ou plus récent à sa date de construction, le 18 septembre 2026), React 19.2.3, marked et un analyseur ANTLR. Le fichier ne contient ni `eval` ni `new Function`, produit du SVG sans HTML incorporé, et n'émet aucune requête. Il n'est pas chargé au démarrage : `index.html` n'en porte que l'adresse et l'empreinte, et `js/rendu.js` le charge, empreinte contrôlée par le navigateur, à la première page ZenUML.
 - **Dépendances optionnelles de jsPDF** — html2canvas, canvg et dompurify ne sont ni embarquées ni chargées : la fonction `html()` de jsPDF n'est pas utilisée.
 
-### 2.3 Icônes illustrées
+### 2.3 Fonds de carte
+
+`cartes/` contient les données géographiques des cartes, reprises de SimpleCarto et préparées par `python3 outils/cartes.py` : pays du monde (Natural Earth, domaine public ; noms français du paquet iso-codes), départements et contours communaux (IGN, ADMIN EXPRESS 2025), composition des EPCI (INSEE), relief, cours d'eau, voies ferrées et routes nationales (IGN), tous sous Licence Ouverte 2.0 sauf mention contraire (`cartes/LICENCE.txt`). Ce sont des données, pas du code : aucun fichier ne contient autre chose que des coordonnées, des codes et des noms, et les noms sont toujours écrits comme du texte. Le catalogue `cartes/index.json` porte l'empreinte de chaque fichier et est lui-même contrôlé par `index.html` ; les contours communaux (un fichier par région) et les calques ne sont téléchargés qu'à leur premier usage, après vérification de leur empreinte par le service worker.
+
+- **D3 est aussi présent dans Mermaid**, sous une forme interne non exposée : FUSAIN embarque donc sa propre copie, chargée seulement pour les cartes. Le fichier contient une fonction d'écriture HTML (`selection.html()`) que FUSAIN n'appelle pas ; la politique Trusted Types la neutraliserait de toute façon.
+
+### 2.4 Icônes illustrées
 
 `icones/illustrees/` contient des images PNG de 192 px, une par icône, regroupées par thème dans des fichiers JSON ; `index.json` porte l'empreinte de chaque fichier de thème et est lui-même contrôlé par `index.html`. Ce ne sont pas des bibliothèques : ces images ont été produites sur le poste du mainteneur avec le modèle de génération d'images Krea 2 (poids sous « community license » de l'éditeur), détourées avec rembg, à partir de descriptions conservées dans `outils/illustrations/icon-prompts.json` et dans le dépôt SimpleCarto. Ni le modèle ni les outils de génération ne sont livrés ou exécutés par l'application. **Point à vérifier avant une diffusion large** : les conditions de la licence du modèle pour la redistribution des images produites.
 
@@ -74,7 +84,7 @@ L'empreinte SHA-256 de **chaque fichier embarqué** figure dans `sbom/fusain-sbo
 |---|---|---|
 | Navigateur de l'utilisateur | Socle d'exécution | Relève de l'entité (mise à jour des postes) |
 | Serveur de fichiers (GitHub Pages pour la publication de référence) | Hébergement statique | Relève de l'hébergeur |
-| `outils/generer.py`, `outils/veille.py`, tests | Outils de développement (Python 3, Node.js, bibliothèque standard uniquement) | Ne sont jamais servis au navigateur |
+| `outils/generer.py`, `outils/cartes.py`, `outils/veille.py`, tests | Outils de développement (Python 3, Node.js, bibliothèque standard uniquement) | Ne sont jamais servis au navigateur |
 | Playwright (pilote de navigateur) et axe-core (contrôle d'accessibilité) | Outils de recette, installés à la demande sur le poste de développement ou dans l'intégration continue | Ne figurent pas dans le dépôt et ne sont jamais servis au navigateur |
 
 ## 4. Points d'attention

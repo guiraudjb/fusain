@@ -201,16 +201,84 @@ ok('fichier à champ inconnu refusé', (await p.textContent('#fusain-messages'))
 fs.writeFileSync(OUT + '/proto.json', json.replace('"format": "fusain",', '"format": "fusain", "__proto__": {"x":1},'));
 await p.setInputFiles('#fusain-fichier', OUT + '/proto.json'); await p.waitForTimeout(600);
 ok('fichier __proto__ refusé', (await p.textContent('#fusain-messages')).includes('champs interdits'));
-// 13. « À propos » : sous service worker, chaque lien ouvre son document et non l'application
+// 13. « À propos » : les documents Markdown s'affichent mis en forme dans une modale
 await p.evaluate(() => navigator.serviceWorker.ready);
 await p.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 60000 });
-await p.click('[data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos a');
-for (const a of await p.locator('#fusain-modale-apropos a').all()) {
-    const [q] = await Promise.all([ctx.waitForEvent('page'), a.click()]);
-    await q.waitForLoadState();
-    const texte = await q.evaluate(() => document.body.innerText.slice(0, 80));
-    ok(`lien « ${await a.textContent()} »`, !await q.locator('#fusain-modales').count() && /FUSAIN|CycloneDX/.test(texte), q.url());
+for (const [nom, tableaux] of [['Guide utilisateur', 3], ['Cahier des charges', 20], ['Nomenclature logicielle (SBOM)', 8]]) {
+    await p.click('.fr-header__tools-links [data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened a');
+    await p.click(`#fusain-modale-apropos a:text-is("${nom}")`);
+    await p.waitForSelector('#fusain-modale-document.fr-modal--opened .fusain-document'); await p.waitForTimeout(300);
+    const d = await p.evaluate(() => { const doc = document.querySelector('.fusain-document'); const n = (sel) => doc.querySelectorAll(sel).length;
+        return { titres: n('h2, h3, h4'), tableaux: n('table'), gras: n('strong'), code: n('code'),
+            brut: [...doc.querySelectorAll('p, li, td')].filter((e) => !e.querySelector('code') && /\*\*|`|\]\(/.test(e.textContent)).length,
+            bancales: [...doc.querySelectorAll('tr')].filter((r) => r.children.length !== r.closest('table').rows[0].children.length).length,
+            mortes: [...doc.querySelectorAll('a[href^="#"]')].filter((a) => !document.getElementById('doc-' + decodeURIComponent(a.getAttribute('href').slice(1)))).length }; });
+    ok(`document « ${nom} » mis en forme`, d.titres > 5 && d.tableaux >= tableaux && d.gras > 5 && d.code > 5 && !d.brut && !d.bancales && !d.mortes, JSON.stringify(d));
+    if (nom === 'Cahier des charges') {
+        await p.click('.fusain-document a[href="#7-sécurité-par-conception"]'); await p.waitForTimeout(300);
+        ok('sommaire : le lien mène au titre', await p.evaluate(() => { const r = document.getElementById('doc-7-sécurité-par-conception').getBoundingClientRect(); const c = document.querySelector('#fusain-modale-document .fr-modal__body').getBoundingClientRect(); return r.top >= c.top - 2 && r.top < c.top + 200; }));
+    }
+    await p.click('#fusain-modale-document .fr-modal__footer button'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened');
+    ok(`retour à « À propos » depuis « ${nom} »`, await p.locator('.fr-modal--opened').count() === 1);
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+}
+ok('bouton du pied de modale lisible', await p.evaluate(() => document.querySelector('#fusain-modale-document .fr-modal__footer button').scrollWidth > 100));
+// Sous service worker, l'adresse d'un document joint rend ce document et non l'application
+for (const chemin of ['Documentation/GUIDE_UTILISATEUR.md', 'sbom/fusain-sbom-cyclonedx.json']) {
+    const q = await ctx.newPage();
+    await q.goto(new URL(chemin, p.url()).href);
+    ok(`adresse directe ${chemin}`, !await q.locator('#fusain-modales').count() && /FUSAIN|CycloneDX/.test(await q.evaluate(() => document.body.innerText.slice(0, 80))));
     await q.close();
 }
+// 14. Cartes : modèles, saisie d'une valeur, import CSV, calques, épingle glissée, export, fonds hors ligne
+const carte = async (nom) => {
+    await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
+    await p.click(`#fusain-modale-modeles .fusain-modele:has(.fusain-modele__nom:text-is("${nom}"))`);
+    await p.waitForSelector('#fusain-feuille .fusain-carte'); await p.waitForTimeout(800);
+};
+const carteStable = () => p.waitForFunction(() => document.querySelector('#fusain-feuille .fusain-carte') && !document.querySelector('#fusain-scene[aria-busy]'), null, { timeout: 60000 }).then(() => p.waitForTimeout(600));
+const zonesCarte = () => p.locator('#fusain-feuille .fusain-carte path[data-fusain^="z:"]').count();
+for (const [nom, attendu] of [['Monde', 177], ['Région du monde', 26], ['France (départements)', 104], ['Région (départements)', 4], ['EPCI (communes)', 59]]) {
+    await carte(nom);
+    const n = await zonesCarte();
+    ok(`carte « ${nom} »`, n >= attendu - 1 && n <= attendu + 1 && !await p.isVisible('#fusain-erreur'), `${n} territoires`);
+}
+await p.click('#fusain-feuille path[data-fusain="z:69123"]'); await p.waitForTimeout(300);
+ok('carte : territoire sélectionné', (await p.textContent('#fusain-proprietes')).includes('Lyon (69123)'));
+await p.fill('#fusain-champ-texte', '12,5'); await p.press('#fusain-champ-texte', 'Tab'); await carteStable();
+c = await lireCode();
+ok('carte : valeur saisie', c.includes('- 69123 | 12.5'), c.split('\n').find((l) => l.startsWith('- 69123')));
+fs.writeFileSync(OUT + '/carte.csv', 'code;habitants;nom\n69123;500000;Lyon\n69266;150000;Villeurbanne\n75056;2100000;Paris\n');
+const [choix] = await Promise.all([p.waitForEvent('filechooser'), p.click('button:has-text("Importer un fichier CSV")')]);
+await choix.setFiles(OUT + '/carte.csv');
+await p.waitForSelector('#fusain-modale-import-carte.fr-modal--opened');
+await p.selectOption('#imp-col1', 'habitants'); await p.selectOption('#imp-texte', 'nom');
+await p.click('#fusain-modale-import-carte .fr-modal__footer button'); await carteStable();
+c = await lireCode();
+ok('carte : import CSV limité aux territoires représentés', /- 69123 \| 500000 \| Lyon/.test(c) && /- 69266 \| 150000/.test(c) && !/75056/.test(c), c.split('\n').filter((l) => l.startsWith('- ')).join(' ; '));
+await p.check('#fusain-proprietes label:text-is("Cours d\'eau")', { force: true }); await carteStable();
+await p.check('#fusain-proprietes label:text-is("Relief (estompage IGN)")', { force: true }); await carteStable();
+ok('carte : relief et cours d\'eau', await p.locator('#fusain-feuille .fusain-carte image').count() === 1 && await p.locator('#fusain-feuille .fusain-carte path[stroke="#5b8dd6"]').count() === 1);
+await p.click('#fusain-proprietes button:has-text("Épingle")'); await carteStable();
+const epingle = async () => (await lireCode()).split('\n').find((l) => l.startsWith('epingle'));
+const e0 = await epingle();
+const be = await p.locator('#fusain-feuille [data-fusain="e:0"]').first().boundingBox();
+await p.mouse.move(be.x + be.width / 2, be.y + be.height / 2); await p.mouse.down(); await p.mouse.move(be.x + 80, be.y - 40, { steps: 6 }); await p.mouse.up(); await carteStable();
+const e1 = await epingle();
+ok('carte : épingle glissée, position en latitude et longitude', e0 && e1 && e0 !== e1 && /^epingle: 4[56]\.\d+ [45]\.\d+/.test(e1), `${e0} → ${e1}`);
+await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
+await p.check('#exp-format-pdf', { force: true }); await p.check('#exp-portee-page', { force: true });
+f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button'));
+ok('carte : export PDF vectoriel', fs.statSync(f).size > 5000 && (await p.textContent('#fusain-messages')).includes('vectoriel'), `${fs.statSync(f).size} o`);
+// Les fonds lus à la demande restent disponibles hors ligne : la page est rouverte sans réseau
+ok('carte : fond communal en cache vérifié', await p.evaluate(async () => (await (await caches.open('fusain-donnees')).keys()).some((r) => r.url.includes('cartes/communes/84.json?empreinte='))));
+await ctx.setOffline(true);
+const q = await ctx.newPage();
+await q.goto(p.url()); await q.waitForSelector('html[data-fusain-pret]');
+await q.click('.fusain-vignette >> nth=-1'); await q.waitForSelector('#fusain-feuille .fusain-carte', { timeout: 30000 }).catch(() => {});
+await q.waitForTimeout(1500);
+ok('carte : rendue hors ligne', await q.locator('#fusain-feuille .fusain-carte path[data-fusain^="z:"]').count() > 50 && await q.locator('#fusain-feuille .fusain-carte image').count() === 1);
+await q.close();
+await ctx.setOffline(false);
 console.log('erreurs console/page :', errs.length, errs.slice(0, 5));
 await b.close();

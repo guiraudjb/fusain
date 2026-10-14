@@ -2,6 +2,20 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.14.0 — 14 octobre 2026 — cartes thématiques, moteur de SimpleCarto
+
+- **Nouveau type de page : la carte.** Le moteur cartographique de SimpleCarto est repris en entier : échelles monde, région du monde (70 regroupements de pays, ou « pays ayant des données »), France, région par départements ou par communes, département, EPCI et commune (Paris, Lyon et Marseille par arrondissements) ; import CSV avec ses quatre calculs (somme, part, ratio, évolution) ; palettes Bleu France, divergentes et personnalisée ; étiquettes nom ou valeur placées sans chevauchement, filtrées par nom ou par seuil ; légende ; relief, cours d'eau, voies ferrées et routes nationales ; épingles avec légende. Les pictogrammes et annotations, qui étaient une surcouche de l'interface de SimpleCarto, deviennent des éléments de la carte.
+- **Édition visuelle** : un clic sur un territoire pour saisir sa valeur ou son étiquette ; épingles, pictogrammes et annotations se glissent à la souris (la position d'une épingle est recalculée en latitude et longitude). Cinq modèles : monde, région du monde, France, région, EPCI ; ceux de la France, de la Bretagne et de la Métropole de Lyon portent la population municipale 2022.
+- **Données** : 16 Mo de fonds préparés par `outils/cartes.py` à partir de ceux de SimpleCarto. Le fond communal (22 Mo) est découpé par région en gardant les limites partagées. Les pays portent leur nom français. Monde, départements et EPCI (1 Mo) sont préchargés ; communes et calques sont téléchargés à la première carte qui en a besoin, vérifiés par le service worker, puis conservés hors ligne d'une version à l'autre tant qu'ils ne changent pas.
+- **Différences avec SimpleCarto** : le relief est reprojeté point par point au lieu d'être posé par tuiles ; tous les tracés sont découpés au cadre de la carte (un PDF d'une commune passe de 3 Mo à 40 Ko) ; un import CSV ne garde que les territoires représentés ; le titre de la carte est celui de la page. Non repris : la recherche d'adresse (2,3 Go), les routes par département (2,2 Go), les villes et aéroports, le choix de la police (Marianne) et l'export par lot.
+- **Bibliothèques** : D3 7.9.0 et topojson-client 3.1.0, depuis le registre npm, à la nomenclature, sans vulnérabilité connue (OSV.dev), chargés seulement pour les cartes, avec contrôle de leur empreinte.
+
+## 0.13.0 — 14 octobre 2026 — documents mis en forme dans « À propos »
+
+- **Guide utilisateur, cahier des charges et nomenclature logicielle s'ouvrent mis en forme dans une modale**, au lieu d'un onglet de texte brut : titres, tableaux, listes, blocs de code, gras, liens. Le sommaire du cahier des charges mène à ses chapitres ; un bouton ramène à « À propos ». Ctrl+clic ouvre toujours le fichier dans un nouvel onglet.
+- La mise en forme est faite par FUSAIN lui-même (`js/markdown.js`, sans bibliothèque ajoutée) : le texte est reconstruit nœud par nœud, jamais interprété comme du HTML ; seules les ancres du document et les adresses web deviennent des liens.
+- **Défaut corrigé** : le bouton du pied des modales (« Exporter ») s'affichait réduit à un carré vide, son libellé masqué.
+
 ## 0.12.1 — 14 octobre 2026 — liens de la fenêtre « À propos »
 
 - **Correction** : une fois l'application installée (service worker actif), les liens « Guide utilisateur », « Cahier des charges », « Nomenclature logicielle » et « format CycloneDX » rouvraient FUSAIN dans un nouvel onglet au lieu du document. Le service worker rendait la page d'entrée pour toute navigation ; il ne le fait plus que pour l'adresse de l'application, et sert les documents joints depuis le cache, y compris hors ligne.

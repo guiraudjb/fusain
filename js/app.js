@@ -677,6 +677,12 @@ function ouvrirExport() {
 
 // ---------- À propos ----------
 
+const EXEMPLES_CARTES = [
+    ['france-departements.csv', 'Départements de France', 'population, budgets, projets, satisfaction (code INSEE du département, séparateur virgule) ; échelles France et région'],
+    ['france-communes.csv', 'Communes de France', 'subventions, dossiers, population éligible, émissions évitées (code INSEE de la commune, séparateur point-virgule, 1 Mo) ; toutes les échelles françaises'],
+    ['monde.csv', 'Pays du monde', 'deux séries de test (code ISO à trois lettres) ; échelles monde et région du monde'],
+];
+
 // Les documents joints sont mis en forme dans une modale ; le lien garde son adresse, pour l'ouverture dans un nouvel onglet
 async function ouvrirDocument(chemin, titre) {
     try {
@@ -710,6 +716,10 @@ function ouvrirAPropos() {
             h('li', {}, document_('./Documentation/GUIDE_UTILISATEUR.md', 'Guide utilisateur')),
             h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
             h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+        h('h2', { class: 'fr-h6' }, 'Données d\'exemple pour les cartes'),
+        h('p', { class: 'fr-text--sm' }, 'Fichiers CSV repris de SimpleCarto, à importer dans une page de carte (« Importer un fichier CSV… »). Hormis les codes des territoires, les valeurs sont fictives.'),
+        h('ul', {}, EXEMPLES_CARTES.map(([fichier, nom, detail]) => h('li', {},
+            h('a', { class: 'fr-link', href: `./cartes/exemples/${fichier}`, download: fichier }, nom), ` — ${detail}`))),
         h('h2', { class: 'fr-h6' }, 'Raccourcis clavier'),
         h('div', { class: 'fr-table fr-table--sm' }, h('table', {}, h('tbody', {}, raccourcis.map(([touche, effet]) => h('tr', {}, h('td', {}, h('kbd', {}, touche)), h('td', {}, effet)))))),
         h('h2', { class: 'fr-h6' }, 'Données locales'),

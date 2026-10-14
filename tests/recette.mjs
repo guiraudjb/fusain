@@ -272,10 +272,22 @@ f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button'));
 ok('carte : export PDF vectoriel', fs.statSync(f).size > 5000 && (await p.textContent('#fusain-messages')).includes('vectoriel'), `${fs.statSync(f).size} o`);
 // Les fonds lus à la demande restent disponibles hors ligne : la page est rouverte sans réseau
 ok('carte : fond communal en cache vérifié', await p.evaluate(async () => (await (await caches.open('fusain-donnees')).keys()).some((r) => r.url.includes('cartes/communes/84.json?empreinte='))));
+// Jeux d'exemple proposés dans « À propos », importables tels quels
+await p.click('.fr-header__tools-links [data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened a[download]');
+ok('à propos : trois jeux d\'exemple', await p.locator('#fusain-modale-apropos a[download]').count() === 3);
+f = await dl(() => p.click('#fusain-modale-apropos a[download="france-departements.csv"]'));
+ok('à propos : jeu d\'exemple téléchargé', fs.readFileSync(f, 'utf8').startsWith('CODE_GEO,') && fs.statSync(f).size > 5000, `${fs.statSync(f).size} o`);
+await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+await carte('France (départements)');
+const [choixEx] = await Promise.all([p.waitForEvent('filechooser'), p.click('button:has-text("Importer un fichier CSV")')]);
+await choixEx.setFiles(f);
+await p.waitForSelector('#fusain-modale-import-carte.fr-modal--opened');
+await p.click('#fusain-modale-import-carte .fr-modal__footer button'); await carteStable();
+ok('carte : jeu d\'exemple importé', ((await lireCode()).match(/^- /gm) || []).length >= 100);
 await ctx.setOffline(true);
 const q = await ctx.newPage();
 await q.goto(p.url()); await q.waitForSelector('html[data-fusain-pret]');
-await q.click('.fusain-vignette >> nth=-1'); await q.waitForSelector('#fusain-feuille .fusain-carte', { timeout: 30000 }).catch(() => {});
+await q.click('.fusain-vignette >> nth=-2'); await q.waitForSelector('#fusain-feuille .fusain-carte', { timeout: 30000 }).catch(() => {});
 await q.waitForTimeout(1500);
 ok('carte : rendue hors ligne', await q.locator('#fusain-feuille .fusain-carte path[data-fusain^="z:"]').count() > 50 && await q.locator('#fusain-feuille .fusain-carte image').count() === 1);
 await q.close();

@@ -2,6 +2,11 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.14.1 — 14 octobre 2026 — jeux de données d'exemple pour les cartes
+
+- La fenêtre « À propos » propose au téléchargement les trois jeux d'exemple de SimpleCarto : départements de France, communes de France et pays du monde, à importer dans une page de carte. Hormis les codes des territoires, leurs valeurs sont fictives.
+- Ces fichiers (1 Mo) sont lus à la demande, vérifiés par le service worker et conservés hors ligne, comme les fonds de carte.
+
 ## 0.14.0 — 14 octobre 2026 — cartes thématiques, moteur de SimpleCarto
 
 - **Nouveau type de page : la carte.** Le moteur cartographique de SimpleCarto est repris en entier : échelles monde, région du monde (70 regroupements de pays, ou « pays ayant des données »), France, région par départements ou par communes, département, EPCI et commune (Paris, Lyon et Marseille par arrondissements) ; import CSV avec ses quatre calculs (somme, part, ratio, évolution) ; palettes Bleu France, divergentes et personnalisée ; étiquettes nom ou valeur placées sans chevauchement, filtrées par nom ou par seuil ; légende ; relief, cours d'eau, voies ferrées et routes nationales ; épingles avec légende. Les pictogrammes et annotations, qui étaient une surcouche de l'interface de SimpleCarto, deviennent des éléments de la carte.

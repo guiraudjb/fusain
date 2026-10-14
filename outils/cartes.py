@@ -147,6 +147,11 @@ def principal(source):
     # Chaque fichier, préchargé ou non, est lu avec son empreinte
     for nom in ("monde", "regions-du-monde", "departements", "epci"):
         index[nom] = CIBLE / f"{nom}.json"
+    # Jeux de données d'exemple de SimpleCarto, proposés au téléchargement dans « À propos »
+    (CIBLE / "exemples").mkdir()
+    for fichier in ("france_communes.csv", "france_departements.csv", "monde.csv"):
+        shutil.copyfile(source / "samples" / fichier, CIBLE / "exemples" / fichier.replace("_", "-"))
+
     ecrire_json(CIBLE / "index.json", {nom: {"fichier": str(c.relative_to(CIBLE)), "integrite": sri(c)} for nom, c in sorted(index.items())})
     (CIBLE / "LICENCE.txt").write_text(LICENCE, encoding="utf-8")
     taille = sum(p.stat().st_size for p in CIBLE.rglob("*") if p.is_file())
@@ -173,6 +178,7 @@ LICENCE = """Données géographiques des diapositives de carte de FUSAIN, repris
 - Relief (estompage) : IGN, Géoplateforme, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Pays du monde : Natural Earth, 1:110 000 000, domaine public ; noms français : paquet iso-codes (LGPL-2.1).
 - Regroupements de pays (régions du monde) : SimpleCarto.
+- Jeux de données d'exemple (exemples/) : SimpleCarto ; hormis les codes, les valeurs sont fictives.
 
 Les fichiers ont été simplifiés (propriétés réduites, découpage par région) ; les tracés ne sont pas modifiés.
 """

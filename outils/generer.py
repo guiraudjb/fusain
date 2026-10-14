@@ -26,7 +26,7 @@ FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charg
 EXCLUS = {"sbom/composants.json"}
 # Fonds de carte volumineux : hors du préchargement, téléchargés à la première carte qui en a besoin, mais vérifiés
 # par le service worker avant d'entrer dans son cache, comme le reste
-A_LA_DEMANDE = ("cartes/communes/", "cartes/calques/")
+A_LA_DEMANDE = ("cartes/communes/", "cartes/calques/", "cartes/exemples/")
 
 
 def lire(chemin):

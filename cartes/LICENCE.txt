@@ -7,5 +7,6 @@ Données géographiques des diapositives de carte de FUSAIN, reprises de SimpleC
 - Relief (estompage) : IGN, Géoplateforme, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Pays du monde : Natural Earth, 1:110 000 000, domaine public ; noms français : paquet iso-codes (LGPL-2.1).
 - Regroupements de pays (régions du monde) : SimpleCarto.
+- Jeux de données d'exemple (exemples/) : SimpleCarto ; hormis les codes, les valeurs sont fictives.
 
 Les fichiers ont été simplifiés (propriétés réduites, découpage par région) ; les tracés ne sont pas modifiés.

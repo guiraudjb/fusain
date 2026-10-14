@@ -3,17 +3,17 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.15.0-fe07ad31eb';
+const VERSION_CACHE = 'fusain-0.16.0-edd2b0551d';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', 'e5dcd6e92bec905287e97f706839834d261d5026caca6654a3f1ff368c3e7c58'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', 'b3c67b1a5a6bfb54274ea90821a3439c3e5088ff0d2fddf2beefc895862c5538'],
     ['./FUSAIN_cahier_des_charges.md', '5790663ca747c4568b34ac4d80d57ca3c04ae1894f6a9bca0df5b0fcf29130ca'],
-    ['./JOURNAL_DES_VERSIONS.md', 'fa28a412cd28980397b91f13eb1f6ca764de6a1cd5e8be8194522e302d6a8046'],
+    ['./JOURNAL_DES_VERSIONS.md', '456925ac132f746a031d8efcc64fe3e39a3434d1b5ba4911897addc0c548f5db'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'c03ee569bf854a8480a2191915cee53c8e28032d4592ce478e23e417bed0ccec'],
-    ['./cartes/LICENCE.txt', '87fe7e29fc6fa948cbf5fe8a69f5a08e8ffc804a0528ae8d6489470a82b3bd87'],
+    ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
     ['./cartes/epci.json', '70aae5470b7f9f1e94f8222cec912ee533ec88349d4fc5b27de3d9b1db257332'],
-    ['./cartes/index.json', 'e39c23dfbcb6ab0e51b2d142825bedd1e55f9dce0ef4f6faff3fff8615ba3465'],
+    ['./cartes/index.json', 'e5a8969f0db9d5c0852b9376c2cd67ea9bd0f783096769ce678d10546c4c7c21'],
     ['./cartes/monde.json', 'd3a4565c2e995afa458d4b2a71351295c9c391c068bdc6d10efc3177794d84e0'],
     ['./cartes/regions-du-monde.json', '5d5472cd7eb79f1538e61855cd14dbeef92e4d74497d3c1b5666ca72ecdce2a1'],
     ['./css/fusain.css', 'd381a150a1c86d89d868960313188330ca95aab0073384b2b3ac3bfbb0e96398'],
@@ -40,18 +40,18 @@ const FICHIERS = [
     ['./icones/illustrees/secours.json', 'c33d8495f55ae073a403533159ba1d0c7859989875600e5a3f46a70fb14a9a07'],
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
-    ['./', 'e86d4e381facd5ab3fc26c44fe0fa71cdd648684ff014b8ad179dfc9adfe5931'],
-    ['./index.html', 'e86d4e381facd5ab3fc26c44fe0fa71cdd648684ff014b8ad179dfc9adfe5931'],
+    ['./', '1d88a21fd67d93720531bb1ca1460a1a7e1cdf46b7693a937e698fe693f0739e'],
+    ['./index.html', '1d88a21fd67d93720531bb1ca1460a1a7e1cdf46b7693a937e698fe693f0739e'],
     ['./js/app.js', 'cfe0dc2b50b58fd2392b906bc7a9c15f95a7b4001e7165759f3a74a139118389'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
-    ['./js/carte.js', 'c0986d8ccbfc12616bfa4e13bdef27af3fd6932de3e51a538d5302bd4d59dae8'],
+    ['./js/carte.js', 'dddf1cca78f130628b837f0674da2d6177ccd893961f5af615f36bc8dacbef11'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
     ['./js/diagrammes/arbre.js', '2de684eb0d7fdd3d98403e44ec614443b4020d8780067f8e75da0c4f6697ebec'],
     ['./js/diagrammes/architecture.js', '4b5b75f8a7ae0194fa90346006ca61e0b63a2fce3914283dd1be736ccae1f929'],
     ['./js/diagrammes/blocs.js', '9a977fc44de97533048a0105b1f5338d78ad0d3323d5b64cc728860f3b62ef45'],
     ['./js/diagrammes/c4.js', '00a5e84119055949f6a5a5eec422d0372cb900902153fac4104b475ac1b33afc'],
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
-    ['./js/diagrammes/carte.js', '688ff8c62377e12f1eb5c8cf8b99d76fb682b9118691e628f8578ce64ca5836b'],
+    ['./js/diagrammes/carte.js', '020b07f1e2d07703bacc8fefae033d33f5c65b42ba3c37ce5bc68a5f9efb0c8f'],
     ['./js/diagrammes/classes.js', '4ca44e5795d360ac03737f514316faae6ff76349cc960724810d6d2f9dfa04aa'],
     ['./js/diagrammes/commun.js', '5a6f1399ec1d6c451a4f985003115928095d2b478f9b6f147c5ce349da2366e6'],
     ['./js/diagrammes/diapo.js', '2c4c800a2603d6a7f9ec9692cb8e06fad3c4350ddbea50852b0b065119ad175e'],
@@ -81,14 +81,14 @@ const FICHIERS = [
     ['./js/export.js', '8b932df21aa83c7822769968dc28404e3857e412ca710c03908dab69bc64bc04'],
     ['./js/fichier.js', '9f8be26e831b0338419583703e5a2b1b9c839195bbf238e672b0fc8a3f4fb0f6'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
-    ['./js/geo.js', '8d9aa01631390db1d1e83ff7869803fa29bf2a82849edc98bd6e74211342f99a'],
+    ['./js/geo.js', '2410705abae5ad8ac66487d8f395b0f42f41d4e70f523bb969698d07f09d9c93'],
     ['./js/icones.js', '0659879af168a36cc8137d3a4901b5c91e34373751a7fa946d127b1ce7fc3bac'],
     ['./js/illustrations.js', '9fc9af6eb7298523b72ab66ee843eb6ef35c758ce27c230d7d5a043a9d133eec'],
     ['./js/markdown.js', '460de07eb055b1f3615b63649418f17c5ccc424fcaa9d37cf65b6f9033f0f601'],
     ['./js/modeles.js', 'a632b4074205815b3d0faf5c5b9e0599425f1cfac1043e8694bfceef78bab952'],
     ['./js/rendu.js', 'c7f545ef0fdefd8120c9f4eb03bd7b321877509e379955de85f57325b2e9ce37'],
     ['./js/securite.js', 'd76de55bb8fd6b4bce36d31af62d2fc811646318999eecae0d94e5173f0908fe'],
-    ['./js/version.js', 'c1cbbb078c16eb692a86ffabd72aba1feade9d434867c98a618f61a24f2ff039'],
+    ['./js/version.js', '56656fd040e8cfcdff9cc54ec8bd7815506ff0f1fc522439aecd859ac5fb458c'],
     ['./libs/d3-v7.9.0/LICENSE', '3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4'],
     ['./libs/d3-v7.9.0/d3.min.js', 'f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
@@ -206,14 +206,123 @@ const FICHIERS = [
     ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
     ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', 'b4c2a79f158703d8b657885e762ae351c31bba618ad2c9341ef4e7c0eeff7904'],
+    ['./sbom/fusain-sbom-cyclonedx.json', 'dfeeb89cf3358f273223030e0c8df335e4781e50f4058871cf446cb3df6aa38d'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 // Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement
 const A_LA_DEMANDE = [
+    ['./cartes/adresses/01.json', '2283eddbe6ce79d2a7efa954fe9f9c0b866459fd95e0e6f9c6a72871733aa7d2'],
+    ['./cartes/adresses/02.json', '0a46b6de8ef5a70af8de7701757c7fa046c449bbd61f2c2ac605739579215976'],
+    ['./cartes/adresses/03.json', '7d46af1c9de03a5247b431f93090ea71ef1302efff0f8a038c4ff771932e3fb3'],
+    ['./cartes/adresses/04.json', '8e6b82711069e8f1e520cf2d2b2c8b983693c4ad3a7599e046912c95a0f3f044'],
+    ['./cartes/adresses/05.json', '118dda4577de323f23db054e0b300e93e2eeb9df49a4d6abb436cc7289ec6d1b'],
+    ['./cartes/adresses/06.json', '4afc5d6ce6aff30b48079a23e149ed7453d04f2d8dfe8c7e0c5b4383f3401cc5'],
+    ['./cartes/adresses/07.json', 'b18db3dfce6ed0652bb077207ed98560f248290c7f7614526743d289d7f93a79'],
+    ['./cartes/adresses/08.json', '722e8ff749ac8436eba25967d858480c72e16026d07bf908308d73f651fa4cab'],
+    ['./cartes/adresses/09.json', '1a228f75c4909f3be8e767b70d3585b5cc88dec375f4e33fc371779ac7a5c579'],
+    ['./cartes/adresses/10.json', '21a6675636d3c5131502a86c098c6a80851389c1d6c7d5edd4029774679cc520'],
+    ['./cartes/adresses/11.json', 'b34de109be038a6bdf47a88a3fc9a4c12ab598f76e1e51e16350df54f34950ed'],
+    ['./cartes/adresses/12.json', '38b87b8cdd130f097b2f69a7420dfc6cc3e8c1a10f65afa1aad3a3d4faa8d9a6'],
+    ['./cartes/adresses/13.json', '8c4b8df4c839fead442003d35a90b2a781080c35471d69f6d7bf78ab4ba99041'],
+    ['./cartes/adresses/14.json', '742e2dd3f12681df32be857c1393661aba519a1695be048f2cd5ccabf6a24ba1'],
+    ['./cartes/adresses/15.json', '425c7a2f1a0f995d224386ed70baeeeab24cb3be6f3c3438c147342f7d162afc'],
+    ['./cartes/adresses/16.json', '58f2ef0e671ab4fccdb58dd9d0729cb2ffd408fedbc03f0707f5e9008878f16f'],
+    ['./cartes/adresses/17.json', 'f29ebb94ec5d5692316ec8fa50e10bcc192d0b98a312d68fcf90397de6b91eb0'],
+    ['./cartes/adresses/18.json', '4a5871db46b67945cd274dad8a786f4706c3d47b7e59da50ace8356c27163070'],
+    ['./cartes/adresses/19.json', 'da88078929baba718f7c649b34da029ede122afdf8000bc59a9bd7d95cacfeec'],
+    ['./cartes/adresses/21.json', 'cc7afefb838650fde17d77f53d0ec346e2609a22c5c0bcec008fdad0eb385ea1'],
+    ['./cartes/adresses/22.json', '0580b459b98942a696aec5b14b8fd2c67232d8a2e5e950b06f872b4c433b86b2'],
+    ['./cartes/adresses/23.json', '54d50b76e836426bf8309183e6dedd9bab34dceab1431d9f2e4ca2851d28ebde'],
+    ['./cartes/adresses/24.json', '01d27682da30ea27e0a68844284201bbf3ccc1089012ada7f39dd6947e506fc4'],
+    ['./cartes/adresses/25.json', '9b4e041c7a7ced8e4bc6632f505deb7b8f27ba6708c5d48ec244192cbbc4b89b'],
+    ['./cartes/adresses/26.json', '4b90958e4355efc2f9ca7c1b1c6b441c82b8c5d52e0e583718462b8d5bc1121c'],
+    ['./cartes/adresses/27.json', '510f219919d31be60f9c8aa3d9a003b98f0084d599f9d8a5bb5fe5a9b0bbbe7f'],
+    ['./cartes/adresses/28.json', '5c22db51b15a5c3b1764574912a205950f601eb3b48a3cc6074776aeee25d7bc'],
+    ['./cartes/adresses/29.json', '754389b680668b94a26a19a7a15f6ef19d945dc40dd070f7a38c4f57a195aac2'],
+    ['./cartes/adresses/2A.json', '6315b324eead8c13b2846c76c1994bb38683758bce6dc85e96dfc577f08cd0f1'],
+    ['./cartes/adresses/2B.json', '3ddd7af0a0d06bc1582cd598e50425e494a103b9236b6d77d120b4c0e88b6c58'],
+    ['./cartes/adresses/30.json', 'acd7ecc90754bb20498bee793d75cd0971bac1b5b9c9fa54293553d4b31e5140'],
+    ['./cartes/adresses/31.json', '22f8e7a44cdde0668829d6171ac1abe829f02fc2bf662f100d81fa6a08e26acd'],
+    ['./cartes/adresses/32.json', 'aef8ba1d66e01562ede33bc40de330303ca008cea9f5e44e8018d07fa1b7fdd3'],
+    ['./cartes/adresses/33.json', '6ac97a1daa0452ecc6c1f29e971868ce9d69f055e8c4f8650eecd62901a19e70'],
+    ['./cartes/adresses/34.json', '73e9d3d41808201a3874ade18a9e7cc22f51aeb763d1f1c92feaa7bac0aef817'],
+    ['./cartes/adresses/35.json', '4aa91d6bd59ff2846cb610781b5e07e4a02575568ae090ad41bcf10c7e6327f6'],
+    ['./cartes/adresses/36.json', '8a08857edda73f0fee30f27db7188d62bb3c9397a6e6cff95b6bdcce04ee3ddf'],
+    ['./cartes/adresses/37.json', 'd27d516d2814b06cf1e909b63896493eb8bc5cf9ad8ebf52a8f0a97be47a856d'],
+    ['./cartes/adresses/38.json', '6584b5145179606b584a7d0a4d782b8cab48393e7327baa64fe8e1f65819ed2d'],
+    ['./cartes/adresses/39.json', 'fd7f55384fa79ae18d196ccf46f7bb119c82335661ee17bdbc99c8f8f8ac3c69'],
+    ['./cartes/adresses/40.json', '8f5bc21c6a76867f309f1e7904732fdd67742c9edbcdb83f9e00818103c49b0b'],
+    ['./cartes/adresses/41.json', '7ddafc244e5bcfe736d29e68d8b8f12bf853c6c5050de800703490ce244fa3fc'],
+    ['./cartes/adresses/42.json', 'd9f9f14a4a3f5ff5cc476b551bc1db4997fbc84da40e47b455b827db7885957f'],
+    ['./cartes/adresses/43.json', '44d98fa8254f386a427dda243f7b8e69010564c03ad968512f3c0da1f4e7a849'],
+    ['./cartes/adresses/44.json', '170268bc7429305eb6f696ba7c957073f931259618c5c607d9d26944123d6259'],
+    ['./cartes/adresses/45.json', 'c6e02597bba820573f4bcf77a231e3b92866f38ee9225d4b1b1f54885de27eb8'],
+    ['./cartes/adresses/46.json', 'f35f614469250b6afd987f89274d5747e73e1fbf57ea25e885fc81f7267090ee'],
+    ['./cartes/adresses/47.json', '630128fa8473c517a1c605dad047e9d0ff95ae096f096e982e710ae8d5fb8e2e'],
+    ['./cartes/adresses/48.json', '8012885c82fd03ad121b53bbb40850476fa8490a64f9ef013fab3d25e2cab7e4'],
+    ['./cartes/adresses/49.json', 'e201b76138116df9a0a20f372a5353ac600fbfb17bad5c04e072eb0dcf6e2221'],
+    ['./cartes/adresses/50.json', '49a55f9e0068e9238a6faf97ec5bf9323335f66abd689a2613ad3c34c4d91dac'],
+    ['./cartes/adresses/51.json', '9a3c90c8a238054f0f30ac10211c97a9f2d5f302d22a7323eaaedd2605432d1d'],
+    ['./cartes/adresses/52.json', '0c87673d3012656dbd1a52c518a1eb1fb71c82262c2065a2fd3aabe80c0a72cb'],
+    ['./cartes/adresses/53.json', '327f3aee2cfe8ddf49cd0f4938c0cbdd142cc91b1f399fc1c75d3dac027ef814'],
+    ['./cartes/adresses/54.json', 'c51faa29292bb21749f0ada5ec19b98a6ff3fd36a20c00c2c599305fd198a06e'],
+    ['./cartes/adresses/55.json', '529ca6e42a48eff95aa41e892781ca6c4fe00a9926e9025e01e67b4c3b37538d'],
+    ['./cartes/adresses/56.json', 'e36e15853c53d464f46d7ec5235eb516a9b42f077d2c37b5e577c9dc3a1e8e30'],
+    ['./cartes/adresses/57.json', 'b30a53ade7cac884fd216c60ba9f778d5371ae13147046236b55f6a5b7ce17ff'],
+    ['./cartes/adresses/58.json', 'f3758debbfa4db3785ef8d94be476a2df360b7289400b6ba215789e931a0a994'],
+    ['./cartes/adresses/59.json', 'd025db4c7b74a69b3d7f5b81429421170dd043050fe5640da7cc1fdd53c5fbe6'],
+    ['./cartes/adresses/60.json', '0b5d49ba4192034729fddca7cb4d04f0606a7860b9b19537d84c2820bd88ff50'],
+    ['./cartes/adresses/61.json', '6cce3a5f68fbd2176b2eaed106c0691f5de679938e4f209c3039b43fc6e3b094'],
+    ['./cartes/adresses/62.json', 'c36c67a3fae30084ff7f598bceea6cb5fee96180b0912a67b114e981f48fe7da'],
+    ['./cartes/adresses/63.json', 'cb21bdd26e13dabccd608c340d082664f3f460f71357d4b55d801d12e26e700f'],
+    ['./cartes/adresses/64.json', 'feeed702ce5dafab94b625d517386b61dfc3cb717ab23f018632bb8cfad18823'],
+    ['./cartes/adresses/65.json', 'fb8bc90e6e7899c0841754af301df053971b10705acd6163448a8da1322ad5f9'],
+    ['./cartes/adresses/66.json', '39fc402c46c11d3f02f61174f6063c444988a560ead099e6c2a31ac62f54718d'],
+    ['./cartes/adresses/67.json', 'e36dc25d107d31d58b59606efff419922d753f8f271fc3cec5c9240659b1ef63'],
+    ['./cartes/adresses/68.json', '1a3ca73eca8eb565c81b657a599f53539dc950e5cce06a1a814e0d61d7423676'],
+    ['./cartes/adresses/69.json', '6e4cecbcf6865421c9af92a1b472c6ab24364d9aeff802f3d0e829a7daa8dc22'],
+    ['./cartes/adresses/70.json', '0e096228fdad146aa5c0b9e6517a1d6cee1319ad1a883d2b8983d0d1859e3623'],
+    ['./cartes/adresses/71.json', '7833b05fa8c02b0775516cf30218add9b9fa23d19af4e89c3eb65235c1e7aab8'],
+    ['./cartes/adresses/72.json', '0a1817667512e1a181b3dd57c8fb5325979a44dc26fd0b7039608357cc833c49'],
+    ['./cartes/adresses/73.json', '08d84f34488acc3de75a06029c96bf7d67a68508fbde88e6b7bfcec102c647c5'],
+    ['./cartes/adresses/74.json', '050571cbb29c6453cca16600c18f93b689ca069d321fd4cef434d8d997748f09'],
+    ['./cartes/adresses/75.json', 'b3595b04eb46e7b64f53bf365d773416cfd6a9ed3d220836c33413f8d88d416e'],
+    ['./cartes/adresses/76.json', 'd96d310c798095dd3b021d1fdf1c809c0bf11186116394c59c52307b8e276476'],
+    ['./cartes/adresses/77.json', 'b15f8300b1b1a1dae59144eea013165e737b0b93f06c1cb735dec5c8b0f0986b'],
+    ['./cartes/adresses/78.json', '66e10397e3340150cdd29e90c0e0e9fbba782600b3832940de482e59f7c7114f'],
+    ['./cartes/adresses/79.json', '595c1bef3dff000db28f77acad3ca612710f4bc7bab5067956443949eed6d11a'],
+    ['./cartes/adresses/80.json', '14f51ac251aff88156a41f2ef20e8b528685025d133e48f6cd6da58aa41881ff'],
+    ['./cartes/adresses/81.json', '42911b02dd65f5523e3e41297ef6b305267d04785b868a8b8629a15f675bcd63'],
+    ['./cartes/adresses/82.json', 'd431b511d1679fc8254b3f0f1292bebd77c253abe3e5ca85d4b3e302c46b0d90'],
+    ['./cartes/adresses/83.json', 'fe8aa9f9cab46d5b800d1f2e355196eed8dce644cceb8918603dfa8fc908f787'],
+    ['./cartes/adresses/84.json', '8d89816ade28fba3301b2feeb5172d57579c7e6595e0f905bc52db1cd6f80914'],
+    ['./cartes/adresses/85.json', 'e03f062c16437d4f1198d9b49f3085f879493372972b442b694b1a6eb51a1ba0'],
+    ['./cartes/adresses/86.json', 'aa9a186cca1a225bd5301142403c1d4b65acc1f37c87da5bad6b0f1d08710c14'],
+    ['./cartes/adresses/87.json', '89badede868c573963a79a0f9be4a3f11d92371041aa51b5de27961c078aab7d'],
+    ['./cartes/adresses/88.json', 'b1a968b7445aed626e68329c26db9460a3e0613b72d107c950f5e4dfdc11c590'],
+    ['./cartes/adresses/89.json', '52ad91eb84b44b0639c366a43a6cc661f22fb193e213ab8e89cfcdef7b22f07b'],
+    ['./cartes/adresses/90.json', 'c90e95d9a64f9bca790f6f133bc39fe314b721f4f5a71af724ec1a5bac765357'],
+    ['./cartes/adresses/91.json', '3c3f7bdf219797b539badc876d934463e79bff7a247d959386481946637118bf'],
+    ['./cartes/adresses/92.json', '72768d4c8d5352762e057f43153946df62b7e0bc45786c6e080cfcaaa6992a5c'],
+    ['./cartes/adresses/93.json', '44f4b9d75817719c967d741e5d338e195a5636c12fae4c22f2dc7e8d24f8ded7'],
+    ['./cartes/adresses/94.json', '513cfef54dbcd31641a6b52b5e696d6eb7b7127ceea865929b66681891fc1d67'],
+    ['./cartes/adresses/95.json', 'a9de35d8e670b0b813cac5e9b0533ba022043431c1d7f6ce2977d1b06d8dd0f4'],
+    ['./cartes/adresses/971.json', '84022790cccf004e4fbade4f1da33896413006bff82e389957a1291916d91246'],
+    ['./cartes/adresses/972.json', '0a9c6f9463e61503f49ce6e245a44e0760e6d2c404171f5a1d5bdb3dc006a77a'],
+    ['./cartes/adresses/973.json', '0e3eaf6fed0b58e378263afa542f602731b2caf4174d300720493a373056e975'],
+    ['./cartes/adresses/974.json', '94c05ad6871a5b080f993e4674f34cd6ec0edeaba3ddbcf6d6c28f0a3c80c95e'],
+    ['./cartes/adresses/975.json', '644fed2eca684771f36d61ef4bf447fe38917c296967f65b85704f8665c8cd01'],
+    ['./cartes/adresses/976.json', '6314c1bc6e5afc4bc6f8bdf48132e19f4e2a1c78a3f47fb53e08a068198025a3'],
+    ['./cartes/adresses/977.json', 'fbba16468a0cfc2722d4a3155547291baf39210fd7441c0b756cb7a00b6f81f7'],
+    ['./cartes/adresses/978.json', '9170bcfef695f274c7f61a63530341bc79771ae9941620e66c4d7236c9b439d3'],
+    ['./cartes/adresses/987.json', '37cdab6c001b57c4be1251ee5067372b88e7e1ddfbdf04293280ddad1f6ade3a'],
+    ['./cartes/adresses/988.json', 'f618929ceec25562c610908d672db603db8a2aa815071fa3d0c56f065423dbd9'],
     ['./cartes/calques/hydro.json', '7577091d8eac0152b73c771faa2b73df22eef19ed57252e86c6fe212364e0549'],
     ['./cartes/calques/rail.json', 'c3ac8988dd84fbb70cf5a10b110aaeb2ecf8027dad56c7284395ba194adf790d'],
     ['./cartes/calques/relief.png', 'ec088ab9c14ba59917edd6f1c8f63d6201d9a921858350419dc47f589e27c185'],
+    ['./cartes/calques/routes-autoroutes.json', 'f061cf35c2e9b2114b3fbcf5dc626638048cf03da97780c9f77021b77a46e34c'],
+    ['./cartes/calques/routes-principales.json', '99ffe10a4166a8dabcb6d130f4154b7976e2596606a3733c5db75e96934cceeb'],
+    ['./cartes/calques/routes-regionales.json', 'f37cccc0ccd8a19848e2cdf82d5c399a4246329c7a953f9a46832f3d52863c23'],
     ['./cartes/calques/routes.json', '1bbc6b7d19c5ad9f96d1f39a3aaee62d8c241a21dc23ea5f62b7638751d43580'],
     ['./cartes/communes/01.json', '71874784c40a254d8c63e06df2239b80c5edc5a4d174bfaab7024f1df2c3aab7'],
     ['./cartes/communes/02.json', '3eea38113a3daf3ac2f8c7445b2dd8c841c4935b32979896057d06e1a1d1aa12'],
@@ -237,6 +346,7 @@ const A_LA_DEMANDE = [
     ['./cartes/exemples/france-departements.csv', '72276930e321b54effe23724de5bcf79fa8d5a1f9bbbe8eae31f9f43ba1d3fc3'],
     ['./cartes/exemples/monde.csv', '54212ab768b41c88ecc6c8999c930bc4feae159d25815f89751da285bdc7c637'],
 ];
+const CACHE_ADRESSES = 'fusain-adresses-a831bc5a2a';
 /* FIN-GENERE */
 
 const CACHE_DONNEES = 'fusain-donnees';
@@ -263,6 +373,23 @@ async function servirALaDemande(chemin, empreinte) {
     return (await cache.match(cle)) || telechargerVerifie(cache, [chemin, empreinte], cle);
 }
 
+// Adresses d'une commune : leur empreinte n'est pas dans la liste ci-dessus mais dans l'index de leur département, déjà
+// vérifié ; la page la transmet avec la requête (attribut integrity), et le fichier n'entre en cache que s'il y correspond
+const ADRESSE = /^\/(?:.*\/)?cartes\/adresses\/[0-9AB]{2,3}\/[0-9AB]{5}\.json$/;
+async function servirAdresse(requete) {
+    const attendue = requete.integrity;
+    const cache = await caches.open(CACHE_ADRESSES);
+    const cle = `${requete.url}?integrite=${encodeURIComponent(attendue)}`;
+    const enCache = await cache.match(cle);
+    if (enCache) return enCache;
+    const reponse = await fetch(new Request(requete.url, { cache: 'reload' }));
+    if (!reponse.ok) return reponse;
+    const condense = await crypto.subtle.digest('SHA-384', await reponse.clone().arrayBuffer());
+    if (`sha384-${btoa(String.fromCharCode(...new Uint8Array(condense)))}` !== attendue) throw new Error(`FUSAIN : intégrité non vérifiée pour ${requete.url}`);
+    await cache.put(cle, reponse.clone());
+    return reponse;
+}
+
 self.addEventListener('install', (evenement) => {
     evenement.waitUntil(
         caches.open(VERSION_CACHE)
@@ -274,7 +401,7 @@ self.addEventListener('install', (evenement) => {
 self.addEventListener('activate', (evenement) => {
     evenement.waitUntil(
         caches.keys()
-            .then((cles) => Promise.all(cles.filter((c) => c.startsWith('fusain-') && c !== VERSION_CACHE && c !== CACHE_DONNEES).map((c) => caches.delete(c))))
+            .then((cles) => Promise.all(cles.filter((c) => c.startsWith('fusain-') && c !== VERSION_CACHE && c !== CACHE_DONNEES && c !== CACHE_ADRESSES).map((c) => caches.delete(c))))
             // Les fonds de carte qui n'appartiennent plus à la version sont retirés
             .then(() => caches.open(CACHE_DONNEES))
             .then(async (cache) => {
@@ -295,6 +422,10 @@ self.addEventListener('fetch', (evenement) => {
     const url = new URL(requete.url);
     // Seules les lectures de la même origine sont servies : rien ne sort, rien d'extérieur n'entre
     if (requete.method !== 'GET' || url.origin !== self.location.origin) return;
+    if (ADRESSE.test(url.pathname) && requete.integrity.startsWith('sha384-')) {
+        evenement.respondWith(servirAdresse(requete));
+        return;
+    }
     const empreinte = EMPREINTES_A_LA_DEMANDE.get(url.pathname);
     if (empreinte) {
         evenement.respondWith(servirALaDemande(url.pathname, empreinte));

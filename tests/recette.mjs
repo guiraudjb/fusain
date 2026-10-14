@@ -274,6 +274,9 @@ ok('carte : import CSV limité aux territoires représentés', /- 69123 \| 50000
 await p.check('#fusain-proprietes label:text-is("Cours d\'eau")', { force: true }); await carteStable();
 await p.check('#fusain-proprietes label:text-is("Relief (estompage IGN)")', { force: true }); await carteStable();
 ok('carte : relief et cours d\'eau', await p.locator('#fusain-feuille .fusain-carte image').count() === 1 && await p.locator('#fusain-feuille .fusain-carte path[stroke="#5b8dd6"]').count() === 1);
+await p.check('#fusain-proprietes label:text-is("Autoroutes et voies rapides")', { force: true }); await carteStable();
+await p.check('#fusain-proprietes label:text-is("Liaisons principales")', { force: true }); await carteStable();
+ok('carte : réseau routier de ROUTE 500', /routes-autoroutes: oui/.test(await lireCode()) && await p.locator('#fusain-feuille .fusain-carte path[stroke="#b3261e"]').count() === 1 && await p.locator('#fusain-feuille .fusain-carte path[stroke="#d07a1f"]').count() === 1);
 await p.click('#fusain-proprietes button:has-text("Épingle")'); await carteStable();
 const epingle = async () => (await lireCode()).split('\n').find((l) => l.startsWith('epingle'));
 const e0 = await epingle();
@@ -281,6 +284,18 @@ const be = await p.locator('#fusain-feuille [data-fusain="e:0"]').first().boundi
 await p.mouse.move(be.x + be.width / 2, be.y + be.height / 2); await p.mouse.down(); await p.mouse.move(be.x + 80, be.y - 40, { steps: 6 }); await p.mouse.up(); await carteStable();
 const e1 = await epingle();
 ok('carte : épingle glissée, position en latitude et longitude', e0 && e1 && e0 !== e1 && /^epingle: 4[56]\.\d+ [45]\.\d+/.test(e1), `${e0} → ${e1}`);
+// Épingle à une adresse de la Base Adresse Nationale : département, commune, voie, numéro
+await p.click('#fusain-proprietes button:has-text("Épingle à une adresse")'); await p.waitForSelector('#fusain-modale-adresse.fr-modal--opened');
+await p.selectOption('#adr-dep', '69'); await p.waitForFunction(() => document.querySelectorAll('#adr-commune option').length > 100);
+await p.selectOption('#adr-commune', '69381'); await p.waitForFunction(() => document.querySelectorAll('#adr-voie option').length > 50);
+await p.selectOption('#adr-voie', 'Rue de la République'); await p.selectOption('#adr-numero', { label: '1' });
+await p.click('#fusain-modale-adresse .fr-modal__footer button'); await carteStable();
+const adresse = (await lireCode()).split('\n').filter((l) => l.startsWith('epingle')).pop();
+ok('carte : épingle placée à une adresse de la BAN', /^epingle: 45\.76\d* 4\.83\d* \| #e1000f \| 1 Rue de la République, Lyon 1er Arrondissement$/.test(adresse), adresse);
+ok('carte : adresses de la commune vérifiées et gardées hors ligne', await p.evaluate(async () => {
+    const nom = (await caches.keys()).find((c) => c.startsWith('fusain-adresses-'));
+    return !!nom && (await (await caches.open(nom)).keys()).some((r) => r.url.includes('cartes/adresses/69/69381.json?integrite=sha384-'));
+}));
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 await p.check('#exp-format-pdf', { force: true }); await p.check('#exp-portee-page', { force: true });
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button'));

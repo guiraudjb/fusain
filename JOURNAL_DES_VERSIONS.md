@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.16.0 — 14 octobre 2026 — épingles à une adresse (Base Adresse Nationale) et réseau routier de ROUTE 500
+
+- **Épingle à une adresse** : comme dans SimpleCarto, une épingle se place en choisissant un département, une commune, une voie puis un numéro, parmi les 26 millions d'adresses de la Base Adresse Nationale (édition du 14 octobre 2026, France entière avec l'outre-mer). Son libellé est l'adresse. Les adresses d'une commune sont téléchargées à son premier choix puis restent disponibles hors ligne.
+- **Format compact** : un fichier par commune, adresses regroupées par voie, coordonnées au mètre près écrites en écarts entiers. La BAN tient en 329 Mo, contre 2,3 Go dans SimpleCarto. `outils/adresses.py` la prépare à partir du fichier national.
+- **Intégrité** : les 34 894 fichiers de communes ne sont pas énumérés dans le service worker. Chacun est contrôlé par l'empreinte que donne l'index de son département, lui-même contrôlé par le catalogue des fonds : la chaîne part toujours d'`index.html`. Le service worker ne garde un fichier d'adresses qu'après l'avoir vérifié, dans un cache propre à l'édition de la BAN.
+- Trois nouveaux fonds de carte pour la France métropolitaine, tirés de ROUTE 500 (IGN, édition 2021, la dernière : le produit est arrêté) : autoroutes et voies rapides, liaisons principales, liaisons régionales. Les routes sont classées par fonction et non par gestionnaire, ce qui évite le classement « nationale / départementale » que les transferts de la loi 3DS ont rendu caduc.
+- Les tronçons sont fusionnés en lignes continues puis simplifiés : 4,3 Mo pour les trois fonds, téléchargés à la première carte qui en a besoin puis conservés hors ligne. `outils/cartes.py` les produit à partir du fichier `TRONCON_ROUTE.shp` de ROUTE 500 (il faut GDAL et mapshaper).
+- Le fond « Routes nationales » (BD TOPO) est conservé.
+
 ## 0.15.0 — 14 octobre 2026 — quatre nouveaux types de schémas (Mermaid 12)
 
 - **Logigramme en couloirs** (`swimlane-beta`) : le logigramme, dont chaque groupe devient le couloir d'un acteur. Une case du panneau fait passer un logigramme existant en couloirs, et inversement.

@@ -413,6 +413,10 @@ export async function rendreCarte(code, rapport = 0.7) {
         if (option(m, 'hydrographie')) await dessinerLignes(svg, chemin, 'hydro', { stroke: '#5b8dd6', 'stroke-width': 0.8 });
         if (option(m, 'rail')) await dessinerLignes(svg, chemin, 'rail', { stroke: '#333333', 'stroke-width': 0.7, 'stroke-dasharray': '4,2' });
         if (option(m, 'routes')) await dessinerLignes(svg, chemin, 'routes', { stroke: '#6b3f1d', 'stroke-width': 0.9, 'stroke-opacity': 0.85 });
+        // Réseau de ROUTE 500, du plus fin au plus fort pour que les autoroutes restent dessus
+        if (option(m, 'routes-regionales')) await dessinerLignes(svg, chemin, 'routes-regionales', { stroke: '#8c8c8c', 'stroke-width': 0.5 });
+        if (option(m, 'routes-principales')) await dessinerLignes(svg, chemin, 'routes-principales', { stroke: '#d07a1f', 'stroke-width': 0.9 });
+        if (option(m, 'routes-autoroutes')) await dessinerLignes(svg, chemin, 'routes-autoroutes', { stroke: '#b3261e', 'stroke-width': 1.4 });
     }
 
     await dessinerEpingles(svg, m, projection, l, h);

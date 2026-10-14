@@ -4,9 +4,13 @@ Données géographiques des diapositives de carte de FUSAIN, reprises de SimpleC
   Licence Ouverte / Open Licence 2.0 (Etalab). Arrondissements municipaux : geo.api.gouv.fr, même licence.
 - Composition des EPCI au 1er janvier 2025 : INSEE, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Hydrographie, voies ferrées et routes nationales : IGN, BD TOPO, Licence Ouverte / Open Licence 2.0 (Etalab).
+- Réseau routier par vocation (calques/routes-*.json) : IGN, ROUTE 500 édition 2021 (dernière édition, produit arrêté),
+  Licence Ouverte / Open Licence 2.0 (Etalab) ; tronçons fusionnés et simplifiés.
 - Relief (estompage) : IGN, Géoplateforme, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Pays du monde : Natural Earth, 1:110 000 000, domaine public ; noms français : paquet iso-codes (LGPL-2.1).
 - Regroupements de pays (régions du monde) : SimpleCarto.
 - Jeux de données d'exemple (exemples/) : SimpleCarto ; hormis les codes, les valeurs sont fictives.
+- Adresses (adresses/) : Base Adresse Nationale, Licence Ouverte / Open Licence 2.0 (Etalab) ; regroupées par voie,
+  coordonnées arrondies au cent-millième de degré (outils/adresses.py).
 
 Les fichiers ont été simplifiés (propriétés réduites, découpage par région) ; les tracés ne sont pas modifiés.

@@ -26,7 +26,10 @@ FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charg
 EXCLUS = {"sbom/composants.json"}
 # Fonds de carte volumineux : hors du préchargement, téléchargés à la première carte qui en a besoin, mais vérifiés
 # par le service worker avant d'entrer dans son cache, comme le reste
-A_LA_DEMANDE = ("cartes/communes/", "cartes/calques/", "cartes/exemples/")
+A_LA_DEMANDE = ("cartes/communes/", "cartes/calques/", "cartes/exemples/", "cartes/adresses/")
+# Adresses d'une commune (35 000 fichiers) : ni préchargées ni énumérées dans le service worker. Leur empreinte est donnée
+# par l'index de leur département (cartes/adresses/<dép>.json, lu à la demande) et vérifiée au téléchargement.
+ADRESSES_COMMUNES = re.compile(r"cartes/adresses/[^/]+/")
 
 
 def lire(chemin):
@@ -52,7 +55,7 @@ def fichiers_caches():
         base = RACINE / dossier
         if base.is_dir():
             liste += [str(p.relative_to(RACINE)) for p in base.rglob("*") if p.is_file()]
-    return sorted(f for f in liste if f not in EXCLUS)
+    return sorted(f for f in liste if f not in EXCLUS and not ADRESSES_COMMUNES.match(f))
 
 
 def fichiers_a_la_demande():
@@ -89,9 +92,12 @@ def sw_genere(generes):
         if f == "index.html":
             lignes.append(f"    ['./', '{empreinte_fichier}'],")
         lignes.append(f"    ['./{f}', '{empreinte_fichier}'],")
+    # Le cache des adresses porte l'empreinte de leurs index : une nouvelle édition de la BAN le remplace en entier
+    adresses = hashlib.sha256("".join(l for l in demande if "cartes/adresses/" in l).encode()).hexdigest()[:10]
     bloc = ("/* DEBUT-GENERE */\nconst VERSION_CACHE = 'fusain-%s-%s';\n// [chemin, empreinte SHA-256] de chaque fichier de la version\nconst FICHIERS = [\n%s\n];\n"
-            "// Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement\nconst A_LA_DEMANDE = [\n%s\n];\n/* FIN-GENERE */") % (
-        num, h.hexdigest()[:10], "\n".join(lignes), "\n".join(demande))
+            "// Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement\nconst A_LA_DEMANDE = [\n%s\n];\n"
+            "const CACHE_ADRESSES = 'fusain-adresses-%s';\n/* FIN-GENERE */") % (
+        num, h.hexdigest()[:10], "\n".join(lignes), "\n".join(demande), adresses)
     return re.sub(r"/\* DEBUT-GENERE \*/.*?/\* FIN-GENERE \*/", lambda _: bloc, lire("sw.js"), flags=re.S)
 
 

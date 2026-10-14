@@ -11,7 +11,7 @@
 import { h, bouton, champTexte, champSelect, champCase, message, modale, ouvrirModale, fermerModale } from '../dom.js';
 import { actionsListe, plan, marquer } from './commun.js';
 import { choisirIcone } from '../icones.js';
-import { referentiels, nomsDesZones, lireCommunes, inverserPosition, territoiresRepresentes } from '../geo.js';
+import { referentiels, nomsDesZones, lireCommunes, inverserPosition, territoiresRepresentes, departementsAdresses, communesAdresses, adressesCommune } from '../geo.js';
 
 export const ECHELLES = {
     monde: { nom: 'Monde' },
@@ -58,6 +58,9 @@ export const OPTIONS = {
     hydrographie: ['oui', false],
     rail: ['oui', false],
     routes: ['oui', false],
+    'routes-autoroutes': ['oui', false],
+    'routes-principales': ['oui', false],
+    'routes-regionales': ['oui', false],
     'libelles-epingles': ['oui', true],
     'legende-epingles': ['oui', true],
     'taille-epingles': ['nombre', 5, 1, 30],
@@ -373,6 +376,83 @@ function dialogueImport(appliquer, echelle, representes, nom, colonnes, lignes) 
     ouvrirModale(dialogue);
 }
 
+// Épingle posée à une adresse de la Base Adresse Nationale : département, commune, voie puis numéro, comme dans SimpleCarto
+const COLLECTIVITES = { 975: 'Saint-Pierre-et-Miquelon', 977: 'Saint-Barthélemy', 978: 'Saint-Martin', 987: 'Polynésie française', 988: 'Nouvelle-Calédonie' };
+const NUMERO_ABSENT = 0;
+const libelleNumero = (n) => (n === NUMERO_ABSENT ? '(sans numéro)' : String(n));
+
+async function dialogueAdresse(appliquer, modele) {
+    let deps;
+    try { deps = await departementsAdresses(); } catch (e) { message('Adresses indisponibles', e.message, 'error'); return; }
+    if (!deps.length) { message('Adresses indisponibles', 'Cette installation de FUSAIN ne contient pas la Base Adresse Nationale.', 'error'); return; }
+    const rang = (c) => parseFloat(c.replace('2A', '20.1').replace('2B', '20.2'));
+    const nomDep = (c) => DEPARTEMENTS[c] || COLLECTIVITES[c] || c;
+    const zone = ['departement', 'commune'].includes(modele.echelle) ? departementDe(modele.zone) : '';
+    const depart = deps.includes(zone) ? zone : '';
+    const liste = (libelle, id, options) => champSelect(libelle, options, '', () => {}, { id });
+    const formulaire = h('form', {},
+        h('p', { class: 'fr-text--sm' }, 'Base Adresse Nationale. Les adresses d\'une commune sont téléchargées à son premier choix, puis restent disponibles hors ligne.'),
+        liste('Département', 'adr-dep', [['', '— Choisir —'], ...deps.sort((a, b) => rang(a) - rang(b)).map((c) => [c, `${c} — ${nomDep(c)}`])]),
+        liste('Commune', 'adr-commune', []),
+        liste('Voie', 'adr-voie', []),
+        liste('Numéro', 'adr-numero', []));
+    formulaire.addEventListener('submit', (e) => e.preventDefault());
+    const champ = (id) => formulaire.querySelector(`#${id}`);
+    const remplir = (id, options) => {
+        champ(id).replaceChildren(...options.map(([v, nom]) => h('option', { value: v }, nom)));
+        champ(id).disabled = options.length <= 1;
+    };
+    let communes = [];
+    let voies = [];
+    const choisirNumeros = () => {
+        const adresses = voies.find(([v]) => v === champ('adr-voie').value)?.[1] || [];
+        remplir('adr-numero', adresses.map(([n], i) => [String(i), libelleNumero(n)]));
+        // Une voie à adresse unique (lieu-dit) n'a rien à choisir
+        champ('adr-numero').disabled = adresses.length <= 1;
+    };
+    const choisirVoies = async () => {
+        voies = [];
+        remplir('adr-voie', []); remplir('adr-numero', []);
+        const code = champ('adr-commune').value;
+        if (!code) return;
+        try { voies = await adressesCommune(champ('adr-dep').value, code); } catch (e) { message('Adresses indisponibles', e.message, 'error'); return; }
+        if (champ('adr-commune').value !== code) return;
+        voies.sort((a, b) => a[0].localeCompare(b[0], 'fr', { numeric: true }));
+        remplir('adr-voie', [['', '— Choisir —'], ...voies.map(([v]) => [v, v])]);
+    };
+    const choisirCommunes = async () => {
+        communes = [];
+        remplir('adr-commune', []); remplir('adr-voie', []); remplir('adr-numero', []);
+        const dep = champ('adr-dep').value;
+        if (!dep) return;
+        try { communes = await communesAdresses(dep); } catch (e) { message('Adresses indisponibles', e.message, 'error'); return; }
+        if (champ('adr-dep').value !== dep) return;
+        const triees = [...communes].sort((a, b) => a[1].localeCompare(b[1], 'fr'));
+        remplir('adr-commune', [['', '— Choisir —'], ...triees.map(([c, nom]) => [c, `${nom} (${c})`])]);
+        if (modele.echelle === 'commune' && communes.some(([c]) => c === modele.zone)) {
+            champ('adr-commune').value = modele.zone;
+            await choisirVoies();
+        }
+    };
+    champ('adr-dep').addEventListener('change', choisirCommunes);
+    champ('adr-commune').addEventListener('change', choisirVoies);
+    champ('adr-voie').addEventListener('change', choisirNumeros);
+    remplir('adr-commune', []); remplir('adr-voie', []); remplir('adr-numero', []);
+    const valider = bouton('Placer l\'épingle', { variante: 'primary', taille: 'md', icone: 'add-line', onclick: () => {
+        const voie = voies.find(([v]) => v === champ('adr-voie').value);
+        const adresse = voie?.[1][Number(champ('adr-numero').value) || 0];
+        if (!adresse) { message('Adresse incomplète', 'Choisissez un département, une commune et une voie.', 'warning'); return; }
+        const [numero, lon, lat] = adresse;
+        const commune = communes.find(([c]) => c === champ('adr-commune').value)?.[1] || '';
+        fermerModale(dialogue);
+        appliquer((m) => { m.epingles.push({ lat: arrondi(lat, 5), lon: arrondi(lon, 5), couleur: '#e1000f', texte: `${numero === NUMERO_ABSENT ? '' : `${numero} `}${voie[0]}, ${commune}`, icone: '' }); },
+            (m) => `e:${m.epingles.length - 1}`);
+    } });
+    const dialogue = modale('fusain-modale-adresse', 'Épingle à une adresse', formulaire, [valider]);
+    ouvrirModale(dialogue);
+    if (depart) { champ('adr-dep').value = depart; await choisirCommunes(); }
+}
+
 const optionsZones = (echelle, zone) => {
     if (echelle === 'region-du-monde') return [['auto', 'Pays ayant des données'], ...referentiels.regionsDuMonde.map((r) => [r.code, `${r.categorie} — ${r.nom}`])];
     if (echelle === 'region' || echelle === 'region-communes') return Object.entries(REGIONS).sort((a, b) => a[1].localeCompare(b[1], 'fr'));
@@ -510,6 +590,10 @@ export function panneau(ctx) {
             case_(modele, appliquer, 'hydrographie', 'Cours d\'eau'),
             case_(modele, appliquer, 'rail', 'Voies ferrées'),
             case_(modele, appliquer, 'routes', 'Routes nationales'),
+            h('p', { class: 'fusain-aide' }, 'Réseau routier par fonction (IGN, ROUTE 500, édition 2021) :'),
+            case_(modele, appliquer, 'routes-autoroutes', 'Autoroutes et voies rapides'),
+            case_(modele, appliquer, 'routes-principales', 'Liaisons principales'),
+            case_(modele, appliquer, 'routes-regionales', 'Liaisons régionales'),
             h('p', { class: 'fusain-aide' }, 'Ces fonds sont téléchargés à la première utilisation, puis disponibles hors ligne.'),
         ] : h('p', { class: 'fusain-aide' }, 'Relief, cours d\'eau, voies ferrées et routes ne couvrent que la France métropolitaine.')));
 
@@ -521,6 +605,7 @@ export function panneau(ctx) {
                 const centre = inverserPosition(ecrire(modele), 0.5, 0.5) || [2.35, 46.6];
                 ajouter('epingles', { lat: arrondi(centre[1], 5), lon: arrondi(centre[0], 5), couleur: '#e1000f', texte: 'Nouvelle épingle', icone: '' }, 'e')();
             } }),
+            bouton('Épingle à une adresse…', { icone: 'search-line', onclick: () => dialogueAdresse(appliquer, modele) }),
             bouton('Pictogramme', { icone: 'add-line', onclick: () => choisirIcone('dsfr:map-pin-2-line', (icone) => ajouter('pictogrammes', { x: 50, y: 50, icone, couleur: '#000091', taille: 48 }, 'p')()).catch((x) => message('Icônes indisponibles', x.message, 'error')) }),
             bouton('Annotation', { icone: 'add-line', onclick: ajouter('annotations', { x: 75, y: 15, cx: 55, cy: 45, texte: 'Votre annotation' }, 'a') })),
         modele.epingles.length ? [

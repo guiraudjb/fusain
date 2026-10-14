@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """FUSAIN — données géographiques des diapositives de carte, reprises de SimpleCarto.
 
-    python3 outils/cartes.py [dossier data de SimpleCarto]     (par défaut ~/SimpleCarto/data)
+    python3 outils/cartes.py [dossier data de SimpleCarto] [TRONCON_ROUTE.shp de ROUTE 500]
+    (par défaut ~/SimpleCarto/data ; sans ROUTE 500, les calques du réseau routier ne sont pas produits)
 
 Produit le dossier cartes/ :
   - monde.json, regions-du-monde.json, departements.json, epci.json : préchargés avec l'application ;
   - communes/<région>.json : contours communaux d'une région (et arrondissements municipaux), lus à la demande ;
   - calques/ : relief, hydrographie, voies ferrées, routes nationales, lus à la demande ;
+  - calques/routes-*.json : réseau routier de ROUTE 500 (IGN, édition 2021, la dernière) par vocation, lu à la demande.
+    Il faut ogr2ogr (GDAL) et mapshaper ;
   - index.json : adresse et empreinte (SRI) de chaque fichier lu à la demande. Son propre condensé est porté par
     index.html (outils/generer.py), si bien que tout fichier chargé est contrôlé.
 
@@ -19,9 +22,14 @@ import csv
 import gettext
 import hashlib
 import json
+import os
 import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
+
+import adresses
 
 RACINE = Path(__file__).resolve().parent.parent
 CIBLE = RACINE / "cartes"
@@ -79,9 +87,33 @@ def sous_topologie(topo, objets):
     return sortie
 
 
-def principal(source):
+# Vocations de ROUTE 500 retenues, du réseau le plus fin au plus fort. Les bretelles vont avec les autoroutes.
+# La vocation (fonction de la route) est préférée à la classe administrative, dépassée depuis les transferts de la loi 3DS.
+VOCATIONS_ROUTE500 = (("routes-regionales", "'Liaison régionale'"), ("routes-principales", "'Liaison principale'"),
+                      ("routes-autoroutes", "'Type autoroutier', 'Bretelle'"))
+
+
+def route500(troncons, index):
+    """Calques routiers de ROUTE 500 : tronçons fusionnés en lignes continues, reprojetés en longitude et latitude,
+    simplifiés. Sans fusion, chaque tronçon serait un arc TopoJSON et le fichier ne maigrirait pas."""
+    with tempfile.TemporaryDirectory() as tmp:
+        for nom, vocations in VOCATIONS_ROUTE500:
+            brut = Path(tmp) / f"{nom}.geojson"
+            subprocess.run(["ogr2ogr", "-f", "GeoJSON", "-t_srs", "EPSG:4326", "-oo", "ENCODING=CP1252", "-dialect", "sqlite",
+                            "-sql", f"SELECT ST_LineMerge(ST_Union(geometry)) AS geometry FROM TRONCON_ROUTE WHERE VOCATION IN ({vocations})",
+                            str(brut), str(troncons)], check=True, env={**os.environ, "OGR_GEOJSON_MAX_OBJ_SIZE": "0"})
+            chemin = CIBLE / "calques" / f"{nom}.json"
+            subprocess.run(["mapshaper", "-i", str(brut), "-explode", "-simplify", "10%", "keep-shapes", "-rename-layers", nom,
+                            "-o", "format=topojson", "quantization=100000", str(chemin)], check=True)
+            index[f"calques/{nom}"] = chemin
+
+
+def principal(source, troncons=None):
+    # Les adresses (outils/adresses.py, 35 000 fichiers) sont produites à part : elles sont conservées
     if CIBLE.exists():
-        shutil.rmtree(CIBLE)
+        for p in CIBLE.iterdir():
+            if p.name != "adresses":
+                shutil.rmtree(p) if p.is_dir() else p.unlink()
     (CIBLE / "communes").mkdir(parents=True)
     (CIBLE / "calques").mkdir()
 
@@ -143,6 +175,8 @@ def principal(source):
         index[f"calques/{nom}"] = chemin
     shutil.copyfile(source / "relief_france.png", CIBLE / "calques" / "relief.png")
     index["calques/relief"] = CIBLE / "calques" / "relief.png"
+    if troncons:
+        route500(troncons, index)
 
     # Chaque fichier, préchargé ou non, est lu avec son empreinte
     for nom in ("monde", "regions-du-monde", "departements", "epci"):
@@ -152,7 +186,8 @@ def principal(source):
     for fichier in ("france_communes.csv", "france_departements.csv", "monde.csv"):
         shutil.copyfile(source / "samples" / fichier, CIBLE / "exemples" / fichier.replace("_", "-"))
 
-    ecrire_json(CIBLE / "index.json", {nom: {"fichier": str(c.relative_to(CIBLE)), "integrite": sri(c)} for nom, c in sorted(index.items())})
+    entrees = {nom: {"fichier": str(c.relative_to(CIBLE)), "integrite": sri(c)} for nom, c in index.items()}
+    ecrire_json(CIBLE / "index.json", dict(sorted({**entrees, **adresses.entrees_existantes()}.items())))
     (CIBLE / "LICENCE.txt").write_text(LICENCE, encoding="utf-8")
     taille = sum(p.stat().st_size for p in CIBLE.rglob("*") if p.is_file())
     print(f"cartes/ : {len(par_region)} régions communales, {len(epci)} EPCI, {taille / 1e6:.1f} Mo au total.")
@@ -175,13 +210,18 @@ LICENCE = """Données géographiques des diapositives de carte de FUSAIN, repris
   Licence Ouverte / Open Licence 2.0 (Etalab). Arrondissements municipaux : geo.api.gouv.fr, même licence.
 - Composition des EPCI au 1er janvier 2025 : INSEE, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Hydrographie, voies ferrées et routes nationales : IGN, BD TOPO, Licence Ouverte / Open Licence 2.0 (Etalab).
+- Réseau routier par vocation (calques/routes-*.json) : IGN, ROUTE 500 édition 2021 (dernière édition, produit arrêté),
+  Licence Ouverte / Open Licence 2.0 (Etalab) ; tronçons fusionnés et simplifiés.
 - Relief (estompage) : IGN, Géoplateforme, Licence Ouverte / Open Licence 2.0 (Etalab).
 - Pays du monde : Natural Earth, 1:110 000 000, domaine public ; noms français : paquet iso-codes (LGPL-2.1).
 - Regroupements de pays (régions du monde) : SimpleCarto.
 - Jeux de données d'exemple (exemples/) : SimpleCarto ; hormis les codes, les valeurs sont fictives.
+- Adresses (adresses/) : Base Adresse Nationale, Licence Ouverte / Open Licence 2.0 (Etalab) ; regroupées par voie,
+  coordonnées arrondies au cent-millième de degré (outils/adresses.py).
 
 Les fichiers ont été simplifiés (propriétés réduites, découpage par région) ; les tracés ne sont pas modifiés.
 """
 
 if __name__ == "__main__":
-    principal(Path(sys.argv[1]) if len(sys.argv) > 1 else Path.home() / "SimpleCarto" / "data")
+    principal(Path(sys.argv[1]) if len(sys.argv) > 1 else Path.home() / "SimpleCarto" / "data",
+              Path(sys.argv[2]) if len(sys.argv) > 2 else None)

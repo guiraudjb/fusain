@@ -90,3 +90,29 @@ export function retenirCarte(code, carte) {
 }
 export const inverserPosition = (code, x, y) => cartes.get(code)?.inverser(x, y) ?? null;
 export const territoiresRepresentes = (code) => cartes.get(code)?.codes ?? null;
+
+// ---------- Adresses (Base Adresse Nationale, outils/adresses.py) ----------
+
+// Départements dont les adresses sont disponibles, d'après le catalogue des fonds
+export async function departementsAdresses() {
+    return Object.keys(await lireIndex()).filter((n) => n.startsWith('adresses/')).map((n) => n.slice(9));
+}
+
+// Communes d'un département : [code INSEE, nom, empreinte du fichier de ses adresses]
+export const communesAdresses = (dep) => lireDonnees(`adresses/${dep}`);
+
+// Adresses d'une commune, regroupées par voie : [[voie, [[numéro, longitude, latitude]…]]…]. Le fichier est lu avec
+// l'empreinte que donne l'index du département, lui-même vérifié : le service worker le garde ensuite hors ligne.
+export async function adressesCommune(dep, code) {
+    const commune = (await communesAdresses(dep)).find(([c]) => c === code);
+    if (!commune) throw new Error(`Aucune adresse connue pour la commune ${code}.`);
+    const reponse = await fetch(`${DOSSIER}adresses/${dep}/${code}.json`, { integrity: commune[2] });
+    if (!reponse.ok) throw new Error(`Les adresses de ${commune[1]} n'ont pas pu être chargées${navigator.onLine ? '' : ' : elles ne sont pas encore disponibles hors ligne'}.`);
+    const { o, v } = await reponse.json();
+    let [lon, lat] = o;
+    return v.map(([voie, numeros, ecarts]) => [voie, numeros.map((n, i) => {
+        lon += ecarts[2 * i];
+        lat += ecarts[2 * i + 1];
+        return [n, lon / 1e5, lat / 1e5];
+    })]);
+}

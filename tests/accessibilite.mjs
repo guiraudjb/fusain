@@ -31,7 +31,7 @@ await p.keyboard.press('Escape'); await p.waitForTimeout(500);
 await p.click('.fr-header__tools [data-action="theme"]'); await p.mouse.move(700, 500); await p.waitForTimeout(500); await controler('thème sombre');
 // Panneaux des éditeurs ajoutés en 0.6.0 (dont le tableau de données du graphique) et page vierge
 await p.click('.fr-header__tools [data-action="theme"]'); await p.waitForTimeout(300);
-for (const id of ['graphique', 'entites', 'classes', 'versions', 'architecture', 'radar', 'treemap', 'zenuml', 'diapo-blocs', 'diapo-libre']) {
+for (const id of ['graphique', 'entites', 'classes', 'versions', 'architecture', 'radar', 'treemap', 'zenuml', 'diapo-blocs', 'diapo-libre', 'couloirs', 'ishikawa', 'arborescence', 'venn']) {
   await p.evaluate(async (id) => { const { MODELES } = await import('./js/modeles.js'); const { charger, nouveauDocument } = await import('./js/etat.js'); charger(nouveauDocument(MODELES.find((m) => m.id === id).code)); }, id);
   await p.waitForTimeout(1300);
   await p.locator('#fusain-proprietes .fusain-plan__element').nth(1).click(); await p.waitForTimeout(400);

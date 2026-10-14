@@ -1,5 +1,5 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
-import { h, bouton, champTexte, champSelect, message } from '../dom.js';
+import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
 import { choisirIcone } from '../icones.js';
 import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit } from './commun.js';
 
@@ -142,9 +142,10 @@ function lireEnonce(texte, modele, groupe) {
 
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);
-    const entete = (corps[0] || '').trim().match(/^(flowchart|graph)(?:\s+(TB|TD|BT|LR|RL))?\s*;?$/);
+    // Le logigramme en couloirs (swimlane-beta de Mermaid) a la même écriture : chaque groupe y est un couloir
+    const entete = (corps[0] || '').trim().match(/^(flowchart|graph|swimlane-beta)(?:\s+(TB|TD|BT|LR|RL))?\s*;?$/);
     if (!entete) throw new Error('La première ligne doit être « flowchart » suivi du sens (TD, LR…).');
-    const modele = { preambule, sens: entete[2] === 'TB' ? 'TD' : entete[2] || 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
+    const modele = { preambule, couloirs: entete[1] === 'swimlane-beta', sens: entete[2] === 'TB' ? 'TD' : entete[2] || 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
     const pile = [];
 
     corps.slice(1).forEach((ligneBrute, n) => {
@@ -224,7 +225,7 @@ function ecrireLien(l) {
 }
 
 export function ecrire(modele) {
-    const lignes = [...modele.preambule, `flowchart ${modele.sens}`];
+    const lignes = [...modele.preambule, `${modele.couloirs ? 'swimlane-beta' : 'flowchart'} ${modele.sens}`];
     const marge = (p) => '    '.repeat(p);
     const ecrireGroupe = (idParent, p) => {
         for (const n of modele.noeuds.filter((x) => x.groupe === idParent)) lignes.push(marge(p) + ecrireNoeud(n));
@@ -396,8 +397,9 @@ export function panneau(ctx) {
     const blocs = [];
 
     blocs.push(h('div', { class: 'fusain-bloc' },
-        h('h2', {}, 'Logigramme'),
+        h('h2', {}, modele.couloirs ? 'Logigramme en couloirs' : 'Logigramme'),
         champSelect('Sens de lecture', SENS, modele.sens, (v) => appliquer((m) => { m.sens = v; })),
+        champCase('Groupes en couloirs (un par acteur)', modele.couloirs, (v) => appliquer((m) => { m.couloirs = v; })),
         h('div', { class: 'fusain-ligne' },
             champSelect('Espacement', ESPACEMENTS, espacement(modele), (v) => appliquer((m) => reglerDisposition(m, { nodeSpacing: VALEURS_ESPACEMENT[v], rankSpacing: VALEURS_ESPACEMENT[v] }, v ? 'dagre' : ''))),
             champSelect('Tracé des liens', TRACES, TRACES.some(([t]) => t === lireInit(modele.preambule).flowchart?.curve) ? lireInit(modele.preambule).flowchart.curve : '', (v) => appliquer((m) => reglerDisposition(m, { curve: v })))),
@@ -406,11 +408,11 @@ export function panneau(ctx) {
                 let cle;
                 appliquer((m) => { cle = `n:${ajouterNoeud(m).id}`; }, () => cle);
             } }),
-            bouton('Ajouter un groupe', { icone: 'add-line', onclick: () => {
+            bouton(modele.couloirs ? 'Ajouter un couloir' : 'Ajouter un groupe', { icone: 'add-line', onclick: () => {
                 let cle;
                 appliquer((m) => {
                     const id = nouvelId(m, 'groupe');
-                    m.groupes.push({ id, titre: 'Nouveau groupe', parent: null, sens: null });
+                    m.groupes.push({ id, titre: m.couloirs ? 'Nouvel acteur' : 'Nouveau groupe', parent: null, sens: null });
                     ajouterNoeud(m, id);
                     cle = `g:${id}`;
                 }, () => cle);
@@ -505,4 +507,4 @@ export function panneau(ctx) {
     return blocs;
 }
 
-export default { type: 'flowchart', nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+export default { type: 'flowchart', types: ['flowchart', 'swimlane'], nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };

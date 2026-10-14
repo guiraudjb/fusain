@@ -95,6 +95,49 @@ export const MODELES = [
     P3 --- S4
     P3 --- S5
 ` },
+    { id: 'couloirs', categorie: 'processus', nom: 'Logigramme en couloirs', code: `swimlane-beta LR
+    subgraph usager ["Usager"]
+        depot["Dépose sa demande"]
+        recoit(["Reçoit la décision"])
+    end
+    subgraph accueil ["Accueil"]
+        enregistre["Enregistre le dossier"]
+        complet{"Dossier complet ?"}
+    end
+    subgraph instruction ["Service instructeur"]
+        instruit["Instruit la demande"]
+        decide["Rédige la décision"]
+    end
+    depot --> enregistre
+    enregistre --> complet
+    complet -->|"Non"| depot
+    complet -->|"Oui"| instruit
+    instruit --> decide
+    decide --> recoit
+` },
+    { id: 'ishikawa', categorie: 'processus', nom: 'Causes et effet (Ishikawa)', code: `ishikawa
+    Délais de traitement trop longs
+        Méthodes
+            Procédure non documentée
+            Validations successives
+        Personnel
+            Effectifs insuffisants
+            Formation incomplète
+        Outils
+            Logiciel métier lent
+        Usagers
+            Dossiers incomplets
+` },
+    { id: 'arborescence', categorie: 'architecture', nom: 'Arborescence', code: `treeView-beta
+    "Direction"
+        "Pôle accueil"
+            "Guichet"
+            "Téléphone"
+        "Pôle instruction"
+            "Aides"
+            "Autorisations"
+        "Pôle support"
+` },
     { id: 'etats', categorie: 'processus', nom: 'Diagramme d\'états', code: `stateDiagram-v2
     state "Validé" as Valide
     state "Publié" as Publie
@@ -153,6 +196,14 @@ export const MODELES = [
     "Fonctionnement" : 250
     "Investissement" : 200
     "Communication" : 100
+` },
+    { id: 'venn', categorie: 'donnees', nom: 'Diagramme de Venn', code: `venn-beta
+    title Publics du service
+    set A["Particuliers"]
+    set B["Entreprises"]
+    set C["Collectivités"]
+    union A,B["Auto-entrepreneurs"]
+    union B,C["Délégataires"]
 ` },
     { id: 'quadrant', categorie: 'donnees', nom: 'Matrice (quadrants)', code: `quadrantChart
     title Cartographie des risques

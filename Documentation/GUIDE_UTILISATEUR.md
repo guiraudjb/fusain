@@ -13,7 +13,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Vingt-trois types de schémas s'éditent visuellement : logigramme, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap) et séquence ZenUML. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§6).
+Vingt-sept types de schémas s'éditent visuellement : logigramme, logigramme en couloirs, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap), séquence ZenUML, diagramme d'Ishikawa, arborescence et diagramme de Venn. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§6).
 
 **Gestes communs**
 
@@ -29,6 +29,8 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Au clavier** — placez le focus sur la page (touche Tab), puis : flèches pour passer d'un élément à l'autre, Entrée ou F2 pour renommer, Suppr pour supprimer, Inser ou « + » pour ajouter un élément lié. Le « plan » en bas de la colonne de droite liste tous les éléments et permet de les sélectionner, y compris avec un lecteur d'écran.
 
 **Logigramme** — une étape peut être représentée par une icône (« Représenter par une icône… », parmi les icônes du DSFR et les icônes illustrées) : son texte s'affiche alors dessous. Sens de lecture, espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), étapes (texte, forme, couleur, groupe, duplication), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
+
+**Logigramme en couloirs** — un logigramme dont chaque groupe est le couloir d'un acteur (« Ajouter un couloir »). La case « Groupes en couloirs » fait passer n'importe quel logigramme d'une présentation à l'autre.
 
 **Diagramme de séquence** — participants (boîte ou personnage), messages, notes, blocs (boucle, alternative…), numérotation. Les ajouts se placent après l'élément sélectionné ; les flèches haut / bas le déplacent.
 
@@ -71,6 +73,12 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Carte proportionnelle (treemap)** — des rubriques emboîtées et des cases dont la surface suit la valeur. La pastille « + » d'une case la divise en sous-cases ; glissée sur une autre case, elle y range la première. Une rubrique vaut la somme de ce qu'elle contient.
 
 **Séquence ZenUML** — une autre écriture du diagramme de séquence : participants (personne, base de données, file…), messages, appels avec retour et messages imbriqués, blocs (condition avec « sinon », boucle, option, en parallèle, essai). La pastille « + » d'un message ajoute sa réponse ; celle d'un participant, un message vers un nouveau participant. Ce type s'appuie sur une extension de Mermaid chargée à la première page qui l'utilise.
+
+**Diagramme d'Ishikawa (causes et effet)** — un effet unique, des catégories (méthodes, personnel, outils…) et leurs causes. Comme pour la carte mentale : cause fille ou sœur, déplacement, rattachement à l'élément précédent ou remontée d'un niveau.
+
+**Arborescence** — une hiérarchie d'éléments (organigramme de services, plan de site, dossiers), avec les mêmes gestes que le diagramme d'Ishikawa ; elle peut avoir plusieurs éléments de premier niveau.
+
+**Diagramme de Venn** — jusqu'à six ensembles et les intersections que vous nommez (cochez les ensembles concernés). Une taille facultative règle la surface relative de chaque ensemble ou intersection.
 
 **Page vierge** — une page sans schéma, pour une page de garde ou un intercalaire : seuls son titre, son sous-titre et son pied de page sont imprimés. Vous pouvez lui donner un schéma plus tard (« Choisir un schéma »).
 

@@ -171,8 +171,16 @@ export function ecrire(modele) {
 // Lecture d'un CSV : séparateur deviné sur la première ligne (point-virgule, virgule ou tabulation), champs entre guillemets
 export function lireCsv(texte) {
     const source = String(texte).replace(/^﻿/, '');
-    const premiere = source.split('\n')[0];
-    const separateur = [';', '\t', ','].map((c) => [c, premiere.split(c).length]).sort((a, b) => b[1] - a[1])[0][0];
+    // Le séparateur est compté sur le premier enregistrement, hors guillemets : un nom de colonne peut contenir des retours
+    // à la ligne (« "Code⏎alpha⏎-3" » dans le jeu d'exemple des pays)
+    const comptes = { ';': 0, '\t': 0, ',': 0 };
+    for (let i = 0, entre = false; i < source.length; i += 1) {
+        const c = source[i];
+        if (c === '"') entre = !entre;
+        else if (!entre && (c === '\n' || c === '\r')) break;
+        else if (!entre && c in comptes) comptes[c] += 1;
+    }
+    const separateur = Object.entries(comptes).sort((a, b) => b[1] - a[1])[0][0];
     const lignes = [];
     let ligne = [];
     let champ = '';

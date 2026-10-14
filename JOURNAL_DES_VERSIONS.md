@@ -2,6 +2,14 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.15.0 — 14 octobre 2026 — quatre nouveaux types de schémas (Mermaid 12)
+
+- **Logigramme en couloirs** (`swimlane-beta`) : le logigramme, dont chaque groupe devient le couloir d'un acteur. Une case du panneau fait passer un logigramme existant en couloirs, et inversement.
+- **Diagramme d'Ishikawa** (causes et effet) et **arborescence** (`treeView-beta`) : écrits par retrait, ils s'éditent comme la carte mentale (élément fils ou frère, déplacement, changement de niveau). L'effet d'un Ishikawa est unique ; ses catégories et causes se rangent dessous.
+- **Diagramme de Venn** (`venn-beta`) : jusqu'à six ensembles, intersections nommées, tailles relatives facultatives.
+- Un modèle de départ pour chacun, dans les rubriques « Processus », « Architecture » et « Données ».
+- Correction : l'import CSV d'une carte devinait mal le séparateur quand un nom de colonne contenait un retour à la ligne entre guillemets (jeu d'exemple des pays).
+
 ## 0.14.1 — 14 octobre 2026 — jeux de données d'exemple pour les cartes
 
 - La fenêtre « À propos » propose au téléchargement les trois jeux d'exemple de SimpleCarto : départements de France, communes de France et pays du monde, à importer dans une page de carte. Hormis les codes des territoires, leurs valeurs sont fictives.

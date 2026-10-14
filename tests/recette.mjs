@@ -230,6 +230,21 @@ for (const chemin of ['Documentation/GUIDE_UTILISATEUR.md', 'sbom/fusain-sbom-cy
     ok(`adresse directe ${chemin}`, !await q.locator('#fusain-modales').count() && /FUSAIN|CycloneDX/.test(await q.evaluate(() => document.body.innerText.slice(0, 80))));
     await q.close();
 }
+// 13 bis. Types de Mermaid 12 ajoutés en 0.15.0 : couloirs, Ishikawa, arborescence, Venn
+for (const [nom, cle] of [['Logigramme en couloirs', 'g:usager'], ['Causes et effet (Ishikawa)', 'r.0.1'], ['Arborescence', 'r.0.1.0'], ['Diagramme de Venn', 'u:0']]) {
+    await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
+    await p.click(`#fusain-modale-modeles .fusain-modele:has(.fusain-modele__nom:text-is("${nom}"))`); await p.waitForTimeout(1500);
+    const marque = p.locator(`#fusain-feuille [data-fusain="${cle}"]`).first();
+    ok(`« ${nom} » : élément repéré sur le schéma`, await marque.count() === 1 && await p.evaluate(() => document.querySelector('#fusain-feuille').classList.contains('fusain-visuel')));
+    await marque.click({ force: true }); await p.waitForTimeout(300);
+    await p.fill('#fusain-champ-texte', 'Texte <b>modifié</b>'); await p.press('#fusain-champ-texte', 'Tab'); await p.waitForTimeout(1200);
+    ok(`« ${nom} » : texte modifié depuis le panneau, écrit comme du texte`, (await p.textContent('#fusain-feuille')).replace(/\s/g, '').includes('Texte<b>modifié</b>') && !await p.locator('#fusain-feuille b').count());
+    await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(500);
+    await p.check('#exp-format-pdf', { force: true }); await p.check('#exp-portee-page', { force: true });
+    f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); await p.waitForTimeout(400);
+    ok(`« ${nom} » : export PDF vectoriel`, (await p.textContent('#fusain-messages')).includes('vectoriel') && fs.statSync(f).size > 3000);
+}
+
 // 14. Cartes : modèles, saisie d'une valeur, import CSV, calques, épingle glissée, export, fonds hors ligne
 const carte = async (nom) => {
     await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
@@ -284,10 +299,21 @@ await choixEx.setFiles(f);
 await p.waitForSelector('#fusain-modale-import-carte.fr-modal--opened');
 await p.click('#fusain-modale-import-carte .fr-modal__footer button'); await carteStable();
 ok('carte : jeu d\'exemple importé', ((await lireCode()).match(/^- /gm) || []).length >= 100);
+// Jeu des pays : en-tête sur plusieurs lignes, séparateur virgule
+await p.click('.fr-header__tools-links [data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened a[download]');
+const monde = await dl(() => p.click('#fusain-modale-apropos a[download="monde.csv"]'));
+await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+await carte('Monde');
+const [choixMonde] = await Promise.all([p.waitForEvent('filechooser'), p.click('button:has-text("Importer un fichier CSV")')]);
+await choixMonde.setFiles(monde);
+await p.waitForSelector('#fusain-modale-import-carte.fr-modal--opened');
+ok('carte : colonnes du jeu des pays reconnues', (await p.$$eval('#imp-code option', (o) => o.map((x) => x.value))).join('|') === 'Code alpha -3|test data1|test data2');
+await p.click('#fusain-modale-import-carte .fr-modal__footer button'); await carteStable();
+ok('carte : jeu des pays importé', ((await lireCode()).match(/^- [A-Z]{3} /gm) || []).length >= 150);
 await ctx.setOffline(true);
 const q = await ctx.newPage();
 await q.goto(p.url()); await q.waitForSelector('html[data-fusain-pret]');
-await q.click('.fusain-vignette >> nth=-2'); await q.waitForSelector('#fusain-feuille .fusain-carte', { timeout: 30000 }).catch(() => {});
+await q.click('.fusain-vignette >> nth=-3'); await q.waitForSelector('#fusain-feuille .fusain-carte', { timeout: 30000 }).catch(() => {});
 await q.waitForTimeout(1500);
 ok('carte : rendue hors ligne', await q.locator('#fusain-feuille .fusain-carte path[data-fusain^="z:"]').count() > 50 && await q.locator('#fusain-feuille .fusain-carte image').count() === 1);
 await q.close();

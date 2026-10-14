@@ -15,7 +15,7 @@
 
 | Fonction | État |
 |---|---|
-| Édition visuelle de 23 types : logigramme, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar, treemap, ZenUML | Disponible |
+| Édition visuelle de 27 types : logigramme, logigramme en couloirs, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar, treemap, ZenUML, Ishikawa, arborescence, Venn | Disponible |
 | 1 038 icônes du DSFR et 380 icônes illustrées embarquées, pour l'architecture, le logigramme et les diapositives | Disponible |
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
 | Diapositives de texte aux mises en page de la charte de l'État (titre, sommaire, intercalaire, colonnes, chiffres clés, frise, blocs, texte libre) | Disponible |

@@ -34,7 +34,7 @@ const bilan = await p.evaluate(async (ESSAIS) => {
     const echecs = [];
     const comptes = {};
 
-    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar', 'treemap', 'zenuml', 'logigramme-icones', 'diapo-titre', 'diapo-sommaire', 'diapo-chiffres', 'diapo-frise', 'diapo-sommaire-colonnes', 'diapo-blocs', 'diapo-libre', 'carte-region', 'carte-epci']) {
+    for (const type of ['logigramme', 'sequence', 'carte-mentale', 'gantt', 'camembert', 'frise', 'kanban', 'quadrant', 'etats', 'parcours', 'graphique', 'flux', 'entites', 'classes', 'architecture', 'versions', 'paquet', 'c4', 'blocs', 'exigences', 'radar', 'treemap', 'zenuml', 'logigramme-icones', 'diapo-titre', 'diapo-sommaire', 'diapo-chiffres', 'diapo-frise', 'diapo-sommaire-colonnes', 'diapo-blocs', 'diapo-libre', 'carte-region', 'carte-epci', 'couloirs', 'ishikawa', 'arborescence', 'venn']) {
         const depart = MODELES.find((m) => m.id === type).code;
         const editeur = editeurPour(typeDiagramme(depart));
         comptes[type] = 0;

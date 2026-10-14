@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.12.0-4e3049c0eb';
+const VERSION_CACHE = 'fusain-0.12.1-c0e54aa239';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./Documentation/GUIDE_UTILISATEUR.md', '1f767b9600d74895cd649d8a2e39890ce85b6e12aed5a6add02ffb8b97f7eca3'],
     ['./FUSAIN_cahier_des_charges.md', '23bd34fc66cf037534236dd1b3e6d597d10aa8d748a52b6c5f92da2b4fbadc8a'],
-    ['./JOURNAL_DES_VERSIONS.md', 'b08ede22f138ec184340b0ea2f1d759ae2f77daa628e11b53e44a549370c90c2'],
+    ['./JOURNAL_DES_VERSIONS.md', '848fc321cc9129005777aeebb86497f63c14bf2bc7e2bcbd74490ce0083c6340'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'd49126064eb6f5c5f88f4e33f090b34c3316f89193b102491e69eae8e02c0f6a'],
     ['./css/fusain.css', '0c3dfacc404d132e45dce92089ee0b94db512d4a2e53edf76eac19bfcc4314cf'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
@@ -76,7 +76,7 @@ const FICHIERS = [
     ['./js/modeles.js', '461418bd392700acb69bdd3d478560aa19942b4a71db3ba5a14af0251583aa7b'],
     ['./js/rendu.js', 'b39f7624bbe8f1b1e4ac810d3fea7caaaeb9ffbc815ab2c8697b34f0628037b7'],
     ['./js/securite.js', 'b972bb2f200e484363286868df7c527ca344b11893d74fc80f449e386894dd7c'],
-    ['./js/version.js', 'b031381c74682a2c8898570cd8ebb817c22283d047f479b24caa80cf71476aa6'],
+    ['./js/version.js', 'c87de4282f1e4544bfbd17b4a13036f97fc3e798f6fc5207573e9c15c1d802b7'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
     ['./libs/dompurify-v3.4.17/purify.min.js', 'cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31'],
     ['./libs/dsfr-v1.15.4/LICENSE.md', 'f57c62e6a99a23ff58dbd7180586e4b89e24857a11b8052c3d55b1614a4e467c'],
@@ -190,7 +190,7 @@ const FICHIERS = [
     ['./libs/svg2pdf-v2.8.1/LICENSE', '04db7fb792d065c8c9a0e3a7a8255cd36e32b263ca023cbea10daee4a45132b8'],
     ['./libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js', '2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '33b5af8f2d60f86e2a792a72582cdd5251c8eace91905ba5522b4909c2555442'],
+    ['./sbom/fusain-sbom-cyclonedx.json', 'a0b85e1e9927baa0621887b5c4ef58e22a99d15f4161a38ab138c23f86a912d7'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 /* FIN-GENERE */
@@ -234,7 +234,10 @@ self.addEventListener('fetch', (evenement) => {
     if (requete.method !== 'GET' || url.origin !== self.location.origin) return;
     evenement.respondWith(
         caches.open(VERSION_CACHE).then(async (cache) => {
-            const cle = requete.mode === 'navigate' ? './index.html' : requete;
+            // Seule l'adresse de l'application rend la page d'entrée : les documents joints (guide, cahier des charges,
+            // nomenclature) ouverts depuis « À propos » sont des navigations vers leur propre fichier
+            const racine = new URL('./', self.location).pathname;
+            const cle = requete.mode === 'navigate' && (url.pathname === racine || url.pathname === `${racine}index.html`) ? './index.html' : requete;
             const enCache = await cache.match(cle, { ignoreSearch: true });
             return enCache || fetch(requete);
         }),

@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.12.1 — 14 octobre 2026 — liens de la fenêtre « À propos »
+
+- **Correction** : une fois l'application installée (service worker actif), les liens « Guide utilisateur », « Cahier des charges », « Nomenclature logicielle » et « format CycloneDX » rouvraient FUSAIN dans un nouvel onglet au lieu du document. Le service worker rendait la page d'entrée pour toute navigation ; il ne le fait plus que pour l'adresse de l'application, et sert les documents joints depuis le cache, y compris hors ligne.
+- La recette Chrome ouvre désormais chacun de ces liens sous service worker.
+- Configuration Nginx d'exemple : l'encodage UTF-8 des documents Markdown et JSON est annoncé, faute de quoi leurs accents s'affichaient mal.
+
 ## 0.12.0 — 13 octobre 2026 — icônes dans le logigramme et les diapositives
 
 - Essai préalable, type par type, de ce que Mermaid sait dessiner avec nos jeux d'icônes : seuls le logigramme (étape-icône) et l'architecture les prennent ; carte mentale, Kanban, frise, blocs, états, séquence et C4 ne le permettent pas.

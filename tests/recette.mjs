@@ -201,5 +201,16 @@ ok('fichier à champ inconnu refusé', (await p.textContent('#fusain-messages'))
 fs.writeFileSync(OUT + '/proto.json', json.replace('"format": "fusain",', '"format": "fusain", "__proto__": {"x":1},'));
 await p.setInputFiles('#fusain-fichier', OUT + '/proto.json'); await p.waitForTimeout(600);
 ok('fichier __proto__ refusé', (await p.textContent('#fusain-messages')).includes('champs interdits'));
+// 13. « À propos » : sous service worker, chaque lien ouvre son document et non l'application
+await p.evaluate(() => navigator.serviceWorker.ready);
+await p.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 60000 });
+await p.click('[data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos a');
+for (const a of await p.locator('#fusain-modale-apropos a').all()) {
+    const [q] = await Promise.all([ctx.waitForEvent('page'), a.click()]);
+    await q.waitForLoadState();
+    const texte = await q.evaluate(() => document.body.innerText.slice(0, 80));
+    ok(`lien « ${await a.textContent()} »`, !await q.locator('#fusain-modales').count() && /FUSAIN|CycloneDX/.test(texte), q.url());
+    await q.close();
+}
 console.log('erreurs console/page :', errs.length, errs.slice(0, 5));
 await b.close();

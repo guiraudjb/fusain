@@ -29,7 +29,7 @@ fi
 # Chemin de mise à jour : copie jetable des fichiers suivis (dans leur état courant), servie sur un second port
 COPIE="$SORTIE/copie-maj"
 if [ ! -e "$COPIE" ] || [ -f "$COPIE/sw.js" ]; then
-    mkdir -p "$COPIE" && git ls-files -z | xargs -0 tar -cf - | tar -x -C "$COPIE"
+    mkdir -p "$COPIE" && git ls-files -z | tar --null -T - -cf - | tar -x -C "$COPIE"
     (cd "$COPIE" && exec python3 -m http.server 8766 --bind 127.0.0.1) >/dev/null 2>&1 &
     SERVEUR2=$!
     sleep 1

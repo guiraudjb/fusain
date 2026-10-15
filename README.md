@@ -4,6 +4,8 @@
 
 **Utiliser l'application : <https://guiraudjb.github.io/fusain/>**
 
+Hors ligne sous Windows, sans rien installer : double-cliquer `lancer-site-local.bat`. Il lance `serveur-local.ps1`, un serveur web PowerShell local (sans droits d'administrateur, accessible depuis le poste seulement) sur `http://localhost:8090/`, et ouvre le navigateur. Q, Échap ou fermeture de la fenêtre pour l'arrêter. Options : `-Port 9000`, `-SansNavigateur`.
+
 - Construire un schéma à la souris ou au clavier, sans écrire de code ; le code Mermaid reste accessible et modifiable à tout moment.
 - Pages A4 ou A3, portrait ou paysage, document multi-pages.
 - Export PDF (vectoriel), PNG et SVG ; sauvegarde et restauration au format JSON.

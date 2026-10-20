@@ -5,7 +5,7 @@ Deux sources :
   - les icônes illustrées de SimpleCarto (dépôt local, dossier icons/pictograms-k2), générées avec Krea 2 ;
   - les icônes propres à FUSAIN, générées de la même façon à partir de icon-prompts.json (voir LISEZ-MOI.md).
 
-    python3 outils/illustrations/installer.py [--simplecarto /home/adm1/SimpleCarto] [--detourees DOSSIER]
+    python3 outils/illustrations/installer.py [--simplecarto /home/adm1/Projets/Dépots_Publics/SimpleCarto] [--detourees DOSSIER]
 
 Chaque icône est ramenée à 192 px et à 128 couleurs (environ 5 Ko), puis rangée par thème dans
 icones/illustrees/<theme>.json. index.json liste les thèmes, les icônes et l'empreinte de chaque fichier.
@@ -46,7 +46,7 @@ def reduire(chemin):
 
 def principal():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--simplecarto", default="/home/adm1/SimpleCarto")
+    parser.add_argument("--simplecarto", default="/home/adm1/Projets/Dépots_Publics/SimpleCarto")
     parser.add_argument("--detourees", default="/home/adm1/RAID/aitools/krea-2/outputs/fusain-icons/cutout")
     args = parser.parse_args()
 

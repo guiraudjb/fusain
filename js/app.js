@@ -4,7 +4,9 @@ import { h, s, vider, bouton, champTexte, champSelect, annoncer, message, modale
 import { etat, abonner, charger, modifier, allerPage, annuler, retablir, peutAnnuler, peutRetablir, pageCourante, nouveauDocument, nouvellePage, idPage, marquerEnregistre } from './etat.js';
 import { FORMATS, MM_PAR_PX, dimensions } from './formats.js';
 import { typeDiagramme } from './securite.js';
-import { THEMES, rendreSchema, composerPage, decrireErreur } from './rendu.js';
+import { THEMES, rendreSchema, composerPage, decrireErreur, verifierPropositions } from './rendu.js';
+import { diagnostiquer } from './diagnostic.js';
+import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
 import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX } from './fichier.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
@@ -202,6 +204,9 @@ async function rafraichir() {
         derniersRendus.set(page.id, schema);
     } catch (e) {
         erreur = decrireErreur(e);
+        // Diagnostic : ligne réelle, objet visé, syntaxe attendue, réparations à vérifier
+        try { erreur.diagnostic = diagnostiquer(page.code, e); } catch (d) { console.warn('Diagnostic impossible', d); }
+        if (erreur.diagnostic?.ligne) erreur.ligne = erreur.diagnostic.ligne;
         schema = derniersRendus.get(page.id) || null; // le dernier rendu valide reste affiché
     }
     if (n !== jeton) return;
@@ -211,6 +216,133 @@ async function rafraichir() {
     afficherCode(erreur);
     afficherPanneau();
     afficherPages(n);
+    if (erreur?.diagnostic) chercherReparations(n, page, erreur.diagnostic);
+}
+
+// ---------- Erreurs de syntaxe : diagnostic et réparations ----------
+
+const reparationsVerifiees = new Map(); // thème + code → propositions vérifiées
+let zoneReparations = null;
+
+async function chercherReparations(n, page, diagnostic) {
+    const cle = `${etat.doc.document.theme}\n${page.code}`;
+    let liste = reparationsVerifiees.get(cle);
+    if (!liste) {
+        try { liste = await verifierPropositions(diagnostic, etat.doc.document.theme, page); } catch { liste = []; }
+        reparationsVerifiees.set(cle, liste);
+        if (reparationsVerifiees.size > 30) reparationsVerifiees.delete(reparationsVerifiees.keys().next().value);
+    }
+    if (n !== jeton || !zoneReparations?.isConnected) return;
+    afficherReparations(liste, diagnostic);
+}
+
+function appliquerReparation(p) {
+    const index = etat.index;
+    validerCodeEnAttente();
+    modifier((doc) => { doc.pages[index].code = p.code; });
+    if (ui.mode === 'code') zones.zoneCode.value = pageCourante().code;
+    message('Réparation appliquée', 'Ctrl+Z pour revenir au code précédent.', 'success', 5000);
+    annoncer(`Réparation appliquée : ${p.libelle}.`);
+}
+
+function afficherReparations(liste, diagnostic) {
+    vider(zoneReparations);
+    if (!liste.length) {
+        zoneReparations.append(h('p', { class: 'fr-text--sm fusain-diagnostic__vide' }, 'Aucune réparation automatique sûre : corrigez la ligne d\'après la syntaxe attendue.'));
+        return;
+    }
+    zoneReparations.append(h('p', { class: 'fusain-diagnostic__intitule' }, liste.length > 1 ? 'Réparations proposées' : 'Réparation proposée'),
+        h('ul', { class: 'fusain-diagnostic__reparations' }, liste.map((p) => h('li', {},
+            bouton('Appliquer', { variante: 'secondary', icone: 'check-line', onclick: () => appliquerReparation(p) }),
+            h('div', {},
+                h('span', {}, p.libelle, p.verifiee ? '' : ` (corrige la ligne ${diagnostic.ligne} ; une autre erreur suit, ligne ${p.suivante})`),
+                p.apres ? h('code', { class: 'fusain-diagnostic__code' }, p.apres.trim()) : null)))));
+    annoncer(`${liste.length} réparation${liste.length > 1 ? 's' : ''} proposée${liste.length > 1 ? 's' : ''}.`);
+}
+
+function allerALaLigne(ligne) {
+    const aller = () => {
+        const zone = zones.zoneCode;
+        const lignes = zone.value.split('\n');
+        const n = Math.max(1, Math.min(ligne, lignes.length));
+        const debut = lignes.slice(0, n - 1).reduce((s, l) => s + l.length + 1, 0);
+        zone.focus();
+        zone.setSelectionRange(debut, debut + lignes[n - 1].length);
+        const hauteur = parseFloat(getComputedStyle(zone).lineHeight) || 21;
+        zone.scrollTop = Math.max(0, (n - 1) * hauteur - zone.clientHeight / 3);
+        zones.lignes.scrollTop = zone.scrollTop;
+    };
+    if (ui.mode !== 'code') { changerMode('code'); requestAnimationFrame(aller); } else aller();
+}
+
+function alerteErreur(page, erreur) {
+    const d = erreur.diagnostic;
+    const total = page.code.split('\n').length;
+    if (!d || !d.ligne) {
+        zoneReparations = null;
+        return h('div', { class: 'fr-alert fr-alert--error fr-alert--sm' },
+            h('h2', { class: 'fr-alert__title' }, erreur.ligne ? `Erreur dans le code, vers la ligne ${Math.min(erreur.ligne, total)}` : 'Erreur dans le code'),
+            h('p', {}, erreur.texte.split('\n').flatMap((l, i) => (i ? [h('br'), l] : [l]))),
+            d?.type && SYNTAXES[d.type] ? h('p', {}, bouton(`Syntaxes : ${SYNTAXES[d.type].nom.toLowerCase()}`, { variante: 'tertiary', icone: 'question-line', onclick: () => ouvrirSyntaxes(d.type) })) : null,
+            ui.mode !== 'code' ? h('p', {}, bouton('Corriger dans le code', { variante: 'secondary', onclick: () => changerMode('code') })) : null);
+    }
+    const o = d.objet;
+    const numero = String(d.ligne);
+    const extrait = [`${numero} │ ${d.texte.replace(/\t/g, '    ')}`];
+    if (d.colonne) extrait.push(`${' '.repeat(numero.length)} │ ${' '.repeat(Math.max(0, d.colonne - 1))}^`);
+    zoneReparations = h('div', { class: 'fusain-diagnostic__zone', 'aria-live': 'polite' }, h('p', { class: 'fr-text--sm fusain-diagnostic__vide' }, 'Recherche de réparations…'));
+    return h('div', { class: 'fr-alert fr-alert--error fr-alert--sm fusain-diagnostic' },
+        h('h2', { class: 'fr-alert__title' }, `Erreur ligne ${d.ligne}${o ? ` — ${o.nom}` : ''}`),
+        h('p', {}, d.cause),
+        h('pre', { class: 'fusain-diagnostic__extrait' }, extrait.join('\n')),
+        o ? h('div', { class: 'fusain-diagnostic__syntaxe' },
+            h('p', { class: 'fusain-diagnostic__intitule' }, 'Syntaxe attendue'),
+            h('ul', {}, o.syntaxe.map((x) => h('li', {}, h('code', {}, x)))),
+            o.exemple ? h('p', {}, 'Exemple : ', h('code', {}, o.exemple.split('\n')[0])) : null,
+            o.aide ? h('p', { class: 'fr-text--sm' }, o.aide) : null) : null,
+        zoneReparations,
+        h('div', { class: 'fusain-actions' },
+            bouton('Aller à la ligne', { variante: 'secondary', icone: 'code-s-slash-line', onclick: () => allerALaLigne(d.ligne) }),
+            SYNTAXES[d.type] ? bouton(`Toutes les syntaxes : ${SYNTAXES[d.type].nom.toLowerCase()}`, { variante: 'tertiary', icone: 'question-line', onclick: () => ouvrirSyntaxes(d.type) }) : null),
+        h('details', { class: 'fusain-diagnostic__detail' }, h('summary', {}, 'Détail technique'), h('pre', {}, d.message.split('\n').slice(0, 8).join('\n'))));
+}
+
+// Index des syntaxes : chaque objet du type, avec sa syntaxe, un exemple et son insertion dans le code
+function ouvrirSyntaxes(type = typeDiagramme(pageCourante().code)) {
+    const premier = SYNTAXES[type] ? type : 'flowchart';
+    const liste = h('div', { class: 'fusain-syntaxes' });
+    const inserer = (texte) => {
+        fermerModale(dialogue);
+        const ecrire = () => {
+            const zone = zones.zoneCode;
+            const debut = zone.value.lastIndexOf('\n', Math.max(0, zone.selectionStart - 1)) + 1;
+            const retrait = (zone.value.slice(debut).match(/^\s*/) || [''])[0];
+            const fin = zone.value.indexOf('\n', zone.selectionEnd);
+            const position = fin < 0 ? zone.value.length : fin;
+            const bloc = texte.split('\n').map((l) => retrait + l).join('\n');
+            zone.setRangeText(`\n${bloc}`, position, position, 'end');
+            zone.dispatchEvent(new Event('input'));
+            zone.focus();
+        };
+        if (ui.mode !== 'code') { changerMode('code'); requestAnimationFrame(ecrire); } else ecrire();
+    };
+    const remplir = (t) => {
+        const def = SYNTAXES[t];
+        const memeType = typeDiagramme(pageCourante().code) === t || SYNTAXES[typeDiagramme(pageCourante().code)] === def;
+        liste.replaceChildren(
+            h('section', {}, h('h2', { class: 'fr-h6' }, 'Première ligne'), h('ul', {}, def.entete.map((e) => h('li', {}, h('code', {}, e))))),
+            ...def.objets.map((o) => h('section', {},
+                h('h2', { class: 'fr-h6' }, o.nom),
+                o.aide ? h('p', { class: 'fr-text--sm' }, o.aide) : null,
+                h('ul', {}, o.syntaxe.map((x) => h('li', {}, h('code', {}, x)))),
+                h('pre', { class: 'fusain-syntaxes__exemple' }, o.exemple),
+                memeType ? bouton('Insérer l\'exemple', { variante: 'tertiary', taille: 'sm', icone: 'add-line', onclick: () => inserer(o.exemple) }) : null)));
+    };
+    const choix = champSelect('Type de schéma', TYPES_AIDE.map((t) => [t, SYNTAXES[t].nom]), premier, remplir);
+    remplir(premier);
+    const dialogue = modale('fusain-modale-syntaxes', 'Syntaxes du code', h('div', {},
+        h('p', { class: 'fr-text--sm' }, 'Chaque sorte d\'objet, son écriture et un exemple. « Insérer l\'exemple » l\'ajoute sous la ligne du curseur.'), choix, liste));
+    ouvrirModale(dialogue);
 }
 
 function afficherFeuille(page, schema, erreur) {
@@ -235,12 +367,8 @@ function afficherFeuille(page, schema, erreur) {
 
     vider(zones.erreur);
     zones.erreur.hidden = !erreur;
-    if (erreur) {
-        zones.erreur.append(h('div', { class: 'fr-alert fr-alert--error fr-alert--sm' },
-            h('h2', { class: 'fr-alert__title' }, erreur.ligne ? `Erreur dans le code, vers la ligne ${Math.min(erreur.ligne, page.code.split('\n').length)}` : 'Erreur dans le code'),
-            h('p', {}, erreur.texte.split('\n').flatMap((l, i) => (i ? [h('br'), l] : [l]))),
-            ui.mode !== 'code' ? h('p', {}, bouton('Corriger dans le code', { variante: 'secondary', onclick: () => changerMode('code') })) : null));
-    }
+    if (erreur) zones.erreur.append(alerteErreur(page, erreur));
+    else zoneReparations = null;
 }
 
 // ---------- Sélection et manipulation directe ----------
@@ -461,6 +589,7 @@ function afficherCode(erreur) {
 }
 
 function brancherCode() {
+    zones.etatCode.before(bouton('Syntaxes', { icone: 'question-line', titre: 'Écriture de chaque objet du schéma, avec un exemple', onclick: () => ouvrirSyntaxes() }));
     zones.zoneCode.addEventListener('input', () => {
         clearTimeout(attenteCode);
         attenteCode = setTimeout(validerCodeEnAttente, 300);
@@ -837,6 +966,8 @@ function ouvrirAPropos() {
             h('li', {}, document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC (liens et équipements en Excel)')),
             h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
             h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+        h('h2', { class: 'fr-h6' }, 'Erreurs de syntaxe et index des syntaxes'),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.21.0, une faute dans le code est expliquée : ligne réelle, objet que la ligne essaie d\'écrire, cause, syntaxe attendue et exemple. Des réparations sont proposées après avoir été essayées ; « Appliquer » s\'annule par Ctrl+Z. Le bouton « Syntaxes » du mode code ouvre l\'index des écritures de chaque type de schéma.'),
         h('h2', { class: 'fr-h6' }, 'Export vers Microsoft Visio'),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.20.0, « Exporter » propose le format Visio (.vsdx) : un fichier, une page Visio par page, lisible par Visio 2013 et suivants et par LibreOffice Draw. Formes et textes y sont modifiables ; les étapes et équipements forment des groupes ; sur les logigrammes, réseaux importés, diagrammes d\'états, de classes, entités-relations et d\'architecture, les liaisons sont des connecteurs collés qui suivent les formes déplacées. Police Marianne, remplacée par une police voisine si elle n\'est pas installée.'),
         h('h2', { class: 'fr-h6' }, 'Schémas de réseau importés'),

@@ -147,7 +147,24 @@ Chaque page a son propre format : un même document peut mêler A4 et A3.
 
 ## 6. Le mode code
 
-Le bouton « Code » affiche le code Mermaid de la page à côté de l'aperçu, mis à jour pendant la frappe. En cas d'erreur, le dernier aperçu valide reste affiché et le message indique la ligne concernée.
+Le bouton « Code » affiche le code Mermaid de la page à côté de l'aperçu, mis à jour pendant la frappe. En cas d'erreur, le dernier aperçu valide reste affiché.
+
+### Erreurs de syntaxe : diagnostic et réparation
+
+Quand une ligne est mal écrite, le message d'erreur indique :
+
+- **la ligne réelle**, surlignée dans la marge du code, avec un repère sous l'endroit où la lecture s'est arrêtée. La numérotation tient compte du bloc `---` de tête, des commentaires et des lignes vides, que Mermaid ne compte pas. Un `end` oublié est signalé à la ligne qui ouvre le groupe, pas en fin de code ;
+- **l'objet que la ligne essaie d'écrire** (étape, lien, groupe, message, tâche, part…) et la cause de l'erreur, en français ;
+- **la syntaxe attendue** pour cet objet, avec un exemple ;
+- **des réparations proposées**. Chacune a d'abord été essayée : seules celles qui donnent un schéma (ou qui corrigent la ligne quand une autre erreur suit) sont affichées. « Appliquer » modifie le code ; Ctrl+Z revient en arrière. En dernier recours, la ligne peut être mise en commentaire (`%%`) pour afficher le reste du schéma.
+
+Exemples de fautes reconnues : flèche à un tiret (`A -> B`), libellé contenant des parenthèses sans guillemets (`A[Texte (détail)]`), crochet ou guillemet non refermé, guillemets typographiques (« » “ ”), `subgraph` ou `loop` sans `end`, `end` en trop, mot clé mal orthographié (`subgrap`, `participan`, `flowchar`), message de séquence sans deux-points, relation entre entités sans libellé, part de camembert avec une virgule décimale, date de Gantt au format français, liaison d'architecture sans côtés, lettres accentuées dans un diagramme de flux, option de carte mal orthographiée.
+
+« Aller à la ligne » place le curseur sur la ligne fautive. « Détail technique » montre le message d'origine de Mermaid.
+
+### Index des syntaxes
+
+Le bouton **Syntaxes**, au-dessus du code, ouvre l'index : pour chaque type de schéma, la première ligne attendue puis chaque sorte d'objet, avec son écriture, un conseil et un exemple. « Insérer l'exemple » l'ajoute sous la ligne du curseur.
 
 L'étiquette au-dessus de l'éditeur indique si la page reste éditable visuellement. Si vous utilisez une écriture avancée que l'éditeur visuel ne connaît pas, la page passe en « code seul » : rien n'est perdu, elle se modifie simplement par le code.
 

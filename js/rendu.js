@@ -2,6 +2,7 @@
 import { s } from './dom.js';
 import { dimensions, MM_PAR_PX } from './formats.js';
 import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
+import { localiser } from './diagnostic.js';
 import { rendreDiapo } from './diapo.js';
 import { rendreCarte } from './carte.js';
 import { PREFIXE, jeuPourMermaid } from './icones.js';
@@ -253,13 +254,36 @@ export function rendreSchema(code, idTheme, page = null) {
 // Message d'erreur lisible, avec le numéro de ligne quand Mermaid le fournit
 export function decrireErreur(erreur) {
     const brut = String(erreur?.message || erreur || 'Erreur inconnue');
-    const ligne = brut.match(/line\s+(\d+)/i);
+    const ligne = brut.match(/\b(?:line|ligne)\s+(\d+)/i);
     let texte = brut.split('\n').slice(0, 4).join('\n');
     if (/^(Parse|Lexical) error/i.test(brut)) texte = 'La syntaxe du schéma est incorrecte.\n' + brut.split('\n').slice(1, 3).join('\n');
     if (/Edge limit exceeded/i.test(brut)) texte = `Le schéma dépasse le nombre maximal de liens (${LIENS_MAX}). Répartissez-le sur plusieurs pages.`;
     if (/Maximum text size/i.test(brut)) texte = 'Le code du schéma dépasse la taille maximale autorisée.';
     if (/No diagram type detected|UnknownDiagramError/i.test(brut)) texte = 'Type de schéma non reconnu : la première ligne doit annoncer le type (flowchart, sequenceDiagram, pie…).';
     return { texte, ligne: ligne ? Number(ligne[1]) : null };
+}
+
+// Réparations proposées par le diagnostic : chacune est essayée par le rendu complet. Sont gardées celles qui donnent
+// un schéma, puis celles qui repoussent l'erreur plus loin dans le code (code à plusieurs fautes). Un essai réussi reste
+// en cache : appliquer la réparation affiche le schéma sans attendre.
+export async function verifierPropositions(diagnostic, idTheme, page, { maximum = 3 } = {}) {
+    const reussies = [];
+    const partielles = [];
+    for (const p of diagnostic.propositions) {
+        if (reussies.length >= maximum) break;
+        try {
+            await rendreSchema(p.code, idTheme, page);
+            reussies.push({ ...p, verifiee: true });
+        } catch (e) {
+            const suite = localiser(p.code, e);
+            // Une ligne supprimée décale les suivantes d'un rang : l'erreur suivante peut alors porter le même numéro
+            const supprime = p.avant && !p.apres && p.code.split('\n').length < String(page?.code ?? '').split('\n').length;
+            if (suite && diagnostic.ligne && !suite.finDeCode && (suite.ligne > diagnostic.ligne || (supprime && suite.ligne === diagnostic.ligne))) {
+                partielles.push({ ...p, verifiee: false, suivante: suite.ligne });
+            }
+        }
+    }
+    return [...reussies, ...partielles].slice(0, maximum);
 }
 
 // ---------- Composition de la page ----------

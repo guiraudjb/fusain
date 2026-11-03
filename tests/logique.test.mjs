@@ -613,3 +613,143 @@ test('visio : paquet complet relu par le lecteur ZIP', async () => {
     }
     assert.equal(crc32(new TextEncoder().encode('123456789')), 0xcbf43926);
 });
+
+// ---------- Diagnostic des erreurs de syntaxe (0.21.0) ----------
+import { SYNTAXES, TYPES_AIDE, objetDe } from '../js/syntaxes.js';
+import { diagnostiquer, localiser, lignesConservees, distance, plusProche } from '../js/diagnostic.js';
+
+const erreurJison = (ligne, colonne = 0) => ({ message: `Parse error on line ${ligne}:\n...`, hash: { loc: { first_line: ligne, first_column: colonne } } });
+
+test('syntaxes : chaque type a un nom, un en-tête et des objets complets ; chaque exemple est reconnu', () => {
+    assert.ok(TYPES_AIDE.length >= 28);
+    for (const t of TYPES_AIDE) {
+        const def = SYNTAXES[t];
+        assert.ok(def.nom && def.entete.length && def.objets.length, t);
+        for (const o of def.objets) {
+            assert.ok(o.id && o.nom && o.syntaxe.length && o.exemple && o.reconnait instanceof RegExp, `${t}/${o.id}`);
+            // La première ligne de l'exemple est reconnue comme un objet du type (la ligne d'en-tête exceptée)
+            const premiere = o.exemple.split('\n')[0];
+            if (!def.entete.some((e) => premiere.startsWith(e.split(' ')[0]))) assert.ok(objetDe(t, premiere), `${t}/${o.id} : exemple non reconnu`);
+        }
+    }
+    // Les exemples des types à éditeur visuel sont relus par l'éditeur, hors écritures qu'il laisse au code
+    const contexte = new Set(['classDiagram/membre', 'erDiagram/attribut', 'requirementDiagram/propriete', 'venn/titre', 'venn/union', 'diapo/element', 'diapo/bloc']);
+    for (const t of TYPES_AIDE) {
+        const editeur = editeurPour(t);
+        if (!editeur) continue;
+        for (const o of SYNTAXES[t].objets) {
+            if (['commentaire', 'fin'].includes(o.id) || contexte.has(`${t}/${o.id}`)) continue;
+            const tete = t === 'gantt' ? 'gantt\n    dateFormat YYYY-MM-DD\n    section S' : t === 'carte' ? 'carte region\nzone: 84' : SYNTAXES[t].entete[0];
+            const decale = ['diapo', 'carte', 'treemap'].includes(t) ? '' : '    ';
+            try { editeur.analyser(`${tete}\n${o.exemple.split('\n').map((l) => decale + l).join('\n')}\n`); } catch (e) {
+                assert.match(e.message, /n'est pas gérée par l'édition visuelle/, `${t}/${o.id} : ${e.message}`);
+            }
+        }
+    }
+});
+
+test('diagnostic : ligne réelle malgré le bloc de tête, les commentaires et les lignes vides', () => {
+    const code = '\n---\ntitle: Essai\nconfig:\n  theme: base\n---\n%% note\n%%{init: {"theme":"base"}}%%\nflowchart TD\n    %% autre\n    A --> B\n\n    B -> C\n';
+    assert.deepEqual(lignesConservees(code).map((i) => i + 1), [9, 11, 12, 13, 14]);
+    assert.equal(localiser(code, erreurJison(4, 5)).ligne, 13);
+    // Fin du code atteinte : dernière ligne écrite
+    assert.deepEqual(localiser('flowchart TD\n    A --> B\n\n', erreurJison(4)), { ligne: 2, colonne: null, finDeCode: true });
+    // Erreurs de l'analyseur Langium (camembert, architecture…) et des écritures de FUSAIN
+    assert.equal(localiser('pie\n    "A" : 1,5\n', { message: 'Parsing failed: Lexer error on line 2, column 13: x' }).ligne, 2);
+    assert.equal(localiser('carte monde\npalete: theme\n', { message: 'Ligne 2 : option inconnue « palete ».' }).ligne, 2);
+    // Le diagramme de flux ne numérote pas ses lignes vides
+    assert.equal(localiser('sankey-beta\n\nA,B,1\nC,D,x\n', erreurJison(3)).ligne, 4);
+});
+
+test('diagnostic : objet visé, cause et réparation attendue sur un corpus de fautes', () => {
+    const cas = [
+        ['flowchart TD\n    A --> B\n    B -> C\n', erreurJison(3), 3, 'lien', '    B --> C'],
+        ['flowchart LR\n    A => B\n', erreurJison(2), 2, 'lien', '    A ==> B'],
+        ['flowchart TD\n    A[Texte (détail)] --> B\n', erreurJison(2), 2, 'etape', '    A["Texte (détail)"] --> B'],
+        ['flowchart TD\n    A["Texte] --> B\n', erreurJison(2), 2, 'lien', '    A["Texte"] --> B'],
+        ['flowchart TD\n    A -->|oui B\n', erreurJison(2), 2, 'lien', '    A -->|oui| B'],
+        ['flowchart TD\n    A[“Texte (x)”] --> B\n', erreurJison(2), 2, 'lien', '    A["Texte (x)"] --> B'],
+        ['flowchart TD\n    subgrap g [G]\n        A --> B\n    end\n', erreurJison(2), 2, 'groupe', '    subgraph g [G]'],
+        ['sequenceDiagram\n    A->>B texte\n', erreurJison(2), 2, 'message', '    A->>B: texte'],
+        ['sequenceDiagram\n    A=>B: texte\n', erreurJison(2), 2, 'message', '    A->>B: texte'],
+        ['sequenceDiagram\n    participan A as Agent\n', erreurJison(2), 2, 'participant', '    participant A as Agent'],
+        ['sequenceDiagram\n    A->>B: x\n    Note A: texte\n', erreurJison(3), 3, 'note', '    Note right of A: texte'],
+        ['stateDiagram-v2\n    A -> B\n', erreurJison(2), 2, 'transition', '    A --> B'],
+        ['erDiagram\n    A ||--o{ B\n', erreurJison(2), 2, 'relation', '    A ||--o{ B : ""'],
+        ['erDiagram\n    A 1--* B : a\n', erreurJison(2), 2, 'relation', '    A ||--o{ B : a'],
+        ['erDiagram\n    A {\n        nom\n    }\n', erreurJison(3), 3, 'attribut', '        string nom'],
+        ['pie\n    Agents : 12,5\n', { message: 'Parsing failed: Lexer error on line 2, column 13' }, 2, 'part', '    "Agents" : 12.5'],
+        ['gantt\n    dateFormat YYYY-MM-DD\n    section S\n    Tache t1, 2026-01-05, 3 jours\n', erreurJison(4), 4, 'tache', '    Tache :t1, 2026-01-05, 3d'],
+        ['architecture-beta\n    service a(server)[A]\n    service b(server)[B]\n    a -- b\n', { message: 'Parsing failed: Parse error on line 4, column 9' }, 4, 'liaison', '    a:R -- L:b'],
+        ['sankey-beta\n\nBudget,Santé publique,400\n', erreurJison(2), 3, 'flux', 'Budget,Sante publique,400'],
+        ['gitGraph\n    commit id: v1\n', { message: 'Parsing failed: Parse error on line 2, column 16' }, 2, 'commit', '    commit id: "v1"'],
+        ['packet-beta\n    0-3 "Version"\n', { message: 'Parsing failed: Parse error on line 2, column 9' }, 2, 'champ', '    0-3: "Version"'],
+        ['requirementDiagram\n    requirement r {\n        risk: élevé\n    }\n', erreurJison(3), 3, 'propriete', '        risk: high'],
+        ['C4Context\n    Rel(a, b)\n', erreurJison(2), 2, 'relation', '    Rel(a, b, "")'],
+        ['carte monde\npalete: theme\n', { message: 'Ligne 2 : option inconnue « palete ».' }, 2, 'option', 'palette: theme'],
+        ['diapo titre\ntitr: Bonjour\n', { message: 'Ligne 2 : champ inconnu pour la mise en page « Page de titre ».' }, 2, 'champ', 'titre: Bonjour'],
+    ];
+    for (const [code, erreur, ligne, objet, attendue] of cas) {
+        const d = diagnostiquer(code, erreur);
+        const nom = code.split('\n')[1].trim();
+        assert.equal(d.ligne, ligne, `${nom} : ligne`);
+        assert.equal(d.objet?.id, objet, `${nom} : objet`);
+        assert.ok(d.cause, `${nom} : cause`);
+        assert.ok(d.propositions.some((p) => p.apres === attendue), `${nom} : ${JSON.stringify(d.propositions.map((p) => p.apres))}`);
+        // Une réparation ne touche que la ligne fautive
+        const p = d.propositions.find((x) => x.apres === attendue);
+        const avant = code.split('\n');
+        const apres = p.code.split('\n');
+        assert.equal(apres.length, avant.length);
+        assert.equal(apres.filter((l, k) => l !== avant[k]).length, 1, nom);
+        // Dernier recours : mise en commentaire (Mermaid) ou suppression (écritures de FUSAIN)
+        assert.ok(d.propositions.some((x) => x.apres.trim().startsWith('%%') || x.libelle === 'Supprimer cette ligne'), `${nom} : recours`);
+    }
+});
+
+test('diagnostic : en-tête, sens, blocs ouverts ou fermés en trop, carte mentale', () => {
+    let d = diagnostiquer('flowchar TD\n    A --> B\n', { message: 'No diagram type detected matching given configuration' });
+    assert.equal(d.ligne, 1);
+    assert.equal(d.propositions[0].apres, 'flowchart TD');
+    d = diagnostiquer('sequence\n    A->>B: x\n', { message: 'No diagram type detected' });
+    assert.equal(d.propositions[0].apres, 'sequenceDiagram');
+    d = diagnostiquer('flowchart TOP\n    A --> B\n', erreurJison(1));
+    assert.deepEqual(d.propositions.map((p) => p.apres), ['flowchart TD', 'flowchart LR']);
+    // end manquant : désigné à l'ouverture du groupe, fermeture proposée en fin de code et après le contenu décalé
+    d = diagnostiquer('flowchart TD\n    subgraph g [G]\n        A --> B\n    C --> D\n', erreurJison(6));
+    assert.equal(d.ligne, 2);
+    assert.equal(d.objet.id, 'groupe');
+    assert.deepEqual(d.propositions.map((p) => p.code.split('\n').indexOf('    end')), [4, 3]);
+    // end en trop : la ligne est désignée, sa suppression proposée
+    d = diagnostiquer('flowchart TD\n    A --> B\n    end\n    C --> D\n', erreurJison(3));
+    assert.equal(d.ligne, 3);
+    assert.equal(d.propositions[0].code, 'flowchart TD\n    A --> B\n    C --> D\n');
+    // Accolade jamais fermée, erreur signalée sur la dernière ligne
+    d = diagnostiquer('stateDiagram-v2\n    state A {\n        B --> C\n', erreurJison(3));
+    assert.equal(d.ligne, 2);
+    assert.ok(d.propositions.some((p) => p.apres === '    }'));
+    // Boucle de séquence non fermée
+    d = diagnostiquer('sequenceDiagram\n    loop Chaque jour\n        A->>B: x\n', erreurJison(4));
+    assert.equal(d.objet.id, 'bloc');
+    // Carte mentale : une seule racine
+    d = diagnostiquer('mindmap\n  racine\n  autre\n', { message: 'There can be only one root. No parent could be found for ("autre")' });
+    assert.equal(d.ligne, 3);
+    assert.equal(d.propositions[0].apres, '    autre');
+    // « end » comme identifiant : renommé dans tout le code
+    d = diagnostiquer('flowchart TD\n    A --> end\n    end --> B\n', erreurJison(2));
+    assert.ok(d.propositions.some((p) => p.code === 'flowchart TD\n    A --> fin\n    fin --> B\n'));
+});
+
+test('diagnostic : libellé hostile, distances, aucun diagnostic hors de propos', () => {
+    const hostile = 'flowchart TD\n    A[<img src=x onerror=alert(1)> (x)] --> B\n';
+    const d = diagnostiquer(hostile, erreurJison(2));
+    // La réparation reste du texte, mis entre guillemets, sans rien perdre ni ajouter
+    assert.ok(d.propositions.some((p) => p.apres === '    A["<img src=x onerror=alert(1)> (x)"] --> B'));
+    assert.ok(d.propositions.every((p) => typeof p.code === 'string' && typeof p.libelle === 'string'));
+    assert.equal(distance('flowchar', 'flowchart'), 1);
+    assert.equal(distance('ab', 'ba'), 1);
+    assert.equal(plusProche('participan', ['participant', 'actor']), 'participant');
+    assert.equal(plusProche('xyz', ['participant', 'actor']), null);
+    // Erreur sans position (limite de taille) : pas de ligne inventée
+    assert.equal(diagnostiquer('flowchart TD\n    A --> B\n', { message: 'Maximum text size in diagram exceeded' }).ligne, null);
+});

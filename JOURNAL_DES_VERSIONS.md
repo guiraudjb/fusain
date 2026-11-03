@@ -2,6 +2,27 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.21.0 — 3 novembre 2026 — diagnostic des erreurs de syntaxe, index des syntaxes, réparations proposées
+
+- **Constat de départ** : une faute dans le code n'était signalée que par « Erreur dans le code, vers la ligne N » et le message anglais de Mermaid. Rien ne disait quelle écriture était attendue. La ligne pouvait être fausse : Mermaid ne compte ni le bloc `---` de tête, ni les commentaires, ni les lignes vides du début, et signale un `end` oublié en fin de code.
+- **Index des syntaxes** (`js/syntaxes.js`) : pour les 28 types de schéma, la première ligne, les mots clés et chaque sorte d'objet, avec son écriture, un conseil et un exemple. Il est consultable par le bouton « Syntaxes » du mode code, et chaque exemple peut être inséré dans le code.
+- **Diagnostic** (`js/diagnostic.js`) :
+  - la ligne réelle est retrouvée en reproduisant la numérotation de Mermaid ;
+  - les blocs ouverts ou fermés en trop (`subgraph`/`end`, `loop`/`end`, accolades) sont désignés à leur ouverture ;
+  - la ligne fautive est rattachée à un objet de l'index ;
+  - des règles par type proposent des réparations, une quarantaine de fautes courantes étant couvertes sur 25 types ;
+  - un mot clé mal orthographié est corrigé par le mot le plus proche ;
+  - la mise en commentaire reste le dernier recours.
+- **Réparations vérifiées** : chaque proposition est rendue avant d'être affichée. Seules restent celles qui donnent un schéma, ou qui corrigent la ligne quand une autre faute suit ; au plus trois sont proposées. Le rendu réussi reste en cache, si bien que le schéma apparaît dès qu'on applique la réparation. « Appliquer » s'annule par Ctrl+Z.
+- **Message d'erreur** : ligne et objet en titre, cause en français, extrait de la ligne avec repère, syntaxe attendue, exemple, réparations, « Aller à la ligne », lien vers l'index et détail technique replié.
+- **Constats sur Mermaid 12** :
+  - le diagramme de flux (Sankey) refuse les lettres accentuées, même entre guillemets, et l'index le dit ;
+  - un service d'architecture sans icône est accepté.
+- Tests :
+  - tests de logique : complétude de l'index, et relecture de ses exemples par les éditeurs visuels ; numérotation (bloc de tête, directives, commentaires, lignes vides, fin de code, messages Langium et de FUSAIN) ; corpus de 25 fautes (ligne, objet, réparation attendue, une seule ligne modifiée) ; en-tête, sens, blocs, carte mentale, « end » ; libellé hostile ;
+  - essai dans Chrome sur 50 fautes : chacune reçoit une réparation validée par le rendu ;
+  - recette : faute saisie, réparation appliquée, faute suivante, annulation, index.
+
 ## 0.20.0 — 3 novembre 2026 — export Microsoft Visio (.vsdx)
 
 - **Constat de départ** : un schéma de FUSAIN, en particulier un réseau importé d'IMC, devait pouvoir être repris dans Microsoft Visio. Un SVG inséré dans Visio n'y devient qu'une image ou un dessin dégroupé, sans liaisons.

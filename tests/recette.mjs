@@ -115,6 +115,23 @@ await p.screenshot({ path: OUT + '/e2e-logigramme.png' });
 await p.click('button:has-text("Code")'); await p.waitForTimeout(300);
 await p.fill('#fusain-code-zone', 'flowchart LR\n  A -->'); await p.waitForTimeout(1200);
 ok('erreur affichée, dernier rendu conservé', await p.locator('#fusain-erreur .fr-alert--error').count() === 1 && await p.locator('#fusain-feuille .fusain-schema').count() === 1, await p.textContent('#fusain-erreur'));
+// 8 bis. diagnostic : ligne et objet désignés, réparations vérifiées puis appliquées, annulation, index des syntaxes
+{ const reparations = '#fusain-erreur .fusain-diagnostic__reparations button';
+  const titre = () => p.textContent('#fusain-erreur .fr-alert__title').catch(() => '');
+  await p.fill('#fusain-code-zone', 'flowchart LR\n  A[Texte (détail)] --> B\n  B -> C');
+  await p.waitForSelector(reparations, { timeout: 20000 });
+  ok('diagnostic : ligne et objet désignés, syntaxe attendue', /Erreur ligne 2 — Étape/.test(await titre()) && await p.locator('#fusain-erreur .fusain-diagnostic__syntaxe li').count() >= 5, await titre());
+  await p.click(`${reparations} >> nth=0`);
+  await p.waitForFunction(() => /Erreur ligne 3/.test(document.querySelector('#fusain-erreur .fr-alert__title')?.textContent || ''), null, { timeout: 20000 }).catch(() => {});
+  ok('diagnostic : réparation appliquée, faute suivante désignée', (await p.inputValue('#fusain-code-zone')).includes('A["Texte (détail)"]') && /Erreur ligne 3 — Lien/.test(await titre()), await titre());
+  await p.waitForSelector(reparations, { timeout: 20000 });
+  await p.click(`${reparations} >> nth=0`); await p.waitForTimeout(1500);
+  ok('diagnostic : schéma rendu après réparation', await p.locator('#fusain-erreur .fr-alert').count() === 0 && (await p.inputValue('#fusain-code-zone')).includes('B --> C'));
+  await p.evaluate(() => document.activeElement?.blur()); await p.keyboard.press('Control+z'); await p.waitForTimeout(1500);
+  ok('diagnostic : Ctrl+Z revient au code fautif', (await p.inputValue('#fusain-code-zone')).includes('B -> C') && /Erreur ligne 3/.test(await titre()));
+  await p.click('#fusain-code .fusain-code__entete button'); await p.waitForSelector('#fusain-modale-syntaxes.fr-modal--opened');
+  ok('index des syntaxes : objets du logigramme et autres types', await p.locator('#fusain-modale-syntaxes .fusain-syntaxes section').count() >= 8 && await p.locator('#fusain-modale-syntaxes select option').count() >= 28);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(400); }
 await p.fill('#fusain-code-zone', 'flowchart LR\n  A@{ shape: cyl, label: "Base" } --> B'); await p.waitForTimeout(1200);
 ok('bascule code seul', (await p.textContent('#fusain-code-etat')) === 'Code seul' && await p.locator('#fusain-erreur .fr-alert').count() === 0, await p.getAttribute('#fusain-code-etat', 'title'));
 await p.screenshot({ path: OUT + '/e2e-code.png' });
@@ -228,10 +245,13 @@ f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); a
 { const { execFileSync } = await import('node:child_process');
   const entrees = execFileSync('unzip', ['-Z1', f], { encoding: 'utf8' }).split('\n');
   const pages = entrees.filter((e) => /^visio\/pages\/page\d+\.xml$/.test(e)).length;
-  const page1 = execFileSync('unzip', ['-p', f, 'visio/pages/page1.xml'], { encoding: 'utf8' });
+  const connecteurs = entrees.filter((e) => /^visio\/pages\/page\d+\.xml$/.test(e))
+    .reduce((n, e) => n + (execFileSync('unzip', ['-p', f, e], { encoding: 'utf8' }).match(/<Connect /g) || []).length, 0);
   execFileSync('unzip', ['-tq', f]);
-  ok('export Visio', f.endsWith('.vsdx') && pages === 27 && entrees.includes('[Content_Types].xml') && /<Connect /.test(page1)
-    && (await p.textContent('#fusain-messages')).includes('Export Visio terminé'), `${pages} pages, ${fs.statSync(f).size} o`); }
+  await p.waitForFunction(() => document.querySelector('#fusain-messages')?.textContent.includes('Export Visio'), null, { timeout: 10000 }).catch(() => {});
+  const messageVisio = (await p.textContent('#fusain-messages')).includes('Export Visio terminé');
+  ok('export Visio', f.endsWith('.vsdx') && pages === 27 && entrees.includes('[Content_Types].xml') && connecteurs > 0 && messageVisio,
+    `${pages} pages, ${connecteurs} connexions, message ${messageVisio}, ${fs.statSync(f).size} o`); }
 // 12. restauration : fichier hostile puis fichier valide
 const hostile = JSON.parse(json); hostile.pages[0].inconnu = 1; fs.writeFileSync(OUT + '/hostile.json', JSON.stringify(hostile));
 await p.setInputFiles('#fusain-fichier', OUT + '/hostile.json'); await p.waitForTimeout(600);
@@ -342,7 +362,7 @@ ok('carte : export PDF vectoriel', fs.statSync(f).size > 5000 && (await p.textCo
 ok('carte : fond communal en cache vérifié', await p.evaluate(async () => (await (await caches.open('fusain-donnees')).keys()).some((r) => r.url.includes('cartes/communes/84.json?empreinte='))));
 // Jeux d'exemple proposés dans « À propos », importables tels quels
 await p.click('.fr-header__tools-links [data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened a[download]');
-ok('à propos : trois jeux d\'exemple', await p.locator('#fusain-modale-apropos a[download]').count() === 3);
+ok('à propos : jeux d\'exemple (3 cartes, 5 réseaux)', await p.locator('#fusain-modale-apropos a[download]').count() === 8);
 f = await dl(() => p.click('#fusain-modale-apropos a[download="france-departements.csv"]'));
 ok('à propos : jeu d\'exemple téléchargé', fs.readFileSync(f, 'utf8').startsWith('CODE_GEO,') && fs.statSync(f).size > 5000, `${fs.statSync(f).size} o`);
 await p.keyboard.press('Escape'); await p.waitForTimeout(400);

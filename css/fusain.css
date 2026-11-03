@@ -96,7 +96,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 
 /* ---------- Mode code ---------- */
 .fusain-code { flex: 0 0 42%; min-width: 16rem; display: flex; flex-direction: column; border-right: 1px solid var(--border-default-grey); background: var(--background-default-grey); }
-.fusain-code__entete { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .75rem; }
+.fusain-code__entete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .75rem; }
 .fusain-code__entete .fr-label, .fusain-code__entete .fr-badge { margin: 0; }
 .fusain-code__editeur { flex: 1; min-height: 0; display: flex; border-top: 1px solid var(--border-default-grey); font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: .875rem; line-height: 1.5; }
 .fusain-code__lignes { flex: 0 0 3rem; overflow: hidden; padding: .5rem .5rem .5rem 0; text-align: right; color: var(--text-mention-grey); background: var(--background-alt-grey); white-space: pre; user-select: none; }
@@ -174,3 +174,19 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-icone:hover, .fusain-icone[aria-pressed="true"] { background: var(--background-alt-blue-france); color: var(--text-action-high-blue-france); border-color: var(--border-action-high-blue-france); }
 .fusain-icones--images { grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr)); }
 .fusain-icones--images .fusain-icone { height: 3.5rem; background: #ffffff; }
+
+/* Diagnostic des erreurs de syntaxe (0.21.0) */
+.fusain-diagnostic { user-select: text; -webkit-user-select: text; }
+.fusain-diagnostic p, .fusain-diagnostic ul { margin-bottom: .5rem; }
+.fusain-diagnostic code, .fusain-syntaxes code { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: .8125rem; background: var(--background-alt-grey); padding: 0 .25rem; white-space: pre-wrap; }
+.fusain-diagnostic__extrait, .fusain-diagnostic__detail pre, .fusain-syntaxes__exemple { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: .8125rem; line-height: 1.4; background: var(--background-alt-grey); padding: .5rem .75rem; margin: 0 0 .5rem; overflow-x: auto; white-space: pre; }
+.fusain-diagnostic__intitule { font-weight: 700; margin-bottom: .25rem !important; }
+.fusain-diagnostic__syntaxe ul { list-style: none; padding-left: 0; display: flex; flex-wrap: wrap; gap: .25rem .75rem; }
+.fusain-diagnostic__reparations { list-style: none; padding-left: 0; }
+.fusain-diagnostic__reparations li { display: flex; align-items: flex-start; gap: .75rem; margin-bottom: .5rem; }
+.fusain-diagnostic__reparations li > div { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.fusain-diagnostic__code { align-self: flex-start; }
+.fusain-diagnostic__vide { color: var(--text-mention-grey); }
+.fusain-diagnostic__detail summary { cursor: pointer; font-size: .875rem; }
+.fusain-syntaxes section { border-top: 1px solid var(--border-default-grey); padding-top: .75rem; margin-top: .75rem; }
+.fusain-syntaxes ul { padding-left: 1.25rem; }

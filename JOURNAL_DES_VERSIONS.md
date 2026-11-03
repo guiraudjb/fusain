@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.21.1 — 3 novembre 2026 — message d'erreur et zoom, ligne précédente contrôlée
+
+- **Zoom** : le message d'erreur faisait partie de la zone zoomée. Au premier zoom avant ou arrière, la vue se recentrait sur la feuille et le message sortait de l'écran. Il est désormais posé au-dessus de la scène, hors de la zone qui défile. Il reste visible à tout niveau de zoom ; sa hauteur est limitée à un peu plus de la moitié de la vue, et il défile s'il est plus long. La feuille est redimensionnée selon la place qu'il laisse.
+- **Ligne précédente** : une faute en fin de ligne (guillemet ou crochet non fermé, par exemple) n'est souvent signalée par Mermaid qu'à la ligne suivante. La dernière ligne écrite avant la ligne signalée passe donc aussi par les règles du diagnostic, en sautant les lignes vides et les commentaires.
+  - Ses réparations s'ajoutent à la liste, sous la forme « Ligne N : … », et sont vérifiées comme les autres.
+  - Si la ligne signalée ne présente aucune faute, le message désigne la ligne d'avant : titre « Erreur ligne N — … (signalée ligne N+1) », cause, extrait des deux lignes. « Aller à la ligne » y mène.
+- **Libellé entre guillemets abandonné** (`B["Texte`) : nouvelle réparation, qui ferme le guillemet et le crochet ensemble.
+- Recette : le contrôle du diagnostic attend le nouveau message avant de le lire ; il lisait parfois celui de l'étape précédente.
+
 ## 0.21.0 — 3 novembre 2026 — diagnostic des erreurs de syntaxe, index des syntaxes, réparations proposées
 
 - **Constat de départ** : une faute dans le code n'était signalée que par « Erreur dans le code, vers la ligne N » et le message anglais de Mermaid. Rien ne disait quelle écriture était attendue. La ligne pouvait être fausse : Mermaid ne compte ni le bloc `---` de tête, ni les commentaires, ni les lignes vides du début, et signale un `end` oublié en fin de code.

@@ -160,6 +160,10 @@ Quand une ligne est mal écrite, le message d'erreur indique :
 
 Exemples de fautes reconnues : flèche à un tiret (`A -> B`), libellé contenant des parenthèses sans guillemets (`A[Texte (détail)]`), crochet ou guillemet non refermé, guillemets typographiques (« » “ ”), `subgraph` ou `loop` sans `end`, `end` en trop, mot clé mal orthographié (`subgrap`, `participan`, `flowchar`), message de séquence sans deux-points, relation entre entités sans libellé, part de camembert avec une virgule décimale, date de Gantt au format français, liaison d'architecture sans côtés, lettres accentuées dans un diagramme de flux, option de carte mal orthographiée.
 
+Une faute en fin de ligne (guillemet ou crochet non fermé) n'est souvent remarquée qu'à la ligne suivante. La ligne d'avant est donc contrôlée aussi : ses réparations sont proposées sous la forme « Ligne N : … ». Si la ligne signalée ne présente aucune faute, le message désigne directement la ligne d'avant (« Erreur ligne 3 — Part (signalée ligne 4) »).
+
+Le message reste au-dessus du schéma quel que soit le zoom ; s'il est long, il défile.
+
 « Aller à la ligne » place le curseur sur la ligne fautive. « Détail technique » montre le message d'origine de Mermaid.
 
 ### Index des syntaxes

@@ -122,6 +122,10 @@ ok('erreur affichée, dernier rendu conservé', await p.locator('#fusain-erreur 
   const attendre = (motif) => p.waitForFunction((m) => new RegExp(m).test(document.querySelector('#fusain-erreur .fr-alert__title')?.textContent || '') && document.querySelector('#fusain-erreur .fusain-diagnostic__reparations button'), motif, { timeout: 20000 }).catch(() => {});
   await attendre('Erreur ligne 2 — Étape');
   ok('diagnostic : ligne et objet désignés, syntaxe attendue', /Erreur ligne 2 — Étape/.test(await titre()) && await p.locator('#fusain-erreur .fusain-diagnostic__syntaxe li').count() >= 5, await titre());
+  { const visible = () => p.evaluate(() => { const r = document.querySelector('#fusain-erreur .fr-alert__title').getBoundingClientRect(); const s = document.getElementById('fusain-scene').getBoundingClientRect(); return r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.bottom <= s.top + 1; });
+    await p.evaluate(() => document.activeElement?.blur()); await p.keyboard.press('Control+Equal'); await p.waitForTimeout(300); await p.keyboard.press('Control+Equal'); await p.waitForTimeout(300);
+    const apresZoom = await visible(); await p.keyboard.press('Control+Digit1'); await p.waitForTimeout(300);
+    ok('diagnostic : message visible au-dessus de la scène après un zoom', apresZoom); }
   await p.click(`${reparations} >> nth=0`);
   await attendre('Erreur ligne 3 — Lien');
   ok('diagnostic : réparation appliquée, faute suivante désignée', (await p.inputValue('#fusain-code-zone')).includes('A["Texte (détail)"]') && /Erreur ligne 3 — Lien/.test(await titre()), await titre());

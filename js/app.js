@@ -255,7 +255,7 @@ function afficherReparations(liste, diagnostic) {
         h('ul', { class: 'fusain-diagnostic__reparations' }, liste.map((p) => h('li', {},
             bouton('Appliquer', { variante: 'secondary', icone: 'check-line', onclick: () => appliquerReparation(p) }),
             h('div', {},
-                h('span', {}, p.libelle, p.verifiee ? '' : ` (corrige la ligne ${diagnostic.ligne} ; une autre erreur suit, ligne ${p.suivante})`),
+                h('span', {}, p.libelle, p.verifiee ? '' : ` (corrige la ligne ${p.ligne || diagnostic.ligne} ; une autre erreur suit, ligne ${p.suivante})`),
                 p.apres ? h('code', { class: 'fusain-diagnostic__code' }, p.apres.trim()) : null)))));
     annoncer(`${liste.length} réparation${liste.length > 1 ? 's' : ''} proposée${liste.length > 1 ? 's' : ''}.`);
 }
@@ -286,14 +286,20 @@ function alerteErreur(page, erreur) {
             d?.type && SYNTAXES[d.type] ? h('p', {}, bouton(`Syntaxes : ${SYNTAXES[d.type].nom.toLowerCase()}`, { variante: 'tertiary', icone: 'question-line', onclick: () => ouvrirSyntaxes(d.type) })) : null,
             ui.mode !== 'code' ? h('p', {}, bouton('Corriger dans le code', { variante: 'secondary', onclick: () => changerMode('code') })) : null);
     }
-    const o = d.objet;
+    // Rien à redire à la ligne signalée : c'est la ligne d'avant qui est désignée
+    const enCause = d.precedente && d.cause.includes(`ligne ${d.precedente.ligne},`) ? d.precedente : null;
+    const o = enCause?.objet || d.objet;
     const numero = String(d.ligne);
-    const extrait = [`${numero} │ ${d.texte.replace(/\t/g, '    ')}`];
-    if (d.colonne) extrait.push(`${' '.repeat(numero.length)} │ ${' '.repeat(Math.max(0, d.colonne - 1))}^`);
+    const largeur = numero.length;
+    // La ligne précédente est montrée quand elle est en cause : une faute en fin de ligne est souvent signalée à la suivante
+    const extrait = d.precedente ? [`${String(d.precedente.ligne).padStart(largeur)} │ ${d.precedente.texte.replace(/\t/g, '    ')}`] : [];
+    extrait.push(`${numero} │ ${d.texte.replace(/\t/g, '    ')}`);
+    if (d.colonne) extrait.push(`${' '.repeat(largeur)} │ ${' '.repeat(Math.max(0, d.colonne - 1))}^`);
     zoneReparations = h('div', { class: 'fusain-diagnostic__zone', 'aria-live': 'polite' }, h('p', { class: 'fr-text--sm fusain-diagnostic__vide' }, 'Recherche de réparations…'));
     return h('div', { class: 'fr-alert fr-alert--error fr-alert--sm fusain-diagnostic' },
-        h('h2', { class: 'fr-alert__title' }, `Erreur ligne ${d.ligne}${o ? ` — ${o.nom}` : ''}`),
+        h('h2', { class: 'fr-alert__title' }, enCause ? `Erreur ligne ${enCause.ligne}${enCause.objet ? ` — ${enCause.objet.nom}` : ''} (signalée ligne ${d.ligne})` : `Erreur ligne ${d.ligne}${o ? ` — ${o.nom}` : ''}`),
         h('p', {}, d.cause),
+        d.precedente?.cause && !d.cause.includes(`ligne ${d.precedente.ligne},`) ? h('p', { class: 'fr-text--sm' }, `Ligne précédente (${d.precedente.ligne}) à vérifier aussi : ${d.precedente.cause}`) : null,
         h('pre', { class: 'fusain-diagnostic__extrait' }, extrait.join('\n')),
         o ? h('div', { class: 'fusain-diagnostic__syntaxe' },
             h('p', { class: 'fusain-diagnostic__intitule' }, 'Syntaxe attendue'),
@@ -302,7 +308,7 @@ function alerteErreur(page, erreur) {
             o.aide ? h('p', { class: 'fr-text--sm' }, o.aide) : null) : null,
         zoneReparations,
         h('div', { class: 'fusain-actions' },
-            bouton('Aller à la ligne', { variante: 'secondary', icone: 'code-s-slash-line', onclick: () => allerALaLigne(d.ligne) }),
+            bouton('Aller à la ligne', { variante: 'secondary', icone: 'code-s-slash-line', onclick: () => allerALaLigne(enCause?.ligne || d.ligne) }),
             SYNTAXES[d.type] ? bouton(`Toutes les syntaxes : ${SYNTAXES[d.type].nom.toLowerCase()}`, { variante: 'tertiary', icone: 'question-line', onclick: () => ouvrirSyntaxes(d.type) }) : null),
         h('details', { class: 'fusain-diagnostic__detail' }, h('summary', {}, 'Détail technique'), h('pre', {}, d.message.split('\n').slice(0, 8).join('\n'))));
 }
@@ -362,13 +368,14 @@ function afficherFeuille(page, schema, erreur) {
     const avaitFocus = zones.feuille.contains(document.activeElement) && document.activeElement.localName === 'svg';
     zones.feuille.replaceChildren(svg, s('svg', { class: 'fusain-calque', 'aria-hidden': 'true' }));
     if (avaitFocus) svg.focus({ preventScroll: true });
-    dimensionnerFeuille();
-    majSelection();
 
+    // L'alerte est posée au-dessus de la scène : elle en change la hauteur, la feuille est dimensionnée ensuite
     vider(zones.erreur);
     zones.erreur.hidden = !erreur;
     if (erreur) zones.erreur.append(alerteErreur(page, erreur));
     else zoneReparations = null;
+    dimensionnerFeuille();
+    majSelection();
 }
 
 // ---------- Sélection et manipulation directe ----------

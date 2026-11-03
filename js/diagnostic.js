@@ -532,62 +532,87 @@ export function diagnostiquer(code, erreur) {
     situer(i);
     diag.colonne = loc?.colonne || null;
     const brute = lignes[i];
-    const retrait = indentation(brute);
     const t = brute.trim();
     diag.objet = i === entete ? { id: 'entete', nom: 'Type de schéma (première ligne)', syntaxe: def.entete, exemple: def.entete[0], aide: '' } : objetDe(type, t);
 
-    const candidats = [];
-    const proposer = (c) => { if (c) candidats.push(c); };
-    // Règles communes
-    const droits = guillemetsDroits(t);
-    if (droits !== t) proposer({ apres: droits, libelle: 'Remplacer les guillemets typographiques par des guillemets droits', cause: 'Les guillemets typographiques (« », “ ”) ne sont pas reconnus : le code attend des guillemets droits (").' });
-    if (type !== 'diapo' && /[  ​﻿\t]/.test(t)) proposer({ apres: t.replace(/[​﻿]/g, '').replace(/[  \t]/g, ' '), libelle: 'Remplacer les espaces spéciales', cause: 'La ligne contient une espace insécable ou une tabulation.' });
-    if (/\t/.test(retrait) && ['mindmap', 'ishikawa', 'treeView', 'kanban', 'treemap'].includes(type)) proposer({ code: remplacer(i, retrait.replace(/\t/g, '    ') + t), libelle: 'Remplacer les tabulations de début de ligne par des espaces', cause: 'L\'indentation donne la hiérarchie : elle s\'écrit avec des espaces, pas des tabulations.' });
-    if (t.startsWith('//')) proposer({ apres: `%%${t.slice(2)}`, libelle: 'Écrire le commentaire avec %%', cause: 'Un commentaire commence par %% (et non //).' });
-    const premierMot = t.match(/^[\p{L}][\p{L}\w-]*/u)?.[0];
-    const motsCles = def.motsCles || [];
-    if (premierMot && premierMot.length >= 3 && !motsCles.includes(premierMot)) {
-        const proche = plusProche(premierMot, motsCles.filter((m) => m.length >= 4));
-        if (proche && distance(premierMot, proche) > 0 && !PROPRES.has(type)) proposer({ apres: proche + t.slice(premierMot.length), libelle: `Écrire « ${proche} »`, cause: `Mot clé mal écrit : « ${proche} ».` });
-    }
-    // Règles du type
-    const ctx = { code, lignes, i, entete, dansBloc: lignes.slice(entete + 1, i).reduce((n, l) => n + (/\{\s*$/.test(l) ? 1 : 0) - (/^\s*\}/.test(l) ? 1 : 0), 0) > 0 };
-    const base = droits;
-    if (['flowchart', 'swimlane', 'block'].includes(type)) reglesLogigramme(base, ctx).forEach(proposer);
-    else if (type === 'sequence') reglesSequence(base).forEach(proposer);
-    else if (type === 'stateDiagram') reglesEtats(base).forEach(proposer);
-    else if (type === 'classDiagram') reglesClasses(base).forEach(proposer);
-    else if (type === 'erDiagram') reglesEntites(base, ctx).forEach(proposer);
-    else if (type === 'gantt') reglesGantt(base, ctx).forEach(proposer);
-    else if (type === 'pie') reglesCamembert(base).forEach(proposer);
-    else if (type === 'architecture') reglesArchitecture(base).forEach(proposer);
-    else if (PROPRES.has(type)) reglesPropres(type, base, ctx).forEach(proposer);
-    else reglesDivers(type, base).forEach(proposer);
-    // Crochets et guillemets non appariés
-    // Les cardinalités d'une relation entre entités (o{, }|) ne sont pas des accolades
-    const eq = equilibre(type === 'erDiagram' ? base.replace(/\S*(--|\.\.)\S*/g, '') : base);
-    if (eq.manquants.length) {
-        const dernier = eq.manquants[eq.manquants.length - 1];
-        const lien = base.slice(dernier.k).match(LIEN);
-        const position = lien ? dernier.k + lien.index : base.length;
-        const fermetures = eq.manquants.map((m) => m.f).reverse().join('');
-        proposer({ apres: base.slice(0, position) + fermetures + base.slice(position), libelle: `Ajouter « ${fermetures} »`, cause: 'Un crochet, une parenthèse ou une accolade ouverte n\'est pas refermée.' });
-    }
-    if (eq.enTrop.length) {
-        const k = eq.enTrop[eq.enTrop.length - 1];
-        proposer({ apres: base.slice(0, k) + base.slice(k + 1), libelle: `Retirer « ${base[k]} » en trop`, cause: 'Un crochet, une parenthèse ou une accolade est fermée sans avoir été ouverte.' });
-    }
-    if (eq.guillemetsImpairs) {
-        // Le guillemet manquant se place avant la fermeture qui suit le dernier guillemet ouvert
-        const ouvert = base.lastIndexOf('"');
-        const fermeture = base.slice(ouvert + 1).search(/[\])}]/);
-        const position = fermeture >= 0 ? ouvert + 1 + fermeture : base.length;
-        proposer({ apres: `${base.slice(0, position)}"${base.slice(position)}`, libelle: 'Fermer les guillemets', cause: 'Des guillemets ouverts ne sont pas refermés.' });
+    // Règles d'une ligne : chaque réparation candidate porte le rang de la ligne qu'elle corrige
+    const analyser = (k) => {
+        const candidats = [];
+        const proposer = (c) => { if (c) candidats.push({ ...c, k }); };
+        const retrait = indentation(lignes[k]);
+        const t = lignes[k].trim();
+        // Règles communes
+        const droits = guillemetsDroits(t);
+        if (droits !== t) proposer({ apres: droits, libelle: 'Remplacer les guillemets typographiques par des guillemets droits', cause: 'Les guillemets typographiques (« », “ ”) ne sont pas reconnus : le code attend des guillemets droits (").' });
+        if (type !== 'diapo' && /[  ​﻿\t]/.test(t)) proposer({ apres: t.replace(/[​﻿]/g, '').replace(/[  \t]/g, ' '), libelle: 'Remplacer les espaces spéciales', cause: 'La ligne contient une espace insécable ou une tabulation.' });
+        if (/\t/.test(retrait) && ['mindmap', 'ishikawa', 'treeView', 'kanban', 'treemap'].includes(type)) proposer({ code: remplacer(k, retrait.replace(/\t/g, '    ') + t), libelle: 'Remplacer les tabulations de début de ligne par des espaces', cause: 'L\'indentation donne la hiérarchie : elle s\'écrit avec des espaces, pas des tabulations.' });
+        if (t.startsWith('//')) proposer({ apres: `%%${t.slice(2)}`, libelle: 'Écrire le commentaire avec %%', cause: 'Un commentaire commence par %% (et non //).' });
+        const premierMot = t.match(/^[\p{L}][\p{L}\w-]*/u)?.[0];
+        const motsCles = def.motsCles || [];
+        if (premierMot && premierMot.length >= 3 && !motsCles.includes(premierMot)) {
+            const proche = plusProche(premierMot, motsCles.filter((m) => m.length >= 4));
+            if (proche && distance(premierMot, proche) > 0 && !PROPRES.has(type)) proposer({ apres: proche + t.slice(premierMot.length), libelle: `Écrire « ${proche} »`, cause: `Mot clé mal écrit : « ${proche} ».` });
+        }
+        // Règles du type
+        const ctx = { code, lignes, i: k, entete, dansBloc: lignes.slice(entete + 1, k).reduce((n, l) => n + (/\{\s*$/.test(l) ? 1 : 0) - (/^\s*\}/.test(l) ? 1 : 0), 0) > 0 };
+        const base = droits;
+        if (['flowchart', 'swimlane', 'block'].includes(type)) reglesLogigramme(base, ctx).forEach(proposer);
+        else if (type === 'sequence') reglesSequence(base).forEach(proposer);
+        else if (type === 'stateDiagram') reglesEtats(base).forEach(proposer);
+        else if (type === 'classDiagram') reglesClasses(base).forEach(proposer);
+        else if (type === 'erDiagram') reglesEntites(base, ctx).forEach(proposer);
+        else if (type === 'gantt') reglesGantt(base, ctx).forEach(proposer);
+        else if (type === 'pie') reglesCamembert(base).forEach(proposer);
+        else if (type === 'architecture') reglesArchitecture(base).forEach(proposer);
+        else if (PROPRES.has(type)) reglesPropres(type, base, ctx).forEach(proposer);
+        else reglesDivers(type, base).forEach(proposer);
+        // Crochets et guillemets non appariés
+        // Les cardinalités d'une relation entre entités (o{, }|) ne sont pas des accolades
+        const eq = equilibre(type === 'erDiagram' ? base.replace(/\S*(--|\.\.)\S*/g, '') : base);
+        if (eq.manquants.length) {
+            const dernier = eq.manquants[eq.manquants.length - 1];
+            const lien = base.slice(dernier.k).match(LIEN);
+            const position = lien ? dernier.k + lien.index : base.length;
+            const fermetures = eq.manquants.map((m) => m.f).reverse().join('');
+            proposer({ apres: base.slice(0, position) + fermetures + base.slice(position), libelle: `Ajouter « ${fermetures} »`, cause: 'Un crochet, une parenthèse ou une accolade ouverte n\'est pas refermée.' });
+        }
+        if (eq.enTrop.length) {
+            const p = eq.enTrop[eq.enTrop.length - 1];
+            proposer({ apres: base.slice(0, p) + base.slice(p + 1), libelle: `Retirer « ${base[p]} » en trop`, cause: 'Un crochet, une parenthèse ou une accolade est fermée sans avoir été ouverte.' });
+        }
+        if (eq.guillemetsImpairs) {
+            // Le guillemet manquant se place avant la fermeture qui suit le dernier guillemet ouvert
+            const ouvert = base.lastIndexOf('"');
+            const fermeture = base.slice(ouvert + 1).search(/[\])}]/);
+            const position = fermeture >= 0 ? ouvert + 1 + fermeture : base.length;
+            proposer({ apres: `${base.slice(0, position)}"${base.slice(position)}`, libelle: 'Fermer les guillemets', cause: 'Des guillemets ouverts ne sont pas refermés.' });
+            // Libellé ouvert puis abandonné (A["Texte) : guillemet et fermetures ensemble
+            if (eq.manquants.length && fermeture < 0) {
+                const fermetures = eq.manquants.map((m) => m.f).reverse().join('');
+                const lien = base.slice(ouvert + 1).match(LIEN);
+                const fin = lien ? ouvert + 1 + lien.index : base.length;
+                const debut = base.slice(0, fin).trimEnd();
+                proposer({ apres: `${debut}"${fermetures}${base.slice(debut.length)}`, libelle: `Fermer les guillemets et ajouter « ${fermetures} »`, cause: 'Un libellé entre guillemets n\'est pas refermé.' });
+            }
+        }
+        return candidats;
+    };
+
+    const candidats = analyser(i);
+    // Ligne précédente : une faute en fin de ligne (lien sans cible, crochet ou guillemet non fermé) n'est souvent
+    // signalée qu'à la ligne suivante. La dernière ligne écrite avant celle désignée est donc contrôlée aussi.
+    let p = i - 1;
+    while (p > entete && (!lignes[p].trim() || estCommentaire(lignes[p]))) p -= 1;
+    const avant = p > entete && i !== entete ? analyser(p) : [];
+    if (avant.length) {
+        const c = avant.find((x) => x.cause);
+        diag.precedente = { ligne: p + 1, texte: lignes[p], objet: objetDe(type, lignes[p].trim()), cause: c?.cause || '' };
+        candidats.push(...avant.map((x) => ({ ...x, libelle: `Ligne ${p + 1} : ${x.libelle.charAt(0).toLowerCase()}${x.libelle.slice(1)}` })));
     }
     // Dernier recours : la ligne est mise de côté, le reste du schéma s'affiche
     if (i !== entete) {
-        if (PROPRES.has(type)) proposer({ supprimer: true, libelle: 'Supprimer cette ligne', cause: '' });
-        else proposer({ apres: `%% ${t}`, libelle: 'Mettre la ligne en commentaire (elle ne sera plus dessinée)', cause: '' });
+        if (PROPRES.has(type)) candidats.push({ supprimer: true, libelle: 'Supprimer cette ligne', cause: '', k: i });
+        else candidats.push({ apres: `%% ${t}`, libelle: 'Mettre la ligne en commentaire (elle ne sera plus dessinée)', cause: '', k: i });
     }
 
     // Mise en forme : ligne complète, code complet, sans doublon ni proposition identique au code
@@ -596,14 +621,20 @@ export function diagnostiquer(code, erreur) {
         let nouveau;
         let apres = '';
         if (c.code) nouveau = c.code;
-        else if (c.supprimer) nouveau = lignes.filter((_, k) => k !== i).join('\n');
-        else { apres = retrait + c.apres; nouveau = remplacer(i, apres); }
+        else if (c.supprimer) nouveau = lignes.filter((_, k) => k !== c.k).join('\n');
+        else { apres = indentation(lignes[c.k]) + c.apres; nouveau = remplacer(c.k, apres); }
         if (vus.has(nouveau)) continue;
         vus.add(nouveau);
-        diag.propositions.push({ libelle: c.libelle, avant: brute, apres: c.code ? '' : apres, code: nouveau, cause: c.cause });
+        diag.propositions.push({ libelle: c.libelle, ligne: c.k + 1, avant: lignes[c.k], apres: c.code ? '' : apres, code: nouveau, cause: c.cause });
+    }
+    const propres = candidats.filter((c) => c.k === i && c.cause);
+    if (!propres.length && diag.precedente?.cause) {
+        // Rien à redire à la ligne désignée : la faute vient de la ligne d'avant
+        diag.cause = `La ligne ${diag.precedente.ligne}, juste avant, est en cause : ${diag.precedente.cause.charAt(0).toLowerCase()}${diag.precedente.cause.slice(1)}`;
+        return diag;
     }
     const retenu = candidats.find((c) => c.objet);
     if (retenu && candidats.indexOf(retenu) === 0) diag.objet = def.objets.find((o) => o.id === retenu.objet) || diag.objet;
-    diag.cause = candidats.find((c) => c.cause)?.cause || (diag.objet ? `Cette ligne ne respecte pas l'écriture attendue : ${diag.objet.nom.toLowerCase()}.` : 'Cette ligne n\'est pas reconnue.');
+    diag.cause = propres[0]?.cause || (diag.objet ? `Cette ligne ne respecte pas l'écriture attendue : ${diag.objet.nom.toLowerCase()}.` : 'Cette ligne n\'est pas reconnue.');
     return diag;
 }

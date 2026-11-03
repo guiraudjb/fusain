@@ -707,6 +707,29 @@ test('diagnostic : objet visé, cause et réparation attendue sur un corpus de f
     }
 });
 
+test('diagnostic : la ligne précédant celle désignée est contrôlée aussi', () => {
+    const erreurLigne = (n) => ({ message: `Parse error on line ${n}:`, hash: { loc: { first_line: n, first_column: 0 } } });
+    // Camembert : guillemet non fermé ligne 3, signalé par Mermaid à la ligne 4
+    const pie = 'pie\n  "A" : 10\n  "B : 20\n\n  %% note\n  "C" : 5';
+    const d = diagnostiquer(pie, erreurLigne(4));
+    expect(d.ligne).toBe(4);
+    expect(d.precedente?.ligne).toBe(3);
+    expect(d.cause).toContain('ligne 3');
+    const r = d.propositions.find((p) => p.ligne === 3);
+    expect(r?.apres.trim()).toBe('"B" : 20');
+    expect(r.libelle).toMatch(/^Ligne 3 : /);
+    expect(r.code.split('\n')[5]).toBe('  "C" : 5');
+    // Ligne précédente correcte : rien n'est ajouté
+    const d2 = diagnostiquer('flowchart LR\n  A --> B\n  B -> C', erreurLigne(3));
+    expect(d2.precedente).toBeUndefined();
+    expect(d2.propositions.every((p) => p.ligne === 3)).toBe(true);
+    // L'en-tête n'est jamais la « ligne précédente »
+    expect(diagnostiquer('pie\n  "B : 20', erreurLigne(2)).propositions.every((p) => p.ligne === 2)).toBe(true);
+    // Libellé entre guillemets abandonné : guillemet et crochet fermés ensemble
+    const d3 = diagnostiquer('flowchart LR\n  A --> B["Texte\n  B --> C', erreurLigne(2));
+    expect(d3.propositions.map((p) => p.apres.trim())).toContain('A --> B["Texte"]');
+});
+
 test('diagnostic : en-tête, sens, blocs ouverts ou fermés en trop, carte mentale', () => {
     let d = diagnostiquer('flowchar TD\n    A --> B\n', { message: 'No diagram type detected matching given configuration' });
     assert.equal(d.ligne, 1);

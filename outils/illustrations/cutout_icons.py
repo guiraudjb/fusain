@@ -1,8 +1,8 @@
 """Détoure les icônes brutes générées par generate_icons.py et les met au format SimpleCarto.
 
-À lancer avec une venv contenant rembg (modèle isnet-general-use déjà présent dans ~/.u2net) :
+À lancer avec une venv contenant rembg, Pillow et scipy :
 
-    /home/adm1/RAID/venv/bin/python cutout_icons.py [--only id1,id2]
+    ~/.venvs/rembg/bin/python cutout_icons.py --raw BRUTES --out DETOUREES [--only id1,id2] [--modele birefnet-general]
 
 Pour chaque <theme>/<id>_s<seed>.png brut : suppression du fond, recadrage sur l'objet,
 carré transparent avec marge, redimensionné en 256x256 -> --out/<theme>/<id>_s<seed>.png.
@@ -20,7 +20,7 @@ from scipy.ndimage import binary_fill_holes
 from rembg import new_session, remove
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KREA_OUT = "/home/adm1/RAID/aitools/krea-2/outputs/simplecarto-icons"
+KREA_OUT = os.path.join(os.environ.get("LABO_KREA", os.path.expanduser("~/aitools/krea-2")), "outputs", "fusain-icons")
 SIZE = 256
 MARGIN = 0.06  # marge transparente autour de l'objet, en fraction du côté
 
@@ -57,10 +57,11 @@ def main():
     parser.add_argument("--out", default=os.path.join(KREA_OUT, "cutout"))
     parser.add_argument("--catalog", default=os.path.join(HERE, "icon-prompts.json"))
     parser.add_argument("--only", default="")
+    parser.add_argument("--modele", default="isnet-general-use", help="modèle rembg (birefnet-general sur les nœuds du labo)")
     args = parser.parse_args()
 
     wanted = set(args.only.split(",")) if args.only else None
-    session = new_session("isnet-general-use")
+    session = new_session(args.modele)
 
     for raw_path in sorted(glob.glob(os.path.join(args.raw, "*", "*.png"))):
         theme = os.path.basename(os.path.dirname(raw_path))

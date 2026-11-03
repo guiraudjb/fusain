@@ -11,5 +11,16 @@
  "magistrat": 0,
  "comite-de-pilotage": 0,
  "algorithme": 0,
- "examen": 0
+ "examen": 0,
+ "annuaire": 1,
+ "cable-reseau-rj45": 1,
+ "commutateur-niveau-3": 1,
+ "dmz": 0,
+ "proxy": 1,
+ "reseau-etendu-wan": 1,
+ "serveur-de-fichiers": 1,
+ "serveur-de-supervision": 1,
+ "serveur-dns": 1,
+ "sonde-ids": 0,
+ "vlan": 0
 }

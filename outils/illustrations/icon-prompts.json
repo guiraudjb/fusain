@@ -609,6 +609,83 @@
    "theme_label": "Logiciels & données",
    "label_fr": "Archivage numérique",
    "subject": "an archive box with a hard drive inside"
+  },
+  {
+   "id": "commutateur-niveau-3",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Commutateur de niveau 3",
+   "subject": "a rack-mounted layer 3 network switch, a flat dark grey box with a row of ethernet ports and a blue emblem of four crossing routing arrows on its front"
+  },
+  {
+   "id": "sonde-ids",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Sonde de détection d'intrusion (IDS)",
+   "subject": "a network intrusion detection sensor, a small dark appliance box with a magnifying glass over a red warning eye emblem"
+  },
+  {
+   "id": "proxy",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Serveur mandataire (proxy)",
+   "subject": "a proxy server, a grey server box with a big curved arrow passing through it from one network cable to another"
+  },
+  {
+   "id": "dmz",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Zone démilitarisée (DMZ)",
+   "subject": "a small server standing inside a fenced area with yellow and black hazard stripes, between two red brick walls"
+  },
+  {
+   "id": "vlan",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "VLAN",
+   "subject": "a transparent glass tube containing a bundle of several network cables of different colors, blue, green, orange and purple"
+  },
+  {
+   "id": "annuaire",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Annuaire (LDAP, Active Directory)",
+   "subject": "a directory server, a server tower next to a blue address book with a golden key"
+  },
+  {
+   "id": "serveur-de-supervision",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Serveur de supervision",
+   "subject": "a monitoring server, a server tower next to a monitor screen showing a green heartbeat line"
+  },
+  {
+   "id": "serveur-de-fichiers",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Serveur de fichiers",
+   "subject": "a file server, a server tower with a large yellow file folder in front of it"
+  },
+  {
+   "id": "serveur-dns",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Serveur DNS",
+   "subject": "a name server, a server tower with a wooden direction signpost with three arrows in front of it"
+  },
+  {
+   "id": "reseau-etendu-wan",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Réseau étendu (WAN)",
+   "subject": "a blue globe surrounded by an orbit of connected network nodes and links"
+  },
+  {
+   "id": "cable-reseau-rj45",
+   "theme": "informatique",
+   "theme_label": "Informatique & réseaux",
+   "label_fr": "Câble réseau RJ45",
+   "subject": "a blue ethernet network cable with a transparent RJ45 plug, coiled"
   }
  ]
 }

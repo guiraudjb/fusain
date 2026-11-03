@@ -37,7 +37,7 @@ export const DEPARTEMENTS = {
 const ETIQUETTES = [['aucune', 'Aucune'], ['nom', 'Nom du territoire'], ['valeur', 'Valeur'], ['nom-valeur', 'Nom et valeur']];
 export const PALETTES = [['theme', 'Bleu France (dégradé)'], ['divergente', 'Vert → jaune → rouge'], ['divergente-inverse', 'Rouge → jaune → vert'], ['personnalisee', 'Personnalisée']];
 const COULEUR = /^#[0-9a-f]{6}$/i;
-const ICONE = /^(?:dsfr|illus):[a-z0-9-]+$/;
+const ICONE = /^(?:dsfr|illus|picto):[a-z0-9-]+$/;
 const CODE = /^[0-9A-Za-z-]{1,12}$/;
 const FILTRE = /^(>=|<=|>|<|=)\s*(-?\d+(?:[.,]\d+)?)$/;
 

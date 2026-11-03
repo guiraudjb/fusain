@@ -267,7 +267,7 @@ test('diapositive libre : un paragraphe ne peut pas devenir un titre, une puce o
 test('chaque icône utilisée par un bouton est embarquée', async () => {
     const { readdirSync, readFileSync } = await import('node:fs');
     const lister = (dossier) => readdirSync(dossier, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? lister(`${dossier}/${e.name}`) : [`${dossier}/${e.name}`]));
-    const racine = new URL('..', import.meta.url).pathname;
+    const racine = (await import('node:url')).fileURLToPath(new URL('..', import.meta.url));
     const embarquees = new Set(lister(`${racine}libs/dsfr-v1.15.4/icons`).map((f) => f.split('/').pop().replace(/^fr--/, '').replace(/\.svg$/, '')));
     const absentes = new Set();
     for (const fichier of lister(`${racine}js`)) for (const m of readFileSync(fichier, 'utf8').matchAll(/icone: '([a-z0-9-]+-(?:line|fill))'/g)) if (!embarquees.has(m[1])) absentes.add(`${m[1]} (${fichier.split('/js/')[1]})`);
@@ -313,6 +313,49 @@ test('icônes illustrées : index cohérent, empreintes exactes, images PNG seul
     const editeur = editeurPour('architecture');
     const code = 'architecture-beta\n    service a(illus:routeur)[Routeur]\n';
     assert.equal(editeur.ecrire(editeur.analyser(code)), code);
+});
+
+// ---------- Pictogrammes en noir et blanc et modèles de réseaux (0.17.0) ----------
+
+test('pictogrammes : formes simples, valeurs numériques, couleurs noir et blanc, empreinte exacte', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { createHash } = await import('node:crypto');
+    const brut = readFileSync(new URL('../icones/pictogrammes.json', import.meta.url));
+    const page = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+    const empreinte = page.match(/id="fusain-pictogrammes" href="\.\/icones\/pictogrammes\.json" integrity="([^"]+)"/)[1];
+    assert.equal(`sha384-${createHash('sha384').update(brut).digest('base64')}`, empreinte);
+    const { categories, icones } = JSON.parse(brut.toString('utf8'));
+    assert.ok(Object.keys(icones).length >= 50);
+    for (const [id, icone] of Object.entries(icones)) {
+        assert.ok(/^[a-z0-9-]+$/.test(id) && icone.nom && categories[icone.categorie], id);
+        for (const [balise, attrs] of icone.elements) {
+            assert.ok(['path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon'].includes(balise), `${id} ${balise}`);
+            for (const [k, v] of Object.entries(attrs)) {
+                if (k === 'fill' || k === 'stroke') assert.ok(['none', '#161616', '#ffffff'].includes(v), `${id} ${k}=${v}`);
+                else assert.ok(/^[0-9MmLlHhVvCcSsQqTtAaZz\s,.+-]+$/.test(v), `${id} ${k}=${v}`);
+            }
+        }
+    }
+});
+
+test('pictogrammes : admis par le filtre, relus à l\'identique dans l\'architecture, le logigramme et les diapositives', () => {
+    const filtre = nettoyerCode('flowchart LR\n    a@{ icon: "picto:routeur", label: "R", pos: "b" }\n    b@{ icon: "logos:aws", label: "X" }\n');
+    assert.match(filtre, /icon: "picto:routeur"/);
+    assert.doesNotMatch(filtre, /logos:aws/);
+    const archi = 'architecture-beta\n    service a(picto:pare-feu)[Pare-feu]\n';
+    assert.equal(editeurPour('architecture').ecrire(editeurPour('architecture').analyser(archi)), archi);
+    const logi = 'flowchart LR\n    a@{ icon: "picto:routeur", label: "Routeur", pos: "b" }\n    b["B"]\n    a --> b\n';
+    assert.equal(logigramme.ecrire(logigramme.analyser(logi)), logi);
+    const diapo = editeurPour('diapo');
+    const modele = diapo.analyser('diapo chiffres\n- [picto:vlan] 12 | VLAN\n- 7 | Sites\n');
+    assert.equal(modele.items[0].icone, 'picto:vlan');
+});
+
+test('modèles de réseaux : rubrique dédiée, code relu à l\'identique par l\'éditeur d\'architecture', () => {
+    const reseaux = MODELES.filter((m) => m.categorie === 'reseaux');
+    assert.deepEqual(reseaux.map((m) => m.id), ['reseau-physique', 'reseau-logique', 'reseau-logique-illustre', 'reseau-sites']);
+    const editeur = editeurPour('architecture');
+    for (const m of reseaux) assert.equal(editeur.ecrire(editeur.analyser(m.code)), m.code, m.id);
 });
 
 // ---------- Icônes dans le logigramme et les diapositives (0.12.0) ----------

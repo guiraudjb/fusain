@@ -6,6 +6,7 @@ import { rendreDiapo } from './diapo.js';
 import { rendreCarte } from './carte.js';
 import { PREFIXE, jeuPourMermaid } from './icones.js';
 import { PREFIXE_ILLUS, jeuPourMermaid as jeuIllustre, incorporerImages } from './illustrations.js';
+import { PREFIXE_PICTO, jeuPourMermaid as jeuPictogrammes } from './pictogrammes.js';
 
 const POLICE = 'Marianne, Arial, sans-serif';
 
@@ -29,7 +30,7 @@ let iconesDeclarees = false;
 
 function configurer(idTheme) {
     // Les icônes du DSFR sont déclarées à Mermaid une fois ; il ne lit le fichier que si un schéma en utilise une
-    if (!iconesDeclarees) { iconesDeclarees = true; window.mermaid.registerIconPacks([{ name: PREFIXE, loader: jeuPourMermaid }, { name: PREFIXE_ILLUS, loader: jeuIllustre }]); }
+    if (!iconesDeclarees) { iconesDeclarees = true; window.mermaid.registerIconPacks([{ name: PREFIXE, loader: jeuPourMermaid }, { name: PREFIXE_ILLUS, loader: jeuIllustre }, { name: PREFIXE_PICTO, loader: jeuPictogrammes }]); }
     if (themeActif === idTheme) return;
     themeActif = idTheme;
     const t = THEMES[idTheme] || THEMES['bleu-france'];
@@ -134,6 +135,7 @@ async function rendre(code, idTheme) {
         // Courbes d'un radar : Mermaid leur donne à toutes la couleur du thème ; chacune reçoit une couleur de la palette
         svg.querySelector('style')?.append(palette.map((c, i) => `#${id} .radarCurve-${i}{fill:${c};stroke:${c};}#${id} .radarLegendBox-${i}{fill:${c};stroke:${c};}`).join(''));
         centrerLibelles(svg, l, h);
+        fondsDesLibelles(svg, l, h);
         return { svg, l, h, htmlIncorpore: Boolean(svg.querySelector('foreignObject')) };
     } finally {
         nettoyerOrphelins(id);
@@ -167,6 +169,33 @@ function remplacerHtmlIncorpore(svg) {
     // Mermaid double parfois le HTML d'un texte SVG de repli dans un <switch> : une fois le HTML retiré,
     // le repli est sorti de son enveloppe, que les convertisseurs PDF ne connaissent pas.
     for (const choix of [...svg.querySelectorAll('switch')]) choix.replaceWith(...choix.childNodes);
+}
+
+// Architecture : une liaison qui part du bas d'un service traverse son libellé, écrit sous l'icône. Chaque libellé
+// reçoit un fond blanc à sa mesure, posé au-dessus des liaisons (dessinées avant les services).
+function fondsDesLibelles(svg, l, h) {
+    const textes = [...svg.querySelectorAll('g.architecture-service text')];
+    if (!textes.length) return;
+    const atelier = document.createElement('div');
+    atelier.className = 'fusain-hors-ecran';
+    svg.setAttribute('width', l);
+    svg.setAttribute('height', h);
+    document.body.append(atelier);
+    atelier.append(svg);
+    try {
+        for (const texte of textes) {
+            const b = texte.getBBox();
+            if (!(b.width > 0 && b.height > 0)) continue;
+            const fond = s('rect', { x: b.x - 3, y: b.y - 1, width: b.width + 6, height: b.height + 2, fill: '#ffffff', class: 'fusain-fond-libelle' });
+            if (texte.getAttribute('transform')) fond.setAttribute('transform', texte.getAttribute('transform'));
+            texte.before(fond);
+        }
+    } finally {
+        svg.remove();
+        atelier.remove();
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+    }
 }
 
 // Mermaid suppose des libellés HTML dans les cartes mentales et les diagrammes d'états : en SVG, certains ne sont pas centrés

@@ -6,6 +6,7 @@ import { analyser, ecrire, option, couleursPersonnalisees, estMonde, departement
 import { chargerBibliotheques, chargerReferentiels, lireDonnees, lireCommunes, referentiels, nomsDesZones, retenirCarte } from './geo.js';
 import { chargerIcones } from './icones.js';
 import { adresseImage } from './illustrations.js';
+import { PREFIXE_PICTO, pictogramme, dessinerPictogramme } from './pictogrammes.js';
 
 export const LARGEUR = 1000;
 const POLICE = 'Marianne, arial, sans-serif';
@@ -173,12 +174,15 @@ async function dessinerLignes(svg, chemin, nom, style) {
     if (d) svg.append(s('path', { d, fill: 'none', 'stroke-linecap': 'round', ...style }));
 }
 
-// Icône du DSFR (tracé recoloré) ou icône illustrée (image), dans un carré de « taille » posé en (x, y)
+// Icône du DSFR (tracé recoloré), pictogramme (trait recoloré) ou icône illustrée (image), dans un carré de « taille » posé en (x, y)
 async function dessinerIcone(g, nom, x, y, taille, couleur) {
     const [jeu, id] = String(nom).split(':');
     if (jeu === 'dsfr') {
         const trouvee = (await chargerIcones()).find((i) => i.nom === id);
         if (trouvee) g.append(s('path', { d: trouvee.trace, fill: couleur, transform: `translate(${x} ${y}) scale(${taille / 24})` }));
+    } else if (jeu === PREFIXE_PICTO) {
+        const trouve = await pictogramme(id);
+        if (trouve) g.append(dessinerPictogramme(trouve, x, y, taille, couleur));
     } else {
         const adresse = await adresseImage(id);
         if (adresse) g.append(s('image', { x, y, width: taille, height: taille, href: adresse, preserveAspectRatio: 'xMidYMid meet' }));

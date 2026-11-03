@@ -7,6 +7,9 @@ Deux sources :
 
     python3 outils/illustrations/installer.py [--simplecarto /home/adm1/Projets/Dépots_Publics/SimpleCarto] [--detourees DOSSIER]
 
+Une icône déjà livrée dans icones/illustrees/ est gardée telle quelle (pas de réencodage) ; une icône FUSAIN n'est
+refaite que si son image détourée est présente.
+
 Chaque icône est ramenée à 192 px et à 128 couleurs (environ 5 Ko), puis rangée par thème dans
 icones/illustrees/<theme>.json. index.json liste les thèmes, les icônes et l'empreinte de chaque fichier.
 À lancer avec un Python disposant de Pillow, numpy et scipy.
@@ -47,24 +50,30 @@ def reduire(chemin):
 def principal():
     parser = argparse.ArgumentParser()
     parser.add_argument("--simplecarto", default="/home/adm1/Projets/Dépots_Publics/SimpleCarto")
-    parser.add_argument("--detourees", default="/home/adm1/RAID/aitools/krea-2/outputs/fusain-icons/cutout")
+    parser.add_argument("--detourees", default="/home/adm1/Projets/.labo/fusain-icones/detourees")
     args = parser.parse_args()
 
     themes = {}  # id -> {nom, icones: {id: {nom, png}}}
     vus = set()
 
-    def ajouter(icone, chemin, origine):
+    # Icônes déjà livrées, réutilisées quand leur image détourée a disparu
+    livrees = {}
+    for fichier in CIBLE.glob("*.json"):
+        if fichier.name != "index.json":
+            livrees.update(json.load(open(fichier, encoding="utf-8")).get("icones", {}))
+
+    def ajouter(icone, chemin, origine, png=None):
         if icone["id"] in vus:
             raise SystemExit(f"Identifiant en double : {icone['id']}")
         vus.add(icone["id"])
         theme = themes.setdefault(icone["theme"], {"nom": icone["theme_label"], "origine": origine, "icones": {}})
-        theme["icones"][icone["id"]] = {"nom": icone["label_fr"], "png": reduire(chemin)}
+        theme["icones"][icone["id"]] = {"nom": icone["label_fr"], "png": png or reduire(chemin)}
 
     catalogue = json.load(open(os.path.join(args.simplecarto, "tools", "icons", "icon-prompts.json"), encoding="utf-8"))
     for icone in catalogue["icons"]:
         chemin = os.path.join(args.simplecarto, "icons", "pictograms-k2", icone["theme"], f"{icone['id']}.png")
         if os.path.exists(chemin):
-            ajouter(icone, chemin, "SimpleCarto")
+            ajouter(icone, chemin, "SimpleCarto", png=livrees.get(icone["id"]))
 
     propres = json.load(open(ICI / "icon-prompts.json", encoding="utf-8"))
     selection = json.load(open(ICI / "selection.json", encoding="utf-8")) if (ICI / "selection.json").exists() else {}
@@ -72,7 +81,10 @@ def principal():
     for icone in propres["icons"]:
         variantes = sorted(glob.glob(os.path.join(args.detourees, icone["theme"], f"{icone['id']}_s*.png")))
         if not variantes:
-            manquantes.append(icone["id"])
+            if icone["id"] in livrees:
+                ajouter(icone, None, "FUSAIN", png=livrees[icone["id"]])
+            else:
+                manquantes.append(icone["id"])
             continue
         imposee = selection.get(icone["id"])
         choisie = next((v for v in variantes if v.endswith(f"_s{imposee}.png")), None) if imposee is not None else None

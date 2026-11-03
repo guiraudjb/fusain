@@ -2,6 +2,7 @@
 // Dans le code Mermaid, une icône s'écrit « dsfr:nom », par exemple service bdd(dsfr:database-2-line)[Base].
 import { h, s, modale, ouvrirModale, fermerModale } from './dom.js';
 import { PREFIXE_ILLUS, chargerIndex, chargerTheme } from './illustrations.js';
+import { PREFIXE_PICTO, chargerPictogrammes, dessinerPictogramme } from './pictogrammes.js';
 
 export const PREFIXE = 'dsfr';
 const CATEGORIES = { arrows: 'Flèches', buildings: 'Bâtiments', business: 'Bureau et affaires', communication: 'Communication', design: 'Création', development: 'Développement', device: 'Appareils', document: 'Documents', editor: 'Édition', finance: 'Finance', health: 'Santé', logo: 'Logos', map: 'Cartes et lieux', media: 'Médias', others: 'Divers', system: 'Système', user: 'Personnes', weather: 'Météo' };
@@ -34,15 +35,17 @@ export async function jeuPourMermaid() {
 
 const sansAccent = (texte) => texte.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-// Fenêtre de choix, pour les deux jeux : icônes du DSFR (au trait, noms en anglais) et icônes illustrées (en couleur,
-// noms en français). Recherche par nom et par catégorie.
+// Fenêtre de choix, pour les trois jeux : icônes du DSFR (au trait, noms en anglais), pictogrammes (au trait, noir et blanc,
+// noms en français) et icônes illustrées (en couleur, noms en français). Recherche par nom et par catégorie.
 export async function choisirIcone(actuelle, surChoix) {
     const illustree = String(actuelle).startsWith(`${PREFIXE_ILLUS}:`);
+    const picto = String(actuelle).startsWith(`${PREFIXE_PICTO}:`);
     const grille = h('div', { class: 'fusain-icones', role: 'group', 'aria-label': 'Icônes' });
     const compte = h('p', { class: 'fusain-aide', 'aria-live': 'polite' });
     const recherche = h('input', { class: 'fr-input', type: 'search', id: 'fusain-icones-recherche' });
     const jeu = h('select', { class: 'fr-select', id: 'fusain-icones-jeu' },
-        h('option', { value: PREFIXE, selected: !illustree }, 'Icônes du DSFR (au trait)'),
+        h('option', { value: PREFIXE, selected: !illustree && !picto }, 'Icônes du DSFR (au trait)'),
+        h('option', { value: PREFIXE_PICTO, selected: picto }, 'Pictogrammes (noir et blanc)'),
         h('option', { value: PREFIXE_ILLUS, selected: illustree }, 'Icônes illustrées (en couleur)'));
     const categorie = h('select', { class: 'fr-select', id: 'fusain-icones-categorie' });
     let dialogue;
@@ -51,11 +54,11 @@ export async function choisirIcone(actuelle, surChoix) {
     const bouton = (nom, titre, contenu) => h('button', { type: 'button', class: 'fusain-icone', title: titre, 'aria-label': titre, 'aria-pressed': String(nom === actuelle), onclick: choisir(nom) }, contenu);
 
     const remplirCategories = async () => {
-        const options = jeu.value === PREFIXE
-            ? [['', 'Toutes les catégories'], ...Object.entries(CATEGORIES)]
-            : (await chargerIndex()).themes.map((t) => [t.id, t.nom]);
+        const options = jeu.value === PREFIXE ? [['', 'Toutes les catégories'], ...Object.entries(CATEGORIES)]
+            : jeu.value === PREFIXE_PICTO ? [['', 'Toutes les catégories'], ...Object.entries((await chargerPictogrammes()).categories)]
+                : (await chargerIndex()).themes.map((t) => [t.id, t.nom]);
         categorie.replaceChildren(...options.map(([id, nom]) => h('option', { value: id }, nom)));
-        recherche.placeholder = jeu.value === PREFIXE ? 'database, user, mail, cloud…' : 'serveur, routeur, tribunal, réunion…';
+        recherche.placeholder = jeu.value === PREFIXE ? 'database, user, mail, cloud…' : jeu.value === PREFIXE_PICTO ? 'routeur, pare-feu, serveur, vlan…' : 'serveur, routeur, tribunal, réunion…';
     };
 
     const afficher = async () => {
@@ -65,6 +68,9 @@ export async function choisirIcone(actuelle, surChoix) {
         if (jeu.value === PREFIXE) {
             const trouvees = (await chargerIcones()).filter((i) => (!categorie.value || i.categorie === categorie.value) && mots.every((m) => i.nom.includes(m)));
             boutons = trouvees.map((i) => bouton(`${PREFIXE}:${i.nom}`, i.nom, s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, 'aria-hidden': 'true' }, s('path', { d: i.trace, fill: 'currentColor' }))));
+        } else if (jeu.value === PREFIXE_PICTO) {
+            const trouvees = (await chargerPictogrammes()).liste.filter((i) => (!categorie.value || i.categorie === categorie.value) && mots.every((m) => sansAccent(i.nom).includes(m) || i.id.includes(m)));
+            boutons = trouvees.map((i) => bouton(`${PREFIXE_PICTO}:${i.id}`, i.nom, s('svg', { viewBox: '0 0 48 48', width: 40, height: 40, 'aria-hidden': 'true', class: 'fusain-pictogramme' }, dessinerPictogramme(i, 0, 0, 48))));
         } else {
             // Sans recherche, seul le thème choisi est affiché ; une recherche porte sur tous les thèmes
             const { parIcone } = await chargerIndex();
@@ -89,6 +95,7 @@ export async function choisirIcone(actuelle, surChoix) {
         compte, grille));
     await remplirCategories();
     if (illustree) { const { parIcone } = await chargerIndex(); categorie.value = parIcone.get(String(actuelle).slice(PREFIXE_ILLUS.length + 1))?.theme || categorie.value; }
+    if (picto) categorie.value = (await chargerPictogrammes()).parId.get(String(actuelle).slice(PREFIXE_PICTO.length + 1))?.categorie || '';
     await afficher();
     ouvrirModale(dialogue);
     recherche.focus();

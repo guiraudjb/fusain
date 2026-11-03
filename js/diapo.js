@@ -4,6 +4,7 @@ import { s } from './dom.js';
 import { analyser } from './diagrammes/diapo.js';
 import { chargerIcones } from './icones.js';
 import { adresseImage } from './illustrations.js';
+import { PREFIXE_PICTO, pictogramme, dessinerPictogramme } from './pictogrammes.js';
 
 export const LARGEUR = 1474;
 export const HAUTEUR = 1006;
@@ -71,7 +72,7 @@ function ecrire(g, texte, { x, y, l, taille, interligne, gras = false, couleur =
     return { hauteur: lignes.length * interligne, largeur: Math.max(0, ...lignes.map((ligne) => ligne.largeur)) };
 }
 
-// Icônes : l'emplacement est posé tout de suite, le dessin (tracé du DSFR ou image illustrée) arrive quand le jeu est lu.
+// Icônes : l'emplacement est posé tout de suite, le dessin (tracé du DSFR, pictogramme ou image illustrée) arrive quand le jeu est lu.
 // « attente » recueille ces chargements pendant le dessin d'une diapositive.
 let attente = null;
 const illustree = (nom) => String(nom).startsWith('illus:');
@@ -83,6 +84,9 @@ function icone(g, nom, x, y, taille, couleur, cle) {
         if (jeu === 'dsfr') {
             const trouvee = (await chargerIcones()).find((i) => i.nom === id);
             if (trouvee) place.append(s('path', { d: trouvee.trace, fill: couleur, transform: `translate(${x} ${y}) scale(${taille / 24})` }));
+        } else if (jeu === PREFIXE_PICTO) {
+            const trouve = await pictogramme(id);
+            if (trouve) place.append(dessinerPictogramme(trouve, x, y, taille, couleur));
         } else {
             const adresse = await adresseImage(id);
             if (adresse) place.append(s('image', { x, y, width: taille, height: taille, href: adresse, preserveAspectRatio: 'xMidYMid meet' }));

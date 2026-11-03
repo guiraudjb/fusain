@@ -22,12 +22,12 @@ export const DISPOSITIONS = {
     libre: { nom: 'Texte libre', blocs: [['h2', 'Titre de la diapositive'], ['p', 'Un paragraphe de texte. Les mots entre deux astérisques doubles sont en **gras**.'], ['li', 'Un premier point'], ['li', 'Un second point']] },
 };
 const BLOCS = [['h2', 'Titre', '# '], ['h3', 'Sous-titre', '## '], ['p', 'Paragraphe', ''], ['li', 'Puce', '- '], ['ligne', 'Ligne de tableau', '| '], ['icone', 'Icône', '']];
-// Une icône embarquée : « dsfr:nom » ou « illus:nom ». Elle s'écrit entre crochets, en tête d'un élément ou seule sur sa ligne.
-const RE_NOM_ICONE = /^(?:dsfr|illus):[a-z0-9-]+$/;
-const RE_ICONE = /^\[((?:dsfr|illus):[a-z0-9-]+)\]\s*(.*)$/;
+// Une icône embarquée : « dsfr:nom », « illus:nom » ou « picto:nom ». Elle s'écrit entre crochets, en tête d'un élément ou seule sur sa ligne.
+const RE_NOM_ICONE = /^(?:dsfr|illus|picto):[a-z0-9-]+$/;
+const RE_ICONE = /^\[((?:dsfr|illus|picto):[a-z0-9-]+)\]\s*(.*)$/;
 const ICONE_DEPART = 'dsfr:information-line';
 // Un texte qui commencerait comme une icône est protégé par une espace sans chasse
-const proteger = (t) => (/^\[(dsfr|illus):/.test(t) ? `\u200b${t}` : t);
+const proteger = (t) => (/^\[(dsfr|illus|picto):/.test(t) ? `\u200b${t}` : t);
 const ITEMS_MAX = 8;
 
 // Un texte tient sur une ligne du code : les retours à la ligne s'écrivent <br>
@@ -80,7 +80,7 @@ export function ecrire(modele) {
         const marque = BLOCS.find(([g]) => g === b.t)[2];
         // Un paragraphe qui commencerait comme un titre, une puce ou un tableau est protégé par une espace sans chasse
         const texte = b.t === 'ligne' ? `${propre(b.texte)} |` : propre(b.texte).replace(/^\u200b+/, '') || '…';
-        lignes.push(`${marque}${b.t === 'p' && /^(#|-(\s|$)|\||\[(dsfr|illus):)/.test(texte) ? '\u200b' : ''}${texte}`);
+        lignes.push(`${marque}${b.t === 'p' && /^(#|-(\s|$)|\||\[(dsfr|illus|picto):)/.test(texte) ? '\u200b' : ''}${texte}`);
     }
     return lignes.join('\n') + '\n';
 }

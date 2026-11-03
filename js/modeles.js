@@ -26,6 +26,7 @@ export const CATEGORIES = [
     ['projet', 'Gestion de projet'],
     ['donnees', 'Analyse et données'],
     ['architecture', 'Ingénierie et architecture'],
+    ['reseaux', 'Réseaux informatiques'],
     ['diapos', 'Diapositives de texte (charte de l\'État)'],
     ['cartes', 'Cartes (moteur de SimpleCarto)'],
 ];
@@ -375,6 +376,115 @@ Transition ecologique,Mobilite,150
     } else {
         Portail->Usager: Demande de pièces
     }
+` },
+    // Réseaux : schémas d'architecture avec les pictogrammes en noir et blanc ou les icônes illustrées
+    { id: 'reseau-physique', categorie: 'reseaux', nom: 'Réseau physique (illustré)', code: `architecture-beta
+    group baie(illus:baie-de-brassage)[Local technique - baie 42U]
+    group etage1(illus:ordinateur-de-bureau)[Étage 1 - bureaux]
+    group etage2(illus:point-d-acces-wi-fi)[Étage 2 - salle de réunion]
+    service operateur(illus:fibre-optique)[Arrivée fibre opérateur]
+    service box(illus:box-internet)[Routeur opérateur]
+    service fw(illus:pare-feu)[Pare-feu] in baie
+    service coeur(illus:commutateur-switch)[Commutateur de cœur] in baie
+    service srv(illus:baie-de-serveurs)[Serveurs] in baie
+    service nas(illus:stockage-nas)[Stockage NAS] in baie
+    service sw1(illus:commutateur-switch)[Commutateur étage 1] in etage1
+    service pc1(illus:ordinateur-de-bureau)[Postes fixes] in etage1
+    service tel1(illus:telephone-ip)[Téléphones IP] in etage1
+    service sw2(illus:commutateur-switch)[Commutateur étage 2] in etage2
+    service wifi2(illus:point-d-acces-wi-fi)[Borne Wi-Fi] in etage2
+    service imp2(illus:imprimante)[Imprimante] in etage2
+    operateur:R -- L:box
+    box:R -[cuivre]- L:fw
+    fw:R -- L:coeur
+    coeur:B -- T:srv
+    srv:R -- L:nas
+    coeur:R -[fibre]- L:sw1
+    sw1:R -[cat 6]- L:pc1
+    sw1:B -- T:tel1
+    coeur:T -[fibre]- B:sw2
+    sw2:R -[cat 6]- L:wifi2
+    sw2:T -- B:imp2
+` },
+    { id: 'reseau-logique', categorie: 'reseaux', nom: 'Réseau logique (pictogrammes)', code: `architecture-beta
+    group dmz(picto:dmz)[DMZ VLAN 99]
+    group v10(picto:vlan)[VLAN 10 Administration 10.0.10.0]
+    group v20(picto:vlan)[VLAN 20 Serveurs 10.0.20.0]
+    group v30(picto:vlan)[VLAN 30 Postes 10.0.30.0]
+    service internet(picto:internet)[Internet]
+    service fw(picto:pare-feu)[Pare-feu]
+    service proxy(picto:proxy)[Proxy inverse] in dmz
+    service web(picto:application-web)[Serveur web] in dmz
+    service coeur(picto:commutateur-niveau-3)[Cœur de réseau niveau 3]
+    service ad(picto:annuaire)[Annuaire] in v10
+    service sup(picto:supervision)[Supervision] in v10
+    service fich(picto:serveur-de-fichiers)[Fichiers] in v20
+    service bdd(picto:base-de-donnees)[Base de données] in v20
+    service postes(picto:groupe)[Postes de travail] in v30
+    service imp(picto:imprimante)[Imprimantes] in v30
+    internet:R -- L:fw
+    fw:B -- T:proxy
+    proxy:B -- T:web
+    fw:R -[trunk 802.1Q]- L:coeur
+    coeur:T -- B:ad
+    ad:R -- L:sup
+    coeur:R -- L:fich
+    fich:R -- L:bdd
+    coeur:B -- T:postes
+    postes:R -- L:imp
+` },
+    { id: 'reseau-logique-illustre', categorie: 'reseaux', nom: 'Réseau logique (illustré)', code: `architecture-beta
+    group dmz(illus:dmz)[DMZ VLAN 99]
+    group v10(illus:vlan)[VLAN 10 Administration 10.0.10.0]
+    group v20(illus:vlan)[VLAN 20 Serveurs 10.0.20.0]
+    group v30(illus:vlan)[VLAN 30 Postes 10.0.30.0]
+    service internet(illus:cloud)[Internet]
+    service fw(illus:pare-feu)[Pare-feu]
+    service proxy(illus:proxy)[Proxy inverse] in dmz
+    service web(illus:site-web)[Serveur web] in dmz
+    service coeur(illus:commutateur-niveau-3)[Cœur de réseau niveau 3]
+    service ad(illus:annuaire)[Annuaire] in v10
+    service sup(illus:serveur-de-supervision)[Supervision] in v10
+    service fich(illus:serveur-de-fichiers)[Fichiers] in v20
+    service bdd(illus:base-de-donnees)[Base de données] in v20
+    service postes(illus:groupe-d-utilisateurs)[Postes de travail] in v30
+    service imp(illus:imprimante)[Imprimantes] in v30
+    internet:R -- L:fw
+    fw:B -- T:proxy
+    proxy:B -- T:web
+    fw:R -[trunk 802.1Q]- L:coeur
+    coeur:T -- B:ad
+    ad:R -- L:sup
+    coeur:R -- L:fich
+    fich:R -- L:bdd
+    coeur:B -- T:postes
+    postes:R -- L:imp
+` },
+    { id: 'reseau-sites', categorie: 'reseaux', nom: 'Interconnexion de sites', code: `architecture-beta
+    group siege(picto:batiment)[Siège]
+    group lyon(picto:batiment)[Agence de Lyon]
+    group nantes(picto:batiment)[Agence de Nantes]
+    service fws(picto:pare-feu)[Pare-feu] in siege
+    service coeur(picto:commutateur-niveau-3)[Cœur de réseau] in siege
+    service dc(picto:baie-de-serveurs)[Salle serveurs] in siege
+    service wan(picto:reseau-etendu)[Réseau étendu opérateur]
+    service internet(picto:internet)[Internet]
+    service r1(picto:routeur)[Routeur] in lyon
+    service sw1(picto:commutateur)[Commutateur] in lyon
+    service r2(picto:routeur)[Routeur] in nantes
+    service sw2(picto:commutateur)[Commutateur] in nantes
+    service vpn(picto:vpn)[Passerelle VPN]
+    service nomades(picto:ordinateur-portable)[Agents nomades]
+    dc:R -- L:coeur
+    coeur:R -- L:fws
+    fws:R -[MPLS]- L:wan
+    wan:R -- L:r1
+    r1:R -- L:sw1
+    wan:B -- T:r2
+    r2:R -- L:sw2
+    fws:T -- B:internet
+    internet:R -- L:vpn
+    vpn:R -[tunnel chiffré]- L:nomades
 ` },
     // Diapositives de texte : une page par mise en page, reprises des diapositives libres de VALOR
     ...Object.entries(DISPOSITIONS).map(([id, d]) => ({ id: `diapo-${id}`, categorie: 'diapos', nom: d.nom, code: codeInitial(id) })),

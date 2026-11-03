@@ -2,6 +2,17 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.17.0 — 3 novembre 2026 — réseaux informatiques : pictogrammes, icônes et modèles
+
+- **Constat de départ** : un schéma d'architecture trouvé ailleurs (icônes `logos:` et `carbon:`, jeux Iconify chargés en ligne) affichait des points d'interrogation. FUSAIN ne charge que ses jeux embarqués ; le guide l'explique désormais et indique par quoi remplacer ces icônes.
+- **Pictogrammes en noir et blanc** (`picto:nom`) : 54 pictogrammes au trait dessinés pour FUSAIN, sur une grille de 48 : routeur, commutateur, commutateur de niveau 3, pare-feu, VLAN (tube de câbles), liaison agrégée, DMZ, proxy, sonde de détection d'intrusion, VPN, Wi-Fi, panneau de brassage, prise RJ45, fibre, baie, serveurs, NAS, hyperviseur, conteneur, onduleur, postes, téléphone IP, annuaire, DNS, supervision… en cinq catégories. Ils servent partout où servent les autres jeux (architecture, logigramme, diapositives, cartes) et prennent la couleur de la diapositive ou du pictogramme de carte.
+- Leur fichier (`icones/pictogrammes.json`, 16 Ko, produit par `outils/pictogrammes.py`) ne contient que des formes simples, des nombres et trois couleurs ; la page revérifie chaque valeur avant de dessiner et reconstruit elle-même le SVG. Il est lu à la première utilisation, contrôlé par son empreinte, et conservé hors ligne.
+- **11 icônes illustrées** générées avec Krea 2 pour les réseaux : commutateur de niveau 3, sonde IDS, proxy, DMZ, VLAN, annuaire, serveurs de supervision, de fichiers et de noms, réseau étendu, câble RJ45 (391 icônes illustrées en tout).
+- **Rubrique « Réseaux informatiques »** dans les modèles : réseau physique (illustré, nature des câbles sur les liaisons), réseau logique en pictogrammes et en icônes illustrées (pare-feu, DMZ, cœur de niveau 3, un groupe par VLAN), interconnexion de sites (siège, agences, réseau de l'opérateur, VPN des nomades).
+- **Correction** : dans un schéma d'architecture, une liaison qui part du bas d'un service barrait son libellé. Chaque libellé reçoit un fond blanc à sa mesure.
+- Outillage des icônes illustrées remis à jour pour le labo (Krea 2 sur un nœud de calcul, détourage BiRefNet) ; l'installeur garde telles quelles les icônes déjà livrées au lieu de les réencoder ou de perdre celles dont l'image de travail a disparu.
+- Tests : pictogrammes (formes, valeurs, empreinte), filtre et relecture du préfixe `picto:` dans trois éditeurs, relecture des modèles de réseaux ; ceux-ci entrent dans l'essai de robustesse. Un test échouait quand le dépôt est dans un dossier accentué (chemin encodé) : corrigé.
+
 ## 0.16.0 — 14 octobre 2026 — épingles à une adresse (Base Adresse Nationale) et réseau routier de ROUTE 500
 
 - **Épingle à une adresse** : comme dans SimpleCarto, une épingle se place en choisissant un département, une commune, une voie puis un numéro, parmi les 26 millions d'adresses de la Base Adresse Nationale (édition du 14 octobre 2026, France entière avec l'outre-mer). Son libellé est l'adresse. Les adresses d'une commune sont téléchargées à son premier choix puis restent disponibles hors ligne.

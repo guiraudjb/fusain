@@ -1,9 +1,10 @@
 """Génère les icônes du catalogue icon-prompts.json avec Krea 2 (checkpoint Turbo).
 
-À lancer avec la venv du dépôt krea-2 (le GPU doit être libre : pas de webui Krea actif) :
+À lancer sur un nœud de calcul, avec la venv du dépôt krea-2 (la carte graphique doit être libre) :
 
-    OSS_TURBO=/home/adm1/RAID/aitools/krea-2/checkpoints/krea2_turbo_fp8_scaled.safetensors \
-    /home/adm1/RAID/aitools/krea-2/.venv/bin/python3 generate_icons.py [--only id1,id2] [--seeds 4]
+    ~/aitools/krea-2/.venv/bin/python3 generate_icons.py --out DOSSIER [--only id1,id2] [--seeds 4]
+
+Le dossier de krea-2 est pris dans la variable LABO_KREA (par défaut ~/aitools/krea-2).
 
 Les images brutes (1024x1024, fond blanc) sont écrites dans --out/<theme>/<id>_s<seed>.png.
 Une image déjà présente n'est pas régénérée : le script peut être interrompu et relancé.
@@ -14,14 +15,14 @@ import os
 import sys
 import time
 
-KREA_DIR = "/home/adm1/RAID/aitools/krea-2"
+KREA_DIR = os.environ.get("LABO_KREA", os.path.expanduser("~/aitools/krea-2"))
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--catalog", default=os.path.join(HERE, "icon-prompts.json"))
-    parser.add_argument("--out", default=os.path.join(KREA_DIR, "outputs", "simplecarto-icons", "raw"))
+    parser.add_argument("--out", default=os.path.join(KREA_DIR, "outputs", "fusain-icons", "raw"))
     parser.add_argument("--only", default="", help="identifiants séparés par des virgules")
     parser.add_argument("--theme", default="", help="limiter à un thème")
     parser.add_argument("--seeds", type=int, default=4)

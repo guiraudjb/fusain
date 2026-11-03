@@ -142,9 +142,9 @@ export function panneau(ctx) {
     if (v.bloc) {
         const groupe = selection.startsWith('g:');
         const modifier = (fonction) => appliquer((m) => fonction(viser(m, selection).bloc));
-        // Une icône choisie dans la fenêtre (« dsfr:nom », « illus:nom ») s'ajoute à la liste courte
+        // Une icône choisie dans la fenêtre (« dsfr:nom », « illus:nom », « picto:nom ») s'ajoute à la liste courte
         const [jeu, nomIcone] = v.bloc.icone.includes(':') ? v.bloc.icone.split(':') : ['', v.bloc.icone];
-        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, jeu === PREFIXE ? `DSFR : ${nomIcone}` : jeu === 'illus' ? `Illustrée : ${nomIcone}` : v.bloc.icone], ...ICONES];
+        const icones = ICONES.some(([i]) => i === v.bloc.icone) ? ICONES : [[v.bloc.icone, jeu === PREFIXE ? `DSFR : ${nomIcone}` : jeu === 'illus' ? `Illustrée : ${nomIcone}` : jeu === 'picto' ? `Pictogramme : ${nomIcone}` : v.bloc.icone], ...ICONES];
         const autres = modele.services.filter((s) => s !== v.bloc).map((s) => [`n:${s.id}`, s.nom || s.id]);
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, groupe ? 'Groupe sélectionné' : 'Service sélectionné'),

@@ -33,7 +33,7 @@ const RE_ID = /^[\p{L}\p{N}_]+/u;
 const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
 const RE_LIEN = /^([<ox])?(-{2,}|={2,}|-\.+-|~{3,})([>ox])?/;
 
-const RE_ICONE = /^@\{ icon: "((?:dsfr|illus):[a-z0-9-]+)", label: "([^"]*)", pos: "b" \}/;
+const RE_ICONE = /^@\{ icon: "((?:dsfr|illus|picto):[a-z0-9-]+)", label: "([^"]*)", pos: "b" \}/;
 
 class Inconnu extends Error {}
 

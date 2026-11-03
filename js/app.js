@@ -707,6 +707,14 @@ const EXEMPLES_CARTES = [
     ['monde.csv', 'Pays du monde', 'deux séries de test (code ISO à trois lettres) ; échelles monde et région du monde'],
 ];
 
+const EXEMPLES_RESEAU = [
+    ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
+    ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
+    ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP et emplacements des mêmes équipements'],
+    ['imc-api.csv', 'Liens de l\'API REST d\'IMC', 'un lien vu des deux côtés, compté une fois'],
+    ['lldp-voisins.csv', 'Voisins LLDP', 'rapport séparé par des points-virgules : téléphones IP, borne Wi-Fi'],
+];
+
 // Les documents joints sont mis en forme dans une modale ; le lien garde son adresse, pour l'ouverture dans un nouvel onglet
 async function ouvrirDocument(chemin, titre) {
     try {
@@ -738,8 +746,20 @@ function ouvrirAPropos() {
         h('h2', { class: 'fr-h6' }, 'Documentation'),
         h('ul', {},
             h('li', {}, document_('./Documentation/GUIDE_UTILISATEUR.md', 'Guide utilisateur')),
+            h('li', {}, document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC (liens et équipements en Excel)')),
             h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
             h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+        h('h2', { class: 'fr-h6' }, 'Schémas de réseau importés'),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.18.0, « Importer un réseau » (rubrique Réseaux informatiques de « Ajouter une page » et de « Modèles ») dessine un réseau à partir d\'exports tabulaires : la liste des liens d\'HPE IMC (« Gestion des liens »), ses liens lus par l\'API REST ou un rapport de voisins LLDP / CDP, et, en option, la liste des équipements d\'IMC. Fichiers lus : Excel .xlsx, CSV, tableau HTML enregistré en .xls.'),
+        h('ul', { class: 'fr-text--sm' },
+            h('li', {}, 'Colonnes reconnues d\'après leur intitulé (Left Node, Right Interface, Remote System Name, Device Category, Location…), corrigeables avant l\'import.'),
+            h('li', {}, 'Schéma physique : icône selon la catégorie de l\'équipement, interfaces abrégées, débits, liens agrégés en trait épais, liens en panne en pointillé, terminaux d\'un commutateur résumés (« 12 téléphones IP »).'),
+            h('li', {}, 'Schéma logique quand l\'export donne les VLAN des ports (access, trunk, VLAN autorisés).'),
+            h('li', {}, 'Regroupement par emplacement, préfixe du nom ou sous-réseau ; au-delà de 25 équipements d\'infrastructure, une vue d\'ensemble puis une page par site.'),
+            h('li', {}, 'Les pages créées sont des logigrammes ordinaires, entièrement modifiables ; un seul Ctrl+Z retire l\'import. Les fichiers sont lus dans le navigateur, sans envoi.')),
+        h('p', { class: 'fr-text--sm' }, 'Pour obtenir ces fichiers depuis IMC, voir le guide ', document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC'), '. Exports fictifs pour essayer l\'import (noms de colonnes documentés par HPE, équipements inventés) :'),
+        h('ul', {}, EXEMPLES_RESEAU.map(([fichier, nom, detail]) => h('li', {},
+            h('a', { class: 'fr-link', href: `./Documentation/exemples-reseau/${fichier}`, download: fichier }, nom), ` — ${detail}`))),
         h('h2', { class: 'fr-h6' }, 'Données d\'exemple pour les cartes'),
         h('p', { class: 'fr-text--sm' }, 'Fichiers CSV repris de SimpleCarto, à importer dans une page de carte (« Importer un fichier CSV… »). Hormis les codes des territoires, les valeurs sont fictives.'),
         h('ul', {}, EXEMPLES_CARTES.map(([fichier, nom, detail]) => h('li', {},

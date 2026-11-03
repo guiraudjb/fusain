@@ -1,7 +1,8 @@
 # Exports réseau fictifs
 
-Fichiers inventés pour tester l'import d'un réseau (`js/reseau.js`). Les noms de colonnes reprennent ceux que documente
-HPE IMC ; les équipements, adresses et ports sont fictifs.
+Fichiers inventés pour essayer l'import d'un réseau (« Importer un réseau ») et pour les tests (`tests/logique.test.mjs`).
+Les noms de colonnes reprennent ceux que documente HPE IMC ; les équipements, adresses et ports sont fictifs.
+Ils se téléchargent depuis la fenêtre « À propos » de FUSAIN. Pour obtenir les vrais exports, voir `../GUIDE_IMC.md`.
 
 - `imc-liens.csv` : liste des liens exportée depuis « Gestion des liens » d'IMC (ligne de titre, nœuds « nom(IP) », VLAN).
 - `imc-liens.xlsx` : le même tableau au format Excel.

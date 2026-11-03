@@ -392,12 +392,12 @@ test('diapositive : icône d\'un élément et bloc icône, sans confusion avec u
     assert.deepEqual(editeur.analyser(editeur.ecrire(libre)).blocs.map((b) => [b.t, b.texte]), [['icone', 'dsfr:flag-line'], ['p', '[illus:serveur]']]);
 });
 
-// ---------- Import d'un réseau (exports IMC, API, LLDP fictifs : tests/reseau/) ----------
+// ---------- Import d'un réseau (exports IMC, API, LLDP fictifs : Documentation/exemples-reseau/) ----------
 import * as reseau from '../js/reseau.js';
 import { readFileSync as lireFichierReseau } from 'node:fs';
 import { fileURLToPath as cheminReseau } from 'node:url';
 
-const exportReseau = async (nom, champs) => reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL(`./reseau/${nom}`, import.meta.url))))), champs);
+const exportReseau = async (nom, champs) => reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL(`../Documentation/exemples-reseau/${nom}`, import.meta.url))))), champs);
 const relireToutes = (pages) => {
     for (const p of pages) {
         const m = logigramme.analyser(p.code);

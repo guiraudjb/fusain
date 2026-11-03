@@ -3,12 +3,19 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.18.0-81ed857d2a';
+const VERSION_CACHE = 'fusain-0.18.0-5c79429e4e';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./Documentation/GUIDE_UTILISATEUR.md', 'b62b737c8f553fc1c82e8edf82bb2bb2c8dbfa23598cad89c1e3ef0f9ad21b48'],
+    ['./Documentation/GUIDE_IMC.md', '98650cba5e75cbbd073794cbada1f4e830593ba654c50ebeadf48e0109da64bd'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', 'c153007f5bca217fa1a97ee4483e746109c46235bf96e336636fbf6e3f7e3c99'],
+    ['./Documentation/exemples-reseau/LISEZ-MOI.md', 'f8968ef6a9b7a6a7c19534c4178e3be15478be8d8c7e60e4baf37eda644f94a1'],
+    ['./Documentation/exemples-reseau/imc-api.csv', 'c670290ae38aac06cb952d08802d5017f65539b5f8054633dc2b81ddd6b3ac92'],
+    ['./Documentation/exemples-reseau/imc-equipements.csv', '9dc4a808fda24ff18d57710e7e1b1e8a69b843ff66fcc5b3c34a9c206024108b'],
+    ['./Documentation/exemples-reseau/imc-liens.csv', 'd8209c1c3595d6c24db77de8a8946d490c9ac63b0ff3c00f0164432c20556349'],
+    ['./Documentation/exemples-reseau/imc-liens.xlsx', '1106fb0f63fe3555038d3b00663c16c9adfb6c22c37859c78cafc2955f5d3c85'],
+    ['./Documentation/exemples-reseau/lldp-voisins.csv', 'e268acb050dce66e0c719edf058d580174a8cf5a7e3ffb753394b0033029ac3c'],
     ['./FUSAIN_cahier_des_charges.md', '86240f8490a5bf3d2313c71261d6bc416f35873f5ad0ac7154bba8bd8cf1dc25'],
-    ['./JOURNAL_DES_VERSIONS.md', 'aaf51497d496f6305203482500f19666aaa6d9b1e8f3af6f616b81d86520eb53'],
+    ['./JOURNAL_DES_VERSIONS.md', '3ae82113be2d9e9d9d7ae9aa8de576938fba92267bacd6a66cde3d2849864cff'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'c03ee569bf854a8480a2191915cee53c8e28032d4592ce478e23e417bed0ccec'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -41,9 +48,9 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '29b9190e17fb255f89921c6a6b78deb5fb7c152030eb1bc86caaab0b91665a1d'],
-    ['./index.html', '29b9190e17fb255f89921c6a6b78deb5fb7c152030eb1bc86caaab0b91665a1d'],
-    ['./js/app.js', 'ce26f48c07c863043ebde512a39ab78c120e7edb0ea17a78bd4da837d79656f1'],
+    ['./', '1f1338aa5a5a8f871c6202f35c1d9e44bd4faada58f249ad9f9e268166ecd584'],
+    ['./index.html', '1f1338aa5a5a8f871c6202f35c1d9e44bd4faada58f249ad9f9e268166ecd584'],
+    ['./js/app.js', '3725f6692a29210e009936c1ebb122d0292493efe903d951f1a28fc319d50e7b'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],

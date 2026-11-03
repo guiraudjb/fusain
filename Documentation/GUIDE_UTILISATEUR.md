@@ -71,6 +71,8 @@ Options : icônes illustrées ou pictogrammes ; regroupement automatique, par em
 
 Le résultat est une page « Réseau physique » et, si les VLAN sont connus, une page « Réseau logique (VLAN) ». Au-delà de 25 équipements d'infrastructure répartis en plusieurs groupes, l'import produit une vue d'ensemble des sites puis une page par site, où les voisins des autres sites figurent dans un cadre « Autres sites ». Les pages sont des logigrammes ordinaires : tout reste modifiable, et un seul Ctrl+Z retire l'import.
 
+Pour obtenir ces fichiers depuis IMC (menus, colonnes, solutions de repli), voir le [guide des exports d'HPE IMC](GUIDE_IMC.md). Des exports fictifs pour essayer l'import se téléchargent depuis la fenêtre « À propos ».
+
 **Historique de versions** — commits, branches et fusions. Les ajouts se placent à la fin de l'historique, sur la « branche de travail ». La pastille « + » d'un commit ou d'une branche y ajoute un commit ; glissée vers une autre branche, elle fusionne la première dans la seconde. FUSAIN refuse les opérations que Mermaid rejetterait (fusion sans rien à fusionner, par exemple).
 
 **Structure de paquet** — une suite de champs, chacun d'une taille en bits ; les positions sont recalculées quand vous ajoutez, déplacez ou redimensionnez un champ.

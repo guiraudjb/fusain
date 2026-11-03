@@ -119,12 +119,12 @@ ok('erreur affichée, dernier rendu conservé', await p.locator('#fusain-erreur 
 { const reparations = '#fusain-erreur .fusain-diagnostic__reparations button';
   const titre = () => p.textContent('#fusain-erreur .fr-alert__title').catch(() => '');
   await p.fill('#fusain-code-zone', 'flowchart LR\n  A[Texte (détail)] --> B\n  B -> C');
-  await p.waitForSelector(reparations, { timeout: 20000 });
+  const attendre = (motif) => p.waitForFunction((m) => new RegExp(m).test(document.querySelector('#fusain-erreur .fr-alert__title')?.textContent || '') && document.querySelector('#fusain-erreur .fusain-diagnostic__reparations button'), motif, { timeout: 20000 }).catch(() => {});
+  await attendre('Erreur ligne 2 — Étape');
   ok('diagnostic : ligne et objet désignés, syntaxe attendue', /Erreur ligne 2 — Étape/.test(await titre()) && await p.locator('#fusain-erreur .fusain-diagnostic__syntaxe li').count() >= 5, await titre());
   await p.click(`${reparations} >> nth=0`);
-  await p.waitForFunction(() => /Erreur ligne 3/.test(document.querySelector('#fusain-erreur .fr-alert__title')?.textContent || ''), null, { timeout: 20000 }).catch(() => {});
+  await attendre('Erreur ligne 3 — Lien');
   ok('diagnostic : réparation appliquée, faute suivante désignée', (await p.inputValue('#fusain-code-zone')).includes('A["Texte (détail)"]') && /Erreur ligne 3 — Lien/.test(await titre()), await titre());
-  await p.waitForSelector(reparations, { timeout: 20000 });
   await p.click(`${reparations} >> nth=0`); await p.waitForTimeout(1500);
   ok('diagnostic : schéma rendu après réparation', await p.locator('#fusain-erreur .fr-alert').count() === 0 && (await p.inputValue('#fusain-code-zone')).includes('B --> C'));
   await p.evaluate(() => document.activeElement?.blur()); await p.keyboard.press('Control+z'); await p.waitForTimeout(1500);

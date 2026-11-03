@@ -1,0 +1,5 @@
+id,label,type,leftSymbolId,leftSymbolName,leftIfDesc,rightSymbolId,rightSymbolName,rightIfDesc,status,bandWidth,leftDevice,rightDevice
+101,10.3.0.1-10.3.0.2,0,1001,core-a,Ten-GigabitEthernet1/0/49 Interface,1002,acc-a1,Ten-GigabitEthernet1/0/51 Interface,1,10000000000,11,12
+102,10.3.0.1-10.3.0.3,0,1001,core-a,Ten-GigabitEthernet1/0/50 Interface,1003,acc-a2,Ten-GigabitEthernet1/0/51 Interface,1,10000000000,11,13
+103,10.3.0.2-10.3.0.3,0,1002,acc-a1,Ten-GigabitEthernet1/0/52 Interface,1003,acc-a2,Ten-GigabitEthernet1/0/52 Interface,1,10000000000,12,13
+104,10.3.0.3-10.3.0.2,0,1003,acc-a2,Ten-GigabitEthernet1/0/52 Interface,1002,acc-a1,Ten-GigabitEthernet1/0/52 Interface,1,10000000000,13,12

@@ -173,6 +173,13 @@ export function ecrire(modele) {
 
 // Lecture d'un CSV : séparateur deviné sur la première ligne (point-virgule, virgule ou tabulation), champs entre guillemets
 export function lireCsv(texte) {
+    const [entetes = [], ...corps] = lignesCsv(texte);
+    const colonnes = entetes.map((e, i) => e.replace(/\s+/g, ' ').trim() || `Colonne ${i + 1}`);
+    return { colonnes, lignes: corps.map((l) => Object.fromEntries(colonnes.map((c, i) => [c, (l[i] ?? '').trim()]))) };
+}
+
+// Enregistrements bruts d'un CSV (tableaux de champs), lignes vides écartées
+export function lignesCsv(texte, impose = null) {
     const source = String(texte).replace(/^﻿/, '');
     // Le séparateur est compté sur le premier enregistrement, hors guillemets : un nom de colonne peut contenir des retours
     // à la ligne (« "Code⏎alpha⏎-3" » dans le jeu d'exemple des pays)
@@ -183,7 +190,7 @@ export function lireCsv(texte) {
         else if (!entre && (c === '\n' || c === '\r')) break;
         else if (!entre && c in comptes) comptes[c] += 1;
     }
-    const separateur = Object.entries(comptes).sort((a, b) => b[1] - a[1])[0][0];
+    const separateur = impose || Object.entries(comptes).sort((a, b) => b[1] - a[1])[0][0];
     const lignes = [];
     let ligne = [];
     let champ = '';
@@ -202,9 +209,7 @@ export function lireCsv(texte) {
     }
     ligne.push(champ);
     if (ligne.some((x) => x.trim())) lignes.push(ligne);
-    const [entetes = [], ...corps] = lignes;
-    const colonnes = entetes.map((e, i) => e.replace(/\s+/g, ' ').trim() || `Colonne ${i + 1}`);
-    return { colonnes, lignes: corps.map((l) => Object.fromEntries(colonnes.map((c, i) => [c, (l[i] ?? '').trim()]))) };
+    return lignes;
 }
 
 // Code du territoire visé : zéro initial rendu (perdu par les tableurs) et, aux échelles par département, commune

@@ -1,0 +1,7 @@
+Local Device;Local Port;Remote System Name;Remote Port ID;Remote Chassis ID;Remote Management Address;System Capabilities Enabled
+SW-ETAGE-1;GigabitEthernet1/0/1;CORE-1;GigabitEthernet1/0/10;7848-59aa-0001;10.4.0.1;Bridge, Router
+SW-ETAGE-1;GigabitEthernet1/0/2;SEP001122334455;Port 1;0011-2233-4455;10.4.10.21;Bridge, Telephone
+SW-ETAGE-1;GigabitEthernet1/0/3;SEP001122334466;Port 1;0011-2233-4466;10.4.10.22;Bridge, Telephone
+SW-ETAGE-1;GigabitEthernet1/0/4;SEP001122334477;Port 1;0011-2233-4477;10.4.10.23;Bridge, Telephone
+SW-ETAGE-1;GigabitEthernet1/0/5;borne-etage1;eth0;0011-2233-4488;10.4.20.5;WLAN Access Point
+CORE-1;GigabitEthernet1/0/10;SW-ETAGE-1;GigabitEthernet1/0/1;7848-59aa-0002;10.4.0.11;Bridge

@@ -11,6 +11,7 @@ import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
 import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
+import { ouvrirImportReseau } from './import-reseau.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -521,6 +522,26 @@ function ajouterPage(code, nom) {
     });
 }
 
+// Plusieurs pages d'un coup (import d'un réseau), après la page courante : une seule étape d'annulation
+function ajouterPages(liste) {
+    const place = PAGES_MAX - etat.doc.pages.length;
+    if (place <= 0) return message('Nombre maximal de pages atteint', '', 'warning');
+    if (liste.length > place) message('Pages en trop', `Seules les ${place} premières pages ont été ajoutées (${PAGES_MAX} pages au plus par document).`, 'warning');
+    ui.selection = null;
+    modifier((doc) => {
+        const modele = pageCourante();
+        const pages = liste.slice(0, place).map(({ code, nom, format, orientation }) => {
+            const page = nouvellePage(code, nom || `Page ${doc.pages.length + 1}`);
+            page.format = FORMATS[format] ? format : modele.format;
+            page.orientation = orientation || modele.orientation;
+            page.margesMm = modele.margesMm;
+            return page;
+        });
+        doc.pages.splice(etat.index + 1, 0, ...pages);
+        etat.index += 1;
+    });
+}
+
 // Les vignettes ne sont rendues que lorsqu'elles deviennent visibles : un document de 100 pages s'ouvre
 // aussi vite qu'un document d'une page.
 let observateurVignettes = null;
@@ -583,7 +604,10 @@ function ouvrirModeles(action) {
                 else { ui.selection = null; majPage((p) => { p.code = m.code; }); }
             } },
             h('span', { class: 'fusain-modele__nom' }, m.nom),
-            h('span', { class: `fr-badge fr-badge--sm fr-badge--no-icon fr-badge--${editeurPour(typeDiagramme(m.code)) ? 'success' : 'info'}` }, editeurPour(typeDiagramme(m.code)) ? 'Édition visuelle' : 'Par le code')))),
+            h('span', { class: `fr-badge fr-badge--sm fr-badge--no-icon fr-badge--${editeurPour(typeDiagramme(m.code)) ? 'success' : 'info'}` }, editeurPour(typeDiagramme(m.code)) ? 'Édition visuelle' : 'Par le code'))),
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportReseau(ajouterPages); } },
+                h('span', { class: 'fusain-modele__nom' }, 'Importer un réseau (HPE IMC, LLDP : CSV, Excel)…'),
+                h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null),
         ]));
     const dialogue = modale('fusain-modale-modeles', action === 'ajouter' ? 'Nouvelle page' : 'Modèles de schémas', contenu);
     ouvrirModale(dialogue);

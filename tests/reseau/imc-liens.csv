@@ -1,0 +1,14 @@
+Link Management
+Link Name,Link Type,Left Node,Left Interface,Left Interface Alias,Left Interface VLAN Type,Left Interface Allowed VLAN,Right Node,Right Interface,Right Interface Alias,Right Interface VLAN Type,Right Interface Allowed VLAN,Link Speed(bps),Status
+10.1.0.1-10.1.0.2,Ethernet,FW-SIEGE(10.1.0.1),GigabitEthernet1/0/1,,access,1,RT-SIEGE(10.1.0.2),GigabitEthernet0/0,,access,1,1000000000,Normal
+10.1.0.2-10.1.0.10,Ethernet,RT-SIEGE(10.1.0.2),GigabitEthernet0/1,,trunk,"1,10,20,30",CORE-SIEGE(10.1.0.10),Ten-GigabitEthernet1/0/49,,trunk,"1,10,20,30",10000000000,Normal
+10.1.0.10-10.1.0.21,Ethernet,CORE-SIEGE(10.1.0.10),Bridge-Aggregation1,,trunk,"10,20",SW-SIEGE-1(10.1.0.21),Bridge-Aggregation1,,trunk,"10,20",20000000000,Normal
+10.1.0.10-10.1.0.21,Ethernet,CORE-SIEGE(10.1.0.10),Ten-GigabitEthernet1/0/1,,trunk,"10,20",SW-SIEGE-1(10.1.0.21),Ten-GigabitEthernet1/0/51,,trunk,"10,20",10000000000,Normal
+10.1.0.10-10.1.0.21,Ethernet,CORE-SIEGE(10.1.0.10),Ten-GigabitEthernet1/0/2,,trunk,"10,20",SW-SIEGE-1(10.1.0.21),Ten-GigabitEthernet1/0/52,,trunk,"10,20",10000000000,Normal
+10.1.0.10-10.1.0.22,Ethernet,CORE-SIEGE(10.1.0.10),Ten-GigabitEthernet1/0/3,,trunk,"10,30",SW-SIEGE-2(10.1.0.22),Ten-GigabitEthernet1/0/51,,trunk,"10,30",10000000000,Normal
+10.1.0.10-10.1.0.30,Ethernet,CORE-SIEGE(10.1.0.10),GigabitEthernet1/0/10,,access,30,SRV-FICHIERS(10.1.0.30),eth0,,access,30,1000000000,Normal
+10.1.0.21-10.1.0.101,Ethernet,SW-SIEGE-1(10.1.0.21),GigabitEthernet1/0/5,,access,20,AP-SIEGE-1(10.1.0.101),GigabitEthernet0/0/1,,access,20,1000000000,Normal
+10.1.0.21-10.1.0.102,Ethernet,SW-SIEGE-1(10.1.0.21),GigabitEthernet1/0/6,,access,20,AP-SIEGE-2(10.1.0.102),GigabitEthernet0/0/1,,access,20,1000000000,Normal
+10.1.0.22-10.1.0.103,Ethernet,SW-SIEGE-2(10.1.0.22),GigabitEthernet1/0/7,,access,20,AP-SIEGE-3(10.1.0.103),GigabitEthernet0/0/1,,access,20,1000000000,Abnormal
+10.1.0.2-10.2.0.2,Ethernet,RT-SIEGE(10.1.0.2),GigabitEthernet0/2,,access,1,RT-AGENCE(10.2.0.2),GigabitEthernet0/0,,access,1,100000000,Normal
+10.2.0.2-10.2.0.10,Ethernet,RT-AGENCE(10.2.0.2),GigabitEthernet0/1,,trunk,"10,20",SW-AGENCE(10.2.0.10),GigabitEthernet1/0/24,,trunk,"10,20",1000000000,Normal

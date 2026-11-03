@@ -60,6 +60,17 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 
 **Réseaux informatiques** — la rubrique du même nom propose quatre modèles, tous des schémas d'architecture : réseau physique (icônes illustrées : arrivée opérateur, baie, commutateurs d'étage, postes, bornes Wi-Fi, avec la nature des câbles), réseau logique, en pictogrammes ou en icônes illustrées (pare-feu, DMZ, cœur de réseau de niveau 3 et un groupe par VLAN) et interconnexion de sites (siège, agences, réseau étendu de l'opérateur, accès VPN des nomades). Un groupe représente un VLAN, une zone ou un site ; son icône (pictogramme « VLAN », « DMZ », « Site ») le signale.
 
+**Importer un réseau** — dans la même rubrique, « Importer un réseau (HPE IMC, LLDP : CSV, Excel)… » construit les schémas à partir d'exports tabulaires, lus dans le navigateur sans envoi :
+
+- *Liens entre équipements* (obligatoire) : l'export « Gestion des liens » d'HPE IMC (Ressources › Liens, « Exporter », depuis IMC 7.3), les liens rendus par son API REST (`/imcrs/plat/res/link`) ou un rapport de voisins LLDP / CDP. Formats lus : CSV (virgule, point-virgule, tabulation), Excel `.xlsx`, tableau HTML enregistré en `.xls`. Un ancien classeur Excel 97-2003 est à réenregistrer en `.xlsx` ou en CSV.
+- *Liste des équipements* (facultatif) : l'export de la liste des équipements d'IMC (libellé, adresse IP, catégorie, modèle, emplacement). Elle donne la bonne icône à chaque équipement et permet de regrouper par site.
+
+Les colonnes sont reconnues d'après leur intitulé (« Left Node », « Right Interface », « leftSymbolName », « Remote System Name », « Device Category », « Location »…, en anglais ou en français) ; chacune peut être corrigée dans une liste déroulante. Pour un rapport LLDP produit par un seul équipement, sans colonne « côté A », indiquez son nom. Les nœuds écrits « nom(adresse IP) » sont séparés.
+
+Options : icônes illustrées ou pictogrammes ; regroupement automatique, par emplacement, par préfixe du nom (« PAR-SW-01 » → PAR), par sous-réseau /24, ou aucun ; résumé des terminaux d'un même commutateur (« 12 téléphones IP ») ; abréviation des interfaces (GE1/0/1, XGE, BAGG) ; schéma logique quand l'export donne les VLAN. Une liaison vue des deux côtés n'est comptée qu'une fois ; les liens parallèles d'un agrégat sont réunis en un trait épais (« BAGG1 – BAGG1 · 2 liens × 10G ») ; un lien en panne est en pointillé. La catégorie vient de la liste des équipements, des capacités LLDP (Bridge, Router, Telephone, WLAN) ou, à défaut, du nom (`fw-`, `rt-`, `sw-`, `ap-`…).
+
+Le résultat est une page « Réseau physique » et, si les VLAN sont connus, une page « Réseau logique (VLAN) ». Au-delà de 25 équipements d'infrastructure répartis en plusieurs groupes, l'import produit une vue d'ensemble des sites puis une page par site, où les voisins des autres sites figurent dans un cadre « Autres sites ». Les pages sont des logigrammes ordinaires : tout reste modifiable, et un seul Ctrl+Z retire l'import.
+
 **Historique de versions** — commits, branches et fusions. Les ajouts se placent à la fin de l'historique, sur la « branche de travail ». La pastille « + » d'un commit ou d'une branche y ajoute un commit ; glissée vers une autre branche, elle fusionne la première dans la seconde. FUSAIN refuse les opérations que Mermaid rejetterait (fusion sans rien à fusionner, par exemple).
 
 **Structure de paquet** — une suite de champs, chacun d'une taille en bits ; les positions sont recalculées quand vous ajoutez, déplacez ou redimensionnez un champ.

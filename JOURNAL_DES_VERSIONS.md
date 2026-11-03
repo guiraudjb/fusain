@@ -2,6 +2,14 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.18.0 — 3 novembre 2026 — schémas de réseau importés des exports d'HPE IMC et des rapports LLDP
+
+- **Constat de départ** : dessiner à la main un réseau déjà décrit par l'outil de supervision (HPE IMC) est long et vite faux. Aucun export réel n'étant disponible, le format a été établi d'après la documentation d'IMC : champs de la gestion des liens (nœud, interface, alias, type de port VLAN et VLAN autorisés de chaque côté, débit), liste des équipements (libellé, IP, catégorie, modèle, emplacement), objets `deviceLink` de l'API REST (`leftSymbolName`, `leftIfDesc`, `bandWidth`…), colonnes usuelles des rapports de voisins LLDP / CDP.
+- **« Importer un réseau »** (rubrique Réseaux informatiques) : un fichier de liens, une liste d'équipements facultative, les colonnes reconnues d'après leur intitulé et corrigeables, des options de présentation, un bilan avant création. Résultat : schéma physique et, si les VLAN sont connus, schéma logique ; au-delà de 25 équipements d'infrastructure, vue d'ensemble des sites et une page par site. Les pages sont des logigrammes à icônes, modifiables comme les autres ; l'ajout se défait d'un seul Ctrl+Z.
+- Lecture dans le navigateur, sans bibliothèque ajoutée : CSV (séparateur cherché sur les dix premières lignes, une ligne de titre est sautée ; UTF-8, UTF-16 ou Windows-1252), classeur `.xlsx` (archive décompressée par le navigateur, XML lu sans être interprété), tableau HTML enregistré en `.xls`.
+- Nettoyage : nœuds « nom(IP) » séparés, liaison vue des deux côtés comptée une fois, liens parallèles et agrégats (BAGG, Port-channel) réunis, interfaces abrégées, débits normalisés (bit/s → 1G, 10G), VLAN en plages (« 1 to 4094 » → tous), liens en panne en pointillé, terminaux d'un même commutateur résumés. Catégorie et icône d'après la catégorie IMC, les capacités LLDP ou le nom.
+- Tests : quatre exports fictifs aux noms de colonnes documentés (`tests/reseau/` : gestion des liens en CSV et en `.xlsx`, liste des équipements, API REST, voisins LLDP), grand réseau multi-sites, valeurs (débits, VLAN, catégories, interfaces), nom d'équipement hostile ; chaque page produite est relue par l'éditeur du logigramme.
+
 ## 0.17.0 — 3 novembre 2026 — réseaux informatiques : pictogrammes, icônes et modèles
 
 - **Constat de départ** : un schéma d'architecture trouvé ailleurs (icônes `logos:` et `carbon:`, jeux Iconify chargés en ligne) affichait des points d'interrogation. FUSAIN ne charge que ses jeux embarqués ; le guide l'explique désormais et indique par quoi remplacer ces icônes.

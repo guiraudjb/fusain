@@ -391,3 +391,96 @@ test('diapositive : icône d\'un élément et bloc icône, sans confusion avec u
     editeur.renommer(libre, 'b:1', '[illus:serveur]');
     assert.deepEqual(editeur.analyser(editeur.ecrire(libre)).blocs.map((b) => [b.t, b.texte]), [['icone', 'dsfr:flag-line'], ['p', '[illus:serveur]']]);
 });
+
+// ---------- Import d'un réseau (exports IMC, API, LLDP fictifs : tests/reseau/) ----------
+import * as reseau from '../js/reseau.js';
+import { readFileSync as lireFichierReseau } from 'node:fs';
+import { fileURLToPath as cheminReseau } from 'node:url';
+
+const exportReseau = async (nom, champs) => reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL(`./reseau/${nom}`, import.meta.url))))), champs);
+const relireToutes = (pages) => {
+    for (const p of pages) {
+        const m = logigramme.analyser(p.code);
+        assert.equal(logigramme.ecrire(m), p.code, `page instable : ${p.nom}`);
+    }
+};
+
+test('réseau : export « Gestion des liens » d\'IMC avec la liste des équipements', async () => {
+    const liens = await exportReseau('imc-liens.csv', reseau.CHAMPS_LIENS);
+    assert.equal(liens.association.source, 'Left Node');
+    assert.equal(liens.association.vlansCible, 'Right Interface Allowed VLAN');
+    assert.equal(liens.association.debit, 'Link Speed(bps)');
+    const equipements = await exportReseau('imc-equipements.csv', reseau.CHAMPS_EQUIPEMENTS);
+    const graphe = reseau.analyserReseau(liens, equipements);
+    const cat = Object.fromEntries(graphe.noeuds.map((x) => [x.nom, x.categorie]));
+    assert.deepEqual([cat['FW-SIEGE'], cat['RT-SIEGE'], cat['CORE-SIEGE'], cat['SW-SIEGE-1'], cat['SRV-FICHIERS'], cat['AP-SIEGE-1']],
+        ['pare-feu', 'routeur', 'commutateur-l3', 'commutateur', 'serveur', 'wifi']);
+    assert.ok(graphe.avecVlans);
+    const { pages, mode } = reseau.produirePages(graphe, { jeu: 'picto' });
+    assert.equal(mode, 'lieu');
+    assert.deepEqual(pages.map((p) => p.nom), ['Réseau physique', 'Réseau logique (VLAN)']);
+    const [physique, logique] = pages.map((p) => p.code);
+    assert.match(physique, /subgraph \w+ \["Agence de Lyon"\]/);
+    assert.match(physique, /icon: "picto:pare-feu", label: "FW-SIEGE"/);
+    assert.match(physique, /e_CORE_SIEGE ===\|"BAGG1 – BAGG1 · 2 liens × 10G"\| e_SW_SIEGE_1/);
+    assert.match(physique, /label: "2 bornes Wi-Fi"/);
+    assert.match(physique, /e_SW_SIEGE_2 -\.-\|/, 'lien en panne en pointillé');
+    assert.match(logique, /"trunk : VLAN 1, 10, 20, 30"/);
+    assert.doesNotMatch(logique, /AP-SIEGE/);
+    relireToutes(pages);
+    // Le même tableau enregistré en .xlsx donne le même schéma
+    const xlsx = await exportReseau('imc-liens.xlsx', reseau.CHAMPS_LIENS);
+    assert.deepEqual(reseau.produirePages(reseau.analyserReseau(xlsx, equipements), { jeu: 'picto' }).pages, pages);
+});
+
+test('réseau : liens de l\'API REST d\'IMC et rapport de voisins LLDP', async () => {
+    const api = reseau.analyserReseau(await exportReseau('imc-api.csv', reseau.CHAMPS_LIENS));
+    assert.deepEqual(api.bilan, { lignes: 4, ignorees: 0, doublons: 1 });
+    const [page] = reseau.produirePages(api).pages;
+    assert.match(page.code, /e_core_a ---\|"XGE1\/0\/49 – XGE1\/0\/51 · 10G"\| e_acc_a1/);
+    const lldp = reseau.analyserReseau(await exportReseau('lldp-voisins.csv', reseau.CHAMPS_LIENS));
+    const cat = Object.fromEntries(lldp.noeuds.map((x) => [x.nom, x.categorie]));
+    assert.deepEqual([cat['CORE-1'], cat['SW-ETAGE-1'], cat.SEP001122334455, cat['borne-etage1']], ['commutateur-l3', 'commutateur', 'telephone', 'wifi']);
+    const pages = reseau.produirePages(lldp, { resumer: true }).pages;
+    assert.equal(pages.length, 1);
+    assert.match(pages[0].code, /icon: "illus:telephone-ip", label: "3 téléphones IP"/);
+    assert.match(reseau.produirePages(lldp, { resumer: false }).pages[0].code, /label: "SEP001122334466"/);
+    relireToutes(pages);
+});
+
+test('réseau : grand réseau multi-sites → vue d\'ensemble et une page par site', () => {
+    const lignes = [];
+    for (const site of ['PAR', 'LYO', 'MRS']) {
+        lignes.push({ a: `${site}-RT-1`, pa: 'GE0/0', b: 'WAN-CORE', pb: `GE0/${site.length}` });
+        for (let i = 1; i <= 12; i += 1) lignes.push({ a: `${site}-RT-1`, pa: `GE1/0/${i}`, b: `${site}-SW-${i}`, pb: 'GE1/0/52' });
+    }
+    const t = { colonnes: ['a', 'pa', 'b', 'pb'], lignes, association: { source: 'a', portSource: 'pa', cible: 'b', portCible: 'pb' } };
+    const graphe = reseau.analyserReseau(t);
+    const { pages, mode } = reseau.produirePages(graphe);
+    assert.equal(mode, 'prefixe');
+    assert.deepEqual(pages.map((p) => p.nom), ['Réseau : vue d\'ensemble', 'Réseau : PAR', 'Réseau : Sans groupe', 'Réseau : LYO', 'Réseau : MRS']);
+    assert.match(pages[0].code, /"PAR \(13 équipements\)"/);
+    assert.match(pages[1].code, /subgraph \w+ \["Autres sites"\]/);
+    relireToutes(pages);
+});
+
+test('réseau : lecture des valeurs (nom et IP, interfaces, débits, VLAN, catégories)', () => {
+    assert.deepEqual(reseau.nomEtIp('SW-01(10.0.0.1)'), { nom: 'SW-01', ip: '10.0.0.1' });
+    assert.deepEqual(reseau.nomEtIp(' SW 01 [10.0.0.1/24] '), { nom: 'SW 01', ip: '10.0.0.1' });
+    assert.equal(reseau.abregerInterface('Ten-GigabitEthernet1/0/49 Interface'), 'XGE1/0/49');
+    assert.equal(reseau.abregerInterface('Port-channel12'), 'Po12');
+    assert.deepEqual(['1000000000', '100000000', '10 Gbps', '1000', '2.5G', 'auto'].map(reseau.debitLisible), ['1G', '100M', '10G', '1G', '2.5G', 'auto']);
+    assert.equal(reseau.ecrireVlans(reseau.lireVlans('1 to 4094')), 'tous');
+    assert.equal(reseau.ecrireVlans(reseau.lireVlans('10,11,12, 20 30-31')), '10-12, 20, 30, 31');
+    assert.deepEqual(['Routers', 'Switches', 'Bridge, Router', 'Bridge, Telephone', 'WLAN Access Point', 'Security', 'Voice', 'Desktops', 'Servers', 'B, R'].map((c) => reseau.categorieDe(c)),
+        ['routeur', 'commutateur', 'commutateur-l3', 'telephone', 'wifi', 'pare-feu', 'telephone', 'poste', 'serveur', 'commutateur-l3']);
+    // Un nom hostile reste du texte : identifiants nettoyés, guillemets échappés
+    const t = { colonnes: ['a', 'b'], lignes: [{ a: 'end', b: 'x"]; click x call alert(1) %%' }], association: { source: 'a', cible: 'b' } };
+    const code = reseau.produirePages(reseau.analyserReseau(t)).pages[0].code;
+    assert.doesNotMatch(code, /^\s*click/m);
+    assert.equal(logigramme.ecrire(logigramme.analyser(code)), code);
+});
+
+test('réseau : fichier Excel 97-2003 refusé avec un conseil', async () => {
+    await assert.rejects(reseau.lireEnregistrements(new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0, 0, 0, 0])), /\.xlsx ou en CSV/);
+});

@@ -143,6 +143,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-modele:hover { background: var(--background-alt-blue-france); }
 .fusain-modele__nom { display: block; font-weight: 700; font-size: .875rem; }
 .fusain-modele .fr-badge { margin-top: .25rem; }
+.fusain-import-reseau__colonnes { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0 1rem; }
+.fusain-import-reseau details summary { cursor: pointer; font-size: .875rem; }
 
 .fusain-glisser { outline: 4px dashed #0a76f6; outline-offset: -8px; }
 .fusain-hors-ecran { position: absolute; left: -100000px; top: 0; pointer-events: none; }

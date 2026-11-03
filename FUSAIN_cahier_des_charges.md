@@ -685,7 +685,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 3 novembre 2026 (version 0.17.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 3 novembre 2026 (version 0.18.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -697,7 +697,7 @@ FUSAIN/
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Icônes | Depuis la 0.12.0, le même menu d'icônes sert aux étapes du logigramme et aux diapositives de texte. Schémas d'architecture : les six icônes de Mermaid et les 1 038 icônes du DSFR, embarquées dans un fichier dérivé chargé à la demande, et, depuis la 0.11.0, des icônes illustrées en couleur (celles de SimpleCarto et celles générées pour FUSAIN avec Krea 2), avec fenêtre de choix commune. Depuis la 0.17.0, un troisième jeu : 54 pictogrammes au trait, en noir et blanc, dessinés pour FUSAIN (réseau, serveurs, postes, sécurité, services), décrits par des formes simples et des nombres vérifiés avant tout dessin, recolorés dans les diapositives et les cartes. Les icônes illustrées sont des images : FUSAIN les pose lui-même dans le schéma après l'assainissement, à partir de ses seuls fichiers embarqués |
 | Cartes | Depuis la 0.14.0, cartes thématiques au moteur de SimpleCarto : huit échelles du monde à la commune, import CSV avec calculs, palettes, étiquettes, légende, fonds IGN, épingles, pictogrammes et annotations glissés à la souris ; fonds communaux lus à la demande et conservés hors ligne |
-| Modèles | Modèles de schémas (dont, depuis la 0.17.0, quatre modèles de réseaux informatiques : physique, logique en pictogrammes ou illustré, interconnexion de sites), 13 de diapositives et 5 de cartes ; répartis en sept rubriques, tous éditables visuellement ; page vierge |
+| Modèles | Modèles de schémas (dont, depuis la 0.17.0, quatre modèles de réseaux informatiques : physique, logique en pictogrammes ou illustré, interconnexion de sites), 13 de diapositives et 5 de cartes ; répartis en sept rubriques, tous éditables visuellement ; page vierge. Depuis la 0.18.0, import d'un réseau à partir des exports d'HPE IMC (gestion des liens, liste des équipements, API REST) ou d'un rapport LLDP / CDP, en CSV ou Excel : schémas physique et logique (VLAN), une page par site pour les grands réseaux |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, import de code Mermaid, brouillon local, annuler / rétablir |
 | Sécurité | Politique de sécurité de contenu (avec les écarts du §7.1), Trusted Types, analyse statique automatisée, Mermaid en mode strict, filtrage des directives, assainissement du SVG par DOMPurify, échappement des libellés, validation des fichiers, intégrité (SRI) |

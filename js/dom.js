@@ -68,7 +68,19 @@ export function champTexte(libelle, valeur, surChangement, { multiligne = false,
 export function champSelect(libelle, options, valeur, surChangement, attrs = {}) {
     const controle = h('select', { class: 'fr-select', ...attrs },
         options.map(([v, nom]) => h('option', { value: v, selected: v === valeur }, nom)));
-    controle.addEventListener('change', () => surChangement(controle.value));
+    // Au clavier, chaque lettre tapée change la valeur : l'application attend la fin de la frappe (recherche par les
+    // premières lettres, « Occ » pour Occitanie), sinon le panneau reconstruit à la première lettre perdrait la suite
+    let clavier = false;
+    let attente = null;
+    const valider = () => { clearTimeout(attente); attente = null; surChangement(controle.value); };
+    controle.addEventListener('keydown', (e) => { clavier = e.key.length === 1 || e.key.startsWith('Arrow') || ['Home', 'End', 'PageUp', 'PageDown'].includes(e.key); if (e.key === 'Enter' && attente) valider(); });
+    controle.addEventListener('pointerdown', () => { clavier = false; });
+    controle.addEventListener('change', () => {
+        if (!clavier) { valider(); return; }
+        clearTimeout(attente);
+        attente = setTimeout(valider, 700);
+    });
+    controle.addEventListener('blur', () => { if (attente) valider(); });
     return champ(libelle, controle);
 }
 

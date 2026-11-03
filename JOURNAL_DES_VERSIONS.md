@@ -2,6 +2,16 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.21.2 — 3 novembre 2026 — cartes : données relues au changement de zone, bouton « Actualiser les données »
+
+- **Constat** : sur une carte de région remplie par import CSV, changer de région laissait la carte grise, et le changement de palette semblait sans effet. L'import ne garde que les territoires de la carte affichée. Après le changement, aucune valeur ne concernait la nouvelle région, et rien ne le signalait.
+- **Fichier gardé en mémoire** : le dernier fichier importé dans chaque page est gardé pendant la session (cinq pages au plus), avec ses réglages (colonnes, calcul). Quand la zone ou l'échelle change, il est relu pour la nouvelle carte une fois celle-ci dessinée. Un message indique le nombre de territoires renseignés, et Ctrl+Z revient en arrière.
+- **« Actualiser les données »** : ce bouton relit le fichier à la demande, par exemple après des valeurs corrigées à la main.
+- **Avertissement** : quand des valeurs concernent des territoires absents de la carte, le bloc Données l'indique, par exemple « 12 territoires, 0 sur la carte ». Il explique pourquoi la carte reste grise et propose de réimporter ou d'effacer.
+- **Listes déroulantes au clavier** : taper les premières lettres (« Occ ») changeait la valeur à chaque lettre, et chaque changement reconstruisait le panneau. La recherche repartait de zéro (Occitanie, puis Centre-Val de Loire, puis Corse), et le focus pouvait sauter sur un autre champ. La valeur est désormais appliquée à la fin de la frappe (0,7 s, Entrée ou sortie du champ). Après la reconstruction, le focus revient au champ de même libellé.
+- Icône `refresh-line` du DSFR ajoutée aux icônes embarquées.
+- Recette : changement de zone d'un EPCI après import (Lyon → Grand Paris → Lyon), données relues à chaque fois.
+
 ## 0.21.1 — 3 novembre 2026 — message d'erreur et zoom, ligne précédente contrôlée
 
 - **Zoom** : le message d'erreur faisait partie de la zone zoomée. Au premier zoom avant ou arrière, la vue se recentrait sur la feuille et le message sortait de l'écran. Il est désormais posé au-dessus de la scène, hors de la zone qui défile. Il reste visible à tout niveau de zoom ; sa hauteur est limitée à un peu plus de la moitié de la vue, et il défile s'il est plus long. La feuille est redimensionnée selon la place qu'il laisse.

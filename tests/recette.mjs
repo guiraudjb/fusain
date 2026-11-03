@@ -333,6 +333,16 @@ await p.selectOption('#imp-col1', 'habitants'); await p.selectOption('#imp-texte
 await p.click('#fusain-modale-import-carte .fr-modal__footer button'); await carteStable();
 c = await lireCode();
 ok('carte : import CSV limité aux territoires représentés', /- 69123 \| 500000 \| Lyon/.test(c) && /- 69266 \| 150000/.test(c) && !/75056/.test(c), c.split('\n').filter((l) => l.startsWith('- ')).join(' ; '));
+// Zone changée après l'import : le même fichier est relu pour la nouvelle carte, puis pour l'ancienne
+{ const epci = '#fusain-proprietes .fusain-champ:has(label:text-is("EPCI")) select';
+  await p.selectOption(epci, '200054781'); await carteStable();
+  await p.waitForTimeout(1500); await carteStable();
+  const paris = await lireCode();
+  ok('carte : zone changée, données relues depuis le fichier importé', /zone: 200054781/.test(paris) && /- 75056 \| 2100000/.test(paris) && !/69123/.test(paris), paris.split('\n').filter((l) => /^(zone|- )/.test(l)).join(' ; '));
+  ok('carte : bouton « Actualiser les données »', await p.locator('#fusain-proprietes button:has-text("Actualiser les données")').count() === 1);
+  await p.selectOption(epci, '200046977'); await carteStable(); await p.waitForTimeout(1500); await carteStable();
+  const lyon = await lireCode();
+  ok('carte : retour à la première zone, données relues', /- 69123 \| 500000 \| Lyon/.test(lyon) && !/75056/.test(lyon), lyon.split('\n').filter((l) => l.startsWith('- ')).join(' ; ')); }
 await p.check('#fusain-proprietes label:text-is("Cours d\'eau")', { force: true }); await carteStable();
 await p.check('#fusain-proprietes label:text-is("Relief (estompage IGN)")', { force: true }); await carteStable();
 ok('carte : relief et cours d\'eau', await p.locator('#fusain-feuille .fusain-carte image').count() === 1 && await p.locator('#fusain-feuille .fusain-carte path[stroke="#5b8dd6"]').count() === 1);

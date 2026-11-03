@@ -664,14 +664,20 @@ function blocDocument() {
 }
 
 function afficherPanneau() {
-    // Le panneau est reconstruit à chaque changement : le champ actif est retrouvé par son rang
+    // Le panneau est reconstruit à chaque changement : le champ actif est retrouvé par son libellé (son rang parmi les
+    // champs de même libellé), à défaut par son rang. Un bloc qui apparaît ou disparaît au-dessus ne déplace plus le focus.
     const focusables = 'input, select, textarea, button';
-    const rang = [...zones.panneau.querySelectorAll(focusables)].indexOf(document.activeElement);
+    const nomChamp = (el) => (el.labels?.[0]?.textContent || el.textContent || el.title || '').trim();
+    const actif = document.activeElement;
+    const avant = [...zones.panneau.querySelectorAll(focusables)];
+    const rang = avant.indexOf(actif);
+    const nom = rang >= 0 ? nomChamp(actif) : '';
+    const rangNom = rang >= 0 ? avant.filter((el) => el.tagName === actif.tagName && nomChamp(el) === nom).indexOf(actif) : -1;
     const defilement = zones.panneau.scrollTop;
     const blocs = [];
     if (ui.mode === 'visuel') {
         if (vue.modele) {
-            blocs.push(...vue.editeur.panneau({ modele: vue.modele, selection: ui.selection, appliquer, selectionner }));
+            blocs.push(...vue.editeur.panneau({ modele: vue.modele, selection: ui.selection, appliquer, selectionner, idPage: pageCourante().id }));
         } else if (vue.vierge) {
             blocs.push(h('div', { class: 'fusain-bloc' },
                 h('h2', {}, 'Page vierge'),
@@ -694,7 +700,10 @@ function afficherPanneau() {
         const champ = $('fusain-champ-texte');
         if (champ) { champ.focus(); champ.select(); return; }
     }
-    if (rang >= 0) zones.panneau.querySelectorAll(focusables)[rang]?.focus({ preventScroll: true });
+    if (rang < 0) return;
+    const apres = [...zones.panneau.querySelectorAll(focusables)];
+    const memes = nom ? apres.filter((el) => el.tagName === actif.tagName && nomChamp(el) === nom) : [];
+    (memes[rangNom] || memes[0] || apres[rang])?.focus({ preventScroll: true });
 }
 
 // ---------- Pages ----------

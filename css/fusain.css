@@ -131,6 +131,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-couleur { width: 1.75rem; height: 1.75rem; padding: 0; border: 2px solid var(--border-default-grey); cursor: pointer; }
 .fusain-couleur[aria-pressed="true"] { outline: 3px solid #0a76f6; outline-offset: 1px; }
 .fusain-aide { font-size: .75rem; color: var(--text-mention-grey); margin: .25rem 0; }
+.fusain-carte-alerte { margin: .5rem 0; }
+.fusain-carte-alerte p { font-size: .8125rem; }
 
 /* ---------- Messages ---------- */
 .fusain-messages { position: fixed; right: 1rem; bottom: 1rem; z-index: 2000; display: flex; flex-direction: column; gap: .5rem; max-width: 26rem; }

@@ -332,7 +332,30 @@ function changerEchelle(modele, echelle) {
     if (['region-communes', 'departement'].includes(echelle) && !['region-communes', 'departement'].includes(avant)) modele.options.etiquettes = 'aucune';
 }
 
-function importer(appliquer, modele) {
+// Dernier fichier importé dans chaque page, gardé le temps de la session. L'import ne garde que les territoires de la
+// carte : quand la zone ou l'échelle change, le même fichier est relu pour la nouvelle carte (« Actualiser les données »).
+const sources = new Map(); // id de la page → { nom, lignes, reglage, cle }
+const cleCarte = (m) => `${m.echelle}|${m.zone}`;
+function retenirSource(idPage, source) {
+    if (!idPage) return;
+    sources.delete(idPage);
+    sources.set(idPage, source);
+    if (sources.size > 5) sources.delete(sources.keys().next().value);
+}
+// Données du fichier pour la carte : regroupées à son échelle, réduites à ses territoires quand ils sont connus
+function donneesDe(source, echelle, representes) {
+    const toutes = agreger(source.lignes, echelle, source.reglage);
+    return representes ? toutes.filter((d) => representes.has(d.code)) : toutes;
+}
+function actualiser(appliquer, modele, source, representes, { auto = false } = {}) {
+    source.cle = cleCarte(modele);
+    const donnees = donneesDe(source, modele.echelle, representes);
+    appliquer((m) => { m.donnees = donnees; });
+    if (donnees.length) message(auto ? 'Données actualisées pour la nouvelle carte' : 'Données actualisées', `${donnees.length} territoire(s) renseigné(s) depuis ${source.nom}.`, 'success', 5000);
+    else message('Aucune donnée pour cette carte', `Aucun code de ${source.nom} ne correspond à un territoire de cette carte.`, 'warning', 7000);
+}
+
+function importer(appliquer, modele, idPage) {
     const { echelle } = modele;
     const representes = territoiresRepresentes(ecrire(modele));
     const entree = h('input', { type: 'file', accept: '.csv,.txt,text/csv', class: 'fr-hidden' });
@@ -342,14 +365,15 @@ function importer(appliquer, modele) {
         if (fichier.size > 20 * 1024 * 1024) { message('Fichier trop volumineux', 'Le fichier CSV dépasse 20 Mo.', 'error'); return; }
         const { colonnes, lignes } = lireCsv(await fichier.text());
         if (!colonnes.length || !lignes.length) { message('Fichier illisible', 'Aucune ligne de données n\'a été trouvée dans ce fichier.', 'error'); return; }
-        dialogueImport(appliquer, echelle, representes, fichier.name, colonnes, lignes);
+        dialogueImport(appliquer, modele, idPage, representes, fichier.name, colonnes, lignes);
     });
     document.body.append(entree);
     entree.click();
     entree.remove();
 }
 
-function dialogueImport(appliquer, echelle, representes, nom, colonnes, lignes) {
+function dialogueImport(appliquer, modele, idPage, representes, nom, colonnes, lignes) {
+    const { echelle } = modele;
     const choix = (libelle, id, options, valeur) => champSelect(libelle, options, valeur, () => {}, { id });
     const avecAucune = [['', '— aucune —'], ...colonnes.map((c) => [c, c])];
     const toutes = colonnes.map((c) => [c, c]);
@@ -373,6 +397,7 @@ function dialogueImport(appliquer, echelle, representes, nom, colonnes, lignes) 
         const donnees = representes ? toutes.filter((d) => representes.has(d.code)) : toutes;
         if (!donnees.length) { message('Aucune donnée', 'Aucun code de la colonne choisie ne correspond à un territoire de la carte.', 'error'); return; }
         fermerModale(dialogue);
+        retenirSource(idPage, { nom, lignes, reglage, cle: cleCarte(modele) });
         appliquer((m) => { m.donnees = donnees; });
         const ecartees = toutes.length - donnees.length;
         message('Données importées', `${donnees.length} territoire(s) renseigné(s)${ecartees ? ` ; ${ecartees} code(s) hors de la carte ignoré(s)` : ''}.`, 'success', 6000);
@@ -495,7 +520,7 @@ const nombreOption = (modele, appliquer, cle, libelle, pas = 1) => {
 };
 
 export function panneau(ctx) {
-    const { modele, selection, appliquer, selectionner } = ctx;
+    const { modele, selection, appliquer, selectionner, idPage } = ctx;
     const blocs = [];
     const metropole = !estMonde(modele.echelle) && !(modele.zone && /^0\d$|^97/.test(modele.zone));
 
@@ -551,11 +576,27 @@ export function panneau(ctx) {
             actionsListe({ supprimer: () => appliquer((m) => supprimer(m, `a:${n}`), () => null) })));
     }
 
+    // Données : celles qui tombent hors de la carte (zone changée après un import) laissent la carte grise
+    const source = sources.get(idPage);
+    const representes = territoiresRepresentes(ecrire(modele));
+    const n = modele.donnees.length;
+    const presents = representes ? modele.donnees.filter((d) => representes.has(d.code)).length : n;
+    // Zone ou échelle changée depuis l'import : le même fichier est relu pour la nouvelle carte, une fois dessinée
+    if (source && representes && source.cle !== cleCarte(modele)) {
+        source.cle = cleCarte(modele);
+        queueMicrotask(() => actualiser(appliquer, modele, source, representes, { auto: true }));
+    }
     blocs.push(h('div', { class: 'fusain-bloc' },
-        h('h2', {}, `Données (${modele.donnees.length} territoire${modele.donnees.length > 1 ? 's' : ''})`),
+        h('h2', {}, `Données (${n} territoire${n > 1 ? 's' : ''}${presents < n ? `, ${presents} sur la carte` : ''})`),
+        presents < n ? h('div', { class: 'fr-alert fr-alert--warning fr-alert--sm fusain-carte-alerte' },
+            h('p', {}, presents
+                ? `${n - presents} valeur(s) concernent des territoires absents de cette carte.`
+                : `Aucune des ${n} valeurs ne concerne un territoire de cette carte : elle reste grise et la palette n'a rien à colorer.`,
+            source ? ` « Actualiser les données » relit ${source.nom} pour cette carte.` : ' Importez le fichier pour cette zone, ou effacez les données.')) : null,
         h('div', { class: 'fusain-actions' },
-            bouton('Importer un fichier CSV…', { icone: 'upload-line', variante: 'secondary', onclick: () => importer(appliquer, modele) }),
-            modele.donnees.length ? bouton('Effacer les données', { icone: 'delete-bin-line', onclick: () => appliquer((m) => { m.donnees = []; }, () => null) }) : null),
+            source ? bouton('Actualiser les données', { icone: 'refresh-line', variante: presents < n ? 'primary' : 'secondary', titre: `Relire ${source.nom} pour cette carte`, onclick: () => actualiser(appliquer, modele, source, representes) }) : null,
+            bouton('Importer un fichier CSV…', { icone: 'upload-line', variante: 'secondary', onclick: () => importer(appliquer, modele, idPage) }),
+            n ? bouton('Effacer les données', { icone: 'delete-bin-line', onclick: () => appliquer((m) => { m.donnees = []; }, () => null) }) : null),
         h('p', { class: 'fusain-aide' }, 'Cliquez sur un territoire de la carte pour saisir ou corriger sa valeur. Les codes attendus sont ceux de l\'INSEE (départements, communes), le SIREN des EPCI ou le code ISO à trois lettres des pays.')));
 
     const palette = option(modele, 'palette');

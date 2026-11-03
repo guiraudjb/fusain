@@ -280,6 +280,13 @@ Un bouton « Effacer les données locales » est disponible dans la modale « À
 - Métadonnées : titre et date ; aucune donnée d'identification du poste ou de l'utilisateur.
 - Repli : si un type de schéma ne peut pas être converti en vectoriel fidèlement, la page concernée est insérée en image à 300 ppp et l'utilisateur en est informé.
 
+**Visio (.vsdx)** — depuis la 0.20.0
+
+- Un seul fichier, une page Visio par page FUSAIN, au même format ; lisible par Visio 2013 et suivants et par LibreOffice Draw.
+- Formes, traits et textes modifiables ; chaque nœud forme un groupe ; images incorporées.
+- Liaisons des schémas à nœuds et liens (logigramme, états, classes, entités-relations, architecture) en connecteurs dynamiques collés aux formes.
+- Repli : page insérée en image quand son contenu ne peut pas être converti, l'utilisateur en est informé.
+
 **PNG**
 
 - Une image par page, à la résolution choisie : 150, 300 (défaut) ou 600 ppp.
@@ -685,7 +692,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 3 novembre 2026 (version 0.19.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 3 novembre 2026 (version 0.20.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 
@@ -695,6 +702,7 @@ FUSAIN/
 | Pages | Document multi-pages, pages vierges, diapositives de texte (13 mises en page reprises des diapositives libres de VALOR, dessinées en SVG aux mêmes mesures ; texte seul, sans image), A4 / A3, portrait / paysage, marges, titre, sous-titre, pied de page avec jetons, description accessible reprise dans le SVG, quatre modes d'ajustement, alerte de lisibilité |
 | Édition visuelle | Logigramme, diagramme de séquence, carte mentale, Gantt, camembert, et depuis la 0.2.0 frise chronologique, tableau Kanban et matrice à quadrants (points déplaçables à la souris), depuis la 0.4.0 diagramme d'états, depuis la 0.6.0 parcours usager, graphique (tableau de données), diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions et structure de paquet, depuis la 0.7.0 diagramme C4 (contexte, conteneurs, composants), diagramme de blocs, diagramme d'exigences et diagramme radar, depuis la 0.8.0 carte proportionnelle (treemap) et séquence ZenUML, soit vingt-trois types : sélection, renommage sur place, ajout et liaison par la poignée, suppression, panneau de propriétés, plan du schéma, navigation au clavier |
 | Navigation | Depuis la 0.19.0 : zoom à la molette sous le pointeur (10 à 800 %), pincement, déplacement de la vue au glisser (souris, stylet, doigt ; Espace + glisser, bouton du milieu), clic molette à 100 %, Ctrl++ / Ctrl+− / Ctrl+0 / Ctrl+1, menu des niveaux, toile de travail autour de la feuille |
+| Export Visio | Depuis la 0.20.0 : fichier `.vsdx` multi-pages (Visio 2013 et suivants, LibreOffice Draw), formes et textes modifiables, nœuds groupés, liaisons en connecteurs collés, icônes illustrées incorporées ; écriture de l'archive sans bibliothèque |
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif |
 | Icônes | Depuis la 0.12.0, le même menu d'icônes sert aux étapes du logigramme et aux diapositives de texte. Schémas d'architecture : les six icônes de Mermaid et les 1 038 icônes du DSFR, embarquées dans un fichier dérivé chargé à la demande, et, depuis la 0.11.0, des icônes illustrées en couleur (celles de SimpleCarto et celles générées pour FUSAIN avec Krea 2), avec fenêtre de choix commune. Depuis la 0.17.0, un troisième jeu : 54 pictogrammes au trait, en noir et blanc, dessinés pour FUSAIN (réseau, serveurs, postes, sécurité, services), décrits par des formes simples et des nombres vérifiés avant tout dessin, recolorés dans les diapositives et les cartes. Les icônes illustrées sont des images : FUSAIN les pose lui-même dans le schéma après l'assainissement, à partir de ses seuls fichiers embarqués |
 | Cartes | Depuis la 0.14.0, cartes thématiques au moteur de SimpleCarto : huit échelles du monde à la commune, import CSV avec calculs, palettes, étiquettes, légende, fonds IGN, épingles, pictogrammes et annotations glissés à la souris ; fonds communaux lus à la demande et conservés hors ligne |

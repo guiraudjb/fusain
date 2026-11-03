@@ -157,7 +157,18 @@ Pour quitter la zone de code au clavier : Échap, puis Tab.
 
 - **Enregistrer** produit un fichier `.fusain.json` contenant tout le document. C'est votre sauvegarde : conservez-le.
 - **Ouvrir** recharge un tel fichier (ou glissez-le sur la fenêtre). Un fichier `.mmd` ou `.txt` contenant du code Mermaid est ajouté comme nouvelle page.
-- **Exporter** : PDF (vectoriel, une page par page du document), PNG (150, 300 ou 600 ppp, fond transparent possible, schéma seul possible) ou SVG.
+- **Exporter** : PDF (vectoriel, une page par page du document), PNG (150, 300 ou 600 ppp, fond transparent possible, schéma seul possible), SVG ou Visio.
+
+### Exporter vers Microsoft Visio
+
+Le format **Visio (.vsdx, modifiable)** produit un seul fichier, lisible par Microsoft Visio 2013 et suivants, ainsi que par LibreOffice Draw. Chaque page FUSAIN y devient une page Visio, au même format et dans la même orientation.
+
+- Les formes, les traits et les textes sont des objets Visio modifiables : couleur, épaisseur, texte.
+- Une étape, un état ou un équipement devient un groupe (forme, icône, libellé) qui se déplace d'un bloc.
+- Sur les logigrammes (dont les réseaux importés), les diagrammes d'états, de classes, entités-relations et d'architecture, les liaisons deviennent des **connecteurs collés** : déplacez une forme dans Visio, ses liaisons suivent. Visio recalcule alors leur tracé selon son propre routage.
+- Les icônes illustrées sont des images incorporées ; les icônes du DSFR et les pictogrammes restent vectoriels.
+- Le texte est en police Marianne : si elle n'est pas installée sur le poste, Visio la remplace par une police voisine, et un libellé peut alors paraître un peu plus large.
+- Simplifications : les dégradés prennent leur couleur moyenne ; le relief d'un fond de carte n'est pas repris ; une page dont le contenu ne peut pas être converti en formes est insérée en image, et le message de fin d'export l'indique.
 
 Le brouillon conservé automatiquement par le navigateur est une commodité, pas une sauvegarde : il disparaît si vous effacez les données du navigateur.
 

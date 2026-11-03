@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.20.0 — 3 novembre 2026 — export Microsoft Visio (.vsdx)
+
+- **Constat de départ** : un schéma de FUSAIN, en particulier un réseau importé d'IMC, devait pouvoir être repris dans Microsoft Visio. Un SVG inséré dans Visio n'y devient qu'une image ou un dessin dégroupé, sans liaisons.
+- **Nouveau format d'export « Visio (.vsdx, modifiable) »** : un fichier, une page Visio par page FUSAIN (format et orientation conservés). Le SVG de chaque page est préparé comme pour le PDF (styles calculés, position exacte de chaque fragment de texte), puis chaque élément est ramené aux coordonnées de la page et traduit en forme Visio : tracés (lignes, courbes et arcs aplatis à 0,06 mm près, formules qui suivent un redimensionnement), remplissage, trait, pointillés, transparences, flèches, textes en Marianne, images incorporées.
+- **Nœuds et connecteurs** : chaque étape, état, classe ou équipement repéré par l'éditeur visuel devient un groupe (forme, icône, libellé). Les liaisons des logigrammes (réseaux importés compris), diagrammes d'états, de classes, entités-relations et d'architecture deviennent des connecteurs dynamiques collés aux groupes : une forme déplacée dans Visio entraîne ses liaisons. Le libellé d'une liaison devient le texte du connecteur.
+- **Archive ZIP sans bibliothèque** : nouveau module `zip.js` (lecture, déjà utilisée par l'import Excel, et écriture : CRC-32, compression du navigateur). Tout texte écrit dans le XML est échappé, les caractères interdits retirés.
+- Vérifications : chaque partie XML bien formée ; fichiers exportés relus par LibreOffice Draw (logigrammes, états, séquence, classes, entités, C4, architecture, réseaux physique et logique illustrés, Kanban, diapositive, carte), rendu comparé à l'écran. L'ouverture dans Microsoft Visio reste à confirmer sur un poste qui en dispose.
+- Tests : lecteur de tracés SVG (toutes commandes, relatives, arcs aux drapeaux collés, tracé tronqué), aplatissement transformé, unités et axe Y, connecteur collé, libellé hostile, paquet complet relu par le lecteur ZIP avec CRC ; recette : export Visio de tout le document (27 pages).
+
 ## 0.19.0 — 3 novembre 2026 — zoom et déplacement dans le schéma
 
 - **Constat de départ** : sur un schéma agrandi, il fallait passer par les ascenseurs pour aller voir une autre partie, et le zoom (boutons seulement) partait du coin de la feuille.

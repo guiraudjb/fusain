@@ -8,7 +8,7 @@ Hors ligne sous Windows, sans rien installer : double-cliquer `lancer-site-local
 
 - Construire un schéma à la souris ou au clavier, sans écrire de code ; le code Mermaid reste accessible et modifiable à tout moment.
 - Pages A4 ou A3, portrait ou paysage, document multi-pages.
-- Export PDF (vectoriel), PNG et SVG ; sauvegarde et restauration au format JSON.
+- Export PDF (vectoriel), PNG, SVG et Microsoft Visio (.vsdx, formes modifiables et connecteurs collés) ; sauvegarde et restauration au format JSON.
 - **Tous les traitements s'exécutent dans le navigateur** : aucun schéma ne quitte le poste. Aucun serveur applicatif, aucun compte, aucun traceur.
 - Application web progressive : installable, utilisable hors ligne.
 - Système de Design de l'État (DSFR).
@@ -22,7 +22,7 @@ Hors ligne sous Windows, sans rien installer : double-cliquer `lancer-site-local
 | Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
 | Diapositives de texte aux mises en page de la charte de l'État (titre, sommaire, intercalaire, colonnes, chiffres clés, frise, blocs, texte libre) | Disponible |
 | 24 modèles de schémas et 13 de diapositives, page vierge | Disponible |
-| Export PDF / PNG / SVG, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
+| Export PDF / PNG / SVG / Visio, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
 | Fonctionnement hors ligne | Disponible |
 | Édition visuelle du déploiement et du diagramme dynamique C4 | À venir |
 

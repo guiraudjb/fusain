@@ -221,6 +221,17 @@ await p.waitForTimeout(1500); console.log('   messages:', (await p.textContent('
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 await p.check('#exp-format-png', { force: true }); await p.check('#exp-portee-page', { force: true });
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); ok('export PNG', fs.statSync(f).size > 5000, `${f.split('/').pop()} ${fs.statSync(f).size} o`);
+// Export Visio : tout le document, archive lisible, une page Visio par page, connecteurs collés
+await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
+await p.check('#exp-format-vsdx', { force: true }); await p.check('#exp-portee-tout', { force: true });
+f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); await p.waitForTimeout(500);
+{ const { execFileSync } = await import('node:child_process');
+  const entrees = execFileSync('unzip', ['-Z1', f], { encoding: 'utf8' }).split('\n');
+  const pages = entrees.filter((e) => /^visio\/pages\/page\d+\.xml$/.test(e)).length;
+  const page1 = execFileSync('unzip', ['-p', f, 'visio/pages/page1.xml'], { encoding: 'utf8' });
+  execFileSync('unzip', ['-tq', f]);
+  ok('export Visio', f.endsWith('.vsdx') && pages === 27 && entrees.includes('[Content_Types].xml') && /<Connect /.test(page1)
+    && (await p.textContent('#fusain-messages')).includes('Export Visio terminé'), `${pages} pages, ${fs.statSync(f).size} o`); }
 // 12. restauration : fichier hostile puis fichier valide
 const hostile = JSON.parse(json); hostile.pages[0].inconnu = 1; fs.writeFileSync(OUT + '/hostile.json', JSON.stringify(hostile));
 await p.setInputFiles('#fusain-fichier', OUT + '/hostile.json'); await p.waitForTimeout(600);

@@ -3,19 +3,19 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.19.0-34f09b452e';
+const VERSION_CACHE = 'fusain-0.20.0-50a0ec1102';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./Documentation/GUIDE_IMC.md', '98650cba5e75cbbd073794cbada1f4e830593ba654c50ebeadf48e0109da64bd'],
-    ['./Documentation/GUIDE_UTILISATEUR.md', 'bdfff31e5349780542e3840cdbbedcbee8187d086cb70f2068cff470ce7ca822'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', '170221ab5e90aa9a49ace2bf9b40f149c36ac6496058e395830ac9d17050ba48'],
     ['./Documentation/exemples-reseau/LISEZ-MOI.md', 'f8968ef6a9b7a6a7c19534c4178e3be15478be8d8c7e60e4baf37eda644f94a1'],
     ['./Documentation/exemples-reseau/imc-api.csv', 'c670290ae38aac06cb952d08802d5017f65539b5f8054633dc2b81ddd6b3ac92'],
     ['./Documentation/exemples-reseau/imc-equipements.csv', '9dc4a808fda24ff18d57710e7e1b1e8a69b843ff66fcc5b3c34a9c206024108b'],
     ['./Documentation/exemples-reseau/imc-liens.csv', 'd8209c1c3595d6c24db77de8a8946d490c9ac63b0ff3c00f0164432c20556349'],
     ['./Documentation/exemples-reseau/imc-liens.xlsx', '1106fb0f63fe3555038d3b00663c16c9adfb6c22c37859c78cafc2955f5d3c85'],
     ['./Documentation/exemples-reseau/lldp-voisins.csv', 'e268acb050dce66e0c719edf058d580174a8cf5a7e3ffb753394b0033029ac3c'],
-    ['./FUSAIN_cahier_des_charges.md', 'a3f515623e85accc77742b365e0ed3dd7aa45bec50eeecc86b97c83df0ba44b1'],
-    ['./JOURNAL_DES_VERSIONS.md', '69c19b84be1de68600d99ec7ea0e9371a720a8ab2e71b068604465793865a3d1'],
+    ['./FUSAIN_cahier_des_charges.md', '79edd54fc1636df7198bc694aa3027ca4f52833f041b6e032a5ba50604f31ed2'],
+    ['./JOURNAL_DES_VERSIONS.md', '97ba76f578b3d13f8bece56f707c354150842f7c414fde3c8a4888ca6eb7c5ea'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'c03ee569bf854a8480a2191915cee53c8e28032d4592ce478e23e417bed0ccec'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -48,9 +48,9 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '8ab4d51666a1735b0d0dd926760dd8b18a05efe0cafcfc173428904ed2d2b13b'],
-    ['./index.html', '8ab4d51666a1735b0d0dd926760dd8b18a05efe0cafcfc173428904ed2d2b13b'],
-    ['./js/app.js', 'bb66d3c35c40aa78c072fafde1dbad9dad05e1340827c78b5dd8c6ccc44e445c'],
+    ['./', '15d800327046b77935e0cc074c508d4045dbfc8c79da0ba19ad08a42679c7f97'],
+    ['./index.html', '15d800327046b77935e0cc074c508d4045dbfc8c79da0ba19ad08a42679c7f97'],
+    ['./js/app.js', 'bf46d4c3cb29e96fd7e23f6c9512321e0d3ad7650e32b32c75e3e88529027768'],
     ['./js/brouillon.js', '185d325849e3485aa8a62f91b66f3e504a5e4f34689d66fac892fb512b0a53f3'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
@@ -86,7 +86,7 @@ const FICHIERS = [
     ['./js/diapo.js', '40647c88946327a492c76a8cce03bfe01e2711fe7d052ff1e9eb865cc077bd14'],
     ['./js/dom.js', '5fcda744fa2c0fb3542c7f52b2c8c2274f90cf1e9645a9d3364d27900b4fd01c'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
-    ['./js/export.js', '8b932df21aa83c7822769968dc28404e3857e412ca710c03908dab69bc64bc04'],
+    ['./js/export.js', '8ad12dc2e55e713406dce91bf4aef3af41169d34718c6f084acc428dea02a186'],
     ['./js/fichier.js', '9f8be26e831b0338419583703e5a2b1b9c839195bbf238e672b0fc8a3f4fb0f6'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
     ['./js/geo.js', '2410705abae5ad8ac66487d8f395b0f42f41d4e70f523bb969698d07f09d9c93'],
@@ -98,9 +98,12 @@ const FICHIERS = [
     ['./js/navigation.js', '8b8286de11b6151d6ff2762e1c938bd8e6bfeaf5eb16b32f1303a54325d7f711'],
     ['./js/pictogrammes.js', '731dda68be9f6259cfb0ae23b65eb63019fd67b018030ddb431457bc11625414'],
     ['./js/rendu.js', 'fc8423a4eedb3e2e928d2165c4ac7f7f28505bb73dc08f82217c6e1994afc54c'],
-    ['./js/reseau.js', 'a0230bde6d144a67fedbcc22f9f9323f8b7d61a0043e425e3ed3a54a6303eb34'],
+    ['./js/reseau.js', '4155bc3c7690dd5adc5bc1cfd87d4527eca79c24f6603451fa574158236bb5b0'],
     ['./js/securite.js', 'a952d319224de7e64135904aa87de343e8da34af080804ddccab9dbc3421a677'],
-    ['./js/version.js', '683c667658911caa5a301296e6976c62524130ba030a2197c3e3639a4bfc0de1'],
+    ['./js/version.js', 'cfeb784add02526a39fa8aec5b1964ec2d10606240b05760dc910ca1fced5c80'],
+    ['./js/visio-format.js', 'eb2563e6e5edb7c9a19ccb71f951bdf5d7836ca588a1142686f6567071571153'],
+    ['./js/visio.js', 'e5fed842ba2aade4f0197d7f191e4fe583a3d1e2d6a4894756fca620f331b56b'],
+    ['./js/zip.js', '0d1cb72c0d08d321a1ec50f7e3f1081ffcd63d36a58c962ee65ed81940b04621'],
     ['./libs/d3-v7.9.0/LICENSE', '3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4'],
     ['./libs/d3-v7.9.0/d3.min.js', 'f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539'],
     ['./libs/dompurify-v3.4.17/LICENSE', 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30'],
@@ -218,7 +221,7 @@ const FICHIERS = [
     ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
     ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', 'fecf3152ec39a90801fcac40c49f96a3c20bc7bd9e7fa6953375814db5e87706'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '6f439e8fbe8907e4214b7fb1ce642542ed20331916ceca3eb5d9fa5de319d27e'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 // Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement

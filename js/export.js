@@ -7,7 +7,7 @@ const NS_SVG = 'http://www.w3.org/2000/svg';
 
 function deuxChiffres(n) { return String(n).padStart(2, '0'); }
 
-async function pagesComposees(doc, indices) {
+export async function pagesComposees(doc, indices) {
     const sorties = [];
     for (const i of indices) {
         const page = doc.pages[i];
@@ -31,7 +31,7 @@ async function svgAutonome(svg, largeurPx, hauteurPx) {
     return new XMLSerializer().serializeToString(clone);
 }
 
-async function svgEnCanvas(svg, largeurPx, hauteurPx, transparent) {
+export async function svgEnCanvas(svg, largeurPx, hauteurPx, transparent) {
     const chaine = await svgAutonome(svg, largeurPx, hauteurPx);
     const url = URL.createObjectURL(new Blob([chaine], { type: 'image/svg+xml;charset=utf-8' }));
     try {
@@ -48,7 +48,7 @@ async function svgEnCanvas(svg, largeurPx, hauteurPx, transparent) {
     }
 }
 
-function canvasEnBlob(canvas) {
+export function canvasEnBlob(canvas) {
     return new Promise((resoudre, rejeter) => canvas.toBlob((b) => (b ? resoudre(b) : rejeter(new Error('La conversion en image a échoué.'))), 'image/png'));
 }
 

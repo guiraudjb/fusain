@@ -520,3 +520,96 @@ test('navigation : le point visé reste sous le pointeur', () => {
     const dehors = navigation.ancrer(avant, { left: 100, top: 50, width: 800, height: 600 }, { x: 50, y: 20 });
     assert.deepEqual(dehors, { dx: -50, dy: -30 });
 });
+
+// ---------- Export Visio ----------
+import { lireTrace, aplatir, traceRectangle, echapperXml, construireVsdx, pageXml } from '../js/visio-format.js';
+import { ecrireZip, lireZip, crc32 } from '../js/zip.js';
+
+const IDENTITE = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+const proche = (a, b, e = 1e-6) => Math.abs(a - b) <= e;
+
+test('visio : lecture des tracés SVG (absolus, relatifs, H/V, Z, courbes, arcs)', () => {
+    const [a] = lireTrace('M10 10 h20 v10 H10 z');
+    assert.deepEqual(a.depart, [10, 10]);
+    assert.deepEqual(a.segments.map((s) => s.p), [[30, 10], [30, 20], [10, 20]]);
+    assert.equal(a.ferme, true);
+    // Coordonnées implicites après M : des LineTo ; relatifs enchaînés
+    const [b] = lireTrace('m0 0 10 0 0 10');
+    assert.deepEqual(b.segments.map((s) => s.p), [[10, 0], [10, 10]]);
+    // Nombres collés, exposants
+    const [c] = lireTrace('M0,0L1e1-5.5.5');
+    assert.deepEqual(c.segments.map((s) => s.p), [[10, -5.5]]);
+    assert.equal(lireTrace('M0 0').length, 0);
+    // Q et S convertis en cubiques, T reflète le point de contrôle
+    const [q] = lireTrace('M0 0Q10 10 20 0T40 0');
+    assert.equal(q.segments.length, 2);
+    assert.ok(q.segments.every((s) => s.t === 'C'));
+    assert.deepEqual(q.segments[1].p, [40, 0]);
+    // Demi-cercle par un arc aux drapeaux collés : tous les points à distance r du centre
+    const arc = lireTrace('M0 0a10 10 0 0110 10');
+    const [plat] = aplatir(arc, IDENTITE, 0.001);
+    assert.deepEqual(plat.points.at(-1), [10, 10]);
+    for (const [x, y] of plat.points) assert.ok(proche(Math.hypot(x - 0, y - 10), 10, 0.01), `point hors du cercle : ${x}, ${y}`);
+    // Tracé tronqué : la partie lisible est gardée
+    assert.equal(lireTrace('M0 0L10 10L5').length, 1);
+});
+
+test('visio : aplatissement transformé et rectangle arrondi', () => {
+    const [r] = aplatir(traceRectangle(0, 0, 10, 4), { a: 2, b: 0, c: 0, d: 2, e: 5, f: 1 });
+    assert.equal(r.ferme, true);
+    assert.deepEqual(r.points, [[5, 1], [25, 1], [25, 9], [5, 9]]);
+    const arrondi = aplatir(traceRectangle(0, 0, 10, 10, 3), IDENTITE, 0.01)[0];
+    assert.ok(arrondi.points.length > 8);
+    for (const [x, y] of arrondi.points) assert.ok(x >= -1e-9 && x <= 10 + 1e-9 && y >= -1e-9 && y <= 10 + 1e-9);
+});
+
+test('visio : échappement XML d\'un libellé hostile', () => {
+    const hostile = '</Text><Shape ID="9"/>&amp; "x"\u0001￾\uD800';
+    const e = echapperXml(hostile);
+    assert.ok(!/[<>]/.test(e));
+    assert.ok(!/[\u0000-\u0008￾\uD800]/.test(e));
+    assert.equal(e, '&lt;/Text&gt;&lt;Shape ID=&quot;9&quot;/&gt;&amp;amp; &quot;x&quot;');
+    const { xml } = pageXml([{ genre: 'texte', centre: [10, 10], largeur: 20, hauteur: 5, angle: 0, texte: hostile, police: {} }], 100, new Map());
+    assert.equal((xml.match(/<Shape /g) || []).length, 1);
+});
+
+test('visio : unités, axe Y inversé, connecteur collé', () => {
+    const carre = (x) => ({ genre: 'groupe', enfants: [{ genre: 'geo', chemins: [{ ferme: true, points: [[x, 10], [x + 25.4, 10], [x + 25.4, 35.4], [x, 35.4]] }], style: { remplissage: '#ffffff', trait: '#000000', epaisseur: 0.3 } }], texte: { centre: [x + 12.7, 22.7], largeur: 10, hauteur: 4, texte: 'Nœud', police: {} } });
+    const a = carre(0);
+    const b = carre(100);
+    const lien = { genre: 'connecteur', points: [[25.4, 22.7], [100, 22.7]], style: { trait: '#000000', epaisseur: 0.3, fin: 13 }, debut: a, fin: b, texte: null };
+    const { xml, formes, connecteurs } = pageXml([a, b, lien], 254, new Map());
+    assert.equal(formes, 5);
+    assert.equal(connecteurs, 2);
+    // Groupe a : 1 pouce de côté, centré à (0,5 ; (254 − 22,7) / 25,4) pouces
+    assert.match(xml, /<Shape ID="1" Type="Group"[^>]*><Cell N="PinX" V="0.5"\/><Cell N="PinY" V="9.106299"\/><Cell N="Width" V="1"/);
+    assert.match(xml, /<Connect FromSheet="5" FromCell="BeginX" FromPart="9" ToSheet="1" ToCell="PinX" ToPart="3"\/>/);
+    assert.match(xml, /<Connect FromSheet="5" FromCell="EndX" FromPart="12" ToSheet="3"/);
+    assert.match(xml, /_XFTRIGGER\(Sheet\.3!EventXFMod\)/);
+    assert.match(xml, /<Cell N="EndArrow" V="13"\/>/);
+});
+
+test('visio : paquet complet relu par le lecteur ZIP', async () => {
+    const pages = [
+        { nom: 'Réseau / siège', largeurMm: 297, hauteurMm: 210, formes: [{ genre: 'image', centre: [50, 50], largeur: 20, hauteur: 20, angle: 0, media: 'image1.png' }] },
+        { nom: 'Deux', largeurMm: 210, hauteurMm: 297, formes: [] },
+    ];
+    const medias = new Map([['image1.png', { octets: new Uint8Array([137, 80, 78, 71, 1, 2, 3]), type: 'png' }]]);
+    const { fichiers } = construireVsdx({ titre: 'Essai <&>', pages, medias });
+    const archive = await ecrireZip(fichiers);
+    const lire = await lireZip(archive);
+    const texte = async (nom) => new TextDecoder().decode(await lire(nom));
+    assert.match(await texte('[Content_Types].xml'), /PartName="\/visio\/pages\/page2.xml"/);
+    assert.match(await texte('visio/pages/pages.xml'), /Name="Réseau - siège"[\s\S]*PrintPageOrientation" V="2"[\s\S]*PrintPageOrientation" V="1"/);
+    assert.match(await texte('visio/pages/page1.xml'), /Type="Foreign"[\s\S]*CompressionType="PNG"><Rel r:id="rId1"\/>/);
+    assert.match(await texte('visio/pages/_rels/page1.xml.rels'), /Target="..\/media\/image1.png"/);
+    assert.match(await texte('docProps/core.xml'), /<dc:title>Essai &lt;&amp;&gt;<\/dc:title>/);
+    assert.deepEqual([...await lire('visio/media/image1.png')], [137, 80, 78, 71, 1, 2, 3]);
+    assert.equal(await lire('absent.xml'), null);
+    for (const f of fichiers) {
+        const relu = await lire(f.nom);
+        const brut = typeof f.donnees === 'string' ? new TextEncoder().encode(f.donnees) : f.donnees;
+        assert.equal(crc32(relu), crc32(brut), f.nom);
+    }
+    assert.equal(crc32(new TextEncoder().encode('123456789')), 0xcbf43926);
+});

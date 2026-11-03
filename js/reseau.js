@@ -4,6 +4,7 @@
 import { lignesCsv } from './diagrammes/carte.js';
 import logigramme from './diagrammes/logigramme.js';
 import { LIENS_MAX, TAILLE_MAX_CODE } from './securite.js';
+import { lireZip } from './zip.js';
 
 export const TAILLE_MAX_FICHIER = 30 * 1024 * 1024;
 
@@ -29,44 +30,11 @@ const texteXml = (t) => String(t).replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (tout
     return ENTITES[e.toLowerCase()] ?? tout;
 });
 
-// Archive ZIP (format des classeurs .xlsx) : répertoire central, puis décompression par le navigateur
-async function lireZip(octets) {
-    const vue = new DataView(octets.buffer, octets.byteOffset, octets.byteLength);
-    let fin = -1;
-    for (let i = octets.length - 22; i >= Math.max(0, octets.length - 65558); i -= 1) if (vue.getUint32(i, true) === 0x06054b50) { fin = i; break; }
-    if (fin < 0) throw new Error('Le classeur est endommagé (archive illisible).');
-    const nombre = vue.getUint16(fin + 10, true);
-    let p = vue.getUint32(fin + 16, true);
-    const entrees = new Map();
-    for (let n = 0; n < nombre && p + 46 <= octets.length; n += 1) {
-        if (vue.getUint32(p, true) !== 0x02014b50) break;
-        const methode = vue.getUint16(p + 10, true);
-        const taille = vue.getUint32(p + 20, true);
-        const longNom = vue.getUint16(p + 28, true);
-        const total = 46 + longNom + vue.getUint16(p + 30, true) + vue.getUint16(p + 32, true);
-        const local = vue.getUint32(p + 42, true);
-        const nom = new TextDecoder().decode(octets.subarray(p + 46, p + 46 + longNom));
-        entrees.set(nom, { methode, taille, local });
-        p += total;
-    }
-    return async (nom) => {
-        const e = entrees.get(nom);
-        if (!e) return null;
-        const debut = e.local + 30 + vue.getUint16(e.local + 26, true) + vue.getUint16(e.local + 28, true);
-        const donnees = octets.subarray(debut, debut + e.taille);
-        if (e.methode === 0) return decoder(donnees);
-        if (e.methode !== 8) throw new Error('Le classeur utilise une compression non prise en charge.');
-        const flux = new Blob([donnees]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-        const brut = new Uint8Array(await new Response(flux).arrayBuffer());
-        if (brut.length > TAILLE_MAX_FICHIER * 4) throw new Error('Le classeur est trop volumineux.');
-        return decoder(brut);
-    };
-}
-
 const colonneExcel = (ref) => [...String(ref).replace(/\d+$/, '')].reduce((n, c) => n * 26 + c.charCodeAt(0) - 64, 0) - 1;
 
 async function lireXlsx(octets) {
-    const lire = await lireZip(octets);
+    const lireOctets = await lireZip(octets, { tailleMax: TAILLE_MAX_FICHIER * 4 });
+    const lire = async (nom) => { const o = await lireOctets(nom); return o && decoder(o); };
     const partages = [];
     const sst = await lire('xl/sharedStrings.xml');
     if (sst) for (const m of sst.matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)) partages.push(texteXml([...m[1].matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g)].map((t) => t[1]).join('')));

@@ -8,6 +8,7 @@ import { THEMES, rendreSchema, composerPage, decrireErreur } from './rendu.js';
 import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX } from './fichier.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
+import { exporterVisio } from './visio.js';
 import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
@@ -744,10 +745,10 @@ function ouvrirExport() {
         coche('exp-transparent', 'Fond transparent (PNG)'),
         coche('exp-schema', 'Schéma seul, sans la page'));
     const formulaire = h('form', {},
-        groupe('Format', radio('format', 'pdf', 'PDF (vectoriel)', true), radio('format', 'png', 'PNG (image)'), radio('format', 'svg', 'SVG (vectoriel)')),
+        groupe('Format', radio('format', 'pdf', 'PDF (vectoriel)', true), radio('format', 'png', 'PNG (image)'), radio('format', 'svg', 'SVG (vectoriel)'), radio('format', 'vsdx', 'Visio (.vsdx, modifiable)')),
         groupe('Pages', radio('portee', 'tout', `Tout le document (${etat.doc.pages.length} page${etat.doc.pages.length > 1 ? 's' : ''})`, true), radio('portee', 'page', 'Page courante')),
         optionsImage);
-    formulaire.addEventListener('change', () => { optionsImage.hidden = formulaire.elements.format.value === 'pdf'; });
+    formulaire.addEventListener('change', () => { optionsImage.hidden = ['pdf', 'vsdx'].includes(formulaire.elements.format.value); });
     formulaire.addEventListener('submit', (e) => e.preventDefault());
 
     const lancer = bouton('Exporter', { variante: 'primary', taille: 'md', icone: 'download-line', onclick: async () => {
@@ -761,6 +762,14 @@ function ouvrirExport() {
                 message('Export PDF terminé', enImage.length
                     ? `${pages} page(s). Insérée(s) en image à 300 ppp faute de conversion vectorielle fidèle : ${enImage.join(', ')}.`
                     : `${pages} page(s), vectoriel.`, enImage.length ? 'warning' : 'success', 8000);
+            } else if (format === 'vsdx') {
+                const { pages, enImage, imagesIgnorees, connecteurs } = await exporterVisio(etat.doc, indices);
+                const remarques = [
+                    enImage.length ? `Insérée(s) en image, faute de conversion en formes : ${enImage.join(', ')}.` : '',
+                    imagesIgnorees ? `${imagesIgnorees} image(s) non reprise(s) (fond de carte ou image découpée).` : '',
+                ].filter(Boolean);
+                message('Export Visio terminé', [`${pages} page(s), formes modifiables${connecteurs ? `, ${connecteurs} connecteur(s) collé(s) aux formes` : ''}.`, ...remarques].join(' '),
+                    remarques.length ? 'warning' : 'success', remarques.length ? 10000 : 6000);
             } else {
                 const n = await (format === 'png' ? exporterPNG : exporterSVG)(etat.doc, indices, options);
                 message(`Export ${format.toUpperCase()} terminé`, `${n} fichier(s).`, 'success', 5000);
@@ -828,6 +837,8 @@ function ouvrirAPropos() {
             h('li', {}, document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC (liens et équipements en Excel)')),
             h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
             h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+        h('h2', { class: 'fr-h6' }, 'Export vers Microsoft Visio'),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.20.0, « Exporter » propose le format Visio (.vsdx) : un fichier, une page Visio par page, lisible par Visio 2013 et suivants et par LibreOffice Draw. Formes et textes y sont modifiables ; les étapes et équipements forment des groupes ; sur les logigrammes, réseaux importés, diagrammes d\'états, de classes, entités-relations et d\'architecture, les liaisons sont des connecteurs collés qui suivent les formes déplacées. Police Marianne, remplacée par une police voisine si elle n\'est pas installée.'),
         h('h2', { class: 'fr-h6' }, 'Schémas de réseau importés'),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.18.0, « Importer un réseau » (rubrique Réseaux informatiques de « Ajouter une page » et de « Modèles ») dessine un réseau à partir d\'exports tabulaires : la liste des liens d\'HPE IMC (« Gestion des liens »), ses liens lus par l\'API REST ou un rapport de voisins LLDP / CDP, et, en option, la liste des équipements d\'IMC. Fichiers lus : Excel .xlsx, CSV, tableau HTML enregistré en .xls.'),
         h('ul', { class: 'fr-text--sm' },

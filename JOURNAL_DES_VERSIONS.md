@@ -2,6 +2,16 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.19.0 — 3 novembre 2026 — zoom et déplacement dans le schéma
+
+- **Constat de départ** : sur un schéma agrandi, il fallait passer par les ascenseurs pour aller voir une autre partie, et le zoom (boutons seulement) partait du coin de la feuille.
+- **Molette** : zoom progressif sous le pointeur, le point visé restant sous la souris (vérifié à 2 px près sur une trentaine de crans aller-retour, le reste fractionnaire du défilement étant reporté d'un cran à l'autre). Pincement du pavé tactile pris en charge ; le glissement à deux doigts et Maj + molette font défiler.
+- **Glisser pour se déplacer**, à la souris, au stylet ou au doigt, avec un seuil de 4 px qui laisse le clic sélectionner ; le clic qui suit un déplacement est ignoré, la sélection ne change pas. Les éléments qui se glissent (épingles, points de matrice) gardent leur geste ; Espace maintenue ou le bouton du milieu déplacent la vue partout.
+- **Clic molette** : 100 % sous le pointeur (sans défilement automatique ni collage). **Ctrl++ / Ctrl+− / Ctrl+0 / Ctrl+1** : zoom avant, arrière, 100 %, ajuster. Le pourcentage de la barre ouvre un menu de niveaux. Pincement à deux doigts sur écran tactile.
+- **Toile de travail** : en zoom manuel, une marge d'une vue presque entière entoure la feuille ; le point visé reste sous le pointeur à tout niveau (10 % à 800 %), et chaque coin peut être amené au milieu de l'écran. « Ajuster à la fenêtre » retrouve la présentation centrée.
+- Un renommage en cours est validé au zoom ; la poignée « + » suit l'élément ; au redimensionnement de la fenêtre, le centre de la vue est conservé ; le niveau de zoom est annoncé aux lecteurs d'écran.
+- Tests : facteur de molette (pixels, lignes, pincement), détection du pavé tactile, bornes, ancrage ; recette : molette sous le pointeur, glisser sans perte de sélection, clic molette, raccourcis.
+
 ## 0.18.0 — 3 novembre 2026 — schémas de réseau importés des exports d'HPE IMC et des rapports LLDP
 
 - **Constat de départ** : dessiner à la main un réseau déjà décrit par l'outil de supervision (HPE IMC) est long et vite faux. Aucun export réel n'étant disponible, le format a été établi d'après la documentation d'IMC : champs de la gestion des liens (nœud, interface, alias, type de port VLAN et VLAN autorisés de chaque côté, débit), liste des équipements (libellé, IP, catégorie, modèle, emplacement), objets `deviceLink` de l'API REST (`leftSymbolName`, `leftIfDesc`, `bandWidth`…), colonnes usuelles des rapports de voisins LLDP / CDP.

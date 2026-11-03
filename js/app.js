@@ -12,6 +12,7 @@ import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
 import { ouvrirImportReseau } from './import-reseau.js';
+import { brancherNavigation, borner, ancrer } from './navigation.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -42,7 +43,7 @@ function construireBarre() {
     const groupe = (...enfants) => h('div', { class: 'fusain-barre__groupe' }, enfants);
     boutons.annuler = bouton('Annuler', { icone: 'arrow-go-back-line', seulIcone: true, titre: 'Annuler (Ctrl+Z)', onclick: annuler });
     boutons.retablir = bouton('Rétablir', { icone: 'arrow-go-forward-line', seulIcone: true, titre: 'Rétablir (Ctrl+Y)', onclick: retablir });
-    boutons.zoom = h('span', { class: 'fusain-barre__zoom', 'aria-live': 'off' });
+    boutons.zoom = h('button', { type: 'button', class: 'fusain-barre__zoom', title: 'Niveau de zoom : choisir une valeur', 'aria-haspopup': 'true', 'aria-expanded': 'false', onclick: () => ouvrirMenuZoom() });
     boutons.visuel = bouton('Visuel', { icone: 'drag-move-2-line', 'aria-pressed': 'true', onclick: () => changerMode('visuel') });
     boutons.code = bouton('Code', { icone: 'code-s-slash-line', 'aria-pressed': 'false', onclick: () => changerMode('code') });
     vider(zones.barre).append(
@@ -53,10 +54,10 @@ function construireBarre() {
             bouton('Exporter', { icone: 'download-line', variante: 'secondary', onclick: ouvrirExport })),
         groupe(boutons.annuler, boutons.retablir),
         groupe(
-            bouton('Zoom arrière', { icone: 'zoom-out-line', seulIcone: true, onclick: () => zoomer(ui.zoom / 1.2) }),
-            boutons.zoom,
-            bouton('Zoom avant', { icone: 'zoom-in-line', seulIcone: true, onclick: () => zoomer(ui.zoom * 1.2) }),
-            bouton('Ajuster à la fenêtre', { icone: 'fullscreen-line', seulIcone: true, onclick: () => { ui.ajuste = true; dimensionnerFeuille(); } })),
+            bouton('Zoom arrière', { icone: 'zoom-out-line', seulIcone: true, titre: 'Zoom arrière (Ctrl+−, molette)', onclick: () => zoomer(ui.zoom / 1.25) }),
+            h('div', { class: 'fusain-zoom' }, boutons.zoom),
+            bouton('Zoom avant', { icone: 'zoom-in-line', seulIcone: true, titre: 'Zoom avant (Ctrl++, molette)', onclick: () => zoomer(ui.zoom * 1.25) }),
+            bouton('Ajuster à la fenêtre', { icone: 'fullscreen-line', seulIcone: true, titre: 'Ajuster à la fenêtre (Ctrl+1)', onclick: ajuster })),
         groupe(h('div', { class: 'fusain-bascule', role: 'group', 'aria-label': 'Mode d\'édition' }, boutons.visuel, boutons.code)),
         groupe(bouton('Modèles', { icone: 'layout-grid-line', onclick: () => ouvrirModeles('remplacer') })));
 }
@@ -83,21 +84,88 @@ function changerMode(mode) {
 
 function dimensionnerFeuille() {
     const { l, h: haut } = dimensions(pageCourante());
+    const scene = zones.scene;
     if (ui.ajuste) {
-        const dispoL = zones.scene.clientWidth - 48;
-        const dispoH = zones.scene.clientHeight - 48;
-        ui.zoom = Math.max(0.1, Math.min(dispoL / (l / MM_PAR_PX), dispoH / (haut / MM_PAR_PX)));
+        const dispoL = scene.clientWidth - 48;
+        const dispoH = scene.clientHeight - 48;
+        ui.zoom = borner(Math.min(dispoL / (l / MM_PAR_PX), dispoH / (haut / MM_PAR_PX)));
     }
-    zones.feuille.style.width = `${(l / MM_PAR_PX) * ui.zoom}px`;
-    zones.feuille.style.height = `${(haut / MM_PAR_PX) * ui.zoom}px`;
+    const largeur = (l / MM_PAR_PX) * ui.zoom;
+    const hauteur = (haut / MM_PAR_PX) * ui.zoom;
+    zones.feuille.style.width = `${largeur}px`;
+    zones.feuille.style.height = `${hauteur}px`;
+    // Zoom manuel : une marge de travail d'une vue presque entière de chaque côté. Le point visé par la molette reste
+    // ainsi toujours sous le pointeur, à tout niveau de zoom, et la feuille ne sort jamais tout à fait de l'écran (40 px).
+    const manuel = !ui.ajuste;
+    const toile = zones.feuille.parentElement;
+    toile.style.padding = manuel ? `${Math.max(0, scene.clientHeight - 64)}px ${Math.max(0, scene.clientWidth - 64)}px` : '';
+    toile.style.width = manuel ? `${largeur}px` : '';
+    zones.feuille.style.margin = manuel ? '0' : '';
+    scene.classList.toggle('fusain-scene--deplacable', manuel);
     boutons.zoom.textContent = `${Math.round(ui.zoom * 100)} %`;
     placerPoignee();
 }
 
-function zoomer(valeur) {
+// Zoom ancré : le point visé (le pointeur, ou le centre de la vue) reste sous les yeux
+function zoomer(valeur, point = null) {
+    const z = borner(valeur);
+    if (!ui.ajuste && Math.abs(z - ui.zoom) < 1e-4) return;
+    zones.feuille.querySelector('.fusain-saisie')?.blur(); // un renommage en cours est validé
+    const avant = zones.feuille.getBoundingClientRect();
+    const cadre = zones.scene.getBoundingClientRect();
+    const cible = point || { x: cadre.left + cadre.width / 2, y: cadre.top + cadre.height / 2 };
     ui.ajuste = false;
-    ui.zoom = Math.max(0.25, Math.min(4, valeur));
+    ui.zoom = z;
     dimensionnerFeuille();
+    const { dx, dy } = ancrer(avant, zones.feuille.getBoundingClientRect(), cible);
+    // Le défilement est arrondi au pixel : le reste est reporté au cran suivant, pour qu'une suite de crans ne dérive pas
+    const scene = zones.scene;
+    const x = scene.scrollLeft + dx + resteDefilement.x;
+    const y = scene.scrollTop + dy + resteDefilement.y;
+    scene.scrollLeft = x;
+    scene.scrollTop = y;
+    resteDefilement = { x: Math.abs(x - scene.scrollLeft) < 1 ? x - scene.scrollLeft : 0, y: Math.abs(y - scene.scrollTop) < 1 ? y - scene.scrollTop : 0 };
+    annoncerZoom();
+}
+let resteDefilement = { x: 0, y: 0 };
+
+function ajuster() {
+    ui.ajuste = true;
+    dimensionnerFeuille();
+    annoncerZoom();
+}
+
+let minuterieZoom = null;
+function annoncerZoom() {
+    clearTimeout(minuterieZoom);
+    minuterieZoom = setTimeout(() => annoncer(`Zoom ${Math.round(ui.zoom * 100)} %`), 500);
+}
+
+function ouvrirMenuZoom() {
+    const parent = boutons.zoom.parentElement;
+    const ouvert = parent.querySelector('.fusain-zoom__menu');
+    if (ouvert) { fermer(); return; }
+    const choix = [['Ajuster à la fenêtre', null], ['50 %', 0.5], ['100 %', 1], ['150 %', 1.5], ['200 %', 2], ['400 %', 4]];
+    const menu = h('ul', { class: 'fusain-zoom__menu', role: 'menu' }, choix.map(([nom, z]) => h('li', { role: 'none' },
+        h('button', { type: 'button', role: 'menuitem', onclick: () => { fermer(); boutons.zoom.focus(); if (z === null) ajuster(); else zoomer(z); } }, nom))));
+    function fermer() {
+        menu.remove();
+        boutons.zoom.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('pointerdown', dehors, true);
+    }
+    function dehors(e) { if (!parent.contains(e.target)) fermer(); }
+    menu.addEventListener('keydown', (e) => {
+        const items = [...menu.querySelectorAll('button')];
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'Escape') { e.preventDefault(); fermer(); boutons.zoom.focus(); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+        else if (e.key === 'Tab') fermer();
+    });
+    parent.append(menu);
+    boutons.zoom.setAttribute('aria-expanded', 'true');
+    document.addEventListener('pointerdown', dehors, true);
+    menu.querySelector('button').focus();
 }
 
 // ---------- Rendu général ----------
@@ -293,6 +361,15 @@ function renommerSurPlace(cle) {
     zones.feuille.append(saisie);
     saisie.focus();
     saisie.select();
+}
+
+// L'appui vise-t-il un élément que l'éditeur sait déplacer ? (mêmes conditions que brancherDeplacement)
+function peutDeplacerElement(e) {
+    const { editeur, modele } = vue;
+    const marque = e.target.closest?.('[data-fusain]');
+    if (ui.mode !== 'visuel' || !modele || !editeur?.deplacer || !marque || !zones.feuille.contains(marque)) return false;
+    if (editeur.deplacable && !editeur.deplacable(marque.getAttribute('data-fusain'))) return false;
+    return !!editeur.zoneDeplacement(zones.feuille.querySelector('.fusain-schema'));
 }
 
 // Glisser un élément à position libre (points d'une matrice) : la nouvelle position est lue dans la zone de référence
@@ -737,6 +814,8 @@ function ouvrirAPropos() {
     } }, texte);
     const raccourcis = [
         ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer en JSON'], ['Ctrl+O', 'Ouvrir un fichier'],
+        ['Molette', 'Zoomer sous le pointeur (Maj + molette : défiler)'], ['Glisser', 'Déplacer la vue (Espace + glisser : partout)'],
+        ['Clic molette', 'Zoom à 100 %'], ['Ctrl++ / Ctrl+−', 'Zoom avant / arrière'], ['Ctrl+0 / Ctrl+1', 'Zoom à 100 % / ajuster à la fenêtre'],
         ['Flèches', 'Parcourir les éléments du schéma'], ['Entrée ou F2', 'Renommer l\'élément sélectionné'],
         ['Suppr', 'Supprimer l\'élément sélectionné'], ['Inser ou +', 'Ajouter un élément lié'], ['Échap puis Tab', 'Quitter l\'éditeur de code au clavier'],
     ];
@@ -850,6 +929,12 @@ function brancherGlobal() {
         else if (saisie) return; // dans un champ, l'annulation native du navigateur s'applique
         else if (cle === 'z' && !e.shiftKey) { e.preventDefault(); annuler(); }
         else if (cle === 'y' || (cle === 'z' && e.shiftKey)) { e.preventDefault(); retablir(); }
+        // Zoom de la scène plutôt que de toute la page (la page reste zoomable par le menu du navigateur)
+        else if (document.querySelector('dialog[open]')) return;
+        else if (['+', '='].includes(e.key) || e.code === 'NumpadAdd') { e.preventDefault(); zoomer(ui.zoom * 1.25); }
+        else if (e.key === '-' || e.code === 'NumpadSubtract') { e.preventDefault(); zoomer(ui.zoom / 1.25); }
+        else if (e.code === 'Digit0' || e.code === 'Numpad0') { e.preventDefault(); zoomer(1); }
+        else if (e.code === 'Digit1' || e.code === 'Numpad1') { e.preventDefault(); ajuster(); }
     });
 
     // Dépôt d'un fichier sur la fenêtre
@@ -866,7 +951,15 @@ function brancherGlobal() {
         ouvrir(e.dataTransfer.files[0]);
     });
 
-    window.addEventListener('resize', () => { if (ui.ajuste) dimensionnerFeuille(); else placerPoignee(); });
+    window.addEventListener('resize', () => {
+        if (ui.ajuste) { dimensionnerFeuille(); return; }
+        // Zoom manuel : le centre de la vue reste le même
+        const centre = { x: zones.scene.scrollLeft + zones.scene.clientWidth / 2, y: zones.scene.scrollTop + zones.scene.clientHeight / 2 };
+        const avant = { l: zones.scene.scrollWidth, h: zones.scene.scrollHeight };
+        dimensionnerFeuille();
+        zones.scene.scrollLeft = (centre.x / avant.l) * zones.scene.scrollWidth - zones.scene.clientWidth / 2;
+        zones.scene.scrollTop = (centre.y / avant.h) * zones.scene.scrollHeight - zones.scene.clientHeight / 2;
+    });
     window.addEventListener('beforeunload', (e) => {
         validerCodeEnAttente();
         if (etat.modifie && !sortieAutorisee) { e.preventDefault(); e.returnValue = ''; }
@@ -877,6 +970,11 @@ async function demarrer() {
     construireBarre();
     brancherFeuille();
     brancherDeplacement();
+    // La feuille est posée sur une toile : en zoom manuel, la toile porte la marge de travail autour d'elle
+    const toile = h('div', { class: 'fusain-toile' });
+    zones.feuille.before(toile);
+    toile.append(zones.feuille);
+    brancherNavigation({ scene: zones.scene, lireZoom: () => ui.zoom, zoomer, peutDeplacerElement });
     brancherCode();
     brancherGlobal();
     appliquerTheme(preference('theme') === 'sombre');

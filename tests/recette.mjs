@@ -16,6 +16,33 @@ await p.goto(process.env.FUSAIN_URL || 'http://127.0.0.1:8765/');
 await p.waitForSelector('html[data-fusain-pret]'); await p.waitForTimeout(900);
 const lireCode = async () => { await p.click('button:has-text("Code")'); await p.waitForTimeout(500); const v = await p.inputValue('#fusain-code-zone'); await p.click('button:has-text("Visuel")'); await p.waitForTimeout(500); return v; };
 
+// 0. zoom et déplacement : molette sous le pointeur, glisser, clic molette, raccourcis
+{
+    const zoomAffiche = () => p.textContent('.fusain-barre__zoom');
+    const centre = async (sel) => { const r = await p.locator(sel).first().boundingBox(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; };
+    const c0 = await centre('[data-fusain="n:C"]');
+    await p.mouse.move(c0.x, c0.y);
+    for (let i = 0; i < 5; i++) { await p.mouse.wheel(0, -100); await p.waitForTimeout(60); }
+    await p.waitForTimeout(300);
+    const c1 = await centre('[data-fusain="n:C"]');
+    ok('navigation : molette, zoom sous le pointeur', parseInt(await zoomAffiche(), 10) > 150 && Math.hypot(c1.x - c0.x, c1.y - c0.y) < 4, `${await zoomAffiche()}, écart ${Math.round(c1.x - c0.x)},${Math.round(c1.y - c0.y)}`);
+    await p.click('[data-fusain="n:C"]'); await p.waitForTimeout(200);
+    const s0 = await p.evaluate(() => [document.getElementById('fusain-scene').scrollLeft, document.getElementById('fusain-scene').scrollTop]);
+    await p.mouse.move(c1.x + 250, c1.y + 120); await p.mouse.down(); await p.mouse.move(c1.x + 150, c1.y + 60, { steps: 6 }); await p.mouse.up(); await p.waitForTimeout(200);
+    const s1 = await p.evaluate(() => [document.getElementById('fusain-scene').scrollLeft, document.getElementById('fusain-scene').scrollTop]);
+    ok('navigation : glisser déplace la vue sans toucher la sélection', s1[0] - s0[0] === 100 && s1[1] - s0[1] === 60 && await p.locator('.fusain-sel[data-fusain="n:C"]').count() > 0, `${s1[0] - s0[0]},${s1[1] - s0[1]}`);
+    const c2 = await centre('[data-fusain="n:C"]');
+    await p.mouse.move(c2.x, c2.y); await p.mouse.down({ button: 'middle' }); await p.mouse.up({ button: 'middle' }); await p.waitForTimeout(200);
+    const c3 = await centre('[data-fusain="n:C"]');
+    ok('navigation : clic molette, 100 %', (await zoomAffiche()) === '100 %' && Math.hypot(c3.x - c2.x, c3.y - c2.y) < 3);
+    await p.keyboard.press('Control+Equal'); await p.waitForTimeout(100);
+    const plus = await zoomAffiche();
+    await p.keyboard.press('Control+Digit0'); await p.waitForTimeout(100);
+    const cent = await zoomAffiche();
+    await p.keyboard.press('Control+Digit1'); await p.waitForTimeout(200);
+    ok('navigation : Ctrl++, Ctrl+0, Ctrl+1', plus === '125 %' && cent === '100 %' && !await p.locator('#fusain-scene.fusain-scene--deplacable').count(), `${plus} ${cent}`);
+    await p.click('#fusain-feuille', { position: { x: 5, y: 5 } }); await p.waitForTimeout(200);
+}
 // 1. sélection + renommage sur place
 await p.click('[data-fusain="n:C"]'); await p.waitForTimeout(200);
 ok('sélection nœud', await p.locator('.fusain-sel').count() > 0 && (await p.textContent('#fusain-proprietes')).includes('Étape sélectionnée'));

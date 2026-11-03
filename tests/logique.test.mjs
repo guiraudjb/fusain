@@ -484,3 +484,39 @@ test('réseau : lecture des valeurs (nom et IP, interfaces, débits, VLAN, caté
 test('réseau : fichier Excel 97-2003 refusé avec un conseil', async () => {
     await assert.rejects(reseau.lireEnregistrements(new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0, 0, 0, 0])), /\.xlsx ou en CSV/);
 });
+
+// ---------- Zoom et déplacement dans la scène ----------
+import * as navigation from '../js/navigation.js';
+
+test('navigation : molette, pincement, pavé tactile, bornes', () => {
+    const roue = (o) => ({ deltaMode: 0, deltaX: 0, deltaY: 0, ctrlKey: false, metaKey: false, ...o });
+    // un cran de souris : environ ×1,16 vers le bas comme vers le haut, symétrique
+    const avant = navigation.facteurMolette(roue({ deltaY: -100 }));
+    const arriere = navigation.facteurMolette(roue({ deltaY: 100 }));
+    assert.ok(avant > 1.1 && avant < 1.25, String(avant));
+    assert.ok(Math.abs(avant * arriere - 1) < 1e-9);
+    // en lignes (Firefox) : même ordre de grandeur
+    assert.ok(Math.abs(navigation.facteurMolette(roue({ deltaMode: 1, deltaY: -3 })) - navigation.facteurMolette(roue({ deltaY: -48 }))) < 1e-9);
+    // pincement du pavé tactile (Ctrl, petits deltas) : sensible, plafonné
+    assert.ok(navigation.facteurMolette(roue({ ctrlKey: true, deltaY: -10 })) > 1.09);
+    assert.ok(navigation.facteurMolette(roue({ deltaY: -100000 })) <= Math.E + 1e-9);
+    // la souris zoome, le pavé tactile glissé à deux doigts défile
+    assert.equal(navigation.estPaveTactile(roue({ deltaY: 100 })), false);
+    assert.equal(navigation.estPaveTactile(roue({ deltaY: 3.5 })), true);
+    assert.equal(navigation.estPaveTactile(roue({ deltaX: 4, deltaY: 1 })), true);
+    assert.equal(navigation.estPaveTactile(roue({ ctrlKey: true, deltaY: 3.5 })), false);
+    assert.deepEqual([0.01, 1, 50].map(navigation.borner), [navigation.ZOOM_MIN, 1, navigation.ZOOM_MAX]);
+});
+
+test('navigation : le point visé reste sous le pointeur', () => {
+    const avant = { left: 100, top: 50, width: 400, height: 300 };
+    const point = { x: 300, y: 200 }; // au milieu de la feuille
+    // la feuille double de taille depuis le même coin : le milieu est désormais 200 px plus loin
+    assert.deepEqual(navigation.ancrer(avant, { left: 100, top: 50, width: 800, height: 600 }, point), { dx: 200, dy: 150 });
+    // feuille recentrée par la mise en page : la correction en tient compte
+    const r = navigation.ancrer(avant, { left: -100, top: -100, width: 800, height: 600 }, point);
+    assert.ok(Math.abs(-100 + 0.5 * 800 - r.dx - point.x) < 1e-9 && Math.abs(-100 + 0.5 * 600 - r.dy - point.y) < 1e-9);
+    // point hors de la feuille (fond gris) : il reste fixe lui aussi
+    const dehors = navigation.ancrer(avant, { left: 100, top: 50, width: 800, height: 600 }, { x: 50, y: 20 });
+    assert.deepEqual(dehors, { dx: -50, dy: -30 });
+});

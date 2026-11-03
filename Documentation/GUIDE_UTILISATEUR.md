@@ -11,6 +11,16 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 | Centre | La page, à ses proportions réelles. Le cadre en pointillés montre les marges (il n'est pas exporté) |
 | Colonne de droite | Les propriétés de l'élément sélectionné, puis celles de la page et du document |
 
+### Se déplacer et zoomer
+
+- **Molette** : zoom avant ou arrière sous le pointeur ; le point visé reste sous la souris. Sur un pavé tactile, pincez pour zoomer ; glisser à deux doigts déplace la vue. Maj + molette fait défiler horizontalement.
+- **Glisser** sur le schéma : déplace la vue (main ouverte, puis fermée pendant le geste). Un simple clic sélectionne toujours l'élément visé : le déplacement ne commence qu'au-delà de quelques pixels, et il ne change pas la sélection. Les éléments qui se glissent eux-mêmes (épingles d'une carte, points d'une matrice) gardent leur glisser.
+- **Espace maintenue + glisser** : déplace la vue où que commence le geste, même sur un élément. Le bouton du milieu glissé fait de même.
+- **Clic molette** : zoom à 100 %, sous le pointeur.
+- **Boutons de la barre** : zoom arrière, zoom avant, ajuster à la fenêtre ; un clic sur le pourcentage ouvre un menu (ajuster, 50, 100, 150, 200, 400 %).
+- **Écran tactile** : un doigt déplace la vue, deux doigts pincent pour zoomer.
+- Le zoom va de 10 % à 800 %. Une fois sorti de « ajuster à la fenêtre », la feuille est posée sur une toile : chacun de ses coins peut être amené au milieu de l'écran.
+
 ## 2. Construire un schéma sans coder
 
 Vingt-sept types de schémas s'éditent visuellement : logigramme, logigramme en couloirs, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap), séquence ZenUML, diagramme d'Ishikawa, arborescence et diagramme de Venn. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§6).
@@ -158,6 +168,11 @@ Le brouillon conservé automatiquement par le navigateur est une commodité, pas
 | Ctrl+Z / Ctrl+Y | Annuler / rétablir |
 | Ctrl+S | Enregistrer |
 | Ctrl+O | Ouvrir |
+| Molette / Maj + molette | Zoom sous le pointeur / défilement horizontal |
+| Glisser, Espace + glisser | Déplacer la vue |
+| Clic molette | Zoom à 100 % |
+| Ctrl++ / Ctrl+− | Zoom avant / arrière |
+| Ctrl+0 / Ctrl+1 | Zoom à 100 % / ajuster à la fenêtre |
 
 ## 9. Hors ligne
 

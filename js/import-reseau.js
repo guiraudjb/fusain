@@ -4,7 +4,7 @@ import { h, bouton, champSelect, champCase, champTexte, message, modale, ouvrirM
 import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages } from './reseau.js';
 
 const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat'];
-const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'lieu'];
+const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
 const ACCEPTES = '.csv,.txt,.tsv,.xlsx,.xls,.htm,.html,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 // ajouterPages(liste de { nom, code, format, orientation }) : fournie par l'application, une seule étape d'annulation
@@ -40,7 +40,7 @@ export function ouvrirImportReseau(ajouterPages) {
     const fichiers = h('div', {},
         champFichier('Liens entre équipements', 'Export « Gestion des liens » d\'HPE IMC, liens de son API REST ou rapport de voisins LLDP / CDP. CSV, texte tabulé ou Excel (.xlsx).',
             (e, nom) => { etat.liens = tableau(e, CHAMPS_LIENS); etat.nomLiens = nom; }),
-        champFichier('Liste des équipements (facultatif)', 'Export de la liste des équipements : précise la catégorie (icône), l\'adresse IP et l\'emplacement (regroupement par site).',
+        champFichier('Liste des équipements (facultatif)', 'Export de la liste des équipements : précise la catégorie (icône), l\'adresse IP et l\'emplacement (regroupement par site). Deux colonnes facultatives, « Site » et « Local technique », donnent un regroupement à deux niveaux.',
             (e, nom) => { etat.equipements = tableau(e, CHAMPS_EQUIPEMENTS); etat.nomEquipements = nom; }));
 
     // Une liste déroulante par champ : la colonne reconnue est présélectionnée, l'utilisateur peut corriger
@@ -60,7 +60,7 @@ export function ouvrirImportReseau(ajouterPages) {
     const o = etat.options;
     const choix = () => h('div', { class: 'fusain-import-reseau__colonnes' },
         champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
-        champSelect('Regrouper les équipements', [['auto', 'Automatique'], ['lieu', 'Par emplacement'], ['prefixe', 'Par préfixe du nom (site)'], ['reseau', 'Par sous-réseau IP (/24)'], ['aucun', 'Sans regroupement']],
+        champSelect('Regrouper les équipements', [['auto', 'Automatique'], ['lieu', 'Par site ou emplacement'], ['prefixe', 'Par préfixe du nom (site)'], ['reseau', 'Par sous-réseau IP (/24)'], ['aucun', 'Sans regroupement']],
             o.regroupement, (v) => { o.regroupement = v; redessiner(); }),
         champCase('Résumer les terminaux d\'un même commutateur (« 12 téléphones IP »)', o.resumer, (v) => { o.resumer = v; redessiner(); }),
         champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),

@@ -148,7 +148,7 @@ function ouvrirMenuZoom() {
     const parent = boutons.zoom.parentElement;
     const ouvert = parent.querySelector('.fusain-zoom__menu');
     if (ouvert) { fermer(); return; }
-    const choix = [['Ajuster à la fenêtre', null], ['50 %', 0.5], ['100 %', 1], ['150 %', 1.5], ['200 %', 2], ['400 %', 4]];
+    const choix = [['Ajuster à la fenêtre', null], ['50 %', 0.5], ['100 %', 1], ['150 %', 1.5], ['200 %', 2], ['400 %', 4], ['800 %', 8], ['1600 %', 16], ['3200 %', 32], ['6400 %', 64]];
     const menu = h('ul', { class: 'fusain-zoom__menu', role: 'menu' }, choix.map(([nom, z]) => h('li', { role: 'none' },
         h('button', { type: 'button', role: 'menuitem', onclick: () => { fermer(); boutons.zoom.focus(); if (z === null) ajuster(); else zoomer(z); } }, nom))));
     function fermer() {
@@ -951,7 +951,7 @@ const EXEMPLES_CARTES = [
 const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
-    ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP et emplacements des mêmes équipements'],
+    ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
     ['imc-api.csv', 'Liens de l\'API REST d\'IMC', 'un lien vu des deux côtés, compté une fois'],
     ['lldp-voisins.csv', 'Voisins LLDP', 'rapport séparé par des points-virgules : téléphones IP, borne Wi-Fi'],
 ];

@@ -19,7 +19,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 - **Clic molette** : zoom à 100 %, sous le pointeur.
 - **Boutons de la barre** : zoom arrière, zoom avant, ajuster à la fenêtre ; un clic sur le pourcentage ouvre un menu (ajuster, 50, 100, 150, 200, 400 %).
 - **Écran tactile** : un doigt déplace la vue, deux doigts pincent pour zoomer.
-- Le zoom va de 10 % à 800 %. Une fois sorti de « ajuster à la fenêtre », la feuille est posée sur une toile : chacun de ses coins peut être amené au milieu de l'écran.
+- Le zoom va de 10 % à 6400 %. Une fois sorti de « ajuster à la fenêtre », la feuille est posée sur une toile : chacun de ses coins peut être amené au milieu de l'écran.
 
 ## 2. Construire un schéma sans coder
 

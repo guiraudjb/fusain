@@ -136,7 +136,10 @@ export const CHAMPS_EQUIPEMENTS = [
     ['ip', 'Adresse IP', [/^(ipaddress|ip|managementip|mgmtip|adresseip|ipaddressmask|ipmask|adresseipmasque|deviceip)$/]],
     ['categorie', 'Catégorie', [/^(devicecategory|category|categorie|categoriedequipement|categoriedeperipherique)$/, /^(devicetype|typedequipement|type)$/]],
     ['modele', 'Modèle', [/^(model|devicemodel|modele|typename|series)$/]],
-    ['lieu', 'Emplacement', [/^(location|syslocation|lieu|emplacement|localisation|site)$/]],
+    // Site et local technique : colonnes facultatives ajoutées au fichier, pour un regroupement à deux niveaux
+    ['site', 'Groupe principal (site)', [/^(site|groupeprincipal|batiment|building|campus)$/]],
+    ['local', 'Sous-groupe (local technique)', [/^(localtechnique|lt|local|sousgroupe|subgroup|etage|floor|salle|room|baie|wiringcloset|closet|idf)$/]],
+    ['lieu', 'Emplacement', [/^(location|syslocation|lieu|emplacement|localisation)$/]],
     ['groupe', 'Groupe ou vue', [/^(group|devicegroup|customview|view|groupe|vue|vuepersonnalisee)$/]],
     ['capacites', 'Capacités (LLDP)', [/^(system)?capabilit(y|ies)(enabled)?$|^capacites$/]],
 ];
@@ -297,12 +300,12 @@ const EST_EN_PANNE = /\b(down|inactive?|inactif|unreachable|injoignable|disconne
 // Construit le graphe : équipements (avec catégorie, IP, lieu, groupe) et liaisons fusionnées
 export function analyserReseau(liens, equipements = null, { equipementLocal = '' } = {}) {
     const a = liens.association;
-    const infos = new Map(); // clé → { nom, ip, categorie, lieu, groupe, modele }
+    const infos = new Map(); // clé → { nom, ip, categorie, site, local, lieu, groupe, modele }
     const noter = (brut, extra = {}) => {
         const { nom, ip } = nomEtIp(brut);
         if (!nom) return null;
         const cle = cleNom(nom);
-        const x = infos.get(cle) || { cle, nom, ip: '', categorie: null, lieu: '', groupe: '', modele: '', indices: [] };
+        const x = infos.get(cle) || { cle, nom, ip: '', categorie: null, site: '', local: '', lieu: '', groupe: '', modele: '', indices: [] };
         if (ip && !x.ip) x.ip = ip;
         for (const [k, v] of Object.entries(extra)) if (v && !x[k]) x[k] = v;
         infos.set(cle, x);
@@ -317,6 +320,8 @@ export function analyserReseau(liens, equipements = null, { equipementLocal = ''
             const ip = nomEtIp(l[e.ip]).ip || String(l[e.ip] || '').match(/\d{1,3}(\.\d{1,3}){3}/)?.[0] || '';
             if (ip && !x.ip) x.ip = ip;
             x.categorie ||= categorieDe(l[e.categorie], l[e.capacites]) || categorieDe(l[e.modele]);
+            x.site ||= l[e.site] || '';
+            x.local ||= l[e.local] || '';
             x.lieu ||= l[e.lieu] || '';
             x.groupe ||= l[e.groupe] || '';
             x.modele ||= l[e.modele] || '';
@@ -387,7 +392,7 @@ const prefixeDe = (nom) => {
 const sousReseau = (ip) => (ip ? `${ip.split('.').slice(0, 3).join('.')}.0/24` : '');
 
 export function groupeDe(x, mode) {
-    if (mode === 'lieu') return x.lieu || x.groupe || '';
+    if (mode === 'lieu') return x.site || x.lieu || x.groupe || '';
     if (mode === 'prefixe') return prefixeDe(x.nom);
     if (mode === 'reseau') return sousReseau(x.ip);
     return '';
@@ -398,7 +403,7 @@ export function groupeDe(x, mode) {
 export function modeAutomatique(noeuds) {
     const infra = noeuds.filter((x) => !CATEGORIES_RESEAU[x.categorie].terminal);
     if (!infra.length) return 'aucun';
-    if (infra.filter((x) => x.lieu || x.groupe).length >= infra.length * 0.6) return 'lieu';
+    if (infra.filter((x) => x.site || x.lieu || x.groupe).length >= infra.length * 0.6) return 'lieu';
     const prefixes = new Set(infra.map((x) => prefixeDe(x.nom)).filter(Boolean));
     if (prefixes.size >= 2 && prefixes.size <= Math.max(2, infra.length / 2) && infra.filter((x) => prefixeDe(x.nom)).length >= infra.length * 0.8) return 'prefixe';
     return 'aucun';
@@ -444,7 +449,7 @@ function libelleLiaison(li, { abreger, logique, inverse }) {
 }
 
 // Une page : nœuds (équipements et résumés), groupes, liaisons, puis écriture par l'éditeur du logigramme
-function construirePage({ noeuds, liaisons, groupeDeNoeud, titresGroupes, jeu, resumer, abreger, logique, nouvelId, exterieurs = new Set() }) {
+function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = () => '', titresGroupes, jeu, resumer, abreger, logique, nouvelId, exterieurs = new Set() }) {
     const modele = { preambule: [], couloirs: false, sens: 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
     const idDe = new Map();
     const parCle = new Map(noeuds.map((x) => [x.cle, x]));
@@ -466,20 +471,22 @@ function construirePage({ noeuds, liaisons, groupeDeNoeud, titresGroupes, jeu, r
         for (const r of resumes.values()) if (r.membres.length >= 2) for (const x of r.membres) masques.add(x.cle);
     }
     if (logique) for (const x of noeuds) if (CATEGORIES_RESEAU[x.categorie].terminal) masques.add(x.cle);
-    // Groupes
+    // Groupes : le site, et dedans le local technique (un même nom de local peut revenir dans plusieurs sites)
     const idGroupe = new Map();
-    const groupeModele = (titre) => {
-        if (!titre) return null;
-        if (!idGroupe.has(titre)) { const id = nouvelId(`g_${titre}`); idGroupe.set(titre, id); modele.groupes.push({ id, titre, parent: null, sens: null }); }
-        return idGroupe.get(titre);
+    const groupeModele = (titre, parent = null) => {
+        if (!titre) return parent;
+        const k = JSON.stringify([parent, titre]);
+        if (!idGroupe.has(k)) { const id = nouvelId(`g_${titre}`); idGroupe.set(k, id); modele.groupes.push({ id, titre, parent, sens: null }); }
+        return idGroupe.get(k);
     };
     for (const x of noeuds) {
         if (masques.has(x.cle)) continue;
         const cat = CATEGORIES_RESEAU[x.categorie];
         const id = nouvelId(x.nom);
         idDe.set(x.cle, id);
-        const titre = exterieurs.has(x.cle) ? 'Autres sites' : titresGroupes ? groupeDeNoeud(x) : '';
-        modele.noeuds.push({ id, texte: x.nom, forme: 'rectangle', groupe: groupeModele(titre), classe: null, icone: `${jeu}:${cat[jeu]}` });
+        const groupe = exterieurs.has(x.cle) ? groupeModele('Autres sites')
+            : groupeModele(sousGroupeDeNoeud(x), titresGroupes ? groupeModele(groupeDeNoeud(x)) : null);
+        modele.noeuds.push({ id, texte: x.nom, forme: 'rectangle', groupe, classe: null, icone: `${jeu}:${cat[jeu]}` });
     }
     for (const li of liaisons) {
         if (!idDe.has(li.a) || !idDe.has(li.b)) continue;
@@ -522,18 +529,22 @@ export function produirePages(graphe, options = {}) {
     const alertes = [];
     const pages = [];
     const groupeDeNoeud = (x) => groupeDe(x, mode) || (mode === 'aucun' ? '' : 'Sans groupe');
-    // Un terminal suit le groupe de son commutateur
+    // Le local technique n'est dessiné que si les équipements sont regroupés
+    const localDe = (x) => (mode === 'aucun' ? '' : x.local || '');
+    // Un terminal suit le groupe (et le local) de son commutateur
     const parCle = new Map(graphe.noeuds.map((x) => [x.cle, x]));
     const voisins = new Map();
     for (const li of graphe.liaisons) for (const [x, y] of [[li.a, li.b], [li.b, li.a]]) (voisins.get(x) || voisins.set(x, []).get(x)).push(y);
     const groupeFinal = new Map();
+    const localFinal = new Map();
     for (const x of graphe.noeuds) {
-        let g = groupeDeNoeud(x);
+        let [g, lt] = [groupeDeNoeud(x), localDe(x)];
         if (CATEGORIES_RESEAU[x.categorie].terminal && (voisins.get(x.cle) || []).length === 1) {
             const v = parCle.get(voisins.get(x.cle)[0]);
-            if (v && !CATEGORIES_RESEAU[v.categorie].terminal) g = groupeDeNoeud(v);
+            if (v && !CATEGORIES_RESEAU[v.categorie].terminal) [g, lt] = [groupeDeNoeud(v), localDe(v)];
         }
         groupeFinal.set(x.cle, g);
+        localFinal.set(x.cle, lt);
     }
     let titres = [...new Set(groupeFinal.values())].filter(Boolean);
     if (titres.length > GROUPES_MAX) {
@@ -545,6 +556,7 @@ export function produirePages(graphe, options = {}) {
         titres = [...new Set(groupeFinal.values())].filter(Boolean);
     }
     const gDe = (x) => groupeFinal.get(x.cle) || '';
+    const ltDe = (x) => localFinal.get(x.cle) || '';
     const infra = graphe.noeuds.filter((x) => !CATEGORIES_RESEAU[x.categorie].terminal);
     const commun = { jeu, resumer, abreger };
     const variantes = logique ? [false, true] : [false];
@@ -552,7 +564,7 @@ export function produirePages(graphe, options = {}) {
     if (titres.length < 2 || infra.length <= SEUIL_VUE_ENSEMBLE) {
         // Une seule page (par variante), les groupes en cadres
         for (const lo of variantes) {
-            const modele = construirePage({ noeuds: graphe.noeuds, liaisons: graphe.liaisons, groupeDeNoeud: gDe, titresGroupes: titres.length >= 2, logique: lo, nouvelId: idsUniques(), ...commun });
+            const modele = construirePage({ noeuds: graphe.noeuds, liaisons: graphe.liaisons, groupeDeNoeud: gDe, sousGroupeDeNoeud: ltDe, titresGroupes: titres.length >= 2, logique: lo, nouvelId: idsUniques(), ...commun });
             const nom = lo ? 'Réseau logique (VLAN)' : 'Réseau physique';
             pages.push({ nom, code: ecrirePage(modele, alertes, nom), equipements: modele.noeuds.length });
         }
@@ -589,7 +601,7 @@ export function produirePages(graphe, options = {}) {
                 const liaisons = graphe.liaisons.filter((li) => dedans.has(li.a) || dedans.has(li.b));
                 const exterieurs = new Set(liaisons.flatMap((li) => [li.a, li.b]).filter((k) => !dedans.has(k)));
                 const noeuds = graphe.noeuds.filter((x) => dedans.has(x.cle) || exterieurs.has(x.cle));
-                const modele = construirePage({ noeuds, liaisons, groupeDeNoeud: () => '', titresGroupes: false, logique: lo, nouvelId: idsUniques(), exterieurs, ...commun });
+                const modele = construirePage({ noeuds, liaisons, groupeDeNoeud: () => '', sousGroupeDeNoeud: ltDe, titresGroupes: false, logique: lo, nouvelId: idsUniques(), exterieurs, ...commun });
                 const nom = `${lo ? 'Logique' : 'Réseau'} : ${t}`;
                 pages.push({ nom, code: ecrirePage(modele, alertes, nom), equipements: modele.noeuds.length });
             }

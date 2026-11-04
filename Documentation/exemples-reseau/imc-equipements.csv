@@ -1,12 +1,12 @@
-Status,Device Label,IP Address,Device Category,Model,Location,Contact
-Normal,FW-SIEGE,10.1.0.1,Security,H3C SecPath F1000,Siège,Équipe réseau
-Normal,RT-SIEGE,10.1.0.2,Routers,HPE MSR3024,Siège,Équipe réseau
-Normal,CORE-SIEGE,10.1.0.10,Switches,HPE 5940,Siège,Équipe réseau
-Normal,SW-SIEGE-1,10.1.0.21,Switches,HPE 5130,Siège,Équipe réseau
-Normal,SW-SIEGE-2,10.1.0.22,Switches,HPE 5130,Siège,Équipe réseau
-Normal,SRV-FICHIERS,10.1.0.30,Servers,HPE ProLiant DL380,Siège,Équipe système
-Normal,AP-SIEGE-1,10.1.0.101,Wireless,Aruba AP-515,Siège,Équipe réseau
-Normal,AP-SIEGE-2,10.1.0.102,Wireless,Aruba AP-515,Siège,Équipe réseau
-Normal,AP-SIEGE-3,10.1.0.103,Wireless,Aruba AP-515,Siège,Équipe réseau
-Normal,RT-AGENCE,10.2.0.2,Routers,HPE MSR2004,Agence de Lyon,Équipe réseau
-Normal,SW-AGENCE,10.2.0.10,Switches,HPE 5130,Agence de Lyon,Équipe réseau
+Status,Device Label,IP Address,Device Category,Model,Location,Local technique,Contact
+Normal,FW-SIEGE,10.1.0.1,Security,H3C SecPath F1000,Siège,Salle serveurs,Équipe réseau
+Normal,RT-SIEGE,10.1.0.2,Routers,HPE MSR3024,Siège,Salle serveurs,Équipe réseau
+Normal,CORE-SIEGE,10.1.0.10,Switches,HPE 5940,Siège,Salle serveurs,Équipe réseau
+Normal,SW-SIEGE-1,10.1.0.21,Switches,HPE 5130,Siège,LT étage 1,Équipe réseau
+Normal,SW-SIEGE-2,10.1.0.22,Switches,HPE 5130,Siège,LT étage 2,Équipe réseau
+Normal,SRV-FICHIERS,10.1.0.30,Servers,HPE ProLiant DL380,Siège,Salle serveurs,Équipe système
+Normal,AP-SIEGE-1,10.1.0.101,Wireless,Aruba AP-515,Siège,LT étage 1,Équipe réseau
+Normal,AP-SIEGE-2,10.1.0.102,Wireless,Aruba AP-515,Siège,LT étage 1,Équipe réseau
+Normal,AP-SIEGE-3,10.1.0.103,Wireless,Aruba AP-515,Siège,LT étage 2,Équipe réseau
+Normal,RT-AGENCE,10.2.0.2,Routers,HPE MSR2004,Agence de Lyon,,Équipe réseau
+Normal,SW-AGENCE,10.2.0.10,Switches,HPE 5130,Agence de Lyon,,Équipe réseau

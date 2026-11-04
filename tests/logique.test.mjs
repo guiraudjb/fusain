@@ -437,6 +437,11 @@ test('réseau : export « Gestion des liens » d\'IMC avec la liste des équipem
     assert.deepEqual(pages.map((p) => p.nom), ['Réseau physique', 'Réseau logique (VLAN)']);
     const [physique, logique] = pages.map((p) => p.code);
     assert.match(physique, /subgraph \w+ \["Agence de Lyon"\]/);
+    // Les locaux techniques sont des cadres dans le cadre de leur site ; les bornes suivent leur commutateur
+    assert.equal(equipements.association.local, 'Local technique');
+    assert.match(physique, /subgraph \w+ \["Siège"\]\n {8}subgraph \w+ \["Salle serveurs"\]\n {12}e_FW_SIEGE/);
+    assert.match(physique, / {8}subgraph \w+ \["LT étage 1"\]\n {12}e_SW_SIEGE_1[^\n]*\n {12}e_sw_siege_1_wifi/);
+    assert.match(physique, /\["LT étage 2"\]\n {12}e_SW_SIEGE_2[^\n]*\n {12}e_AP_SIEGE_3/);
     assert.match(physique, /icon: "picto:pare-feu", label: "FW-SIEGE"/);
     assert.match(physique, /e_CORE_SIEGE ===\|"BAGG1 – BAGG1 · 2 liens × 10G"\| e_SW_SIEGE_1/);
     assert.match(physique, /label: "2 bornes Wi-Fi"/);
@@ -461,6 +466,31 @@ test('réseau : liens de l\'API REST d\'IMC et rapport de voisins LLDP', async (
     assert.equal(pages.length, 1);
     assert.match(pages[0].code, /icon: "illus:telephone-ip", label: "3 téléphones IP"/);
     assert.match(reseau.produirePages(lldp, { resumer: false }).pages[0].code, /label: "SEP001122334466"/);
+    relireToutes(pages);
+});
+
+test('réseau : colonnes « Site » et « Local technique » → cadres imbriqués, même nom de local dans deux sites', () => {
+    const liens = { colonnes: [], association: { source: 'a', cible: 'b' }, lignes: [
+        { a: 'RT-A', b: 'SW-A1' }, { a: 'RT-A', b: 'SW-A2' }, { a: 'RT-A', b: 'RT-B' }, { a: 'RT-B', b: 'SW-B1' }] };
+    const equipements = reseau.tableau([
+        ['Device Label', 'Device Category', 'Location', 'Site', 'Local technique'],
+        ['RT-A', 'Routers', 'Paris, bât. A', 'Paris', 'Salle serveurs'],
+        ['SW-A1', 'Switches', '', 'Paris', 'Étage 1'],
+        ['SW-A2', 'Switches', '', 'Paris', 'Étage 2'],
+        ['RT-B', 'Routers', '', 'Lyon', ''],
+        ['SW-B1', 'Switches', '', 'Lyon', 'Étage 1']], reseau.CHAMPS_EQUIPEMENTS);
+    assert.deepEqual([equipements.association.site, equipements.association.local, equipements.association.lieu], ['Site', 'Local technique', 'Location']);
+    const graphe = reseau.analyserReseau(liens, equipements);
+    const { pages, mode } = reseau.produirePages(graphe, { jeu: 'picto' });
+    assert.equal(mode, 'lieu');
+    const m = logigramme.analyser(pages[0].code);
+    const titre = (id) => m.groupes.find((g) => g.id === id)?.titre ?? null;
+    const place = (nom) => { const g = m.groupes.find((x) => x.id === m.noeuds.find((n) => n.texte === nom).groupe); return [titre(g.parent), g.titre]; };
+    assert.deepEqual(['RT-A', 'SW-A1', 'SW-A2', 'SW-B1'].map(place), [['Paris', 'Salle serveurs'], ['Paris', 'Étage 1'], ['Paris', 'Étage 2'], ['Lyon', 'Étage 1']]);
+    assert.equal(titre(m.noeuds.find((n) => n.texte === 'RT-B').groupe), 'Lyon', 'sans local : directement dans le site');
+    assert.equal(m.groupes.filter((g) => g.titre === 'Étage 1').length, 2);
+    // Sans regroupement, pas de cadre de local
+    assert.doesNotMatch(reseau.produirePages(graphe, { regroupement: 'aucun' }).pages[0].code, /subgraph/);
     relireToutes(pages);
 });
 
@@ -521,7 +551,7 @@ test('navigation : molette, pincement, pavé tactile, bornes', () => {
     assert.equal(navigation.estPaveTactile(roue({ deltaY: 3.5 })), true);
     assert.equal(navigation.estPaveTactile(roue({ deltaX: 4, deltaY: 1 })), true);
     assert.equal(navigation.estPaveTactile(roue({ ctrlKey: true, deltaY: 3.5 })), false);
-    assert.deepEqual([0.01, 1, 50].map(navigation.borner), [navigation.ZOOM_MIN, 1, navigation.ZOOM_MAX]);
+    assert.deepEqual([0.01, 1, 500].map(navigation.borner), [navigation.ZOOM_MIN, 1, navigation.ZOOM_MAX]);
 });
 
 test('navigation : le point visé reste sous le pointeur', () => {
@@ -603,6 +633,9 @@ test('visio : unités, axe Y inversé, connecteur collé', () => {
     assert.match(xml, /<Connect FromSheet="5" FromCell="EndX" FromPart="12" ToSheet="3"/);
     assert.match(xml, /_XFTRIGGER\(Sheet\.3!EventXFMod\)/);
     assert.match(xml, /<Cell N="EndArrow" V="13"\/>/);
+    // Visio refuse un fichier dont une forme écrit son texte après ses sous-formes (LibreOffice l'accepte)
+    assert.match(xml, /<\/Section><Text>Nœud<\/Text><Shapes>/);
+    assert.doesNotMatch(xml, /<\/Shapes><Text>/);
 });
 
 test('visio : paquet complet relu par le lecteur ZIP', async () => {
@@ -620,6 +653,8 @@ test('visio : paquet complet relu par le lecteur ZIP', async () => {
     assert.match(await texte('visio/pages/page1.xml'), /Type="Foreign"[\s\S]*CompressionType="PNG"><Rel r:id="rId1"\/>/);
     assert.match(await texte('visio/pages/_rels/page1.xml.rels'), /Target="..\/media\/image1.png"/);
     assert.match(await texte('docProps/core.xml'), /<dc:title>Essai &lt;&amp;&gt;<\/dc:title>/);
+    // Attribut de police au nom exact du format (Visio refuse un attribut inconnu)
+    assert.match(await texte('visio/document.xml'), /<FaceName NameU="Marianne" UnicodeRanges="[^"]*" CharSets="[^"]*" Panose="[^"]*" Flags="\d+"\/>/);
     assert.deepEqual([...await lire('visio/media/image1.png')], [137, 80, 78, 71, 1, 2, 3]);
     assert.equal(await lire('absent.xml'), null);
     for (const f of fichiers) {

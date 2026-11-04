@@ -3,7 +3,7 @@
 // ne fait que traduire les gestes et garder sous le pointeur le point visé.
 
 export const ZOOM_MIN = 0.1;
-export const ZOOM_MAX = 8;
+export const ZOOM_MAX = 64; // 6400 % : une feuille A0 reste sous les limites de taille des navigateurs
 const SEUIL = 4; // px : en deçà, un appui est un clic
 
 export const borner = (z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));

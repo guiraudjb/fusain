@@ -810,7 +810,7 @@ test('diagnostic : une ligne très longue ne fige pas le diagnostic', async () =
     assert.ok(Date.now() - debut < 2000);
 });
 
-test('éditeurs : accTitle/accDescr gardés, « # » et « %% » protégés, linkStyle suivi', () => {
+test('éditeurs : accTitle/accDescr gardés, entités gardées, « %% » protégé, linkStyle suivi', () => {
     const etats = editeurPour('stateDiagram');
     const e = etats.ecrire(etats.analyser('stateDiagram-v2\n  accTitle: Cycle\n  [*] --> A'));
     assert.ok(e.includes('accTitle: Cycle') && !e.includes('as accTitle'));
@@ -821,13 +821,9 @@ test('éditeurs : accTitle/accDescr gardés, « # » et « %% » protégés, lin
     assert.ok(ecrit.includes('linkStyle 1 stroke:red') && !ecrit.includes('linkStyle 2'));
     const st = lg.ecrire(lg.analyser('flowchart TD\n  A --> B\n  style A font-family:Marianne,arial,stroke:#000'));
     assert.ok(st.includes('font-family:Marianne,arial'));
-    const n = lg.analyser('flowchart TD\n  A --> B');
-    n.noeuds[0].texte = 'Ticket #42; urgent';
-    const relu = lg.analyser(lg.ecrire(n));
-    assert.equal(relu.noeuds.find((x) => x.id === 'A').texte, 'Ticket #42; urgent');
-    // Entité écrite dans le code : lue comme son caractère, réécrite comme lui (le rendu ne change pas)
-    const coeur = lg.analyser('flowchart TD\n    A[Avec #quot;guillemets#quot; et #9829;] --> B');
-    assert.equal(coeur.noeuds.find((x) => x.id === 'A').texte, 'Avec "guillemets" et ♥');
+    // Entité écrite dans le code : gardée telle quelle à la réécriture
+    const coeur = lg.ecrire(lg.analyser('flowchart TD\n    A[Avec #quot;guillemets#quot; et #9829;] --> B'));
+    assert.ok(coeur.includes('#9829;'));
     const g = editeurPour('gantt');
     const gm = g.analyser('gantt\n  dateFormat YYYY-MM-DD\n  section S\n  Tache :2026-01-01, 2d');
     gm.lignes.find((l) => l.t === 'tache').nom = '%% revoir';

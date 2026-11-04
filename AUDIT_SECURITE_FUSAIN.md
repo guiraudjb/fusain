@@ -21,7 +21,7 @@ FUSAIN reste un logiciel sans serveur applicatif, dont toutes les ressources son
 - empreintes SHA-256 vérifiées par le service worker avant toute mise en cache ;
 - aucune requête vers l'extérieur.
 
-L'audit a relevé **32 constats**, tous corrigés ou documentés dans la 0.22.0. Aucun ne permettait d'exécuter du code dans la page. Les plus importants sont les suivants :
+L'audit a relevé **32 constats** : 31 sont corrigés dans la 0.22.0, et un (F18) est documenté sans correction. Aucun ne permettait d'exécuter du code dans la page. Les plus importants sont les suivants :
 
 | Gravité | Nombre | Exemples |
 |---|---|---|
@@ -97,7 +97,7 @@ Les bibliothèques embarquées ne présentaient aucune vulnérabilité connue. T
 | F15 | Dans un schéma d'états, `Etat:::classe` devenait une description « ::classe ». | `js/diagrammes/etats.js` | La page passe en « code seul ». |
 | F16 | Les lignes `linkStyle N` gardaient leur numéro après la suppression d'un lien : le mauvais lien était stylé, ou le rendu échouait. | `js/diagrammes/logigramme.js` | Le style est rattaché au lien, et son numéro est recalculé à l'écriture. |
 | F17 | `style A font-family:Marianne,arial` perdait la suite de la valeur. | idem | Une virgule ne sépare deux propriétés que si un nom de propriété la suit. |
-| F18 | « Ticket #42; urgent » s'affichait « Ticket * urgent » : Mermaid lit `#42;` comme une entité. | `js/diagrammes/commun.js` | `#` est écrit `#35;` devant une forme d'entité. |
+| F18 | « Ticket #42; urgent » s'affiche « Ticket * urgent » : Mermaid lit `#42;` comme une entité. | `js/diagrammes/commun.js` | **Non corrigé.** Protéger le `#` changeait le rendu des entités écrites volontairement dans le code (`#9829;` pour ♥ : écart détecté par la recette de fidélité). C'est le comportement documenté de Mermaid, laissé tel quel. |
 | F19 | Une tâche, période, étape, idée ou un membre dont le texte commence par `%%` devenait un commentaire et disparaissait. | gantt, frise, parcours, carte mentale, classes | Une espace sans chasse précède le `%%`, ou le texte est encadré. |
 | F20 | Gantt : vider le début d'une tâche qui porte un identifiant produisait une date invalide. | `js/diagrammes/gantt.js` | Le début est exigé tant que l'identifiant existe. |
 | F21 | Export Visio : des noms de page en double, après troncature à 31 caractères, sont refusés par Visio. | `js/visio-format.js` | Les doublons reçoivent un numéro. |

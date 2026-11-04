@@ -3,10 +3,10 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.22.0-07b9cc2c9b';
+const VERSION_CACHE = 'fusain-0.22.0-58b24145e8';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
-    ['./AUDIT_SECURITE_FUSAIN.md', '45dc685a5082a698651fa0c7bf9302fa6e0ac7aeaf2e5c5dbb194eef0003a0e5'],
+    ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
     ['./Documentation/GUIDE_IMC.md', '98650cba5e75cbbd073794cbada1f4e830593ba654c50ebeadf48e0109da64bd'],
     ['./Documentation/GUIDE_UTILISATEUR.md', 'f089781075e40708704f6ca77ff18c3a9b3f2d21eac47620ae185077b9a06b16'],
     ['./Documentation/exemples-reseau/LISEZ-MOI.md', 'f8968ef6a9b7a6a7c19534c4178e3be15478be8d8c7e60e4baf37eda644f94a1'],
@@ -16,7 +16,7 @@ const FICHIERS = [
     ['./Documentation/exemples-reseau/imc-liens.xlsx', '1106fb0f63fe3555038d3b00663c16c9adfb6c22c37859c78cafc2955f5d3c85'],
     ['./Documentation/exemples-reseau/lldp-voisins.csv', 'e268acb050dce66e0c719edf058d580174a8cf5a7e3ffb753394b0033029ac3c'],
     ['./FUSAIN_cahier_des_charges.md', 'c00b7d7c0d2f2dbef481a1b6ba3da8769e55a05aa8d9b1f5c3420e4146f94fbf'],
-    ['./JOURNAL_DES_VERSIONS.md', '60dfb676677b28319784988b2a5da57ffbf58ae5172a9a43d9cb2913c9c12f8e'],
+    ['./JOURNAL_DES_VERSIONS.md', '223076d4f648822059a3fecbcb2d89651cb1851f55c63bb9c5e18db0e4efed44'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '31f484109145ccb770987a47799d76e2c668b58cd136ca1013239fb3601f982e'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -63,7 +63,7 @@ const FICHIERS = [
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
     ['./js/diagrammes/carte.js', '902b266dd9dc20ad7f02b44a9089dedaff4751c583bda0eea15492ad63afb631'],
     ['./js/diagrammes/classes.js', 'd06157d33248204ae692bdcc5f2e7d610010e45cd46750baa08c9d6a019d43cd'],
-    ['./js/diagrammes/commun.js', 'c5529917e5ddc4e9f330d1f4316aca8d0bace18104ef31e41604e9850bfd556a'],
+    ['./js/diagrammes/commun.js', '443d4137599960b2e365e547ab55ea7e0f386d8cd548a9d02b4057a5f4a521f2'],
     ['./js/diagrammes/diapo.js', 'ce5a9455c165c690e5affb4e66ebe1075f6b2bb35ec93b069e8268a7e5f99592'],
     ['./js/diagrammes/entites.js', '3b3174ed2572bbda6ff719956194c99a1759dbad3811187ffe8b0cc173078af5'],
     ['./js/diagrammes/etats.js', '5e5f1f27f35be3fa569b12c180007b1c053161a6f66acd7f09ba95443d8f0e1c'],

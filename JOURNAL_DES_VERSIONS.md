@@ -4,7 +4,7 @@ Chaque version suit le même cycle : mesure ou essai → correction → recette 
 
 ## 0.22.0 — 4 novembre 2026 — audit de sécurité, revue de code, nomenclature CycloneDX 1.7
 
-- **Audit et revue** : 32 constats, tous corrigés ou documentés ; le détail est dans `AUDIT_SECURITE_FUSAIN.md`, ouvert depuis « À propos ».
+- **Audit et revue** : 32 constats, dont 31 corrigés et un documenté ; le détail est dans `AUDIT_SECURITE_FUSAIN.md`, ouvert depuis « À propos ».
 - **Sécurité** :
   - le diagnostic ne bloque plus l'onglet sur une ligne piégée (une ligne mesurée à 49 s dans Chrome) ;
   - les en-têtes `--- ` suivis d'espaces et les directives `%%{` non fermées ne contournent plus la liste blanche de configuration ;
@@ -31,7 +31,7 @@ Chaque version suit le même cycle : mesure ou essai → correction → recette 
 - **Éditeurs visuels** :
   - `accTitle:` et `accDescr:` sont reconnus ;
   - `linkStyle` suit son lien quand des liens sont supprimés ;
-  - `#42;` et les textes commençant par `%%` sont protégés ;
+  - les textes commençant par `%%` sont protégés (les entités `#…;` restent lues comme Mermaid les lit) ;
   - `Etat:::classe` fait passer la page en « code seul » ;
   - une tâche Gantt identifiée exige un début.
 - **Export Visio** : les noms de page en double sont numérotés.

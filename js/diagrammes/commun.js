@@ -29,20 +29,16 @@ export function nuancier(fondActuel, surChoix) {
         }));
 }
 
-// Texte d'un libellé Mermaid : guillemets et retours à la ligne ne peuvent pas « sortir » du libellé (§7.3)
+// Texte d'un libellé Mermaid : guillemets et retours à la ligne ne peuvent pas « sortir » du libellé (§7.3).
+// Les entités de Mermaid (« #9829; ») sont laissées telles quelles, comme Mermaid les lit : « #42; » saisi dans un
+// libellé s'affiche donc « * » (comportement documenté de Mermaid, voir l'audit F18).
 export function echapper(texte) {
     // L'accent grave ouvrirait une « chaîne Markdown » de Mermaid ; la tabulation n'est pas admise dans un libellé
-    // Un « # » suivi d'un mot et d'un point-virgule serait lu comme une entité (« #42; ») : il est écrit « #35; »
-    return String(texte).replace(/\t/g, ' ').replace(/#(?=\w+;)/g, '#35;').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
+    return String(texte).replace(/\t/g, ' ').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
 }
 
-// Entités de Mermaid (« #9829; », « #amp; ») : lues comme le caractère qu'elles affichent, réécrites comme ce caractère
-const ENTITES = { amp: '&', lt: '<', gt: '>', apos: '\'', nbsp: '\u00a0', hearts: '♥', copy: '©', reg: '®', deg: '°', euro: '€' };
 export function desechapper(texte) {
-    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n')
-        .replace(/#(\d{1,7});/g, (entier, n) => (n === '35' || Number(n) > 0x10ffff || Number(n) === 0 ? entier : String.fromCodePoint(Number(n))))
-        .replace(/#([a-z]+);/g, (entier, nom) => ENTITES[nom] ?? entier)
-        .replace(/#35;/g, '#');
+    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n');
 }
 
 export function sansGuillemets(texte) {

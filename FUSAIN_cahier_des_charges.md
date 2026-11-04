@@ -517,15 +517,15 @@ Les deux sont versionnés avec le code, mis à jour dans le même changement que
 | Composant | Rôle | Version | Licence | Provenance |
 |---|---|---|---|---|
 | DSFR | Système de Design de l'État : composants, styles, police Marianne, icônes | 1.15.4 | Etalab-2.0 | Registre npm `@gouvfr/dsfr` |
-| Mermaid | Analyse et rendu des diagrammes | 12.1.0 | MIT | Registre npm `mermaid` |
+| Mermaid | Analyse et rendu des diagrammes | 12.3.0 | MIT | Registre npm `mermaid` |
 | Extension ZenUML de Mermaid | Diagrammes de séquence ZenUML, chargée à la demande (ajoutée en 0.8.0) | 1.0.1 | MIT | Registre npm `@mermaid-js/mermaid-zenuml` |
-| D3 | Projections, tracés et placement des étiquettes des cartes, chargé à la demande (ajouté en 0.14.0) | 7.9.0 | ISC | Registre npm `d3` |
+| D3 | Projections, tracés et placement des étiquettes des cartes, chargé à la demande (ajouté en 0.14.0) | 7.9.2 | ISC | Registre npm `d3` |
 | topojson-client | Lecture des fonds de carte TopoJSON, chargé à la demande (ajouté en 0.14.0) | 3.1.0 | ISC | Registre npm `topojson-client` |
 | DOMPurify | Assainissement du SVG avant insertion | 3.4.17 | Apache-2.0 ou MPL-2.0 | Registre npm `dompurify` |
 | jsPDF | Génération du fichier PDF | 4.2.1 | MIT | Registre npm `jspdf` |
-| svg2pdf.js | Conversion vectorielle SVG → PDF | 2.8.1 | MIT | Registre npm `svg2pdf.js` |
+| svg2pdf.js | Conversion vectorielle SVG → PDF | 2.9.0 | MIT | Registre npm `svg2pdf.js` |
 
-Versions figées le 13 octobre 2026 : dernières versions amont à cette date, contrôlées sur OSV.dev (aucune vulnérabilité connue). La nomenclature consigne, par fichier embarqué : version exacte, empreinte SHA-256, URL de l'archive d'origine, licence, date du dernier contrôle.
+Versions figées le 13 octobre 2026, revues le 4 novembre 2026 (0.22.0 : Mermaid, D3 et svg2pdf.js à leur dernière version) : dernières versions amont à cette date, contrôlées sur OSV.dev (aucune vulnérabilité connue). La nomenclature consigne, par fichier embarqué : version exacte, empreinte SHA-256, URL de l'archive d'origine, licence, date du dernier contrôle.
 
 Sont également recensés, bien qu'ils ne soient pas des dépendances embarquées :
 

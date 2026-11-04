@@ -1,19 +1,25 @@
 // Frise chronologique : périodes et événements
 import { h, bouton, champTexte } from '../dom.js';
-import { separerPreambule, deplacer, actionsListe, plan, marquer } from './commun.js';
+import { separerPreambule, deplacer, actionsListe, plan, marquer, ligneAccessible } from './commun.js';
 
 // Deux-points, point-virgule et dièse structurent la syntaxe : ils sont retirés des textes
-const propre = (t) => String(t).replace(/[:;#\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+// Un texte qui commence par « %% » serait un commentaire : il est précédé d'une espace sans chasse
+const propre = (t) => String(t).replace(/[:;#\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^%%/, '\u200b%%');
 const MOT_CLE = /^(title|section|timeline|accTitle|accDescr)(\s|$)/i;
 const nomSur = (t, repli) => { const n = propre(t) || repli; return MOT_CLE.test(n) ? `« ${n} »` : n; };
 
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);
     if (!/^timeline(\s+(LR|TD))?$/.test((corps[0] || '').trim())) throw new Error('La première ligne doit être « timeline ».');
-    const modele = { preambule, entete: corps[0].trim(), titre: '', items: [] };
+    const modele = { preambule, entete: corps[0].trim(), titre: '', accessible: [], items: [] };
     corps.slice(1).forEach((brute, n) => {
         const ligne = brute.trim();
         if (!ligne || ligne.startsWith('%%')) return;
+        try {
+            if (ligneAccessible(ligne)) { modele.accessible.push(ligne); return; }
+        } catch (e) {
+            throw new Error(`Ligne ${n + 2 + preambule.length} : ${e.message}, non gérée par l'édition visuelle.`);
+        }
         const mot = ligne.match(/^([A-Za-z]+)(?=\s|$)/)?.[1] || '';
         const reste = ligne.slice(mot.length).trim();
         if (mot === 'title') { modele.titre = reste; return; }
@@ -34,6 +40,7 @@ export function analyser(code) {
 export function ecrire(modele) {
     const lignes = [...modele.preambule, modele.entete || 'timeline'];
     if (propre(modele.titre)) lignes.push(`    title ${propre(modele.titre)}`);
+    for (const l of modele.accessible || []) lignes.push(`    ${l}`);
     for (const item of modele.items) {
         if (item.t === 'section') { lignes.push(`    section ${propre(item.nom) || 'Section'}`); continue; }
         const evenements = item.evenements.map(propre).filter(Boolean);

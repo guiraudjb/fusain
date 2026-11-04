@@ -1,6 +1,6 @@
 // Architecture technique : services, groupes et liaisons
 import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
-import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible } from './commun.js';
 import { PREFIXE, choisirIcone } from '../icones.js';
 
 const ICONES = [['server', 'Serveur'], ['database', 'Base de données'], ['disk', 'Disque'], ['cloud', 'Nuage'], ['internet', 'Internet'], ['blank', 'Carré plein'], ['', 'Sans icône']];
@@ -16,7 +16,7 @@ export function analyser(code) {
     if ((corps[0] || '').trim() !== 'architecture-beta') throw new Error('La première ligne doit être « architecture-beta ».');
     const modele = { preambule, groupes: [], services: [], liens: [], brut: [] };
     parLigne(corps.slice(1), preambule, (ligne) => {
-        if (/^(title|accTitle|accDescr)\s/.test(ligne)) { modele.brut.push(ligne); return; }
+        if (/^(title)\s/.test(ligne) || ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
         let m = ligne.match(RE_BLOC);
         if (m) {
             (m[1] === 'group' ? modele.groupes : modele.services).push({ id: m[2], icone: m[3] || '', nom: m[4] === undefined ? '' : sansGuillemets(m[4]), parent: m[5] || '' });

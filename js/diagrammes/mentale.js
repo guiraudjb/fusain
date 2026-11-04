@@ -63,7 +63,8 @@ export function ecrire(modele) {
         const texte = noeud.texte.trim() || 'Sans titre';
         let nomForme = noeud.forme;
         // Un texte simple ne peut pas contenir de caractères de structure : il est alors encadré
-        if (nomForme === 'defaut' && !TEXTE_NU.test(texte)) nomForme = 'arrondi';
+        // « %% » en tête ferait du nœud un commentaire : il est encadré lui aussi
+        if (nomForme === 'defaut' && (!TEXTE_NU.test(texte) || texte.startsWith('%%'))) nomForme = 'arrondi';
         const forme = FORMES.find((f) => f[0] === nomForme);
         lignes.push(marge + (forme ? `n${n}${forme[1]}"${echapper(texte)}"${forme[2]}` : texte));
         for (const extra of noeud.extras) lignes.push(marge + extra);

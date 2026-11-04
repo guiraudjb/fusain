@@ -3,7 +3,7 @@ import { VERSION, DATE_VERSION } from './version.js';
 import { h, s, vider, bouton, champTexte, champSelect, annoncer, message, modale, ouvrirModale, fermerModale, confirmer } from './dom.js';
 import { etat, abonner, charger, modifier, allerPage, annuler, retablir, peutAnnuler, peutRetablir, pageCourante, nouveauDocument, nouvellePage, idPage, marquerEnregistre } from './etat.js';
 import { FORMATS, MM_PAR_PX, dimensions } from './formats.js';
-import { typeDiagramme } from './securite.js';
+import { typeDiagramme, TAILLE_MAX_CODE, TAILLE_MAX_CARTE } from './securite.js';
 import { THEMES, rendreSchema, composerPage, decrireErreur, verifierPropositions } from './rendu.js';
 import { diagnostiquer } from './diagnostic.js';
 import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
@@ -44,8 +44,8 @@ const boutons = {};
 
 function construireBarre() {
     const groupe = (...enfants) => h('div', { class: 'fusain-barre__groupe' }, enfants);
-    boutons.annuler = bouton('Annuler', { icone: 'arrow-go-back-line', seulIcone: true, titre: 'Annuler (Ctrl+Z)', onclick: annuler });
-    boutons.retablir = bouton('Rétablir', { icone: 'arrow-go-forward-line', seulIcone: true, titre: 'Rétablir (Ctrl+Y)', onclick: retablir });
+    boutons.annuler = bouton('Annuler', { icone: 'arrow-go-back-line', seulIcone: true, titre: 'Annuler (Ctrl+Z)', onclick: () => { validerCodeEnAttente(); annuler(); } });
+    boutons.retablir = bouton('Rétablir', { icone: 'arrow-go-forward-line', seulIcone: true, titre: 'Rétablir (Ctrl+Y)', onclick: () => { validerCodeEnAttente(); retablir(); } });
     boutons.zoom = h('button', { type: 'button', class: 'fusain-barre__zoom', title: 'Niveau de zoom : choisir une valeur', 'aria-haspopup': 'true', 'aria-expanded': 'false', onclick: () => ouvrirMenuZoom() });
     boutons.visuel = bouton('Visuel', { icone: 'drag-move-2-line', 'aria-pressed': 'true', onclick: () => changerMode('visuel') });
     boutons.code = bouton('Code', { icone: 'code-s-slash-line', 'aria-pressed': 'false', onclick: () => changerMode('code') });
@@ -703,7 +703,7 @@ function afficherPanneau() {
     if (rang < 0) return;
     const apres = [...zones.panneau.querySelectorAll(focusables)];
     const memes = nom ? apres.filter((el) => el.tagName === actif.tagName && nomChamp(el) === nom) : [];
-    (memes[rangNom] || memes[0] || apres[rang])?.focus({ preventScroll: true });
+    (memes[rangNom] || apres[rang])?.focus({ preventScroll: true });
 }
 
 // ---------- Pages ----------
@@ -847,8 +847,14 @@ async function nouveau() {
 
 function enregistrer() {
     validerCodeEnAttente();
-    telecharger(new Blob([serialiser(etat.doc)], { type: 'application/json' }), `${nomDocument(etat.doc)}.fusain.json`);
+    const texte = serialiser(etat.doc);
+    telecharger(new Blob([texte], { type: 'application/json' }), `${nomDocument(etat.doc)}.fusain.json`);
     marquerEnregistre();
+    // Le fichier est relu comme à l'ouverture : un document que FUSAIN refuserait est signalé tout de suite
+    try { lireJson(texte); } catch (e) {
+        message('Fichier enregistré, mais il ne pourra pas être rouvert', `${e.message} Réduisez la page concernée, puis enregistrez de nouveau.`, 'error', 0);
+        return;
+    }
     message('Document enregistré', 'Le fichier JSON a été remis à votre navigateur.', 'success', 4000);
 }
 
@@ -857,7 +863,11 @@ async function ouvrir(fichier) {
     try {
         const texte = await lireFichier(fichier);
         if (/\.(mmd|mermaid|txt)$/i.test(fichier.name)) {
-            ajouterPage(texte.slice(0, 50000), fichier.name.replace(/\.[^.]+$/, '').slice(0, 100));
+            // Code trop long : refusé plutôt que coupé au milieu d'une ligne
+            const max = typeDiagramme(texte) === 'carte' ? TAILLE_MAX_CARTE : TAILLE_MAX_CODE;
+            if (texte.length > max) throw new Error(`Le code dépasse la taille maximale d'une page (${max} caractères).`);
+            if (etat.doc.pages.length >= PAGES_MAX) throw new Error(`Le document compte déjà ${PAGES_MAX} pages.`);
+            ajouterPage(texte, fichier.name.replace(/\.[^.]+$/, '').slice(0, 100));
             message('Code importé', 'Le schéma a été ajouté dans une nouvelle page.', 'success', 4000);
             return;
         }
@@ -981,7 +991,8 @@ function ouvrirAPropos() {
             h('li', {}, document_('./Documentation/GUIDE_UTILISATEUR.md', 'Guide utilisateur')),
             h('li', {}, document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC (liens et équipements en Excel)')),
             h('li', {}, document_('./FUSAIN_cahier_des_charges.md', 'Cahier des charges')),
-            h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX'))),
+            h('li', {}, document_('./NOMENCLATURE_LOGICIELLE_FUSAIN.md', 'Nomenclature logicielle (SBOM)'), ' — ', lien('./sbom/fusain-sbom-cyclonedx.json', 'format CycloneDX')),
+            h('li', {}, document_('./AUDIT_SECURITE_FUSAIN.md', 'Audit de sécurité et revue de code'))),
         h('h2', { class: 'fr-h6' }, 'Erreurs de syntaxe et index des syntaxes'),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.21.0, une faute dans le code est expliquée : ligne réelle, objet que la ligne essaie d\'écrire, cause, syntaxe attendue et exemple. Des réparations sont proposées après avoir été essayées ; « Appliquer » s\'annule par Ctrl+Z. Le bouton « Syntaxes » du mode code ouvre l\'index des écritures de chaque type de schéma.'),
         h('h2', { class: 'fr-h6' }, 'Export vers Microsoft Visio'),
@@ -1140,7 +1151,14 @@ async function demarrer() {
     let doc = null;
     const brouillon = await lireBrouillon();
     if (brouillon) {
-        try { doc = lireJson(brouillon); } catch { doc = null; }
+        try {
+            doc = lireJson(brouillon);
+        } catch (e) {
+            // Le brouillon serait écrasé par le document neuf : il est d'abord mis de côté, et l'utilisateur prévenu
+            doc = null;
+            await enregistrerBrouillon(brouillon, 'illisible');
+            message('Brouillon non repris', `Le dernier brouillon n'a pas pu être relu (${e.message}). Il est conservé à part dans ce navigateur ; « Effacer les données locales » le supprime.`, 'warning', 0);
+        }
     }
     charger(doc || nouveauDocument(MODELE_INITIAL.code), { modifie: false });
     if (doc) message('Brouillon repris', 'Votre dernier travail a été rechargé depuis ce navigateur. Pensez à l\'enregistrer dans un fichier.', 'info', 7000);

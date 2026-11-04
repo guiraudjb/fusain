@@ -1,24 +1,59 @@
 {
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
   "bomFormat": "CycloneDX",
-  "specVersion": "1.6",
-  "serialNumber": "urn:uuid:11502d9d-fd57-5b7b-88d7-188033ca979d",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:52e22ebb-e7cb-5087-8f7d-598912d8ec98",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-03T00:00:00Z",
-    "component": {
-      "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.21.2",
-      "name": "FUSAIN",
-      "version": "0.21.2",
-      "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.21.2"
-    },
+    "timestamp": "2026-11-04T00:00:00Z",
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
     "tools": {
       "components": [
         {
           "type": "application",
-          "name": "outils/generer.py"
+          "name": "outils/generer.py",
+          "version": "0.22.0"
         }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.22.0",
+      "supplier": {
+        "name": "guiraudjb",
+        "url": [
+          "https://github.com/guiraudjb/fusain"
+        ]
+      },
+      "name": "FUSAIN",
+      "version": "0.22.0",
+      "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
+      "purl": "pkg:github/guiraudjb/fusain@0.22.0",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/guiraudjb/fusain"
+        },
+        {
+          "type": "website",
+          "url": "https://guiraudjb.github.io/fusain/"
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:licence",
+          "value": "Aucune licence fixée pour le code propre à FUSAIN (nomenclature §4, point 4)."
+        }
+      ]
+    },
+    "supplier": {
+      "name": "guiraudjb",
+      "url": [
+        "https://github.com/guiraudjb/fusain"
       ]
     }
   },
@@ -26,14 +61,21 @@
     {
       "type": "library",
       "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "supplier": {
+        "name": "Service d'information du Gouvernement (SIG)",
+        "url": [
+          "https://github.com/GouvernementFR/dsfr"
+        ]
+      },
       "name": "@gouvfr/dsfr",
       "version": "1.15.4",
       "description": "Système de Design de l'État : composants, styles, police Marianne, icônes",
-      "purl": "pkg:npm/%40gouvfr/dsfr@1.15.4",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "etalab-2.0"
+            "id": "etalab-2.0",
+            "acknowledgement": "declared"
           }
         }
       ],
@@ -43,16 +85,25 @@
           "content": "e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb"
         }
       ],
+      "purl": "pkg:npm/%40gouvfr/dsfr@1.15.4",
       "externalReferences": [
         {
           "type": "distribution",
           "url": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/GouvernementFR/dsfr"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
           "value": "libs/dsfr-v1.15.4"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "demarrage"
         },
         {
           "name": "fusain:note",
@@ -62,6 +113,7 @@
       "components": [
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/LICENSE.md",
           "name": "libs/dsfr-v1.15.4/LICENSE.md",
           "hashes": [
             {
@@ -72,6 +124,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/dsfr.min.css",
           "name": "libs/dsfr-v1.15.4/dsfr.min.css",
           "hashes": [
             {
@@ -82,6 +135,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/dsfr.module.min.js",
           "name": "libs/dsfr-v1.15.4/dsfr.module.min.js",
           "hashes": [
             {
@@ -92,6 +146,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/android-chrome-192x192.png",
           "name": "libs/dsfr-v1.15.4/favicon/android-chrome-192x192.png",
           "hashes": [
             {
@@ -102,6 +157,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/android-chrome-512x512.png",
           "name": "libs/dsfr-v1.15.4/favicon/android-chrome-512x512.png",
           "hashes": [
             {
@@ -112,6 +168,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/apple-touch-icon.png",
           "name": "libs/dsfr-v1.15.4/favicon/apple-touch-icon.png",
           "hashes": [
             {
@@ -122,6 +179,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/favicon.ico",
           "name": "libs/dsfr-v1.15.4/favicon/favicon.ico",
           "hashes": [
             {
@@ -132,6 +190,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/favicon.svg",
           "name": "libs/dsfr-v1.15.4/favicon/favicon.svg",
           "hashes": [
             {
@@ -142,6 +201,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/favicon/manifest.webmanifest",
           "name": "libs/dsfr-v1.15.4/favicon/manifest.webmanifest",
           "hashes": [
             {
@@ -152,6 +212,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts-ttf/Marianne-Bold.ttf",
           "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Bold.ttf",
           "hashes": [
             {
@@ -162,6 +223,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular.ttf",
           "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular.ttf",
           "hashes": [
             {
@@ -172,6 +234,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Bold.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Bold.woff2",
           "hashes": [
             {
@@ -182,6 +245,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Bold_Italic.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Bold_Italic.woff2",
           "hashes": [
             {
@@ -192,6 +256,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Light.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Light.woff2",
           "hashes": [
             {
@@ -202,6 +267,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Light_Italic.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Light_Italic.woff2",
           "hashes": [
             {
@@ -212,6 +278,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Medium.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Medium.woff2",
           "hashes": [
             {
@@ -222,6 +289,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Medium_Italic.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Medium_Italic.woff2",
           "hashes": [
             {
@@ -232,6 +300,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Regular.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Regular.woff2",
           "hashes": [
             {
@@ -242,6 +311,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Marianne-Regular_Italic.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Marianne-Regular_Italic.woff2",
           "hashes": [
             {
@@ -252,6 +322,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Spectral-ExtraBold.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Spectral-ExtraBold.woff2",
           "hashes": [
             {
@@ -262,6 +333,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts/Spectral-Regular.woff2",
           "name": "libs/dsfr-v1.15.4/fonts/Spectral-Regular.woff2",
           "hashes": [
             {
@@ -272,6 +344,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icones-dsfr.json",
           "name": "libs/dsfr-v1.15.4/icones-dsfr.json",
           "hashes": [
             {
@@ -282,6 +355,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-down-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-down-line.svg",
           "hashes": [
             {
@@ -292,6 +366,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-down-s-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-down-s-line.svg",
           "hashes": [
             {
@@ -302,6 +377,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-go-back-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-go-back-line.svg",
           "hashes": [
             {
@@ -312,6 +388,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-go-forward-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-go-forward-line.svg",
           "hashes": [
             {
@@ -322,6 +399,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-left-right-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-left-right-line.svg",
           "hashes": [
             {
@@ -332,6 +410,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-left-s-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-left-s-line.svg",
           "hashes": [
             {
@@ -342,6 +421,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-right-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-right-line.svg",
           "hashes": [
             {
@@ -352,6 +432,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-right-s-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-right-s-line.svg",
           "hashes": [
             {
@@ -362,6 +443,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-up-down-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-down-line.svg",
           "hashes": [
             {
@@ -372,6 +454,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-up-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-line.svg",
           "hashes": [
             {
@@ -382,6 +465,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/arrow-up-s-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/arrow-up-s-line.svg",
           "hashes": [
             {
@@ -392,6 +476,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/fr--arrow-left-s-first-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/fr--arrow-left-s-first-line.svg",
           "hashes": [
             {
@@ -402,6 +487,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/arrows/fr--arrow-right-s-last-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/arrows/fr--arrow-right-s-last-line.svg",
           "hashes": [
             {
@@ -412,6 +498,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/business/briefcase-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/business/briefcase-fill.svg",
           "hashes": [
             {
@@ -422,6 +509,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/business/links-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/business/links-fill.svg",
           "hashes": [
             {
@@ -432,6 +520,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/business/mail-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/business/mail-line.svg",
           "hashes": [
             {
@@ -442,6 +531,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/business/stack-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/business/stack-line.svg",
           "hashes": [
             {
@@ -452,6 +542,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/design/drag-move-2-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/design/drag-move-2-line.svg",
           "hashes": [
             {
@@ -462,6 +553,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/design/layout-grid-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/design/layout-grid-line.svg",
           "hashes": [
             {
@@ -472,6 +564,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/development/code-s-slash-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/development/code-s-slash-line.svg",
           "hashes": [
             {
@@ -482,6 +575,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/device/save-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/device/save-line.svg",
           "hashes": [
             {
@@ -492,6 +586,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/document/file-add-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/document/file-add-line.svg",
           "hashes": [
             {
@@ -502,6 +597,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/editor/align-left.svg",
           "name": "libs/dsfr-v1.15.4/icons/editor/align-left.svg",
           "hashes": [
             {
@@ -512,6 +608,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/editor/fr--quote-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/editor/fr--quote-line.svg",
           "hashes": [
             {
@@ -522,6 +619,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/editor/translate-2.svg",
           "name": "libs/dsfr-v1.15.4/icons/editor/translate-2.svg",
           "hashes": [
             {
@@ -532,6 +630,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/bluesky-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/bluesky-fill.svg",
           "hashes": [
             {
@@ -542,6 +641,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/bluesky-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/bluesky-line.svg",
           "hashes": [
             {
@@ -552,6 +652,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/facebook-circle-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/facebook-circle-fill.svg",
           "hashes": [
             {
@@ -562,6 +663,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/facebook-circle-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/facebook-circle-line.svg",
           "hashes": [
             {
@@ -572,6 +674,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/fr--dailymotion-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/fr--dailymotion-fill.svg",
           "hashes": [
             {
@@ -582,6 +685,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/fr--tiktok-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/fr--tiktok-fill.svg",
           "hashes": [
             {
@@ -592,6 +696,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/github-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/github-fill.svg",
           "hashes": [
             {
@@ -602,6 +707,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/instagram-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/instagram-fill.svg",
           "hashes": [
             {
@@ -612,6 +718,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/linkedin-box-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/linkedin-box-fill.svg",
           "hashes": [
             {
@@ -622,6 +729,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/linkedin-box-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/linkedin-box-line.svg",
           "hashes": [
             {
@@ -632,6 +740,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/mastodon-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/mastodon-fill.svg",
           "hashes": [
             {
@@ -642,6 +751,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/mastodon-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/mastodon-line.svg",
           "hashes": [
             {
@@ -652,6 +762,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/snapchat-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/snapchat-fill.svg",
           "hashes": [
             {
@@ -662,6 +773,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/telegram-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/telegram-fill.svg",
           "hashes": [
             {
@@ -672,6 +784,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/threads-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/threads-fill.svg",
           "hashes": [
             {
@@ -682,6 +795,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/threads-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/threads-line.svg",
           "hashes": [
             {
@@ -692,6 +806,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/twitch-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/twitch-fill.svg",
           "hashes": [
             {
@@ -702,6 +817,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/twitter-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/twitter-fill.svg",
           "hashes": [
             {
@@ -712,6 +828,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/twitter-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/twitter-line.svg",
           "hashes": [
             {
@@ -722,6 +839,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/twitter-x-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/twitter-x-fill.svg",
           "hashes": [
             {
@@ -732,6 +850,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/twitter-x-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/twitter-x-line.svg",
           "hashes": [
             {
@@ -742,6 +861,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/vimeo-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/vimeo-fill.svg",
           "hashes": [
             {
@@ -752,6 +872,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/logo/youtube-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/logo/youtube-fill.svg",
           "hashes": [
             {
@@ -762,6 +883,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/media/fullscreen-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/media/fullscreen-line.svg",
           "hashes": [
             {
@@ -772,6 +894,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/add-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/add-line.svg",
           "hashes": [
             {
@@ -782,6 +905,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/check-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/check-line.svg",
           "hashes": [
             {
@@ -792,6 +916,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/checkbox-circle-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/checkbox-circle-line.svg",
           "hashes": [
             {
@@ -802,6 +927,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/close-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/close-line.svg",
           "hashes": [
             {
@@ -812,6 +938,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/delete-bin-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/delete-bin-line.svg",
           "hashes": [
             {
@@ -822,6 +949,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/download-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/download-line.svg",
           "hashes": [
             {
@@ -832,6 +960,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/error-warning-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/error-warning-fill.svg",
           "hashes": [
             {
@@ -842,6 +971,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/external-link-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/external-link-line.svg",
           "hashes": [
             {
@@ -852,6 +982,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--alert-warning-2-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--alert-warning-2-fill.svg",
           "hashes": [
             {
@@ -862,6 +993,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--alert-warning-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--alert-warning-fill.svg",
           "hashes": [
             {
@@ -872,6 +1004,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--error-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--error-fill.svg",
           "hashes": [
             {
@@ -882,6 +1015,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--info-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--info-fill.svg",
           "hashes": [
             {
@@ -892,6 +1026,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--success-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--success-fill.svg",
           "hashes": [
             {
@@ -902,6 +1037,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--theme-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--theme-fill.svg",
           "hashes": [
             {
@@ -912,6 +1048,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/fr--warning-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/fr--warning-fill.svg",
           "hashes": [
             {
@@ -922,6 +1059,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/information-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/information-line.svg",
           "hashes": [
             {
@@ -932,6 +1070,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/menu-2-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/menu-2-fill.svg",
           "hashes": [
             {
@@ -942,6 +1081,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/menu-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/menu-fill.svg",
           "hashes": [
             {
@@ -952,6 +1092,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/question-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/question-line.svg",
           "hashes": [
             {
@@ -962,6 +1103,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/refresh-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/refresh-line.svg",
           "hashes": [
             {
@@ -972,6 +1114,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/search-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/search-line.svg",
           "hashes": [
             {
@@ -982,6 +1125,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/upload-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/upload-line.svg",
           "hashes": [
             {
@@ -992,6 +1136,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/zoom-in-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/zoom-in-line.svg",
           "hashes": [
             {
@@ -1002,6 +1147,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/system/zoom-out-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/system/zoom-out-line.svg",
           "hashes": [
             {
@@ -1012,6 +1158,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/user/account-circle-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/user/account-circle-fill.svg",
           "hashes": [
             {
@@ -1022,6 +1169,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/user/team-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/user/team-line.svg",
           "hashes": [
             {
@@ -1032,6 +1180,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/weather/flashlight-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/weather/flashlight-fill.svg",
           "hashes": [
             {
@@ -1042,6 +1191,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/weather/heavy-showers-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/weather/heavy-showers-fill.svg",
           "hashes": [
             {
@@ -1052,6 +1202,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/weather/moon-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/weather/moon-line.svg",
           "hashes": [
             {
@@ -1062,6 +1213,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/weather/sun-line.svg",
           "name": "libs/dsfr-v1.15.4/icons/weather/sun-line.svg",
           "hashes": [
             {
@@ -1072,6 +1224,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/icons/weather/typhoon-fill.svg",
           "name": "libs/dsfr-v1.15.4/icons/weather/typhoon-fill.svg",
           "hashes": [
             {
@@ -1082,6 +1235,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/utility/icons/icons.min.css",
           "name": "libs/dsfr-v1.15.4/utility/icons/icons.min.css",
           "hashes": [
             {
@@ -1094,34 +1248,50 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/mermaid@12.1.0",
+      "bom-ref": "pkg:npm/mermaid@12.3.0",
+      "supplier": {
+        "name": "Mermaid",
+        "url": [
+          "https://github.com/mermaid-js/mermaid"
+        ]
+      },
       "name": "mermaid",
-      "version": "12.1.0",
+      "version": "12.3.0",
       "description": "Analyse et rendu des diagrammes",
-      "purl": "pkg:npm/mermaid@12.1.0",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "id": "MIT",
+            "acknowledgement": "declared"
           }
         }
       ],
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a"
+          "content": "be0684e8d20bfc874df12c0f04927a5c482f57f2200eec54cca52a4583fd4040"
         }
       ],
+      "purl": "pkg:npm/mermaid@12.3.0",
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz"
+          "url": "https://registry.npmjs.org/mermaid/-/mermaid-12.3.0.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/mermaid-js/mermaid"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
-          "value": "libs/mermaid-v12.1.0"
+          "value": "libs/mermaid-v12.3.0"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "demarrage"
         },
         {
           "name": "fusain:note",
@@ -1131,7 +1301,8 @@
       "components": [
         {
           "type": "file",
-          "name": "libs/mermaid-v12.1.0/LICENSE",
+          "bom-ref": "pkg:npm/mermaid@12.3.0#libs/mermaid-v12.3.0/LICENSE",
+          "name": "libs/mermaid-v12.3.0/LICENSE",
           "hashes": [
             {
               "alg": "SHA-256",
@@ -1141,27 +1312,55 @@
         },
         {
           "type": "file",
-          "name": "libs/mermaid-v12.1.0/mermaid.min.js",
+          "bom-ref": "pkg:npm/mermaid@12.3.0#libs/mermaid-v12.3.0/mermaid.min.js",
+          "name": "libs/mermaid-v12.3.0/mermaid.min.js",
           "hashes": [
             {
               "alg": "SHA-256",
-              "content": "6484afc32872a3aa16cac9a76ba1816a1ed4cc870a6593cc2e17757750f518b2"
+              "content": "336df803d87a38b70a01e736e666c8f7601d2ce42f5e47c8fafe5d721074b9a3"
             }
           ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/mermaid@12.3.0#inclus/pkg:npm/dompurify@3.4.17",
+          "name": "dompurify",
+          "scope": "required",
+          "licenses": [
+            {
+              "expression": "(MPL-2.0 OR Apache-2.0)",
+              "acknowledgement": "declared"
+            }
+          ],
+          "purl": "pkg:npm/dompurify@3.4.17",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Copie interne de Mermaid, version relevée dans le fichier."
+            }
+          ],
+          "version": "3.4.17"
         }
       ]
     },
     {
       "type": "library",
       "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
+      "supplier": {
+        "name": "Mermaid",
+        "url": [
+          "https://github.com/mermaid-js/mermaid"
+        ]
+      },
       "name": "@mermaid-js/mermaid-zenuml",
       "version": "1.0.1",
       "description": "Extension de Mermaid pour les diagrammes de séquence ZenUML, chargée à la demande",
-      "purl": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "id": "MIT",
+            "acknowledgement": "declared"
           }
         }
       ],
@@ -1171,16 +1370,25 @@
           "content": "ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a"
         }
       ],
+      "purl": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
       "externalReferences": [
         {
           "type": "distribution",
           "url": "https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/mermaid-js/mermaid"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
           "value": "libs/mermaid-zenuml-v1.0.1"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "a-la-demande"
         },
         {
           "name": "fusain:note",
@@ -1190,6 +1398,7 @@
       "components": [
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#libs/mermaid-zenuml-v1.0.1/LICENSE",
           "name": "libs/mermaid-zenuml-v1.0.1/LICENSE",
           "hashes": [
             {
@@ -1200,6 +1409,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#libs/mermaid-zenuml-v1.0.1/mermaid-zenuml.min.js",
           "name": "libs/mermaid-zenuml-v1.0.1/mermaid-zenuml.min.js",
           "hashes": [
             {
@@ -1207,19 +1417,132 @@
               "content": "f75662869d22aac58870e52370fe4c46b89b9710bf4b03df93b3227b5e18e730"
             }
           ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/%40zenuml/core",
+          "name": "@zenuml/core",
+          "scope": "required",
+          "licenses": [
+            {
+              "license": {
+                "id": "MIT",
+                "acknowledgement": "declared"
+              }
+            }
+          ],
+          "purl": "pkg:npm/%40zenuml/core",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Version exacte non inscrite dans le fichier (3.47.9 ou plus récente à la date de construction)."
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/react@19.2.3",
+          "name": "react",
+          "scope": "required",
+          "licenses": [
+            {
+              "license": {
+                "id": "MIT",
+                "acknowledgement": "declared"
+              }
+            }
+          ],
+          "purl": "pkg:npm/react@19.2.3",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Version relevée dans le fichier."
+            }
+          ],
+          "version": "19.2.3"
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/react-dom@19.2.3",
+          "name": "react-dom",
+          "scope": "required",
+          "licenses": [
+            {
+              "license": {
+                "id": "MIT",
+                "acknowledgement": "declared"
+              }
+            }
+          ],
+          "purl": "pkg:npm/react-dom@19.2.3",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Version relevée dans le fichier."
+            }
+          ],
+          "version": "19.2.3"
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/marked",
+          "name": "marked",
+          "scope": "required",
+          "licenses": [
+            {
+              "license": {
+                "id": "MIT",
+                "acknowledgement": "declared"
+              }
+            }
+          ],
+          "purl": "pkg:npm/marked",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Branche 4.x d'après les options présentes (mangle, sanitize déprécié) ; version exacte non inscrite."
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+          "name": "dompurify",
+          "scope": "required",
+          "licenses": [
+            {
+              "expression": "(MPL-2.0 OR Apache-2.0)",
+              "acknowledgement": "declared"
+            }
+          ],
+          "purl": "pkg:npm/dompurify@3.3.1",
+          "properties": [
+            {
+              "name": "fusain:note",
+              "value": "Copie interne de ZenUML, version relevée dans le fichier."
+            }
+          ],
+          "version": "3.3.1"
         }
       ]
     },
     {
       "type": "library",
       "bom-ref": "pkg:npm/dompurify@3.4.17",
+      "supplier": {
+        "name": "Cure53",
+        "url": [
+          "https://github.com/cure53/DOMPurify"
+        ]
+      },
       "name": "dompurify",
       "version": "3.4.17",
       "description": "Assainissement du SVG avant insertion dans la page",
-      "purl": "pkg:npm/dompurify@3.4.17",
+      "scope": "required",
       "licenses": [
         {
-          "expression": "(MPL-2.0 OR Apache-2.0)"
+          "expression": "(MPL-2.0 OR Apache-2.0)",
+          "acknowledgement": "declared"
         }
       ],
       "hashes": [
@@ -1228,16 +1551,25 @@
           "content": "056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7"
         }
       ],
+      "purl": "pkg:npm/dompurify@3.4.17",
       "externalReferences": [
         {
           "type": "distribution",
           "url": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/cure53/DOMPurify"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
           "value": "libs/dompurify-v3.4.17"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "demarrage"
         },
         {
           "name": "fusain:note",
@@ -1247,6 +1579,7 @@
       "components": [
         {
           "type": "file",
+          "bom-ref": "pkg:npm/dompurify@3.4.17#libs/dompurify-v3.4.17/LICENSE",
           "name": "libs/dompurify-v3.4.17/LICENSE",
           "hashes": [
             {
@@ -1257,6 +1590,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/dompurify@3.4.17#libs/dompurify-v3.4.17/purify.min.js",
           "name": "libs/dompurify-v3.4.17/purify.min.js",
           "hashes": [
             {
@@ -1270,14 +1604,21 @@
     {
       "type": "library",
       "bom-ref": "pkg:npm/jspdf@4.2.1",
+      "supplier": {
+        "name": "Parallax / yWorks",
+        "url": [
+          "https://github.com/parallax/jsPDF"
+        ]
+      },
       "name": "jspdf",
       "version": "4.2.1",
       "description": "Génération du fichier PDF",
-      "purl": "pkg:npm/jspdf@4.2.1",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "id": "MIT",
+            "acknowledgement": "declared"
           }
         }
       ],
@@ -1287,16 +1628,25 @@
           "content": "e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a"
         }
       ],
+      "purl": "pkg:npm/jspdf@4.2.1",
       "externalReferences": [
         {
           "type": "distribution",
           "url": "https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/parallax/jsPDF"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
           "value": "libs/jspdf-v4.2.1"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "demarrage"
         },
         {
           "name": "fusain:note",
@@ -1306,6 +1656,7 @@
       "components": [
         {
           "type": "file",
+          "bom-ref": "pkg:npm/jspdf@4.2.1#libs/jspdf-v4.2.1/LICENSE",
           "name": "libs/jspdf-v4.2.1/LICENSE",
           "hashes": [
             {
@@ -1316,6 +1667,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/jspdf@4.2.1#libs/jspdf-v4.2.1/jspdf.umd.min.js",
           "name": "libs/jspdf-v4.2.1/jspdf.umd.min.js",
           "hashes": [
             {
@@ -1328,34 +1680,50 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/svg2pdf.js@2.8.1",
+      "bom-ref": "pkg:npm/svg2pdf.js@2.9.0",
+      "supplier": {
+        "name": "yWorks",
+        "url": [
+          "https://github.com/yWorks/svg2pdf.js"
+        ]
+      },
       "name": "svg2pdf.js",
-      "version": "2.8.1",
+      "version": "2.9.0",
       "description": "Conversion vectorielle SVG vers PDF",
-      "purl": "pkg:npm/svg2pdf.js@2.8.1",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "id": "MIT",
+            "acknowledgement": "declared"
           }
         }
       ],
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a"
+          "content": "e5af8d65fb0ff4d2fd3c9e0d65a1622919f2bcc09120f081864c38e2d71cdf96"
         }
       ],
+      "purl": "pkg:npm/svg2pdf.js@2.9.0",
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz"
+          "url": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.9.0.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/yWorks/svg2pdf.js"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
-          "value": "libs/svg2pdf-v2.8.1"
+          "value": "libs/svg2pdf-v2.9.0"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "demarrage"
         },
         {
           "name": "fusain:note",
@@ -1365,7 +1733,8 @@
       "components": [
         {
           "type": "file",
-          "name": "libs/svg2pdf-v2.8.1/LICENSE",
+          "bom-ref": "pkg:npm/svg2pdf.js@2.9.0#libs/svg2pdf-v2.9.0/LICENSE",
+          "name": "libs/svg2pdf-v2.9.0/LICENSE",
           "hashes": [
             {
               "alg": "SHA-256",
@@ -1375,11 +1744,12 @@
         },
         {
           "type": "file",
-          "name": "libs/svg2pdf-v2.8.1/svg2pdf.umd.min.js",
+          "bom-ref": "pkg:npm/svg2pdf.js@2.9.0#libs/svg2pdf-v2.9.0/svg2pdf.umd.min.js",
+          "name": "libs/svg2pdf-v2.9.0/svg2pdf.umd.min.js",
           "hashes": [
             {
               "alg": "SHA-256",
-              "content": "2f10c0d16959e9a0c4cfd8605cfce0830ddc384337f74fa0351a6eff1c1efb8b"
+              "content": "84d81b1e15641abd5249c311eccaed4c51ab4f4083915889be5d279f52bab3bf"
             }
           ]
         }
@@ -1387,34 +1757,50 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/d3@7.9.0",
+      "bom-ref": "pkg:npm/d3@7.9.2",
+      "supplier": {
+        "name": "Mike Bostock / Observable",
+        "url": [
+          "https://github.com/d3/d3"
+        ]
+      },
       "name": "d3",
-      "version": "7.9.0",
+      "version": "7.9.2",
       "description": "Projections, tracés géographiques, échelles de couleurs et placement des étiquettes des cartes, chargé à la demande",
-      "purl": "pkg:npm/d3@7.9.0",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
+            "id": "ISC",
+            "acknowledgement": "declared"
           }
         }
       ],
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "7e36605710a2ba54846797c8c6d888911341b215ae53257dc32a49a0b824355e"
+          "content": "f0c1d2c2479907a6e3265370d0fd715f7aef0f561cdd2b415df385ba7df9d1aa"
         }
       ],
+      "purl": "pkg:npm/d3@7.9.2",
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/d3/-/d3-7.9.0.tgz"
+          "url": "https://registry.npmjs.org/d3/-/d3-7.9.2.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/d3/d3"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
-          "value": "libs/d3-v7.9.0"
+          "value": "libs/d3-v7.9.2"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "a-la-demande"
         },
         {
           "name": "fusain:note",
@@ -1424,21 +1810,23 @@
       "components": [
         {
           "type": "file",
-          "name": "libs/d3-v7.9.0/LICENSE",
+          "bom-ref": "pkg:npm/d3@7.9.2#libs/d3-v7.9.2/LICENSE",
+          "name": "libs/d3-v7.9.2/LICENSE",
           "hashes": [
             {
               "alg": "SHA-256",
-              "content": "3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4"
+              "content": "2a6d2d5f32ba0b755ddbc1c833f766e30cdbe6ebe9a6d4e3e24427721f0b63d3"
             }
           ]
         },
         {
           "type": "file",
-          "name": "libs/d3-v7.9.0/d3.min.js",
+          "bom-ref": "pkg:npm/d3@7.9.2#libs/d3-v7.9.2/d3.min.js",
+          "name": "libs/d3-v7.9.2/d3.min.js",
           "hashes": [
             {
               "alg": "SHA-256",
-              "content": "f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539"
+              "content": "912111098ea99503a6f4967361d2bbdc9dbf58cf9c678c8e27e5b02d1a07f0c1"
             }
           ]
         }
@@ -1447,14 +1835,21 @@
     {
       "type": "library",
       "bom-ref": "pkg:npm/topojson-client@3.1.0",
+      "supplier": {
+        "name": "Mike Bostock",
+        "url": [
+          "https://github.com/topojson/topojson-client"
+        ]
+      },
       "name": "topojson-client",
       "version": "3.1.0",
       "description": "Lecture des fonds de carte au format TopoJSON, chargé à la demande",
-      "purl": "pkg:npm/topojson-client@3.1.0",
+      "scope": "required",
       "licenses": [
         {
           "license": {
-            "id": "ISC"
+            "id": "ISC",
+            "acknowledgement": "declared"
           }
         }
       ],
@@ -1464,16 +1859,25 @@
           "content": "889fadb422f6236d0f8337a236ce6499f258b75e44b81733b13bd971067322bf"
         }
       ],
+      "purl": "pkg:npm/topojson-client@3.1.0",
       "externalReferences": [
         {
           "type": "distribution",
           "url": "https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/topojson/topojson-client"
         }
       ],
       "properties": [
         {
           "name": "fusain:dossier",
           "value": "libs/topojson-client-v3.1.0"
+        },
+        {
+          "name": "fusain:chargement",
+          "value": "a-la-demande"
         },
         {
           "name": "fusain:note",
@@ -1483,6 +1887,7 @@
       "components": [
         {
           "type": "file",
+          "bom-ref": "pkg:npm/topojson-client@3.1.0#libs/topojson-client-v3.1.0/LICENSE",
           "name": "libs/topojson-client-v3.1.0/LICENSE",
           "hashes": [
             {
@@ -1493,6 +1898,7 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/topojson-client@3.1.0#libs/topojson-client-v3.1.0/topojson-client.min.js",
           "name": "libs/topojson-client-v3.1.0/topojson-client.min.js",
           "hashes": [
             {
@@ -1502,19 +1908,132 @@
           ]
         }
       ]
+    },
+    {
+      "type": "data",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.22.0#donnees/fonds-de-carte",
+      "supplier": {
+        "name": "IGN, INSEE, Natural Earth, Base Adresse Nationale (via SimpleCarto)"
+      },
+      "name": "fonds-de-carte",
+      "description": "Fonds de carte et adresses (IGN ADMIN EXPRESS 2025, BD TOPO, ROUTE 500, BAN, INSEE : Licence Ouverte 2.0 ; Natural Earth : domaine public ; noms des pays : iso-codes, LGPL-2.1). Détail dans cartes/LICENCE.txt.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e5a8969f0db9d5c0852b9376c2cd67ea9bd0f783096769ce678d10546c4c7c21"
+        }
+      ],
+      "data": [
+        {
+          "type": "dataset",
+          "name": "fonds-de-carte",
+          "contents": {
+            "url": "cartes/index.json"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "cartes"
+        },
+        {
+          "name": "fusain:index",
+          "value": "cartes/index.json"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "etalab-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.22.0#donnees/icones-illustrees",
+      "supplier": {
+        "name": "FUSAIN"
+      },
+      "name": "icones-illustrees",
+      "description": "Images PNG produites localement avec le modèle Krea 2, détourées avec rembg ; licence des images à confirmer (conditions du modèle).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4dca62d78b7d2c5fd5a4a293cba142187f44eeecdfc9cd2251bc4139d451fb00"
+        }
+      ],
+      "data": [
+        {
+          "type": "dataset",
+          "name": "icones-illustrees",
+          "contents": {
+            "url": "icones/illustrees/index.json"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "icones/illustrees"
+        },
+        {
+          "name": "fusain:index",
+          "value": "icones/illustrees/index.json"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.22.0#donnees/pictogrammes",
+      "supplier": {
+        "name": "FUSAIN"
+      },
+      "name": "pictogrammes",
+      "description": "Pictogrammes noir et blanc dessinés pour FUSAIN (source : outils/pictogrammes.py).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121"
+        }
+      ],
+      "data": [
+        {
+          "type": "dataset",
+          "name": "pictogrammes",
+          "contents": {
+            "url": "icones/pictogrammes.json"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "fusain:dossier",
+          "value": "icones"
+        },
+        {
+          "name": "fusain:index",
+          "value": "icones/pictogrammes.json"
+        }
+      ]
     }
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.21.2",
+      "ref": "pkg:github/guiraudjb/fusain@0.22.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
-        "pkg:npm/mermaid@12.1.0",
+        "pkg:npm/mermaid@12.3.0",
         "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
         "pkg:npm/dompurify@3.4.17",
         "pkg:npm/jspdf@4.2.1",
-        "pkg:npm/svg2pdf.js@2.8.1",
-        "pkg:npm/d3@7.9.0",
+        "pkg:npm/svg2pdf.js@2.9.0",
+        "pkg:npm/d3@7.9.2",
         "pkg:npm/topojson-client@3.1.0"
       ]
     },
@@ -1523,12 +2042,20 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/mermaid@12.1.0",
-      "dependsOn": []
+      "ref": "pkg:npm/mermaid@12.3.0",
+      "dependsOn": [
+        "pkg:npm/mermaid@12.3.0#inclus/pkg:npm/dompurify@3.4.17"
+      ]
     },
     {
       "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1",
-      "dependsOn": []
+      "dependsOn": [
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/%40zenuml/core",
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/react@19.2.3",
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/react-dom@19.2.3",
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/marked",
+        "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+      ]
     },
     {
       "ref": "pkg:npm/dompurify@3.4.17",
@@ -1539,16 +2066,396 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/svg2pdf.js@2.8.1",
+      "ref": "pkg:npm/svg2pdf.js@2.9.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/d3@7.9.0",
+      "ref": "pkg:npm/d3@7.9.2",
       "dependsOn": []
     },
     {
       "ref": "pkg:npm/topojson-client@3.1.0",
       "dependsOn": []
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "bom-ref": "vex/GHSA-39q2-94rc-95cp/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-39q2-94rc-95cp",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-39q2-94rc-95cp"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-55q2-fjhq-7xh7/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-55q2-fjhq-7xh7",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-55q2-fjhq-7xh7"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-6688-9rhm-gjv2/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-6688-9rhm-gjv2",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-6688-9rhm-gjv2"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-76mc-f452-cxcm/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-76mc-f452-cxcm",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-76mc-f452-cxcm"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-c2j3-45gr-mqc4/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-c2j3-45gr-mqc4",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-c2j3-45gr-mqc4"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-c6gr-qvv4-5v3f/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-c6gr-qvv4-5v3f",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-c6gr-qvv4-5v3f"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-cj63-jhhr-wcxv/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-cj63-jhhr-wcxv",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-cj63-jhhr-wcxv"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-cjmm-f4jc-qw8r/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-cjmm-f4jc-qw8r",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-cjmm-f4jc-qw8r"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-cmwh-pvxp-8882/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-cmwh-pvxp-8882",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-cmwh-pvxp-8882"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-crv5-9vww-q3g8/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-crv5-9vww-q3g8",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-crv5-9vww-q3g8"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-gvmj-g25r-r7wr/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-gvmj-g25r-r7wr",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-gvmj-g25r-r7wr"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-h7mw-gpvr-xq4m/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-h7mw-gpvr-xq4m",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-h7mw-gpvr-xq4m"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-h8r8-wccr-v5f2/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-h8r8-wccr-v5f2",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-h8r8-wccr-v5f2"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-hpcv-96wg-7vj8/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-hpcv-96wg-7vj8",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-hpcv-96wg-7vj8"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-mrv2-3pqr-j5jr/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-mrv2-3pqr-j5jr",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-mrv2-3pqr-j5jr"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-r47g-fvhr-h676/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-r47g-fvhr-h676",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-r47g-fvhr-h676"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-rp9w-3fw7-7cwq/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-rp9w-3fw7-7cwq",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-rp9w-3fw7-7cwq"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-v2wj-7wpq-c8vv/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-v2wj-7wpq-c8vv",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-v2wj-7wpq-c8vv"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-v9jr-rg53-9pgp/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-v9jr-rg53-9pgp",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-v9jr-rg53-9pgp"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-vxr8-fq34-vvx9/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-vxr8-fq34-vvx9",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-vxr8-fq34-vvx9"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "vex/GHSA-x4vx-rjvf-j5p4/pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1",
+      "id": "GHSA-x4vx-rjvf-j5p4",
+      "source": {
+        "name": "OSV",
+        "url": "https://osv.dev/vulnerability/GHSA-x4vx-rjvf-j5p4"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/%40mermaid-js/mermaid-zenuml@1.0.1#inclus/pkg:npm/dompurify@3.3.1"
+        }
+      ]
     }
   ]
 }

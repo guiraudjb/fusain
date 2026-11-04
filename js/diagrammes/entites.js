@@ -1,6 +1,6 @@
 // Modèle de données (entités et associations)
 import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
-import { separerPreambule, deplacer, actionsListe, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { separerPreambule, deplacer, actionsListe, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible } from './commun.js';
 
 const SENS = [['', 'Automatique'], ['TB', 'De haut en bas'], ['LR', 'De gauche à droite'], ['BT', 'De bas en haut'], ['RL', 'De droite à gauche']];
 const ID = '[\\p{L}_][\\p{L}\\p{N}_-]*';
@@ -40,7 +40,7 @@ export function analyser(code) {
         }
         let m = ligne.match(/^direction\s+(TB|TD|BT|LR|RL)$/);
         if (m) { modele.sens = m[1] === 'TD' ? 'TB' : m[1]; return; }
-        if (/^(classDef|class|style|accTitle|accDescr)\s/.test(ligne)) { modele.brut.push(ligne); return; }
+        if (/^(classDef|class|style)\s/.test(ligne) || ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
         m = ligne.match(RE_RELATION);
         if (m) {
             entite(modele, m[1]);

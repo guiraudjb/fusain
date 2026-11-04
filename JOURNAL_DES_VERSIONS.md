@@ -2,6 +2,45 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.22.0 — 4 novembre 2026 — audit de sécurité, revue de code, nomenclature CycloneDX 1.7
+
+- **Audit et revue** : 32 constats, tous corrigés ou documentés ; le détail est dans `AUDIT_SECURITE_FUSAIN.md`, ouvert depuis « À propos ».
+- **Sécurité** :
+  - le diagnostic ne bloque plus l'onglet sur une ligne piégée (une ligne mesurée à 49 s dans Chrome) ;
+  - les en-têtes `--- ` suivis d'espaces et les directives `%%{` non fermées ne contournent plus la liste blanche de configuration ;
+  - les échappements CSS et `image-set()` ne contournent plus le filtre des ressources extérieures ;
+  - la clé `"img"` écrite entre guillemets est retirée ;
+  - la décompression d'un classeur est arrêtée dès que la taille admise est dépassée.
+- **Bibliothèques** : Mermaid 12.3.0, svg2pdf.js 2.9.0 et D3 7.9.2 ; aucune n'était vulnérable. L'extension ZenUML 1.0.1 embarque une copie de DOMPurify 3.3.1, visée par 21 avis : le risque est atténué par Trusted Types, la CSP et le second assainissement, et l'analyse est publiée dans le CycloneDX.
+- **Nomenclature** : CycloneDX 1.7, validée contre le schéma officiel. Elle décrit désormais :
+  - les fournisseurs et les dépôts amont ;
+  - les composants inclus dans Mermaid et ZenUML ;
+  - les fonds de carte et les icônes, comme jeux de données ;
+  - l'analyse des avis connus, dans la section `vulnerabilities`.
+
+  La veille mensuelle contrôle aussi les copies internes de version connue.
+- **Cartes** :
+  - le fichier CSV n'est plus relu après Annuler ou Rétablir, qui ne perdent donc plus l'historique ;
+  - le fichier est oublié après « Effacer les données » et à l'ouverture d'un autre document ;
+  - seules les colonnes utiles sont gardées en mémoire.
+- **Listes déroulantes** : Ctrl+S applique d'abord un choix en attente, et un choix en attente n'est plus appliqué à une autre page.
+- **Fichiers** :
+  - un brouillon illisible au démarrage est mis de côté au lieu d'être écrasé ;
+  - un fichier enregistré que FUSAIN ne pourrait pas rouvrir est signalé ;
+  - l'import `.mmd` refuse un code trop long au lieu de le couper.
+- **Éditeurs visuels** :
+  - `accTitle:` et `accDescr:` sont reconnus ;
+  - `linkStyle` suit son lien quand des liens sont supprimés ;
+  - `#42;` et les textes commençant par `%%` sont protégés ;
+  - `Etat:::classe` fait passer la page en « code seul » ;
+  - une tâche Gantt identifiée exige un début.
+- **Export Visio** : les noms de page en double sont numérotés.
+- **Outils et déploiement** :
+  - chemins portables sous Windows, et code INSEE contrôlé dans `outils/adresses.py` ;
+  - cache nginx revalidé hors de `libs/` ;
+  - actions GitHub épinglées par empreinte.
+- Recette : 51 tests de logique (6 nouveaux) ; recette navigateur sur GitHub.
+
 ## 0.21.2 — 3 novembre 2026 — cartes : données relues au changement de zone, bouton « Actualiser les données »
 
 - **Constat** : sur une carte de région remplie par import CSV, changer de région laissait la carte grise, et le changement de palette semblait sans effet. L'import ne garde que les territoires de la carte affichée. Après le changement, aucune valeur ne concernait la nouvelle région, et rien ne le signalait.

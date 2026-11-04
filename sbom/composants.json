@@ -10,18 +10,32 @@
       "archive": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz",
       "archiveSha256": "e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb",
       "dossier": "libs/dsfr-v1.15.4",
-      "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
+      "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine.",
+      "fournisseur": "Service d'information du Gouvernement (SIG)",
+      "depot": "https://github.com/GouvernementFR/dsfr",
+      "chargement": "demarrage"
     },
     {
       "nom": "mermaid",
-      "version": "12.1.0",
+      "version": "12.3.0",
       "licence": "MIT",
       "role": "Analyse et rendu des diagrammes",
-      "purl": "pkg:npm/mermaid@12.1.0",
-      "archive": "https://registry.npmjs.org/mermaid/-/mermaid-12.1.0.tgz",
-      "archiveSha256": "3e516f33246e1a6a5bc5ebcabd35434669b487c3b3791f9b0466aa2c254d004a",
-      "dossier": "libs/mermaid-v12.1.0",
-      "note": "Fichier dist/mermaid.min.js : distribution autonome, qui inclut ses propres dépendances (moteurs de disposition, analyseurs, D3, DOMPurify interne)."
+      "purl": "pkg:npm/mermaid@12.3.0",
+      "archive": "https://registry.npmjs.org/mermaid/-/mermaid-12.3.0.tgz",
+      "archiveSha256": "be0684e8d20bfc874df12c0f04927a5c482f57f2200eec54cca52a4583fd4040",
+      "dossier": "libs/mermaid-v12.3.0",
+      "note": "Fichier dist/mermaid.min.js : distribution autonome, qui inclut ses propres dépendances (moteurs de disposition, analyseurs, D3, DOMPurify interne).",
+      "fournisseur": "Mermaid",
+      "depot": "https://github.com/mermaid-js/mermaid",
+      "chargement": "demarrage",
+      "inclus": [
+        {
+          "nom": "dompurify",
+          "version": "3.4.17",
+          "licence": "(MPL-2.0 OR Apache-2.0)",
+          "note": "Copie interne de Mermaid, version relevée dans le fichier."
+        }
+      ]
     },
     {
       "nom": "@mermaid-js/mermaid-zenuml",
@@ -32,7 +46,64 @@
       "archive": "https://registry.npmjs.org/@mermaid-js/mermaid-zenuml/-/mermaid-zenuml-1.0.1.tgz",
       "archiveSha256": "ba11f6923af6cbb73d0048d18d4ce30ff748057e43c9e8641b7b5e051f26fe3a",
       "dossier": "libs/mermaid-zenuml-v1.0.1",
-      "note": "Fichier dist/mermaid-zenuml.min.js : distribution autonome, qui inclut @zenuml/core (3.47.9 ou plus récent à la date de construction, 18 septembre 2026), React 19.2.3, marked et l'analyseur ANTLR. Chargé seulement quand une page contient un schéma ZenUML."
+      "note": "Fichier dist/mermaid-zenuml.min.js : distribution autonome, qui inclut @zenuml/core (3.47.9 ou plus récent à la date de construction, 18 septembre 2026), React 19.2.3, marked et l'analyseur ANTLR. Chargé seulement quand une page contient un schéma ZenUML.",
+      "fournisseur": "Mermaid",
+      "depot": "https://github.com/mermaid-js/mermaid",
+      "chargement": "a-la-demande",
+      "inclus": [
+        {
+          "nom": "@zenuml/core",
+          "licence": "MIT",
+          "note": "Version exacte non inscrite dans le fichier (3.47.9 ou plus récente à la date de construction)."
+        },
+        {
+          "nom": "react",
+          "version": "19.2.3",
+          "licence": "MIT",
+          "note": "Version relevée dans le fichier."
+        },
+        {
+          "nom": "react-dom",
+          "version": "19.2.3",
+          "licence": "MIT",
+          "note": "Version relevée dans le fichier."
+        },
+        {
+          "nom": "marked",
+          "licence": "MIT",
+          "note": "Branche 4.x d'après les options présentes (mangle, sanitize déprécié) ; version exacte non inscrite."
+        },
+        {
+          "nom": "dompurify",
+          "version": "3.3.1",
+          "licence": "(MPL-2.0 OR Apache-2.0)",
+          "note": "Copie interne de ZenUML, version relevée dans le fichier.",
+          "avis": [
+            "GHSA-39q2-94rc-95cp",
+            "GHSA-55q2-fjhq-7xh7",
+            "GHSA-6688-9rhm-gjv2",
+            "GHSA-76mc-f452-cxcm",
+            "GHSA-c2j3-45gr-mqc4",
+            "GHSA-c6gr-qvv4-5v3f",
+            "GHSA-cj63-jhhr-wcxv",
+            "GHSA-cjmm-f4jc-qw8r",
+            "GHSA-cmwh-pvxp-8882",
+            "GHSA-crv5-9vww-q3g8",
+            "GHSA-gvmj-g25r-r7wr",
+            "GHSA-h7mw-gpvr-xq4m",
+            "GHSA-h8r8-wccr-v5f2",
+            "GHSA-hpcv-96wg-7vj8",
+            "GHSA-mrv2-3pqr-j5jr",
+            "GHSA-r47g-fvhr-h676",
+            "GHSA-rp9w-3fw7-7cwq",
+            "GHSA-v2wj-7wpq-c8vv",
+            "GHSA-v9jr-rg53-9pgp",
+            "GHSA-vxr8-fq34-vvx9",
+            "GHSA-x4vx-rjvf-j5p4"
+          ],
+          "analyse": "Copie interne de l'extension ZenUML, non appelée directement par FUSAIN. Tout HTML inséré dans la page passe par la politique Trusted Types « default » (js/confiance.js), qui l'assainit avec DOMPurify 3.4.17 ; la politique de sécurité de contenu interdit tout script en ligne et tout gestionnaire d'événement (script-src 'self') ; le SVG produit est assaini une seconde fois (js/securite.js) avant d'être affiché ou exporté. Les configurations visées par la plupart des avis (IN_PLACE, SAFE_FOR_TEMPLATES, ADD_TAGS en fonction) ne sont pas utilisées par FUSAIN."
+        }
+      ]
     },
     {
       "nom": "dompurify",
@@ -43,7 +114,10 @@
       "archive": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
       "archiveSha256": "056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7",
       "dossier": "libs/dompurify-v3.4.17",
-      "note": "Fichier dist/purify.min.js."
+      "note": "Fichier dist/purify.min.js.",
+      "fournisseur": "Cure53",
+      "depot": "https://github.com/cure53/DOMPurify",
+      "chargement": "demarrage"
     },
     {
       "nom": "jspdf",
@@ -54,29 +128,38 @@
       "archive": "https://registry.npmjs.org/jspdf/-/jspdf-4.2.1.tgz",
       "archiveSha256": "e97bd16e3211928442c631b20dcefa78a8e10dad8ccbe97160b89b214745603a",
       "dossier": "libs/jspdf-v4.2.1",
-      "note": "Fichier dist/jspdf.umd.min.js. Les dépendances optionnelles de jsPDF (html2canvas, canvg, dompurify) ne sont ni embarquées ni chargées : la fonction html() n'est pas utilisée."
+      "note": "Fichier dist/jspdf.umd.min.js. Les dépendances optionnelles de jsPDF (html2canvas, canvg, dompurify) ne sont ni embarquées ni chargées : la fonction html() n'est pas utilisée.",
+      "fournisseur": "Parallax / yWorks",
+      "depot": "https://github.com/parallax/jsPDF",
+      "chargement": "demarrage"
     },
     {
       "nom": "svg2pdf.js",
-      "version": "2.8.1",
+      "version": "2.9.0",
       "licence": "MIT",
       "role": "Conversion vectorielle SVG vers PDF",
-      "purl": "pkg:npm/svg2pdf.js@2.8.1",
-      "archive": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.8.1.tgz",
-      "archiveSha256": "5fdfdf4f540a80911c59b0eb2e72d9c8653558e9917ac2286a240f153f2ff40a",
-      "dossier": "libs/svg2pdf-v2.8.1",
-      "note": "Fichier dist/svg2pdf.umd.min.js."
+      "purl": "pkg:npm/svg2pdf.js@2.9.0",
+      "archive": "https://registry.npmjs.org/svg2pdf.js/-/svg2pdf.js-2.9.0.tgz",
+      "archiveSha256": "e5af8d65fb0ff4d2fd3c9e0d65a1622919f2bcc09120f081864c38e2d71cdf96",
+      "dossier": "libs/svg2pdf-v2.9.0",
+      "note": "Fichier dist/svg2pdf.umd.min.js.",
+      "fournisseur": "yWorks",
+      "depot": "https://github.com/yWorks/svg2pdf.js",
+      "chargement": "demarrage"
     },
     {
       "nom": "d3",
-      "version": "7.9.0",
+      "version": "7.9.2",
       "licence": "ISC",
       "role": "Projections, tracés géographiques, échelles de couleurs et placement des étiquettes des cartes, chargé à la demande",
-      "purl": "pkg:npm/d3@7.9.0",
-      "archive": "https://registry.npmjs.org/d3/-/d3-7.9.0.tgz",
-      "archiveSha256": "7e36605710a2ba54846797c8c6d888911341b215ae53257dc32a49a0b824355e",
-      "dossier": "libs/d3-v7.9.0",
-      "note": "Fichier dist/d3.min.js, identique à celui de SimpleCarto, et LICENSE. Chargé seulement quand une page contient une carte."
+      "purl": "pkg:npm/d3@7.9.2",
+      "archive": "https://registry.npmjs.org/d3/-/d3-7.9.2.tgz",
+      "archiveSha256": "f0c1d2c2479907a6e3265370d0fd715f7aef0f561cdd2b415df385ba7df9d1aa",
+      "dossier": "libs/d3-v7.9.2",
+      "note": "Fichier dist/d3.min.js, identique à celui de SimpleCarto, et LICENSE. Chargé seulement quand une page contient une carte.",
+      "fournisseur": "Mike Bostock / Observable",
+      "depot": "https://github.com/d3/d3",
+      "chargement": "a-la-demande"
     },
     {
       "nom": "topojson-client",
@@ -87,7 +170,40 @@
       "archive": "https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz",
       "archiveSha256": "889fadb422f6236d0f8337a236ce6499f258b75e44b81733b13bd971067322bf",
       "dossier": "libs/topojson-client-v3.1.0",
-      "note": "Fichier dist/topojson-client.min.js et LICENSE. SimpleCarto embarque le paquet complet topojson 3.0.2 ; seule la partie client est utile à FUSAIN."
+      "note": "Fichier dist/topojson-client.min.js et LICENSE. SimpleCarto embarque le paquet complet topojson 3.0.2 ; seule la partie client est utile à FUSAIN.",
+      "fournisseur": "Mike Bostock",
+      "depot": "https://github.com/topojson/topojson-client",
+      "chargement": "a-la-demande"
     }
-  ]
+  ],
+  "donnees": [
+    {
+      "nom": "fonds-de-carte",
+      "dossier": "cartes",
+      "index": "cartes/index.json",
+      "licence": "etalab-2.0",
+      "description": "Fonds de carte et adresses (IGN ADMIN EXPRESS 2025, BD TOPO, ROUTE 500, BAN, INSEE : Licence Ouverte 2.0 ; Natural Earth : domaine public ; noms des pays : iso-codes, LGPL-2.1). Détail dans cartes/LICENCE.txt.",
+      "fournisseur": "IGN, INSEE, Natural Earth, Base Adresse Nationale (via SimpleCarto)"
+    },
+    {
+      "nom": "icones-illustrees",
+      "dossier": "icones/illustrees",
+      "index": "icones/illustrees/index.json",
+      "description": "Images PNG produites localement avec le modèle Krea 2, détourées avec rembg ; licence des images à confirmer (conditions du modèle).",
+      "fournisseur": "FUSAIN"
+    },
+    {
+      "nom": "pictogrammes",
+      "dossier": "icones",
+      "index": "icones/pictogrammes.json",
+      "description": "Pictogrammes noir et blanc dessinés pour FUSAIN (source : outils/pictogrammes.py).",
+      "fournisseur": "FUSAIN"
+    }
+  ],
+  "application": {
+    "fournisseur": "guiraudjb",
+    "depot": "https://github.com/guiraudjb/fusain",
+    "site": "https://guiraudjb.github.io/fusain/",
+    "licence": null
+  }
 }

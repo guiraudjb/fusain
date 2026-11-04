@@ -1,7 +1,7 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
 import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
 import { choisirIcone } from '../icones.js';
-import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit } from './commun.js';
+import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit, ligneAccessible } from './commun.js';
 
 // [nom, ouvrant, fermant, libellé] — les ouvrants les plus longs sont testés en premier
 const FORMES = [
@@ -27,7 +27,7 @@ const FLECHES = [['fin', 'Flèche'], ['aucune', 'Sans flèche'], ['double', 'Dou
 const ESPACEMENTS = [['', 'Normal'], ['compact', 'Resserré'], ['aere', 'Aéré']];
 const VALEURS_ESPACEMENT = { compact: 30, aere: 90 };
 const TRACES = [['', 'Courbes'], ['linear', 'Droits'], ['step', 'En escalier']];
-const MOTS_BRUTS = ['classDef', 'class', 'linkStyle', 'accTitle', 'accDescr'];
+const MOTS_BRUTS = ['classDef', 'class', 'linkStyle'];
 const RESERVES = new Set(['end', 'subgraph', 'direction', 'style', 'click', 'graph', 'flowchart', ...MOTS_BRUTS]);
 const RE_ID = /^[\p{L}\p{N}_]+/u;
 const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
@@ -146,6 +146,8 @@ export function analyser(code) {
     const entete = (corps[0] || '').trim().match(/^(flowchart|graph|swimlane-beta)(?:\s+(TB|TD|BT|LR|RL))?\s*;?$/);
     if (!entete) throw new Error('La première ligne doit être « flowchart » suivi du sens (TD, LR…).');
     const modele = { preambule, couloirs: entete[1] === 'swimlane-beta', sens: entete[2] === 'TB' ? 'TD' : entete[2] || 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
+    // « linkStyle 2 … » désigne un lien par son rang : le style est rattaché au lien, et son rang recalculé à l'écriture
+    const stylesLiens = [];
     const pile = [];
 
     corps.slice(1).forEach((ligneBrute, n) => {
@@ -179,7 +181,8 @@ export function analyser(code) {
                 const m = ligne.match(/^style\s+([\p{L}\p{N}_]+)\s+(.+)$/u);
                 if (!m) throw new Inconnu('style');
                 const proprietes = {};
-                for (const paire of m[2].split(',')) {
+                // Une virgule ne sépare deux propriétés que si un « nom: » la suit (« font-family:Marianne,arial » reste entier)
+                for (const paire of m[2].split(/,(?=\s*[\w-]+\s*:)/)) {
                     const i = paire.indexOf(':');
                     if (i > 0) proprietes[paire.slice(0, i).trim()] = paire.slice(i + 1).trim();
                 }
@@ -187,6 +190,9 @@ export function analyser(code) {
                 return;
             }
             if (mot === 'click') return; // les interactions sont neutralisées (§7.2)
+            if (ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
+            const ls = ligne.match(/^linkStyle\s+(\d+(?:\s*,\s*\d+)*)\s+(.+?);?$/);
+            if (ls) { for (const rang of ls[1].split(',')) stylesLiens.push([Number(rang), ls[2]]); return; }
             if (MOTS_BRUTS.includes(mot) && /\s/.test(ligne[mot.length] || '')) { modele.brut.push(ligne); return; }
             lireEnonce(ligne, modele, groupe);
         } catch (e) {
@@ -195,6 +201,8 @@ export function analyser(code) {
         }
     });
     if (pile.length) throw new Error('Un groupe n\'est pas fermé par « end ».');
+    // Un rang sans lien ferait échouer le rendu : il est abandonné
+    for (const [rang, style] of stylesLiens) if (modele.liens[rang]) modele.liens[rang] = { ...modele.liens[rang], style };
 
     // Un lien peut viser un groupe : ce n'est alors pas un nœud
     const idsGroupes = new Set(modele.groupes.map((g) => g.id));
@@ -238,6 +246,7 @@ export function ecrire(modele) {
     };
     ecrireGroupe(null, 1);
     for (const l of modele.liens) lignes.push(marge(1) + ecrireLien(l));
+    modele.liens.forEach((l, i) => { if (l.style) lignes.push(`${marge(1)}linkStyle ${i} ${String(l.style).replace(/[\n;]/g, ' ').trim()}`); });
     for (const [id, proprietes] of Object.entries(modele.styles)) {
         const paires = Object.entries(proprietes).map(([k, v]) => `${k}:${v}`);
         if (paires.length) lignes.push(`${marge(1)}style ${id} ${paires.join(',')}`);

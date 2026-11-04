@@ -1,6 +1,6 @@
 // Diagramme d'états : états et transitions
 import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
-import { separerPreambule, plan, marquer } from './commun.js';
+import { separerPreambule, plan, marquer, ligneAccessible } from './commun.js';
 
 const SENS = [['', 'Automatique'], ['TB', 'De haut en bas'], ['LR', 'De gauche à droite'], ['BT', 'De bas en haut'], ['RL', 'De droite à gauche']];
 const RE_ID = /^[\p{L}\p{N}_]+$/u;
@@ -32,7 +32,9 @@ export function analyser(code) {
             if (m) { modele.sens = m[1] === 'TD' ? 'TB' : m[1]; return; }
             m = ligne.match(/^state\s+"([^"]*)"\s+as\s+(\S+)$/);
             if (m) { etat(modele, m[2]).nom = lireNom(m[1]); return; }
-            if (/^(classDef|class|accTitle|accDescr)\s/.test(ligne)) { modele.brut.push(ligne); return; }
+            if (/^(classDef|class)\s/.test(ligne) || ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
+            // « Etat:::classe » serait lu comme une description « ::classe »
+            if (ligne.includes(':::')) throw new Inconnu('classe appliquée par « ::: »');
             if (/^(state|note|end note|hide|scale)\b/.test(ligne) || ligne === '--' || ligne === '}' || ligne.includes('<<')) throw new Inconnu('états composés, notes ou branchements');
             m = ligne.match(/^(\[\*\]|[^\s:]+)\s*-->\s*(\[\*\]|[^\s:]+)\s*(?::\s*(.*))?$/);
             if (m) {

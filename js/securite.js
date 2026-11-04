@@ -65,7 +65,10 @@ export function nettoyerCode(code) {
     if (texte.length > TAILLE_MAX_CODE) throw new Error(`Le code dépasse la taille maximale autorisée (${TAILLE_MAX_CODE} caractères).`);
 
     // Bloc de configuration en tête : seul le titre est conservé
-    const tete = texte.match(/^\s*---\n([\s\S]*?)\n---[ \t]*(\n|$)/);
+    // Mermaid admet des espaces après les tirets d'ouverture et de fermeture (« --- ») : le filtre aussi
+    const tete = texte.match(/^\s*---[ \t]*\n([\s\S]*?)\n[ \t]*---[ \t]*(\n|$)/);
+    // En-tête ouvert mais jamais fermé : rien n'en est gardé ni transmis
+    if (!tete && /^\s*---[ \t]*\n/.test(texte)) throw new Error('Le bloc de configuration en tête (---) n\'est pas fermé.');
     if (tete) {
         const titre = tete[1].match(/^title:[ \t]*([^\n]*)$/m);
         const valeur = titre ? titre[1].trim().replace(/^["']|["']$/g, '') : '';
@@ -76,10 +79,13 @@ export function nettoyerCode(code) {
     // Formes étendues « @{ img: "…" } » : Mermaid chargerait l'image dès le rendu, avant tout assainissement
     // Seules les icônes embarquées par FUSAIN sont admises (« dsfr:nom », « illus:nom », « picto:nom »). Le bloc est délimité en tenant
     // compte des guillemets, pour qu'une accolade dans un libellé ne le termine pas avant l'heure.
-    texte = texte.replace(/@\{(?:"[^"]*"|'[^']*'|[^}"'])*\}/g, (bloc) => bloc.replace(/\b(img|icon)\s*:\s*("[^"]*"|'[^']*'|[^,}\s]+)\s*,?/g,
-        (entier, cle, valeur) => (cle === 'icon' && ICONE_EMBARQUEE.test(valeur) ? entier : '')));
+    texte = texte.replace(/@\{(?:"[^"]*"|'[^']*'|[^}"'])*\}/g, (bloc) => bloc.replace(/(["']?)\b(img|icon)\1\s*:\s*("[^"]*"|'[^']*'|[^,}\s]+)\s*,?/g,
+        // La clé peut être écrite entre guillemets (« "img": … ») : Mermaid la lit de la même façon
+        (entier, _guillemet, cle, valeur) => (cle === 'icon' && ICONE_EMBARQUEE.test(valeur) ? entier : '')));
 
-    // Directives %%{ ... }%%
+    // Directives %%{ ... }%%. Mermaid lit aussi une directive dont la fermeture « }%% » manque : avant le filtrage des
+    // directives fermées, un « %%{ » qu'aucun « }%% » ne suit est rendu inoffensif (« %% { » n'est qu'un commentaire)
+    texte = texte.replace(/%%\{(?![\s\S]*?\}%%)/g, '%% {');
     return texte.replace(/%%\{([\s\S]*?)\}%%/g, (_, contenu) => {
         const m = contenu.match(/^\s*(init|initialize)\s*:\s*([\s\S]*)$/);
         if (!m) return '';
@@ -96,7 +102,7 @@ export function nettoyerCode(code) {
 const SYNONYMES = { graph: 'flowchart', 'flowchart-elk': 'flowchart', sequenceDiagram: 'sequence', 'stateDiagram-v2': 'stateDiagram', 'classDiagram-v2': 'classDiagram' };
 
 export function typeDiagramme(code) {
-    const texte = String(code).replace(/^\s*---\n[\s\S]*?\n---[ \t]*\n?/, '').replace(/%%\{[\s\S]*?\}%%/g, '');
+    const texte = String(code).replace(/^\s*---[ \t]*\n[\s\S]*?\n[ \t]*---[ \t]*\n?/, '').replace(/%%\{[\s\S]*?\}%%/g, '');
     for (const ligne of texte.split('\n')) {
         const l = ligne.trim();
         if (!l || l.startsWith('%%')) continue;
@@ -110,6 +116,20 @@ export function typeDiagramme(code) {
 
 let crochetsPoses = false;
 
+// Les échappements CSS (« \75 rl( » pour « url( », « @\69mport ») sont décodés avant tout contrôle : sans cela ils
+// passeraient le filtre, et un SVG exporté puis ouvert hors de FUSAIN (sans sa politique de sécurité) chargerait l'adresse
+export function decoderCss(texte) {
+    if (!texte.includes('\\')) return texte;
+    return texte.replace(/\\([0-9a-f]{1,6})[ \t\n\r\f]?|\\([^\n\r\f0-9a-f])/gi, (_, hex, car) => {
+        if (car !== undefined) return car;
+        const point = parseInt(hex, 16);
+        return point > 0 && point <= 0x10ffff && (point < 0xd800 || point > 0xdfff) ? String.fromCodePoint(point) : '\ufffd';
+    });
+}
+// Ressource extérieure dans une valeur CSS : url() hors ancre interne, image-set(), @import, javascript:
+const CSS_EXTERIEUR = /url\s*\(\s*['"]?(?!#)|image-set\s*\(|@import|javascript:/i;
+export const cssExterieur = (valeur) => CSS_EXTERIEUR.test(decoderCss(String(valeur)));
+
 function poserCrochets(DOMPurify) {
     if (crochetsPoses) return;
     crochetsPoses = true;
@@ -118,7 +138,7 @@ function poserCrochets(DOMPurify) {
         const valeur = String(donnees.attrValue || '');
         // Aucun lien ni ressource hors du document : seules les ancres internes subsistent
         if ((nom === 'href' || nom === 'xlink:href' || nom === 'src') && !valeur.startsWith('#')) donnees.keepAttr = false;
-        if (/url\s*\(\s*['"]?(?!#)/i.test(valeur) || /javascript:/i.test(valeur)) donnees.keepAttr = false;
+        if (cssExterieur(valeur)) donnees.keepAttr = false;
     });
 }
 
@@ -137,8 +157,9 @@ export function assainirSvg(chaineSvg) {
     const svg = corps.querySelector('svg');
     if (!svg) throw new Error('Le rendu n\'a produit aucun schéma.');
     for (const style of svg.querySelectorAll('style')) {
-        style.textContent = style.textContent
+        style.textContent = decoderCss(style.textContent)
             .replace(/@import[^;]*;?/gi, '')
+            .replace(/(?:-webkit-)?image-set\s*\((?:[^()]|\([^()]*\))*\)/gi, 'none')
             .replace(/url\s*\(\s*['"]?(?!#)[^)]*\)/gi, 'none');
     }
     return document.importNode(svg, true);

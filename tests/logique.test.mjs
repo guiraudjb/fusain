@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MODELES } from '../js/modeles.js';
 import { editeurPour } from '../js/diagrammes/index.js';
-import { typeDiagramme, nettoyerCode, nomFichierSur } from '../js/securite.js';
+import { typeDiagramme, nettoyerCode, nomFichierSur, decoderCss, cssExterieur } from '../js/securite.js';
 import { lireJson, serialiser } from '../js/fichier.js';
 import { nouveauDocument } from '../js/etat.js';
 import logigramme from '../js/diagrammes/logigramme.js';
@@ -775,4 +775,67 @@ test('diagnostic : libellé hostile, distances, aucun diagnostic hors de propos'
     assert.equal(plusProche('xyz', ['participant', 'actor']), null);
     // Erreur sans position (limite de taille) : pas de ligne inventée
     assert.equal(diagnostiquer('flowchart TD\n    A --> B\n', { message: 'Maximum text size in diagram exceeded' }).ligne, null);
+});
+
+test('CSS : les échappements ne contournent pas le filtre des ressources extérieures', () => {
+    assert.equal(decoderCss('\\75 rl(x)'), 'url(x)');
+    assert.equal(decoderCss('@\\69mport'), '@import');
+    assert.equal(decoderCss('a\\:b'), 'a:b');
+    assert.equal(decoderCss('fill:red'), 'fill:red');
+    assert.ok(cssExterieur('fill:\\75rl(https://exemple.fr/x.png)'));
+    assert.ok(cssExterieur('background:image-set("https://exemple.fr/x.png" 1x)'));
+    assert.ok(cssExterieur('@\\69mport "https://exemple.fr/a.css"'));
+    assert.ok(!cssExterieur('fill:url(#degrade)'));
+    assert.ok(!cssExterieur('fill:#ff0000;stroke-width:2px'));
+});
+
+test('directives : en-tête avec espaces, directive non fermée, clé « img » entre guillemets', () => {
+    const tete = nettoyerCode('--- \nconfig:\n  flowchart:\n    htmlLabels: true\n---\nflowchart TD\n  A --> B');
+    assert.ok(!tete.includes('htmlLabels'));
+    assert.throws(() => nettoyerCode('---\nconfig:\n  logLevel: 0\nflowchart TD\n  A --> B'));
+    const ouverte = nettoyerCode('flowchart TD\n  A --> B\n%%{init: {"flowchart":{"htmlLabels":true}}');
+    assert.ok(!ouverte.includes('%%{'));
+    const fermee = nettoyerCode('%%{init: {"theme":"forest"}}%%\nflowchart TD\n  A --> B');
+    assert.ok(fermee.includes('%%{init: {"theme":"forest"}}%%'));
+    const image = nettoyerCode('flowchart TD\n  A@{ "img": "https://exemple.fr/p.png", label: "x" }');
+    assert.ok(!image.includes('exemple.fr'));
+    assert.ok(nettoyerCode('flowchart TD\n  A@{ icon: "dsfr:user-line" }').includes('dsfr:user-line'));
+});
+
+test('diagnostic : une ligne très longue ne fige pas le diagnostic', async () => {
+    const { diagnostiquer } = await import('../js/diagnostic.js');
+    const debut = Date.now();
+    diagnostiquer('pie\n  1' + ' '.repeat(20000) + '"', new Error('Parse error on line 2'));
+    diagnostiquer('treemap-beta\n  a' + ' '.repeat(20000) + '"x', new Error('Parse error on line 2'));
+    assert.ok(Date.now() - debut < 2000);
+});
+
+test('éditeurs : accTitle/accDescr gardés, « # » et « %% » protégés, linkStyle suivi', () => {
+    const etats = editeurPour('stateDiagram');
+    const e = etats.ecrire(etats.analyser('stateDiagram-v2\n  accTitle: Cycle\n  [*] --> A'));
+    assert.ok(e.includes('accTitle: Cycle') && !e.includes('as accTitle'));
+    const lg = editeurPour('flowchart');
+    const m = lg.analyser('flowchart TD\n  A --> B\n  B --> C\n  C --> D\n  linkStyle 2 stroke:red');
+    m.liens.splice(0, 1);
+    const ecrit = lg.ecrire(m);
+    assert.ok(ecrit.includes('linkStyle 1 stroke:red') && !ecrit.includes('linkStyle 2'));
+    const st = lg.ecrire(lg.analyser('flowchart TD\n  A --> B\n  style A font-family:Marianne,arial,stroke:#000'));
+    assert.ok(st.includes('font-family:Marianne,arial'));
+    const n = lg.analyser('flowchart TD\n  A --> B');
+    n.noeuds[0].texte = 'Ticket #42; urgent';
+    const relu = lg.analyser(lg.ecrire(n));
+    assert.equal(relu.noeuds.find((x) => x.id === 'A').texte, 'Ticket #42; urgent');
+    const g = editeurPour('gantt');
+    const gm = g.analyser('gantt\n  dateFormat YYYY-MM-DD\n  section S\n  Tache :2026-01-01, 2d');
+    gm.lignes.find((l) => l.t === 'tache').nom = '%% revoir';
+    assert.ok(!/^\s*%%/m.test(g.ecrire(gm).split('\n').slice(3).join('\n')));
+    assert.throws(() => etats.analyser('stateDiagram-v2\n  [*] --> Still:::lent'));
+});
+
+test('ZIP : une archive dont le contenu dépasse la taille admise est arrêtée', async () => {
+    const { ecrireZip, lireZip } = await import('../js/zip.js');
+    const archive = await ecrireZip([{ nom: 'a.txt', donnees: 'a'.repeat(200000) }]);
+    const lire = await lireZip(archive, { tailleMax: 1000 });
+    await assert.rejects(() => lire('a.txt'));
+    assert.equal((await (await lireZip(archive))('a.txt')).length, 200000);
 });

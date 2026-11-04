@@ -32,11 +32,12 @@ export function nuancier(fondActuel, surChoix) {
 // Texte d'un libellé Mermaid : guillemets et retours à la ligne ne peuvent pas « sortir » du libellé (§7.3)
 export function echapper(texte) {
     // L'accent grave ouvrirait une « chaîne Markdown » de Mermaid ; la tabulation n'est pas admise dans un libellé
-    return String(texte).replace(/\t/g, ' ').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
+    // Un « # » suivi d'un mot et d'un point-virgule serait lu comme une entité (« #42; ») : il est écrit « #35; »
+    return String(texte).replace(/\t/g, ' ').replace(/#(?=\w+;)/g, '#35;').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
 }
 
 export function desechapper(texte) {
-    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n');
+    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n').replace(/#35;/g, '#');
 }
 
 export function sansGuillemets(texte) {
@@ -121,6 +122,14 @@ export function marquer(el, cle) {
 
 // Une écriture valide pour Mermaid mais non gérée par l'éditeur visuel : la page passe en « code seul »
 export class Inconnu extends Error {}
+
+// Titre et description accessibles : « accTitle: … », « accDescr: … » ou « accDescr { … } » sur une ligne. Ils sont gardés
+// tels quels ; le bloc « accDescr { » qui s'étend sur plusieurs lignes n'est pas géré par l'édition visuelle.
+export function ligneAccessible(ligne) {
+    if (!/^acc(Title\s*:|Descr\s*[:{])/.test(ligne)) return false;
+    if (/^accDescr\s*\{/.test(ligne) && !ligne.includes('}')) throw new Inconnu('description accessible sur plusieurs lignes');
+    return true;
+}
 
 // Lit le corps ligne à ligne ; les lignes vides et les commentaires sont ignorés
 export function parLigne(lignes, preambule, lire) {

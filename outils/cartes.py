@@ -186,7 +186,7 @@ def principal(source, troncons=None):
     for fichier in ("france_communes.csv", "france_departements.csv", "monde.csv"):
         shutil.copyfile(source / "samples" / fichier, CIBLE / "exemples" / fichier.replace("_", "-"))
 
-    entrees = {nom: {"fichier": str(c.relative_to(CIBLE)), "integrite": sri(c)} for nom, c in index.items()}
+    entrees = {nom: {"fichier": c.relative_to(CIBLE).as_posix(), "integrite": sri(c)} for nom, c in index.items()}
     ecrire_json(CIBLE / "index.json", dict(sorted({**entrees, **adresses.entrees_existantes()}.items())))
     (CIBLE / "LICENCE.txt").write_text(LICENCE, encoding="utf-8")
     taille = sum(p.stat().st_size for p in CIBLE.rglob("*") if p.is_file())

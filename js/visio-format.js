@@ -438,6 +438,15 @@ export function construireVsdx({ titre = '', pages, medias = new Map() }) {
     const bilan = [];
     const pagesXml = [];
     const pagesRels = [];
+    // Visio exige des noms de page distincts : un doublon (après troncature à 31 caractères) reçoit un numéro
+    const nomsPris = new Set();
+    const nomUnique = (p, i) => {
+        const base = String(p.nom || `Page ${i + 1}`).replace(/[\\/:*?"<>|[\]]/g, '-').slice(0, 31) || `Page ${i + 1}`;
+        let nom = base;
+        for (let n = 2; nomsPris.has(nom.toLowerCase()); n += 1) nom = `${base.slice(0, 31 - ` (${n})`.length)} (${n})`;
+        nomsPris.add(nom.toLowerCase());
+        return nom;
+    };
     pages.forEach((p, i) => {
         const { xml, rels, formes, connecteurs } = pageXml(p.formes, p.hauteurMm, medias);
         fichiers.push({ nom: `visio/pages/page${i + 1}.xml`, donnees: xml });
@@ -445,7 +454,7 @@ export function construireVsdx({ titre = '', pages, medias = new Map() }) {
         bilan.push({ nom: p.nom, formes, connecteurs });
         const l = p.largeurMm / POUCE;
         const h = p.hauteurMm / POUCE;
-        const nom = echapperXml(String(p.nom || `Page ${i + 1}`).replace(/[\\/:*?"<>|[\]]/g, '-').slice(0, 31) || `Page ${i + 1}`);
+        const nom = echapperXml(nomUnique(p, i));
         pagesXml.push(`<Page ID="${i}" NameU="${nom}" Name="${nom}" ViewScale="-1" ViewCenterX="${nombre(l / 2)}" ViewCenterY="${nombre(h / 2)}"><PageSheet LineStyle="0" FillStyle="0" TextStyle="0">${cellule('PageWidth', l)}${cellule('PageHeight', h)}${cellule('ShdwOffsetX', 0.125)}${cellule('ShdwOffsetY', -0.125)}${cellule('PageScale', 1 / POUCE)}${cellule('DrawingScale', 1 / POUCE)}${cellule('DrawingSizeType', 0)}${cellule('DrawingScaleType', 0)}${cellule('InhibitSnap', 0)}${cellule('PageLockReplace', 0)}${cellule('PageLockDuplicate', 0)}${cellule('UIVisibility', 0)}${cellule('ShdwType', 0)}${cellule('ShdwObliqueAngle', 0)}${cellule('ShdwScaleFactor', 1)}${cellule('DrawingResizeType', 0)}${cellule('PageShapeSplit', 1)}${cellule('PrintPageOrientation', p.largeurMm > p.hauteurMm ? 2 : 1)}${cellule('RouteStyle', 0)}${cellule('LineRouteExt', 0)}</PageSheet><Rel r:id="rId${i + 1}"/></Page>`);
         pagesRels.push(`<Relationship Id="rId${i + 1}" Type="http://schemas.microsoft.com/visio/2010/relationships/page" Target="page${i + 1}.xml"/>`);
     });

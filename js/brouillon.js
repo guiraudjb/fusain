@@ -26,8 +26,9 @@ async function transaction(mode, action) {
     }
 }
 
-export async function enregistrerBrouillon(texte) {
-    try { await transaction('readwrite', (m) => m.put(texte, CLE)); } catch { /* stockage indisponible : le brouillon est simplement absent */ }
+// « cle » : un brouillon illisible est mis de côté sous une autre clé au lieu d'être écrasé
+export async function enregistrerBrouillon(texte, cle = CLE) {
+    try { await transaction('readwrite', (m) => m.put(texte, cle)); } catch { /* stockage indisponible : le brouillon est simplement absent */ }
 }
 
 export async function lireBrouillon() {
@@ -39,6 +40,6 @@ export async function effacerBrouillon() {
 }
 
 export async function effacerDonneesLocales() {
-    await effacerBrouillon();
+    try { await transaction('readwrite', (m) => m.clear()); } catch { /* idem */ }
     try { localStorage.clear(); } catch { /* idem */ }
 }

@@ -4,7 +4,7 @@
 Met à jour, à partir des fichiers réellement présents dans le dépôt :
   - les attributs d'intégrité (SRI) de index.html ;
   - la liste des fichiers et la version du cache dans sw.js ;
-  - la nomenclature sbom/fusain-sbom-cyclonedx.json (CycloneDX 1.6).
+  - la nomenclature sbom/fusain-sbom-cyclonedx.json (CycloneDX 1.7, avec l'analyse des avis connus).
 
     python3 outils/generer.py              met à jour les fichiers
     python3 outils/generer.py --verifier   ne modifie rien ; code de sortie 1 en cas d'écart
@@ -22,7 +22,7 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parent.parent
 # Fichiers servis par l'application, donc mis en cache pour le fonctionnement hors ligne
 DOSSIERS_CACHE = ["css", "js", "libs", "icones", "sbom", "schema", "Documentation", "cartes"]
-FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
+FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "AUDIT_SECURITE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
 EXCLUS = {"sbom/composants.json"}
 # Fonds de carte volumineux : hors du préchargement, téléchargés à la première carte qui en a besoin, mais vérifiés
 # par le service worker avant d'entrer dans son cache, comme le reste
@@ -54,7 +54,7 @@ def fichiers_caches():
     for dossier in DOSSIERS_CACHE:
         base = RACINE / dossier
         if base.is_dir():
-            liste += [str(p.relative_to(RACINE)) for p in base.rglob("*") if p.is_file()]
+            liste += [p.relative_to(RACINE).as_posix() for p in base.rglob("*") if p.is_file()]
     return sorted(f for f in liste if f not in EXCLUS and not ADRESSES_COMMUNES.match(f))
 
 
@@ -101,42 +101,101 @@ def sw_genere(generes):
     return re.sub(r"/\* DEBUT-GENERE \*/.*?/\* FIN-GENERE \*/", lambda _: bloc, lire("sw.js"), flags=re.S)
 
 
+def licences(expression):
+    """Licence déclarée par l'amont : identifiant SPDX seul, ou expression (« A OR B »)."""
+    if " " in expression:
+        return [{"expression": expression, "acknowledgement": "declared"}]
+    return [{"license": {"id": expression, "acknowledgement": "declared"}}]
+
+
+def purl_npm(nom, version=None):
+    base = "pkg:npm/" + nom.replace("@", "%40", 1)
+    return f"{base}@{version}" if version else base
+
+
 def nomenclature():
     num, date = version()
     source = json.loads(lire("sbom/composants.json"))
-    composants, dependances = [], []
+    app = source["application"]
+    ref_app = f"pkg:github/guiraudjb/fusain@{num}"
+    composants, dependances, vulnerabilites = [], [], []
     for c in source["composants"]:
         dossier = RACINE / c["dossier"]
         if not dossier.is_dir():
             raise SystemExit(f"Dossier absent pour {c['nom']} : {c['dossier']}")
         ref = c["purl"]
-        fichiers = sorted(str(p.relative_to(RACINE)) for p in dossier.rglob("*") if p.is_file())
+        fichiers = sorted(p.relative_to(RACINE).as_posix() for p in dossier.rglob("*") if p.is_file())
+        sous = [{"type": "file", "bom-ref": f"{ref}#{f}", "name": f, "hashes": [{"alg": "SHA-256", "content": empreinte(f).hexdigest()}]} for f in fichiers]
+        inclus_refs = []
+        # Composants inclus dans une distribution autonome (mermaid.min.js, mermaid-zenuml.min.js) : listés quand ils sont identifiés
+        for i in c.get("inclus", []):
+            ref_i = f"{ref}#inclus/{purl_npm(i['nom'], i.get('version'))}"
+            inclus_refs.append(ref_i)
+            entree = {"type": "library", "bom-ref": ref_i, "name": i["nom"], "scope": "required",
+                      "licenses": licences(i["licence"]), "purl": purl_npm(i["nom"], i.get("version")),
+                      "properties": [{"name": "fusain:note", "value": i["note"]}]}
+            if i.get("version"):
+                entree["version"] = i["version"]
+            sous.append(entree)
+            for id_avis in i.get("avis", []):
+                vulnerabilites.append({
+                    "bom-ref": f"vex/{id_avis}/{ref_i}", "id": id_avis,
+                    "source": {"name": "OSV", "url": f"https://osv.dev/vulnerability/{id_avis}"},
+                    "analysis": {"state": "not_affected", "justification": "protected_by_mitigating_control", "detail": i["analyse"]},
+                    "affects": [{"ref": ref_i}],
+                })
         composants.append({
-            "type": "library", "bom-ref": ref, "name": c["nom"], "version": c["version"],
-            "description": c["role"], "purl": ref,
-            "licenses": [{"expression": c["licence"]}] if " " in c["licence"] else [{"license": {"id": c["licence"]}}],
+            "type": "library", "bom-ref": ref, "supplier": {"name": c["fournisseur"], "url": [c["depot"]]},
+            "name": c["nom"], "version": c["version"], "description": c["role"], "scope": "required",
+            "licenses": licences(c["licence"]),
             "hashes": [{"alg": "SHA-256", "content": c["archiveSha256"]}],
-            "externalReferences": [{"type": "distribution", "url": c["archive"]}],
-            "properties": [{"name": "fusain:dossier", "value": c["dossier"]}, {"name": "fusain:note", "value": c["note"]}],
-            "components": [{"type": "file", "name": f, "hashes": [{"alg": "SHA-256", "content": empreinte(f).hexdigest()}]} for f in fichiers],
+            "purl": ref,
+            "externalReferences": [{"type": "distribution", "url": c["archive"]}, {"type": "vcs", "url": c["depot"]}],
+            "properties": [{"name": "fusain:dossier", "value": c["dossier"]}, {"name": "fusain:chargement", "value": c["chargement"]},
+                           {"name": "fusain:note", "value": c["note"]}],
+            "components": sous,
         })
-        dependances.append({"ref": ref, "dependsOn": []})
-    ref_app = f"pkg:github/guiraudjb/fusain@{num}"
-    contenu = json.dumps(composants, sort_keys=True)
-    return {
-        "bomFormat": "CycloneDX", "specVersion": "1.6",
+        dependances.append({"ref": ref, "dependsOn": inclus_refs})
+    # Données livrées (fonds de carte, icônes) : l'empreinte est celle de leur index, qui porte l'empreinte de chaque fichier
+    for d in source["donnees"]:
+        entree = {"type": "data", "bom-ref": f"{ref_app}#donnees/{d['nom']}", "supplier": {"name": d["fournisseur"]}, "name": d["nom"],
+                  "description": d["description"], "scope": "required",
+                  "hashes": [{"alg": "SHA-256", "content": empreinte(d["index"]).hexdigest()}],
+                  "data": [{"type": "dataset", "name": d["nom"], "contents": {"url": d["index"]}}],
+                  "properties": [{"name": "fusain:dossier", "value": d["dossier"]}, {"name": "fusain:index", "value": d["index"]}]}
+        if d.get("licence"):
+            entree["licenses"] = licences(d["licence"])
+        composants.append(entree)
+    contenu = json.dumps([composants, vulnerabilites], sort_keys=True)
+    application = {
+        "type": "application", "bom-ref": ref_app, "supplier": {"name": app["fournisseur"], "url": [app["depot"]]},
+        "name": "FUSAIN", "version": num,
+        "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
+        "purl": ref_app,
+        "externalReferences": [{"type": "vcs", "url": app["depot"]}, {"type": "website", "url": app["site"]}],
+    }
+    if app.get("licence"):
+        application["licenses"] = licences(app["licence"])
+    else:
+        application["properties"] = [{"name": "fusain:licence", "value": "Aucune licence fixée pour le code propre à FUSAIN (nomenclature §4, point 4)."}]
+    bom = {
+        "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+        "bomFormat": "CycloneDX", "specVersion": "1.7",
         "serialNumber": "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, ref_app + contenu)),
         "version": 1,
         "metadata": {
             "timestamp": f"{date}T00:00:00Z",
-            "component": {"type": "application", "bom-ref": ref_app, "name": "FUSAIN", "version": num,
-                          "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-                          "purl": ref_app},
-            "tools": {"components": [{"type": "application", "name": "outils/generer.py"}]},
+            "lifecycles": [{"phase": "build"}],
+            "tools": {"components": [{"type": "application", "name": "outils/generer.py", "version": num}]},
+            "component": application,
+            "supplier": {"name": app["fournisseur"], "url": [app["depot"]]},
         },
         "components": composants,
-        "dependencies": [{"ref": ref_app, "dependsOn": [c["bom-ref"] for c in composants]}, *dependances],
+        "dependencies": [{"ref": ref_app, "dependsOn": [c["bom-ref"] for c in composants if c["type"] == "library"]}, *dependances],
     }
+    if vulnerabilites:
+        bom["vulnerabilities"] = vulnerabilites
+    return bom
 
 
 def principal():

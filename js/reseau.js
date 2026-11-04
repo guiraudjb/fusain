@@ -572,11 +572,13 @@ export function produirePages(graphe, options = {}) {
         for (const li of graphe.liaisons) {
             const [ga, gb] = [gDe(parCle.get(li.a)), gDe(parCle.get(li.b))];
             if (!ga || !gb || ga === gb) continue;
-            const k = [ga, gb].sort().join('~');
-            entre.set(k, (entre.get(k) || 0) + li.membres.length);
+            // La paire est gardée telle quelle : un nom de groupe peut contenir n'importe quel caractère
+            const paire = [ga, gb].sort();
+            const k = JSON.stringify(paire);
+            const avant = entre.get(k);
+            entre.set(k, { paire, n: (avant?.n || 0) + li.membres.length });
         }
-        for (const [k, n] of entre) {
-            const [ga, gb] = k.split('~');
+        for (const { paire: [ga, gb], n } of entre.values()) {
             vue.liens.push({ de: idGroupe.get(ga), vers: idGroupe.get(gb), debut: '', fin: '', texte: `${n} lien${n > 1 ? 's' : ''}`, trait: 'plein', longueur: 1 });
         }
         pages.push({ nom: 'Réseau : vue d\'ensemble', code: ecrirePage(vue, alertes, 'Vue d\'ensemble'), equipements: vue.noeuds.length });

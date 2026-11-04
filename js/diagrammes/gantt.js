@@ -1,6 +1,6 @@
 // Diagramme de Gantt : sections et tâches saisies en grille
-import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
-import { separerPreambule, deplacer, actionsListe, plan, marquer } from './commun.js';
+import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
+import { separerPreambule, deplacer, actionsListe, plan, marquer, ligneAccessible } from './commun.js';
 
 const ETATS = ['done', 'active', 'crit', 'milestone'];
 const NOMS_ETATS = { done: 'Terminée', active: 'En cours', crit: 'Critique', milestone: 'Jalon' };
@@ -8,7 +8,8 @@ const REGLAGES = ['dateFormat', 'axisFormat', 'excludes', 'tickInterval', 'today
 // Un nom de tâche qui commence par un mot-clé de Mermaid serait lu comme une instruction : il est mis entre guillemets français
 const MOT_CLE_EN_TETE = /^(title|section|click|dateFormat|axisFormat|excludes|includes|todayMarker|tickInterval|weekday|weekend|inclusiveEndDates|topAxis|displayMode|accTitle|accDescr|gantt)(\s|$)/i;
 const nomTache = (t) => { const n = propre(t) || 'Tâche'; return MOT_CLE_EN_TETE.test(n) ? `« ${n} »` : n; };
-const propre = (t) => String(t).replace(/[\n:;#]/g, ' ').replace(/\s+/g, ' ').trim();
+// Un texte qui commence par « %% » serait un commentaire : il est précédé d'une espace sans chasse
+const propre = (t) => String(t).replace(/[\n:;#]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^%%/, '\u200b%%');
 
 function lireTache(nom, meta) {
     const morceaux = meta.split(',').map((x) => x.trim()).filter(Boolean);
@@ -30,6 +31,11 @@ export function analyser(code) {
         const ligne = brute.trim();
         if (!ligne) return;
         if (ligne.startsWith('%%')) { modele.lignes.push({ t: 'brut', ligne }); return; }
+        try {
+            if (ligneAccessible(ligne)) { modele.lignes.push({ t: 'brut', ligne }); return; }
+        } catch (e) {
+            throw new Error(`Ligne ${n + 2 + preambule.length} : ${e.message}, non gérée par l'édition visuelle.`);
+        }
         // Un mot-clé n'en est un que s'il est suivi d'un espace : « titleX » est un nom de tâche
         const mot = ligne.match(/^([A-Za-z]+)(?=\s|$)/)?.[1] || '';
         const reste = ligne.slice(mot.length).trim();
@@ -133,7 +139,11 @@ export function panneau(ctx) {
                 h('h2', {}, 'Tâche sélectionnée'),
                 champTexte('Nom', ligne.nom, (v) => maj((x) => { if (v.trim()) x.nom = v.trim(); }), { id: 'fusain-champ-texte' }),
                 h('div', { class: 'fusain-ligne' },
-                    champTexte('Début', ligne.debut, (v) => maj((x) => { x.debut = v.trim(); }), { placeholder: '2026-01-15 ou after t1' }),
+                    champTexte('Début', ligne.debut, (v) => {
+                        // Sans début, l'identifiant serait lu par Mermaid comme la date de début (« t1, 5d ») : il faut l'un sans l'autre
+                        if (!v.trim() && ligne.id) { message('Début nécessaire', 'Une tâche qui porte un identifiant doit avoir un début : une date, ou « after » suivi d\'une autre tâche. Videz d\'abord l\'identifiant.', 'warning'); return; }
+                        maj((x) => { x.debut = v.trim(); });
+                    }, { placeholder: '2026-01-15 ou after t1' }),
                     champTexte('Durée ou fin', ligne.fin, (v) => maj((x) => { if (v.trim()) x.fin = v.trim(); }), { placeholder: '10d ou 2026-02-01' })),
                 champTexte('Identifiant (pour enchaîner d\'autres tâches)', ligne.id, (v) => maj((x) => { x.id = v.trim().replace(/[^\p{L}\p{N}_-]/gu, ''); })),
                 ETATS.map((e) => champCase(NOMS_ETATS[e], ligne.etats.includes(e), (coche) => maj((x) => {

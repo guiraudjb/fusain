@@ -72,8 +72,15 @@ export function champSelect(libelle, options, valeur, surChangement, attrs = {})
     // premières lettres, « Occ » pour Occitanie), sinon le panneau reconstruit à la première lettre perdrait la suite
     let clavier = false;
     let attente = null;
-    const valider = () => { clearTimeout(attente); attente = null; surChangement(controle.value); };
-    controle.addEventListener('keydown', (e) => { clavier = e.key.length === 1 || e.key.startsWith('Arrow') || ['Home', 'End', 'PageUp', 'PageDown'].includes(e.key); if (e.key === 'Enter' && attente) valider(); });
+    // Un choix encore en attente quand le champ a quitté la page (autre page affichée, panneau reconstruit) est abandonné :
+    // appliqué plus tard, il toucherait la page désormais affichée
+    const valider = () => { clearTimeout(attente); attente = null; if (controle.isConnected) surChangement(controle.value); };
+    controle.addEventListener('keydown', (e) => {
+        // Raccourci (Ctrl+S, Ctrl+Z…) : le choix en attente est appliqué avant que le raccourci n'agisse
+        if (e.ctrlKey || e.metaKey || e.altKey) { if (attente) valider(); return; }
+        clavier = e.key.length === 1 || e.key.startsWith('Arrow') || ['Home', 'End', 'PageUp', 'PageDown'].includes(e.key);
+        if (e.key === 'Enter' && attente) valider();
+    });
     controle.addEventListener('pointerdown', () => { clavier = false; });
     controle.addEventListener('change', () => {
         if (!clavier) { valider(); return; }

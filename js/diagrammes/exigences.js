@@ -1,6 +1,6 @@
 // Diagramme d'exigences : exigences, éléments qui y répondent, relations typées
 import { h, bouton, champTexte, champSelect } from '../dom.js';
-import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible } from './commun.js';
 
 const SENS = [['', 'Automatique'], ['TB', 'De haut en bas'], ['LR', 'De gauche à droite'], ['BT', 'De bas en haut'], ['RL', 'De droite à gauche']];
 const GENRES = [['requirement', 'Exigence'], ['functionalRequirement', 'Exigence fonctionnelle'], ['interfaceRequirement', 'Exigence d\'interface'], ['performanceRequirement', 'Exigence de performance'], ['physicalRequirement', 'Exigence physique'], ['designConstraint', 'Contrainte de conception']];
@@ -38,7 +38,7 @@ export function analyser(code) {
         }
         let m = ligne.match(/^direction\s+(TB|TD|BT|LR|RL)$/);
         if (m) { modele.sens = m[1] === 'TD' ? 'TB' : m[1]; return; }
-        if (/^(classDef|class|style|accTitle|accDescr)\s/.test(ligne)) { modele.brut.push(ligne); return; }
+        if (/^(classDef|class|style)\s/.test(ligne) || ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
         m = ligne.match(RE_BLOC);
         if (m) {
             const nom = m[2] ?? m[3];

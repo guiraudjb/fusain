@@ -3,7 +3,8 @@ import { h, bouton, champTexte, champSelect } from '../dom.js';
 import { separerPreambule, deplacer, actionsListe, plan, marquer, Inconnu, parLigne } from './commun.js';
 
 // Deux-points, point-virgule et dièse structurent la syntaxe : ils sont retirés des textes
-const propre = (t) => String(t).replace(/[:;#\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+// Un texte qui commence par « %% » serait un commentaire : il est précédé d'une espace sans chasse
+const propre = (t) => String(t).replace(/[:;#\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^%%/, '\u200b%%');
 const propreActeur = (t) => propre(String(t).replace(/,/g, ' '));
 const MOT_CLE = /^(title|section|journey|accTitle|accDescr)(\s|$)/i;
 const nomSur = (t, repli) => { const n = propre(t) || repli; return MOT_CLE.test(n) ? `« ${n} »` : n; };

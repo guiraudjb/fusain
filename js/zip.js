@@ -21,6 +21,25 @@ async function transformer(octets, flux) {
     return new Uint8Array(await new Response(new Blob([octets]).stream().pipeThrough(flux)).arrayBuffer());
 }
 
+// Décompression arrêtée dès que la taille admise est dépassée : une archive très compressible (« bombe ») ne remplit
+// pas la mémoire avant le contrôle
+async function decompresser(octets, tailleMax) {
+    const lecteur = new Blob([octets]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+    const morceaux = [];
+    let total = 0;
+    for (;;) {
+        const { done, value } = await lecteur.read();
+        if (done) break;
+        total += value.length;
+        if (total > tailleMax) { await lecteur.cancel(); throw new Error('Le contenu de l\'archive est trop volumineux.'); }
+        morceaux.push(value);
+    }
+    const brut = new Uint8Array(total);
+    let p = 0;
+    for (const m of morceaux) { brut.set(m, p); p += m.length; }
+    return brut;
+}
+
 // Lecture : rend une fonction qui donne le contenu (octets) d'un fichier de l'archive, ou null s'il n'y est pas
 export async function lireZip(octets, { tailleMax = Infinity } = {}) {
     const vue = new DataView(octets.buffer, octets.byteOffset, octets.byteLength);
@@ -47,9 +66,7 @@ export async function lireZip(octets, { tailleMax = Infinity } = {}) {
         const donnees = octets.subarray(debut, debut + e.taille);
         if (e.methode === 0) return donnees;
         if (e.methode !== 8) throw new Error('L\'archive utilise une compression non prise en charge.');
-        const brut = await transformer(donnees, new DecompressionStream('deflate-raw'));
-        if (brut.length > tailleMax) throw new Error('Le contenu de l\'archive est trop volumineux.');
-        return brut;
+        return decompresser(donnees, tailleMax);
     };
 }
 

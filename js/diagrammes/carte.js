@@ -11,6 +11,7 @@
 import { h, bouton, champTexte, champSelect, champCase, message, modale, ouvrirModale, fermerModale } from '../dom.js';
 import { actionsListe, plan, marquer } from './commun.js';
 import { choisirIcone } from '../icones.js';
+import { abonner } from '../etat.js';
 import { referentiels, nomsDesZones, lireCommunes, inverserPosition, territoiresRepresentes, departementsAdresses, communesAdresses, adressesCommune } from '../geo.js';
 
 export const ECHELLES = {
@@ -334,13 +335,25 @@ function changerEchelle(modele, echelle) {
 
 // Dernier fichier importé dans chaque page, gardé le temps de la session. L'import ne garde que les territoires de la
 // carte : quand la zone ou l'échelle change, le même fichier est relu pour la nouvelle carte (« Actualiser les données »).
-const sources = new Map(); // id de la page → { nom, lignes, reglage, cle }
+// La relecture automatique n'a lieu qu'après un changement de zone ou d'échelle fait dans le panneau (« relire »),
+// jamais après une annulation : elle viderait l'historique des étapes à rétablir.
+const sources = new Map(); // id de la page → { nom, lignes, reglage, cle, relire }
 const cleCarte = (m) => `${m.echelle}|${m.zone}`;
-function retenirSource(idPage, source) {
+// Un autre document peut porter les mêmes identifiants de page : ses données ne viennent pas du fichier de la session
+abonner((raison) => { if (raison === 'chargement') sources.clear(); });
+function retenirSource(idPage, { nom, lignes, reglage, cle }) {
     if (!idPage) return;
+    // Seules les colonnes du réglage sont relues : le reste du fichier n'est pas gardé en mémoire
+    const colonnes = [...new Set([reglage.colCode, reglage.col1, reglage.col2, reglage.colTexte, reglage.colFiltre].filter(Boolean))];
+    const utiles = lignes.map((l) => Object.fromEntries(colonnes.map((c) => [c, l[c]])));
     sources.delete(idPage);
-    sources.set(idPage, source);
+    sources.set(idPage, { nom, lignes: utiles, reglage, cle, relire: false });
     if (sources.size > 5) sources.delete(sources.keys().next().value);
+}
+// Changement de zone ou d'échelle demandé par l'utilisateur : la carte suivante relira le fichier
+function demanderRelecture(idPage) {
+    const source = sources.get(idPage);
+    if (source) source.relire = true;
 }
 // Données du fichier pour la carte : regroupées à son échelle, réduites à ses territoires quand ils sont connus
 function donneesDe(source, echelle, representes) {
@@ -349,8 +362,12 @@ function donneesDe(source, echelle, representes) {
 }
 function actualiser(appliquer, modele, source, representes, { auto = false } = {}) {
     source.cle = cleCarte(modele);
+    source.relire = false;
     const donnees = donneesDe(source, modele.echelle, representes);
-    appliquer((m) => { m.donnees = donnees; });
+    // Relecture automatique sans résultat (passage de la France au monde, par exemple) : rien n'est changé ni signalé
+    if (auto && !donnees.length) return;
+    // Mêmes données qu'à l'écran : pas d'étape vide dans l'historique
+    if (JSON.stringify(donnees) !== JSON.stringify(modele.donnees)) appliquer((m) => { m.donnees = donnees; });
     if (donnees.length) message(auto ? 'Données actualisées pour la nouvelle carte' : 'Données actualisées', `${donnees.length} territoire(s) renseigné(s) depuis ${source.nom}.`, 'success', 5000);
     else message('Aucune donnée pour cette carte', `Aucun code de ${source.nom} ne correspond à un territoire de cette carte.`, 'warning', 7000);
 }
@@ -394,7 +411,7 @@ function dialogueImport(appliquer, modele, idPage, representes, nom, colonnes, l
         if (['ratio', 'evolution'].includes(reglage.calcul) && !reglage.col2) { message('Colonne 2 manquante', 'Ce calcul compare deux colonnes : choisissez la colonne 2.', 'warning'); return; }
         // Seuls les territoires de la carte sont gardés : un fichier national ne charge pas la page de milliers de lignes inutiles
         const toutes = agreger(lignes, echelle, reglage);
-        const donnees = representes ? toutes.filter((d) => representes.has(d.code)) : toutes;
+        const donnees = donneesDe({ lignes, reglage }, echelle, representes);
         if (!donnees.length) { message('Aucune donnée', 'Aucun code de la colonne choisie ne correspond à un territoire de la carte.', 'error'); return; }
         fermerModale(dialogue);
         retenirSource(idPage, { nom, lignes, reglage, cle: cleCarte(modele) });
@@ -493,10 +510,10 @@ const optionsZones = (echelle, zone) => {
     return [];
 };
 
-function choixZone(modele, appliquer) {
+function choixZone(modele, appliquer, idPage) {
     const { echelle, zone } = modele;
     if (!ZONES[echelle]) return null;
-    if (echelle !== 'commune') return champSelect(ECHELLES[echelle].zone, optionsZones(echelle, zone), zone, (v) => appliquer((m) => { m.zone = v; }));
+    if (echelle !== 'commune') return champSelect(ECHELLES[echelle].zone, optionsZones(echelle, zone), zone, (v) => { demanderRelecture(idPage); appliquer((m) => { m.zone = v; }); });
     // Commune : le département d'abord, puis la commune parmi les siennes
     const dep = departementDe(zone);
     const communes = referentiels.communes.get(dep) || [[zone, nomZone(zone)]];
@@ -505,10 +522,10 @@ function choixZone(modele, appliquer) {
             try {
                 await lireCommunes(referentiels.regionDuDepartement.get(v));
                 const premiere = referentiels.communes.get(v)?.[0]?.[0];
-                if (premiere) appliquer((m) => { m.zone = premiere; });
+                if (premiere) { demanderRelecture(idPage); appliquer((m) => { m.zone = premiere; }); }
             } catch (e) { message('Communes indisponibles', e.message, 'error'); }
         }),
-        champSelect('Commune', communes, zone, (v) => appliquer((m) => { m.zone = v; })),
+        champSelect('Commune', communes, zone, (v) => { demanderRelecture(idPage); appliquer((m) => { m.zone = v; }); }),
     ];
 }
 
@@ -526,8 +543,8 @@ export function panneau(ctx) {
 
     blocs.push(h('div', { class: 'fusain-bloc' },
         h('h2', {}, 'Carte'),
-        champSelect('Échelle', Object.entries(ECHELLES).map(([id, e]) => [id, e.nom]), modele.echelle, (v) => appliquer((m) => changerEchelle(m, v), () => null)),
-        choixZone(modele, appliquer)));
+        champSelect('Échelle', Object.entries(ECHELLES).map(([id, e]) => [id, e.nom]), modele.echelle, (v) => { demanderRelecture(idPage); appliquer((m) => changerEchelle(m, v), () => null); }),
+        choixZone(modele, appliquer, idPage)));
 
     // Territoire, épingle, pictogramme ou annotation sélectionné
     if (selection?.startsWith('z:')) {
@@ -582,8 +599,9 @@ export function panneau(ctx) {
     const n = modele.donnees.length;
     const presents = representes ? modele.donnees.filter((d) => representes.has(d.code)).length : n;
     // Zone ou échelle changée depuis l'import : le même fichier est relu pour la nouvelle carte, une fois dessinée
-    if (source && representes && source.cle !== cleCarte(modele)) {
+    if (source && source.relire && representes && source.cle !== cleCarte(modele)) {
         source.cle = cleCarte(modele);
+        source.relire = false;
         queueMicrotask(() => actualiser(appliquer, modele, source, representes, { auto: true }));
     }
     blocs.push(h('div', { class: 'fusain-bloc' },
@@ -594,9 +612,9 @@ export function panneau(ctx) {
                 : `Aucune des ${n} valeurs ne concerne un territoire de cette carte : elle reste grise et la palette n'a rien à colorer.`,
             source ? ` « Actualiser les données » relit ${source.nom} pour cette carte.` : ' Importez le fichier pour cette zone, ou effacez les données.')) : null,
         h('div', { class: 'fusain-actions' },
-            source ? bouton('Actualiser les données', { icone: 'refresh-line', variante: presents < n ? 'primary' : 'secondary', titre: `Relire ${source.nom} pour cette carte`, onclick: () => actualiser(appliquer, modele, source, representes) }) : null,
+            source && representes ? bouton('Actualiser les données', { icone: 'refresh-line', variante: presents < n ? 'primary' : 'secondary', titre: `Relire ${source.nom} pour cette carte`, onclick: () => actualiser(appliquer, modele, source, representes) }) : null,
             bouton('Importer un fichier CSV…', { icone: 'upload-line', variante: 'secondary', onclick: () => importer(appliquer, modele, idPage) }),
-            n ? bouton('Effacer les données', { icone: 'delete-bin-line', onclick: () => appliquer((m) => { m.donnees = []; }, () => null) }) : null),
+            n ? bouton('Effacer les données', { icone: 'delete-bin-line', onclick: () => { sources.delete(idPage); appliquer((m) => { m.donnees = []; }, () => null); } }) : null),
         h('p', { class: 'fusain-aide' }, 'Cliquez sur un territoire de la carte pour saisir ou corriger sa valeur. Les codes attendus sont ceux de l\'INSEE (départements, communes), le SIREN des EPCI ou le code ISO à trois lettres des pays.')));
 
     const palette = option(modele, 'palette');

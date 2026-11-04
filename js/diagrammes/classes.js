@@ -1,6 +1,6 @@
 // Diagramme de classes : classes, membres et relations
 import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
-import { separerPreambule, deplacer, actionsListe, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { separerPreambule, deplacer, actionsListe, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible } from './commun.js';
 
 const SENS = [['', 'Automatique'], ['TB', 'De haut en bas'], ['LR', 'De gauche à droite'], ['BT', 'De bas en haut'], ['RL', 'De droite à gauche']];
 const ID = '[\\p{L}_][\\p{L}\\p{N}_]*';
@@ -19,7 +19,8 @@ const propreLibelle = (t) => String(t).replace(/[^\p{L}\p{N} .,'()!?_+*/=<>-]/gu
 // Mermaid lit comme une méthode tout membre qui contient « ) », et échoue s'il n'a pas la forme « nom(…) »
 const estMethode = (m) => m.includes(')');
 function propreMembre(t) {
-    let m = String(t).replace(/[{}\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+    // « %% » en tête ferait du membre un commentaire : une espace sans chasse le précède
+    let m = String(t).replace(/[{}\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^%%/, '\u200b%%');
     if (/^<<.*>>$/.test(m)) m = m.replace(/[<>]/g, '').trim();
     return estMethode(m) && !/.\(.*\)/.test(m) ? m.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim() : m;
 }
@@ -45,7 +46,7 @@ export function analyser(code) {
         }
         let m = ligne.match(/^direction\s+(TB|TD|BT|LR|RL)$/);
         if (m) { modele.sens = m[1] === 'TD' ? 'TB' : m[1]; return; }
-        if (/^(classDef|cssClass|style|accTitle|accDescr)\s/.test(ligne)) { modele.brut.push(ligne); return; }
+        if (/^(classDef|cssClass|style)\s/.test(ligne) || ligneAccessible(ligne)) { modele.brut.push(ligne); return; }
         m = ligne.match(RE_CLASSE);
         if (m) {
             const c = classe(modele, m[1]);

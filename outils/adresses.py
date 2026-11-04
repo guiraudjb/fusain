@@ -64,6 +64,9 @@ def ecrire_commune(code, nom, voies):
     return [code, nom, sri(donnees)]
 
 
+CODE_INSEE = re.compile(r"(?:\d{2}|2[AB])\d{3}")
+
+
 def principal(source):
     if CIBLE.exists():
         shutil.rmtree(CIBLE)
@@ -80,6 +83,9 @@ def principal(source):
     with gzip.open(source, "rt", encoding="utf-8", newline="") as f:
         for ligne in csv.DictReader(f, delimiter=";"):
             code = ligne["code_insee"]
+            # Le code sert de nom de fichier : rien d'autre qu'un code INSEE de commune n'est admis
+            if not CODE_INSEE.fullmatch(code):
+                raise SystemExit(f"Code INSEE invalide dans le fichier source : {code!r}")
             if code != courante:
                 clore()
                 # Le fichier national est rangé par commune : une commune ne doit pas reparaître plus loin

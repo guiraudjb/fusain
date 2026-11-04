@@ -441,6 +441,10 @@ function reglesPropres(type, t, ctx) {
 // ---------- Diagnostic ----------
 
 // erreur : l'objet levé par le rendu (message, et hash.loc pour les erreurs de Mermaid)
+// Au-delà, une ligne n'est pas soumise aux règles de réparation : certaines expressions ont un coût qui croît vite avec
+// la longueur, et le diagnostic s'exécute à chaque erreur de rendu (un fichier piégé figerait l'onglet)
+const LIGNE_MAX = 300;
+
 export function diagnostiquer(code, erreur) {
     const lignes = lignesDe(code);
     const type = typeDiagramme(code);
@@ -526,7 +530,7 @@ export function diagnostiquer(code, erreur) {
         }
     }
     if (i < 0 && type === 'gantt') {
-        i = lignes.findIndex((l, k) => k > entete && reglesGantt(l.trim(), { code }).length > 0);
+        i = lignes.findIndex((l, k) => k > entete && l.length <= LIGNE_MAX && reglesGantt(l.trim(), { code }).length > 0);
     }
     if (i < 0) return diag;
     situer(i);
@@ -539,6 +543,7 @@ export function diagnostiquer(code, erreur) {
     const analyser = (k) => {
         const candidats = [];
         const proposer = (c) => { if (c) candidats.push({ ...c, k }); };
+        if (lignes[k].length > LIGNE_MAX) return candidats;
         const retrait = indentation(lignes[k]);
         const t = lignes[k].trim();
         // Règles communes

@@ -36,8 +36,13 @@ export function echapper(texte) {
     return String(texte).replace(/\t/g, ' ').replace(/#(?=\w+;)/g, '#35;').replace(/"/g, '#quot;').replace(/`/g, '#96;').replace(/\r?\n/g, '<br/>');
 }
 
+// Entités de Mermaid (« #9829; », « #amp; ») : lues comme le caractère qu'elles affichent, réécrites comme ce caractère
+const ENTITES = { amp: '&', lt: '<', gt: '>', apos: '\'', nbsp: '\u00a0', hearts: '♥', copy: '©', reg: '®', deg: '°', euro: '€' };
 export function desechapper(texte) {
-    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n').replace(/#35;/g, '#');
+    return String(texte).replace(/#quot;/g, '"').replace(/#96;/g, '`').replace(/<br\s*\/?>/gi, '\n')
+        .replace(/#(\d{1,7});/g, (entier, n) => (n === '35' || Number(n) > 0x10ffff || Number(n) === 0 ? entier : String.fromCodePoint(Number(n))))
+        .replace(/#([a-z]+);/g, (entier, nom) => ENTITES[nom] ?? entier)
+        .replace(/#35;/g, '#');
 }
 
 export function sansGuillemets(texte) {

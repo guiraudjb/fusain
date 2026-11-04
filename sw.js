@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.22.0-675e285df1';
+const VERSION_CACHE = 'fusain-0.22.0-07b9cc2c9b';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', '45dc685a5082a698651fa0c7bf9302fa6e0ac7aeaf2e5c5dbb194eef0003a0e5'],
@@ -63,7 +63,7 @@ const FICHIERS = [
     ['./js/diagrammes/camembert.js', '34d80b782476682bafc9c1a7b4c3e3ac37a00f1c1d70b420d169367214d4a806'],
     ['./js/diagrammes/carte.js', '902b266dd9dc20ad7f02b44a9089dedaff4751c583bda0eea15492ad63afb631'],
     ['./js/diagrammes/classes.js', 'd06157d33248204ae692bdcc5f2e7d610010e45cd46750baa08c9d6a019d43cd'],
-    ['./js/diagrammes/commun.js', '81ffed4a274830d333dcf2fa00e6df8e41cc592f158f0a8e1dd41abb57aa23e9'],
+    ['./js/diagrammes/commun.js', 'c5529917e5ddc4e9f330d1f4316aca8d0bace18104ef31e41604e9850bfd556a'],
     ['./js/diagrammes/diapo.js', 'ce5a9455c165c690e5affb4e66ebe1075f6b2bb35ec93b069e8268a7e5f99592'],
     ['./js/diagrammes/entites.js', '3b3174ed2572bbda6ff719956194c99a1759dbad3811187ffe8b0cc173078af5'],
     ['./js/diagrammes/etats.js', '5e5f1f27f35be3fa569b12c180007b1c053161a6f66acd7f09ba95443d8f0e1c'],
@@ -225,7 +225,7 @@ const FICHIERS = [
     ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
     ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '7543c9d99c79bbd8f853344702442a0ebd5cccb4bd072fc1e104ffb18f795dec'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '4b7153c3c07ee473dad475a3fe8d72957dfdf98d7aab4e22c98e83100c1931c5'],
     ['./schema/fusain.schema.json', '839ce30901c0ab12e44e189d7d3dc27d593eab3185ab6eaabc0cc7dcb901eb17'],
 ];
 // Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement

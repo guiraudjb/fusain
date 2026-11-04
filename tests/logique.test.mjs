@@ -825,6 +825,9 @@ test('éditeurs : accTitle/accDescr gardés, « # » et « %% » protégés, lin
     n.noeuds[0].texte = 'Ticket #42; urgent';
     const relu = lg.analyser(lg.ecrire(n));
     assert.equal(relu.noeuds.find((x) => x.id === 'A').texte, 'Ticket #42; urgent');
+    // Entité écrite dans le code : lue comme son caractère, réécrite comme lui (le rendu ne change pas)
+    const coeur = lg.analyser('flowchart TD\n    A[Avec #quot;guillemets#quot; et #9829;] --> B');
+    assert.equal(coeur.noeuds.find((x) => x.id === 'A').texte, 'Avec "guillemets" et ♥');
     const g = editeurPour('gantt');
     const gm = g.analyser('gantt\n  dateFormat YYYY-MM-DD\n  section S\n  Tache :2026-01-01, 2d');
     gm.lignes.find((l) => l.t === 'tache').nom = '%% revoir';

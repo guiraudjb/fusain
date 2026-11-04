@@ -178,9 +178,10 @@ def nomenclature():
         application["licenses"] = licences(app["licence"])
     else:
         application["properties"] = [{"name": "fusain:licence", "value": "Aucune licence fixée pour le code propre à FUSAIN (nomenclature §4, point 4)."}]
+    # « bomFormat » en tête : c'est l'usage, et la recette reconnaît le fichier à ses premiers caractères
     bom = {
-        "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
         "bomFormat": "CycloneDX", "specVersion": "1.7",
+        "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
         "serialNumber": "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, ref_app + contenu)),
         "version": 1,
         "metadata": {

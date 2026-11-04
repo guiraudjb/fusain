@@ -51,6 +51,8 @@ python3 outils/veille.py             # vulnérabilités connues des bibliothèqu
 
 La recette est rejouée par GitHub à chaque modification (`.github/workflows/recette.yml`) et la veille des vulnérabilités le 1er de chaque mois (`veille.yml`).
 
+Pour héberger le dépôt sur un GitLab privé et servir l'application par GitLab Pages : `deploiement/GITLAB.md`.
+
 `outils/generer.py` doit être relancé après toute modification d'un fichier servi : il recalcule les empreintes d'intégrité de `index.html`, la liste et la version du cache du service worker, et la nomenclature CycloneDX.
 
 ## Sécurité

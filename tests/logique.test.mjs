@@ -125,8 +125,24 @@ test('noms de fichiers nettoyés', () => {
 
 // ---------- Éditeurs ajoutés en 0.6.0 ----------
 
+// Types arrivés avec Mermaid 12.3 : modèle et aide à la syntaxe, édition en code seulement pour l'instant
+const EN_CODE_SEULEMENT = new Set(['agentflow', 'cynefin', 'eventmodeling', 'railroad-ebnf', 'usecase', 'wardley']);
 test('tous les modèles proposés ont un éditeur visuel', () => {
-    for (const m of MODELES) assert.ok(editeurPour(typeDiagramme(m.code)), `sans éditeur : ${m.id}`);
+    for (const m of MODELES) {
+        const type = typeDiagramme(m.code);
+        if (EN_CODE_SEULEMENT.has(type)) assert.ok(SYNTAXES[type], `sans aide à la syntaxe : ${m.id}`);
+        else assert.ok(editeurPour(type), `sans éditeur : ${m.id}`);
+    }
+});
+
+test('C4 dynamique et déploiement : nœuds de déploiement relus et réécrits à l\'identique', () => {
+    const c4 = editeurPour('C4Deployment');
+    assert.equal(c4, editeurPour('C4Dynamic'));
+    const code = 'C4Deployment\n    Deployment_Node(poste, "Poste", "Navigateur web", "Poste de l\'usager") {\n        Container(web, "Portail", "HTML")\n    }\n    Deployment_Node(dc, "Centre") {\n        ContainerDb(db, "Base", "PostgreSQL")\n    }\n    Rel(web, db, "Lit")\n';
+    assert.equal(c4.ecrire(c4.analyser(code)), code);
+    for (const m of MODELES.filter((x) => /^C4(Dynamic|Deployment)/.test(x.code))) {
+        assert.equal(c4.ecrire(c4.analyser(m.code)), c4.ecrire(c4.analyser(c4.ecrire(c4.analyser(m.code)))), m.id);
+    }
 });
 
 test('historique de versions : une opération que Mermaid refuserait n\'est jamais écrite', () => {

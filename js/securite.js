@@ -133,6 +133,18 @@ export const cssExterieur = (valeur) => CSS_EXTERIEUR.test(decoderCss(String(val
 function poserCrochets(DOMPurify) {
     if (crochetsPoses) return;
     crochetsPoses = true;
+    // Le HTML incorporé dans un foreignObject est retiré par DOMPurify : son texte seul (jamais de balise) est relevé
+    // avant, pour que le rendu le réécrive en texte SVG (rendu.js, remplacerHtmlIncorpore). Sert à la modélisation par
+    // événements, qui écrit toujours ses libellés en HTML.
+    DOMPurify.addHook('uponSanitizeElement', (noeud) => {
+        if (noeud.nodeName?.toLowerCase() !== 'foreignobject') return;
+        // Morceaux de texte joints par une espace : « <b>Commande</b>champ » ne doit pas devenir « Commandechamp »
+        const morceaux = [];
+        const parcours = noeud.ownerDocument.createTreeWalker(noeud, 4);
+        while (parcours.nextNode()) morceaux.push(parcours.currentNode.nodeValue);
+        const texte = morceaux.join(' ').replace(/\s+/g, ' ').trim().slice(0, 1000);
+        if (texte) noeud.setAttribute('data-fusain-texte', texte);
+    });
     DOMPurify.addHook('uponSanitizeAttribute', (noeud, donnees) => {
         const nom = donnees.attrName;
         const valeur = String(donnees.attrValue || '');

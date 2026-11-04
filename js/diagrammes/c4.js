@@ -2,14 +2,16 @@
 import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
 import { separerPreambule, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
 
-const TITRES = { C4Context: 'Diagramme de contexte (C4)', C4Container: 'Diagramme de conteneurs (C4)', C4Component: 'Diagramme de composants (C4)' };
+const TITRES = { C4Context: 'Diagramme de contexte (C4)', C4Container: 'Diagramme de conteneurs (C4)', C4Component: 'Diagramme de composants (C4)', C4Dynamic: 'Diagramme dynamique (C4)', C4Deployment: 'Diagramme de déploiement (C4)' };
 // Nature d'un élément : radical de l'instruction Mermaid, à laquelle « _Ext » s'ajoute pour un élément externe
 const NATURES = [['Person', 'Personne'], ['System', 'Système'], ['SystemDb', 'Système — base de données'], ['SystemQueue', 'Système — file de messages'],
     ['Container', 'Conteneur'], ['ContainerDb', 'Conteneur — base de données'], ['ContainerQueue', 'Conteneur — file de messages'],
     ['Component', 'Composant'], ['ComponentDb', 'Composant — base de données'], ['ComponentQueue', 'Composant — file de messages']];
-const LIMITES = [['Boundary', 'Limite'], ['Enterprise_Boundary', 'Organisation'], ['System_Boundary', 'Système'], ['Container_Boundary', 'Conteneur']];
+const LIMITES = [['Boundary', 'Limite'], ['Enterprise_Boundary', 'Organisation'], ['System_Boundary', 'Système'], ['Container_Boundary', 'Conteneur'], ['Deployment_Node', 'Nœud de déploiement']];
+// Un nœud de déploiement porte, comme un conteneur, un type (technologie) et une description
+const NOEUD = 'Deployment_Node';
 const SENS = [['Rel', 'Automatique'], ['BiRel', 'Double sens'], ['Rel_D', 'Vers le bas'], ['Rel_U', 'Vers le haut'], ['Rel_R', 'Vers la droite'], ['Rel_L', 'Vers la gauche'], ['Rel_Back', 'Retour']];
-const SYNONYMES = { Rel_Down: 'Rel_D', Rel_Up: 'Rel_U', Rel_Right: 'Rel_R', Rel_Left: 'Rel_L' };
+const SYNONYMES = { Rel_Down: 'Rel_D', Rel_Up: 'Rel_U', Rel_Right: 'Rel_R', Rel_Left: 'Rel_L', Node: NOEUD };
 const ALIAS = /^[A-Za-z0-9_]+$/;
 const avecTechno = (nature) => !/^(Person|System)/.test(nature);
 
@@ -33,7 +35,7 @@ function arguments_(texte) {
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);
     const entete = (corps[0] || '').trim();
-    if (!TITRES[entete]) throw new Error('La première ligne doit être « C4Context », « C4Container » ou « C4Component ».');
+    if (!TITRES[entete]) throw new Error('La première ligne doit être « C4Context », « C4Container », « C4Component », « C4Dynamic » ou « C4Deployment ».');
     const modele = { preambule, entete, titre: '', items: [], relations: [], brut: [] };
     const pile = [];
     parLigne(corps.slice(1), preambule, (ligne) => {
@@ -47,12 +49,13 @@ export function analyser(code) {
         const args = arguments_(m[2]);
         const parent = pile[pile.length - 1] || '';
         if (LIMITES.some(([l]) => l === macro)) {
-            if (!m[3] || args.length < 1 || args.length > 2 || !ALIAS.test(args[0])) throw new Inconnu('limite mal formée');
-            modele.items.push({ t: 'limite', macro, id: args[0], nom: args[1] ?? '', parent });
+            const maxLimite = macro === NOEUD ? 4 : 2;
+            if (!m[3] || args.length < 1 || args.length > maxLimite || !ALIAS.test(args[0])) throw new Inconnu('limite mal formée');
+            modele.items.push({ t: 'limite', macro, id: args[0], nom: args[1] ?? '', techno: args[2] ?? '', desc: args[3] ?? '', parent });
             pile.push(args[0]);
             return;
         }
-        if (m[3]) throw new Inconnu('nœuds de déploiement');
+        if (m[3]) throw new Inconnu('nœud de déploiement placé à gauche ou à droite');
         if (SENS.some(([s]) => s === macro)) {
             if (args.length < 2 || args.length > 4 || !ALIAS.test(args[0]) || !ALIAS.test(args[1])) throw new Inconnu('relation mal formée');
             modele.relations.push({ macro, de: args[0], vers: args[1], texte: args[2] ?? '', techno: args[3] ?? '' });
@@ -76,7 +79,8 @@ export function ecrire(modele) {
     const ecrireNiveau = (parent, retrait) => {
         for (const x of modele.items.filter((i) => i.parent === parent)) {
             if (x.t === 'limite') {
-                lignes.push(`${retrait}${x.macro}(${x.id}, ${cite(x.nom || x.id)}) {`);
+                const extra = x.macro === NOEUD ? [propre(x.techno) || propre(x.desc) ? cite(x.techno) : null, propre(x.desc) ? cite(x.desc) : null].filter(Boolean) : [];
+                lignes.push(`${retrait}${x.macro}(${[x.id, cite(x.nom || x.id), ...extra].join(', ')}) {`);
                 ecrireNiveau(x.id, `${retrait}    `);
                 lignes.push(`${retrait}}`);
                 continue;
@@ -172,7 +176,7 @@ function nouveauNoeud(modele, nature, parent = '') {
 }
 
 // Ce que l'on ajoute par défaut dépend du niveau du diagramme
-const natureParDefaut = (modele) => ({ C4Context: 'System', C4Container: 'Container', C4Component: 'Component' }[modele.entete]);
+const natureParDefaut = (modele) => ({ C4Context: 'System', C4Container: 'Container', C4Component: 'Component', C4Dynamic: 'Container', C4Deployment: 'Container' }[modele.entete]);
 
 export const peutRelier = (cle) => cle.startsWith('n:');
 
@@ -253,6 +257,9 @@ export function panneau(ctx) {
             h('div', { class: 'fusain-ligne' },
                 champSelect('Périmètre', LIMITES, x.macro, (val) => modifier((y) => { y.macro = val; })),
                 champSelect('Dans la limite', limitesPossibles(modele, x), x.parent, (val) => appliquer((m) => { viser(m, selection).item.parent = val; nettoyer(m); }))),
+            x.macro === NOEUD ? h('div', { class: 'fusain-ligne' },
+                champTexte('Type (matériel, système)', x.techno || '', (val) => modifier((y) => { y.techno = propre(val); })),
+                champTexte('Description', x.desc || '', (val) => modifier((y) => { y.desc = propre(val); }))) : null,
             h('p', { class: 'fusain-aide' }, 'Une limite vide n\'est pas admise : elle disparaît avec son dernier élément. La supprimer conserve son contenu.'),
             h('div', { class: 'fusain-actions' }, bouton('Supprimer la limite', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimer(m, selection), () => null) }))));
     }
@@ -274,4 +281,4 @@ export function panneau(ctx) {
     return blocs;
 }
 
-export default { type: 'C4Context', types: ['C4Context', 'C4Container', 'C4Component'], nom: 'Diagramme C4', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+export default { type: 'C4Context', types: ['C4Context', 'C4Container', 'C4Component', 'C4Dynamic', 'C4Deployment'], nom: 'Diagramme C4', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };

@@ -206,6 +206,42 @@ export const MODELES = [
     union A,B["Auto-entrepreneurs"]
     union B,C["Délégataires"]
 ` },
+    { id: 'cynefin', categorie: 'donnees', nom: 'Cadre Cynefin', code: `cynefin-beta
+    title Classement des situations du service
+    complex
+        "Nouvelle réglementation à appliquer"
+        "Usages numériques émergents"
+    complicated
+        "Audit des comptes"
+        "Refonte du système d'information"
+    clear
+        "Traitement d'une demande courante"
+        "Renouvellement d'un titre"
+    chaotic
+        "Panne générale du téléservice"
+    confusion
+        "Signalement non qualifié"
+    complex --> complicated : "Pratique identifiée"
+    chaotic --> complex : "Situation stabilisée"
+    clear --> chaotic : "Excès de confiance"
+` },
+    { id: 'wardley', categorie: 'donnees', nom: 'Carte de Wardley', code: `wardley-beta
+    title Chaîne de valeur d'un téléservice
+    anchor Usager [0.95, 0.60]
+    component "Démarche en ligne" [0.80, 0.55]
+    component Instruction [0.65, 0.40]
+    component Identification [0.60, 0.75]
+    component "Hébergement" [0.25, 0.85]
+    component "Base de données" [0.35, 0.70]
+    Usager -> "Démarche en ligne"
+    "Démarche en ligne" -> Instruction
+    "Démarche en ligne" -> Identification
+    Instruction -> "Base de données"
+    "Base de données" -> "Hébergement"
+    Identification -> "Hébergement"
+    evolve Instruction 0.65
+    note "Mutualiser l'identification" [0.55, 0.85]
+` },
     { id: 'quadrant', categorie: 'donnees', nom: 'Matrice (quadrants)', code: `quadrantChart
     title Cartographie des risques
     x-axis Faible probabilité --> Forte probabilité
@@ -308,6 +344,91 @@ Transition ecologique,Mobilite,150
     Rel(agent, portail, "Instruit")
     Rel(portail, ged, "Archive")
     Rel(portail, messagerie, "Notifie")
+` },
+    { id: 'c4-dynamique', categorie: 'architecture', nom: 'Scénario dynamique (C4)', code: `C4Dynamic
+    title Dépôt d'une demande en ligne
+    Person(usager, "Usager", "Dépose sa demande")
+    Container(portail, "Portail", "Application web", "Formulaire de demande")
+    Container_Boundary(si, "Système d'instruction") {
+        Component(api, "Service de dépôt", "API", "Enregistre la demande")
+        ComponentDb(base, "Base des dossiers", "PostgreSQL", "Dossiers et pièces")
+    }
+    Rel(usager, portail, "Remplit le formulaire", "HTTPS")
+    Rel(portail, api, "Transmet la demande", "JSON/HTTPS")
+    Rel(api, base, "Enregistre le dossier", "SQL")
+` },
+    { id: 'c4-deploiement', categorie: 'architecture', nom: 'Déploiement (C4)', code: `C4Deployment
+    title Déploiement du téléservice
+    Deployment_Node(poste, "Poste de l'usager", "Navigateur web") {
+        Container(spa, "Portail", "HTML et JavaScript", "Formulaire de demande")
+    }
+    Deployment_Node(dc, "Centre de données", "Hébergement de l'État") {
+        Deployment_Node(app, "Serveur d'application", "Debian 13") {
+            Container(api, "Service de dépôt", "API", "Enregistre les demandes")
+        }
+        Deployment_Node(bdd, "Serveur de base de données", "PostgreSQL 17") {
+            ContainerDb(base, "Base des dossiers", "PostgreSQL", "Dossiers et pièces")
+        }
+    }
+    Rel(spa, api, "Transmet la demande", "HTTPS")
+    Rel(api, base, "Lit et écrit", "SQL")
+` },
+    { id: 'cas-utilisation', categorie: 'architecture', nom: 'Cas d\'utilisation', code: `usecase-beta
+    direction LR
+    actor Usager("Usager")
+    actor Agent("Agent instructeur")
+    systemBoundary "Téléservice"
+        Deposer("Déposer une demande")
+        Suivre("Suivre son dossier")
+        Joindre("Joindre des pièces")
+        Instruire("Instruire la demande")
+    end
+    Usager --> Deposer
+    Usager --> Suivre
+    Agent --> Instruire
+    Deposer ..> : include Joindre
+` },
+    { id: 'evenements', categorie: 'architecture', nom: 'Modélisation par événements', code: `eventmodeling
+    tf 01 ui FormulaireDemande
+    tf 02 cmd DeposerDemande { usager: texte, motif: texte }
+    tf 03 evt DemandeDeposee
+    tf 04 rmo DossiersEnAttente
+    tf 05 ui TableauInstructeur
+    tf 06 cmd InstruireDemande
+    tf 07 evt DemandeInstruite
+    tf 08 pcr EnvoiNotification
+    tf 09 cmd NotifierUsager
+    tf 10 evt UsagerNotifie
+` },
+    { id: 'agents', categorie: 'architecture', nom: 'Flux d\'agents (IA)', code: `agentflow-beta TB
+    demande["Demande de l'usager"]@{ shape: input }
+    flow accueil["Agent d'accueil"]
+        tri["Qualifier la demande"]@{ shape: task }
+        recherche["recherche_dossier"]@{ shape: tool }
+        guide["Guide des procédures"]@{ shape: refdoc }
+        complet{"Dossier complet ?"}@{ shape: decision }
+        tri --> recherche --> complet
+        tri -.- guide
+    end
+    flow instructeur["Agent d'instruction"]
+        analyse["Analyser le dossier"]@{ shape: task }
+        controle["controle_pieces"]@{ shape: tool }
+        analyse --> controle
+    end
+    reponse["Envoyer la réponse"]@{ shape: action }
+    demande --> accueil
+    complet -- oui --> instructeur
+    complet -- non --> reponse
+    controle --> reponse
+    controle --x analyse
+` },
+    { id: 'syntaxique', categorie: 'architecture', nom: 'Diagramme syntaxique (grammaire)', code: `railroad-ebnf-beta
+    title "Numéro de dossier"
+    numero = annee "-" service "-" rang ;
+    annee = chiffre chiffre chiffre chiffre ;
+    service = "ACC" | "INS" | "CTL" ;
+    rang = chiffre+ ;
+    chiffre = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 ` },
     { id: 'blocs', categorie: 'architecture', nom: 'Diagramme de blocs', code: `block-beta
     columns 3

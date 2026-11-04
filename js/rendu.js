@@ -150,7 +150,8 @@ let mesure = null;
 function remplacerHtmlIncorpore(svg) {
     for (const bloc of [...svg.querySelectorAll('foreignObject')]) {
         const [x, y, l, h] = ['x', 'y', 'width', 'height'].map((n) => parseFloat(bloc.getAttribute(n)) || 0);
-        const contenu = bloc.textContent.replace(/\s+/g, ' ').trim();
+        // Texte resté dans le bloc, ou relevé à l'assainissement quand le HTML a été retiré (securite.js)
+        const contenu = (bloc.textContent.trim() || bloc.getAttribute('data-fusain-texte') || '').replace(/\s+/g, ' ').trim();
         if (!contenu || l <= 0) { bloc.remove(); continue; }
         const interne = bloc.querySelector('[style*="font-size"]');
         const taille = Math.max(8, Math.min(parseFloat(interne?.style.fontSize) || 14, 24));

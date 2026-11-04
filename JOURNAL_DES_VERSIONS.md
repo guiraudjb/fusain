@@ -2,6 +2,20 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.23.0 — 4 novembre 2026 — types de Mermaid 12.3
+
+- **Inventaire** : FUSAIN couvrait 28 des 34 types de schémas de Mermaid 12.3. Il manquait les six types arrivés avec la 12.x, ainsi que les variantes dynamique et déploiement du C4.
+- **Six nouveaux types, en mode code** : chacun a un modèle et son aide à la syntaxe (index des syntaxes, diagnostic des erreurs). L'édition visuelle viendra plus tard. Les types sont :
+  - cas d'utilisation (`usecase`) ;
+  - modélisation par événements (`eventmodeling`) ;
+  - flux d'agents (`agentflow`) ;
+  - diagramme syntaxique (`railroad-ebnf`, avec ses variantes ABNF et PEG) ;
+  - cadre Cynefin (`cynefin`) ;
+  - carte de Wardley (`wardley`).
+- **C4** : l'éditeur visuel ouvre aussi `C4Dynamic` et `C4Deployment`. Les nœuds de déploiement (`Deployment_Node`, `Node`) portent leur type et leur description et s'imbriquent comme les frontières. Deux modèles sont ajoutés : « Scénario dynamique » et « Déploiement ».
+- **Rendu** : la modélisation par événements écrit ses libellés en HTML incorporé, que l'assainissement retire. Seul leur texte est relevé avant l'assainissement (jamais de balise), puis réécrit en texte SVG. Le schéma reste ainsi lisible à l'écran, en image et en PDF.
+- **Recette** : chaque modèle proposé a un éditeur visuel ou, pour les six types en code seul, son aide à la syntaxe. Les nœuds de déploiement C4 sont relus puis réécrits à l'identique.
+
 ## 0.22.0 — 4 novembre 2026 — audit de sécurité, revue de code, nomenclature CycloneDX 1.7
 
 - **Audit et revue** : 32 constats, dont 31 corrigés et un documenté ; le détail est dans `AUDIT_SECURITE_FUSAIN.md`, ouvert depuis « À propos ».

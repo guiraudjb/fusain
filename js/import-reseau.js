@@ -3,7 +3,7 @@
 import { h, bouton, champSelect, champCase, champTexte, message, modale, ouvrirModale, fermerModale, idUnique } from './dom.js';
 import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages } from './reseau.js';
 
-const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat'];
+const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat', 'siteSource', 'localSource', 'siteCible', 'localCible'];
 const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
 const ACCEPTES = '.csv,.txt,.tsv,.xlsx,.xls,.htm,.html,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -38,7 +38,7 @@ export function ouvrirImportReseau(ajouterPages) {
     };
 
     const fichiers = h('div', {},
-        champFichier('Liens entre équipements', 'Export « Gestion des liens » d\'HPE IMC, liens de son API REST ou rapport de voisins LLDP / CDP. CSV, texte tabulé ou Excel (.xlsx).',
+        champFichier('Liens entre équipements', 'Export « Gestion des liens » d\'HPE IMC, liens de son API REST ou rapport de voisins LLDP / CDP. CSV, texte tabulé ou Excel (.xlsx). Colonnes facultatives : site et local technique de chaque côté (Left Site, Left Local technique, Right Site, Right Local technique).',
             (e, nom) => { etat.liens = tableau(e, CHAMPS_LIENS); etat.nomLiens = nom; }),
         champFichier('Liste des équipements (facultatif)', 'Export de la liste des équipements : précise la catégorie (icône), l\'adresse IP et l\'emplacement (regroupement par site). Deux colonnes facultatives, « Site » et « Local technique », donnent un regroupement à deux niveaux.',
             (e, nom) => { etat.equipements = tableau(e, CHAMPS_EQUIPEMENTS); etat.nomEquipements = nom; }));

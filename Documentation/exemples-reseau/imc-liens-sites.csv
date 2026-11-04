@@ -1,0 +1,12 @@
+Left Node,Left Interface,Left Site,Left Local technique,Right Node,Right Interface,Right Site,Right Local technique,Link Speed(bps),Status
+RT-PARIS(10.1.0.1),GigabitEthernet0/1,Paris,Salle serveurs,CORE-PARIS(10.1.0.10),GigabitEthernet1/0/48,Paris,Salle serveurs,1000000000,Normal
+CORE-PARIS(10.1.0.10),Ten-GigabitEthernet1/0/49,Paris,Salle serveurs,SW-PARIS-RDC(10.1.0.21),Ten-GigabitEthernet1/0/51,Paris,LT rez-de-chaussée,10000000000,Normal
+CORE-PARIS(10.1.0.10),Ten-GigabitEthernet1/0/50,Paris,Salle serveurs,SW-PARIS-E1(10.1.0.22),Ten-GigabitEthernet1/0/51,Paris,LT étage 1,10000000000,Normal
+CORE-PARIS(10.1.0.10),Ten-GigabitEthernet1/0/51,Paris,Salle serveurs,SW-PARIS-E2(10.1.0.23),Ten-GigabitEthernet1/0/51,Paris,LT étage 2,10000000000,Normal
+CORE-PARIS(10.1.0.10),GigabitEthernet1/0/10,Paris,Salle serveurs,SRV-PARIS(10.1.0.30),eth0,Paris,Salle serveurs,1000000000,Normal
+SW-PARIS-E1(10.1.0.22),GigabitEthernet1/0/1,Paris,LT étage 1,AP-PARIS-E1(10.1.0.101),GigabitEthernet0/0/1,Paris,LT étage 1,1000000000,Normal
+SW-PARIS-E2(10.1.0.23),GigabitEthernet1/0/1,Paris,LT étage 2,AP-PARIS-E2(10.1.0.102),GigabitEthernet0/0/1,Paris,LT étage 2,1000000000,Normal
+RT-PARIS(10.1.0.1),GigabitEthernet0/2,Paris,Salle serveurs,RT-LYON(10.2.0.1),GigabitEthernet0/0,Lyon,,100000000,Normal
+RT-LYON(10.2.0.1),GigabitEthernet0/1,Lyon,,SW-LYON-RDC(10.2.0.21),GigabitEthernet1/0/24,Lyon,LT rez-de-chaussée,1000000000,Normal
+SW-LYON-RDC(10.2.0.21),GigabitEthernet1/0/23,Lyon,LT rez-de-chaussée,SW-LYON-E1(10.2.0.22),GigabitEthernet1/0/24,Lyon,LT étage 1,1000000000,Normal
+SW-LYON-E1(10.2.0.22),GigabitEthernet1/0/1,Lyon,LT étage 1,AP-LYON-E1(10.2.0.101),GigabitEthernet0/0/1,Lyon,LT étage 1,1000000000,Normal

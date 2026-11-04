@@ -3,18 +3,20 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.23.0-a3e36968a3';
+const VERSION_CACHE = 'fusain-0.23.0-cc238cd8c4';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
-    ['./Documentation/GUIDE_IMC.md', 'bacff3f007fa40b9f434836ace7d567b35aebba18f45f8ac57253cff49e4244d'],
+    ['./Documentation/GUIDE_IMC.md', '13014e9b7e64958181886944fcfd491322fa4483cfb21492de4721005c2d31cf'],
     ['./Documentation/GUIDE_UTILISATEUR.md', '1a4ba959c43adcfa62391687e164fa56de8f191c7840dec0bafa79e91cf0532a'],
     ['./Documentation/exemples-reseau/LISEZ-MOI.md', 'f8968ef6a9b7a6a7c19534c4178e3be15478be8d8c7e60e4baf37eda644f94a1'],
     ['./Documentation/exemples-reseau/imc-api.csv', 'c670290ae38aac06cb952d08802d5017f65539b5f8054633dc2b81ddd6b3ac92'],
     ['./Documentation/exemples-reseau/imc-equipements.csv', '307f708ec15895235bfa5c851fdfbdbaeeb7826f17d1112c2931a932b8250d8b'],
+    ['./Documentation/exemples-reseau/imc-liens-sites.csv', '739d89ab25a13b071be8f9a57fc547ea2667128780da22e421259c7a27fc9aff'],
     ['./Documentation/exemples-reseau/imc-liens.csv', 'd8209c1c3595d6c24db77de8a8946d490c9ac63b0ff3c00f0164432c20556349'],
     ['./Documentation/exemples-reseau/imc-liens.xlsx', '1106fb0f63fe3555038d3b00663c16c9adfb6c22c37859c78cafc2955f5d3c85'],
     ['./Documentation/exemples-reseau/lldp-voisins.csv', 'e268acb050dce66e0c719edf058d580174a8cf5a7e3ffb753394b0033029ac3c'],
+    ['./Documentation/outils/Exporter-ReseauIMC.ps1', '713c7428241de802477a0c2a86c0d03a88dbc7f6def715d10d781c1ad9e5c7ae'],
     ['./FUSAIN_cahier_des_charges.md', '0b844220af53c144fc192d53ac825033f2eb0e31c948325c8946dae529e6091a'],
     ['./JOURNAL_DES_VERSIONS.md', '1cafe3aa268ab57f6da0a720e651928ae15db053f1aec56a5d3cb332028387d4'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '31f484109145ccb770987a47799d76e2c668b58cd136ca1013239fb3601f982e'],
@@ -49,9 +51,9 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '36835cde0d536c47eef8d01d1dc818534fd75fdc10c793dd4ad1431a263a1fe4'],
-    ['./index.html', '36835cde0d536c47eef8d01d1dc818534fd75fdc10c793dd4ad1431a263a1fe4'],
-    ['./js/app.js', '3d7ee4ee798c445b60a1d7834669abe55be2eb02ff0e5f0b61189e62f85f1bff'],
+    ['./', '81e9a2691a93a1d154c14c9ff9b47b69d3612b76d94e5961f8c5e624ddc26257'],
+    ['./index.html', '81e9a2691a93a1d154c14c9ff9b47b69d3612b76d94e5961f8c5e624ddc26257'],
+    ['./js/app.js', '831f60a73ade14bc40f2991eb5223f5dc5031619a0bea9cd6c05289e962be811'],
     ['./js/brouillon.js', '8eaefb98fc4dda95f498e795466c2058c89544b2eb6fc86602388185efb6c95e'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
@@ -94,13 +96,13 @@ const FICHIERS = [
     ['./js/geo.js', '2410705abae5ad8ac66487d8f395b0f42f41d4e70f523bb969698d07f09d9c93'],
     ['./js/icones.js', '52fc78631d4b68dbf29e438de14f775eeb3df496291ce330ac66623dde1f6a7f'],
     ['./js/illustrations.js', '9fc9af6eb7298523b72ab66ee843eb6ef35c758ce27c230d7d5a043a9d133eec'],
-    ['./js/import-reseau.js', '896d62f798bb1f5b98ed343edc113fab3dfbc7aadcf4b81d070793e7853bea6b'],
+    ['./js/import-reseau.js', 'ebf8b8ad32530dc0bed0af6c181706e3e8c17bb3d20d8142f38d7e57636404b7'],
     ['./js/markdown.js', '460de07eb055b1f3615b63649418f17c5ccc424fcaa9d37cf65b6f9033f0f601'],
     ['./js/modeles.js', '669cc6ffb78e67090b6a62afe1a5da7c5bc10e9cedaff5eda06a27abad218a91'],
     ['./js/navigation.js', 'f9ea93b59322b834a47ef466d63d80905565ed057a37f2ac2f6923a9f51d28f6'],
     ['./js/pictogrammes.js', '731dda68be9f6259cfb0ae23b65eb63019fd67b018030ddb431457bc11625414'],
     ['./js/rendu.js', '18d9c2e72ad4b74b572fb7661480b893ca2a689dbda18011935e2f933e8eea42'],
-    ['./js/reseau.js', 'b16bdb0d55f1590a94d5b93cc6e0b802adb6da2221aae9b5effe252818efdc9c'],
+    ['./js/reseau.js', 'baf4e052604e054b8e56d3a590d0d82c45338f643c3d08f80fef64c1a7ce2cc3'],
     ['./js/securite.js', '5c702977bf8dd068dfabd50bad376cf017f5f5b9634b4e2d277be80bc3da4756'],
     ['./js/syntaxes.js', '2cd3c86c211ad1459178faa5dcbebedd09a47c4f513cef4f4e3263a837bc1180'],
     ['./js/version.js', '2626672cb425941b6a1b93c84db5c880aa010e8fad68e98c648b4fa0c221096a'],

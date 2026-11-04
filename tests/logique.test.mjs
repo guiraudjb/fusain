@@ -494,6 +494,26 @@ test('réseau : colonnes « Site » et « Local technique » → cadres imbriqu�
     relireToutes(pages);
 });
 
+test('réseau : site et local technique lus dans le fichier des liens, sans liste des équipements', async () => {
+    const liens = await exportReseau('imc-liens-sites.csv', reseau.CHAMPS_LIENS);
+    assert.deepEqual(['siteSource', 'localSource', 'siteCible', 'localCible'].map((k) => liens.association[k]),
+        ['Left Site', 'Left Local technique', 'Right Site', 'Right Local technique']);
+    assert.equal(liens.association.portSource, 'Left Interface');
+    const graphe = reseau.analyserReseau(liens);
+    const { pages, mode } = reseau.produirePages(graphe, { jeu: 'picto' });
+    assert.equal(mode, 'lieu');
+    const m = logigramme.analyser(pages[0].code);
+    const titre = (id) => m.groupes.find((g) => g.id === id)?.titre ?? null;
+    const place = (nom) => { const g = m.groupes.find((x) => x.id === m.noeuds.find((n) => n.texte === nom).groupe); return [titre(g.parent), g.titre]; };
+    assert.deepEqual(['CORE-PARIS', 'SW-PARIS-E2', 'SW-LYON-E1'].map(place), [['Paris', 'Salle serveurs'], ['Paris', 'LT étage 2'], ['Lyon', 'LT étage 1']]);
+    assert.equal(titre(m.noeuds.find((n) => n.texte === 'RT-LYON').groupe), 'Lyon');
+    // La liste des équipements garde la priorité
+    const equipements = reseau.tableau([['Device Label', 'Site', 'Local technique'], ['SW-LYON-E1', 'Lyon', 'LT étage 3']], reseau.CHAMPS_EQUIPEMENTS);
+    const m2 = logigramme.analyser(reseau.produirePages(reseau.analyserReseau(liens, equipements)).pages[0].code);
+    assert.equal(m2.groupes.find((g) => g.id === m2.noeuds.find((n) => n.texte === 'SW-LYON-E1').groupe).titre, 'LT étage 3');
+    relireToutes(pages);
+});
+
 test('réseau : grand réseau multi-sites → vue d\'ensemble et une page par site', () => {
     const lignes = [];
     for (const site of ['PAR', 'LYO', 'MRS']) {

@@ -130,6 +130,11 @@ export const CHAMPS_LIENS = [
     ['typeLien', 'Type de lien', [/^(linktype|typedelien|typelien|discoveryprotocol|protocol|protocole)$/, /^type$/]],
     ['etat', 'État', [/^(status|linkstatus|state|operstatus|operationalstatus)$/, /^(etat|statut|etatdulien)$/]],
     ['nomLien', 'Nom du lien', [/^(linkname|label|nomdulien|libelle)$/]],
+    // Site et local technique de chaque extrémité : colonnes facultatives ajoutées au fichier des liens
+    ['siteSource', 'Site (côté A)', [new RegExp(`^(${G})(site|groupeprincipal|batiment|building|campus)$`), /^(site|batiment)(left|source|gauche|a|cotea)$/]],
+    ['localSource', 'Local technique (côté A)', [new RegExp(`^(${G})(localtechnique|lt|local|sousgroupe|subgroup|etage|floor|salle|room|baie)$`), /^(localtechnique|lt|sousgroupe|etage|salle)(left|source|gauche|a|cotea)$/]],
+    ['siteCible', 'Site (côté B)', [new RegExp(`^(${D})(site|groupeprincipal|batiment|building|campus)$`), /^(site|batiment)(right|destination|droite?|distante?|voisin|b|coteb)$/]],
+    ['localCible', 'Local technique (côté B)', [new RegExp(`^(${D})(localtechnique|lt|local|sousgroupe|subgroup|etage|floor|salle|room|baie)$`), /^(localtechnique|lt|sousgroupe|etage|salle)(right|destination|droite?|distante?|voisin|b|coteb)$/]],
 ];
 export const CHAMPS_EQUIPEMENTS = [
     ['nom', 'Nom de l\'équipement', [/^(devicelabel|label|devicename|nomdelequipement|libelle)$/, /^(sysname|systemname|hostname|name|nom|equipement|device)$/]],
@@ -333,8 +338,9 @@ export function analyserReseau(liens, equipements = null, { equipementLocal = ''
     for (const l of liens.lignes) {
         const sourceBrute = l[a.source] || equipementLocal;
         const cibleBrute = l[a.cible] || l[a.chassis] || l[a.ipCible];
-        const s = noter(sourceBrute);
-        const c = noter(cibleBrute, { ip: nomEtIp(l[a.ipCible]).ip });
+        // La liste des équipements, lue d'abord, garde la priorité sur le site et le local écrits dans les liens
+        const s = noter(sourceBrute, { site: l[a.siteSource], local: l[a.localSource] });
+        const c = noter(cibleBrute, { ip: nomEtIp(l[a.ipCible]).ip, site: l[a.siteCible], local: l[a.localCible] });
         if (!s || !c || s === c) { bilan.ignorees += 1; continue; }
         if (!c.categorie) c.categorie = categorieDe(l[a.capacites]);
         let ps = String(l[a.portSource] || l[a.aliasSource] || '').trim();

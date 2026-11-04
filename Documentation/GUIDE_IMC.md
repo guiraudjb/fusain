@@ -15,7 +15,7 @@ Il faut un compte IMC qui voit la topologie et la liste des équipements : un co
 
 ## 2. La liste des liens
 
-L'export de la liste des liens vers Excel existe depuis IMC PLAT 7.3 E0710. Sur une version plus ancienne, voyez la section 4.
+L'export de la liste des liens vers Excel existe depuis IMC PLAT 7.3 E0710. Sur une version plus ancienne, voyez les sections 4 et 5.
 
 1. Ouvrez **Resource › Network Topology** (Ressource › Topologie réseau), puis la vue qui couvre le périmètre voulu : *IP View* pour tout le réseau, ou une vue personnalisée (*Custom View*) pour un site.
 2. Faites un clic droit dans une zone vide de la carte, puis choisissez **Link Management** (gestion des liens).
@@ -60,7 +60,14 @@ Vous pouvez ajouter vous-même deux colonnes au fichier exporté, par exemple da
 - Sur un grand réseau (une page par site), les locaux techniques apparaissent en cadres dans la page de leur site.
 - Les locaux ne sont pas dessinés si l'option « Regrouper les équipements » est réglée sur « Sans regroupement ».
 
-Exemple :
+Ces colonnes peuvent aussi être ajoutées **directement au fichier des liens**, une paire par extrémité : *Left Site*, *Left Local technique*, *Right Site*, *Right Local technique* (ou *Site A*, *Local technique A*, *Site B*, *Local technique B*). La liste des équipements n'est alors plus nécessaire pour le regroupement. Si les deux fichiers donnent un site différent pour le même équipement, la liste des équipements l'emporte.
+
+```csv
+Left Node,Left Interface,Left Site,Left Local technique,Right Node,Right Interface,Right Site,Right Local technique
+CORE-PARIS,XGE1/0/50,Paris,Salle serveurs,SW-PARIS-E1,XGE1/0/51,Paris,LT étage 1
+```
+
+Exemple dans la liste des équipements :
 
 ```csv
 Device Label,IP Address,Device Category,Site,Local technique
@@ -72,7 +79,33 @@ RT-LYON,10.2.0.2,Routers,Lyon,
 
 La recherche rapide (champ en haut à droite, *Query Devices*) propose aussi **Export Excel** et **Export CSV** pour le résultat d'une recherche : pratique pour ne prendre qu'un site.
 
-## 4. Sans export des liens
+## 4. Par l'API REST, avec le script PowerShell
+
+Le script `Documentation/outils/Exporter-ReseauIMC.ps1` interroge l'API REST d'IMC, en lecture seule, et écrit directement les fichiers que lit FUSAIN :
+
+- `reseau-liens.csv` : les liens, avec le **site** et le **local technique** de chaque extrémité. Ce fichier suffit à l'import ;
+- `reseau-equipements.csv` : les équipements (catégorie, IP, modèle, emplacement, site, local), facultatif, pour les icônes.
+
+Le site et le local viennent de l'emplacement (*Location*) des équipements dans IMC : écrivez-le sous la forme `Site / Local technique`, par exemple `Paris / LT étage 1`. Un emplacement sans « / » devient le site, sans local. Un autre séparateur se choisit avec `-Separateur ';'`.
+
+```powershell
+# Windows PowerShell 5.1 ou PowerShell 7 ; le mot de passe est demandé
+.\Exporter-ReseauIMC.ps1 -Serveur https://imc.exemple.fr:8443 -IgnorerCertificat
+.\Exporter-ReseauIMC.ps1 -Serveur http://10.0.0.5:8080 -Dossier C:\Exports -VueTopologie 1
+```
+
+| Paramètre | Rôle |
+|---|---|
+| `-Serveur` | Adresse d'IMC avec protocole et port |
+| `-Identifiants` | Compte IMC autorisé sur l'API (*System › Operator Management*) ; demandé sinon |
+| `-VueTopologie` | Vue dont on lit les liens ; 1 = vue IP, tout le réseau |
+| `-Separateur` | Séparateur entre site et local dans l'emplacement ; chaîne vide : pas de découpage |
+| `-Dossier` | Dossier des fichiers produits |
+| `-IgnorerCertificat` | Accepte le certificat auto-signé d'IMC |
+
+Si Windows bloque le script téléchargé : `Unblock-File .\Exporter-ReseauIMC.ps1`, ou lancez-le avec `powershell -ExecutionPolicy Bypass -File .\Exporter-ReseauIMC.ps1 -Serveur …`.
+
+## 5. Sans export des liens
 
 Sur une version d'IMC antérieure à 7.3 E0710, ou si la page *Link Management* n'offre pas d'export :
 
@@ -80,7 +113,7 @@ Sur une version d'IMC antérieure à 7.3 E0710, ou si la page *Link Management* 
 - **Rapport de voisins LLDP** : la sortie de `display lldp neighbor-information list` (Comware) ou `show lldp neighbors` (ArubaOS, Cisco), mise en tableau avec les colonnes *Local Device*, *Local Port*, *Remote System Name*, *Remote Port ID* et, si possible, *System Capabilities Enabled* (pour reconnaître routeurs, téléphones et bornes). Quand le rapport vient d'un seul équipement, il n'y a pas de colonne « côté A » : FUSAIN demande alors le nom de cet équipement.
 - **Saisie à la main** : un tableau à quatre colonnes (*Équipement A*, *Interface A*, *Équipement B*, *Interface B*) suffit.
 
-## 5. Dans FUSAIN
+## 6. Dans FUSAIN
 
 1. **Ajouter une page** (ou **Modèles**) › rubrique **Réseaux informatiques** › **Importer un réseau (HPE IMC, LLDP : CSV, Excel)…**
 2. Choisissez le fichier des liens, puis, si vous l'avez, la liste des équipements.
@@ -89,7 +122,7 @@ Sur une version d'IMC antérieure à 7.3 E0710, ou si la page *Link Management* 
 
 Formats lus : `.xlsx`, CSV (virgule, point-virgule ou tabulation, UTF-8 ou Windows), tableau HTML enregistré en `.xls`. Un ancien classeur Excel 97-2003 (`.xls` binaire) est à réenregistrer en `.xlsx` ou en CSV.
 
-## 6. Problèmes fréquents
+## 7. Problèmes fréquents
 
 | Constat | Cause probable | Remède |
 |---|---|---|
@@ -100,11 +133,12 @@ Formats lus : `.xlsx`, CSV (virgule, point-virgule ou tabulation, UTF-8 ou Windo
 | Pas de schéma logique | Colonnes VLAN absentes de l'export | Vérifiez que les ports sont lus par IMC (SNMP) ; à défaut, ajoutez les VLAN à la main sur le schéma |
 | Des liens manquent | IMC ne les a pas découverts | Vérifiez LLDP sur les équipements et le calcul de topologie de niveau 2 (*System › System Configuration › System Settings › Layer 2 Topology Configuration*) |
 
-## 7. Fichiers d'exemple
+## 8. Fichiers d'exemple
 
 Des exports fictifs, aux noms de colonnes documentés par HPE, permettent d'essayer l'import sans IMC. Ils se téléchargent depuis la fenêtre « À propos » de FUSAIN :
 
 - `imc-liens.xlsx` et `imc-liens.csv` : liste des liens (siège et agence, VLAN, agrégat, lien en panne) ;
 - `imc-equipements.csv` : liste des équipements correspondante (catégories, emplacements, locaux techniques du siège) ;
+- `imc-liens-sites.csv` : liens avec le site et le local technique de chaque extrémité, en un seul fichier ;
 - `imc-api.csv` : liens au format de l'API REST ;
 - `lldp-voisins.csv` : rapport de voisins LLDP (téléphones, borne Wi-Fi).

@@ -952,6 +952,7 @@ const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
+    ['imc-liens-sites.csv', 'Liens avec sites et locaux techniques', 'un seul fichier : site et local technique de chaque extrémité, cadres imbriqués sans liste des équipements'],
     ['imc-api.csv', 'Liens de l\'API REST d\'IMC', 'un lien vu des deux côtés, compté une fois'],
     ['lldp-voisins.csv', 'Voisins LLDP', 'rapport séparé par des points-virgules : téléphones IP, borne Wi-Fi'],
 ];

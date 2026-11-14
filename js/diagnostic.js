@@ -375,6 +375,10 @@ function reglesDivers(type, t) {
     if (type === 'venn') {
         ajouter(t.replace(/^(union\s+\w+)\s*,\s*(\w+)/, '$1,$2').replace(/\[([^"\]][^\]]*)\]/, '["$1"]'), 'Écrire l\'ensemble au format attendu', 'set id["Libellé"] ; union id1,id2["Libellé"].');
     }
+    if (type === 'agentflow') {
+        const f = t.replace(/=+>/g, '-->').replace(/-\.\s+(.+?)\s+\.+-+>/g, '-- $1 -->').replace(/-\.+-+>/g, '-.-').replace(/(?<![-.])-+>/g, '-->');
+        ajouter(f, 'Corriger la flèche (--> , -- texte --> ou -.-)', 'Dans un flux d\'agents, un lien s\'écrit --> (enchaînement), -- texte --> (avec libellé), -.- (consultation) ou --x (échec).');
+    }
     if (type.startsWith('C4')) {
         const rel = t.match(/^((?:Bi)?Rel\w*)\(\s*([^,]+?)\s*,\s*([^,)]+?)\s*\)$/);
         if (rel) ajouter(`${rel[1]}(${rel[2]}, ${rel[3]}, "")`, 'Ajouter le libellé de la relation', 'Une relation s\'écrit Rel(de, vers, "Libellé").');

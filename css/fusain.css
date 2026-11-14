@@ -195,3 +195,32 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-diagnostic__detail summary { cursor: pointer; font-size: .875rem; }
 .fusain-syntaxes section { border-top: 1px solid var(--border-default-grey); padding-top: .75rem; margin-top: .75rem; }
 .fusain-syntaxes ul { padding-left: 1.25rem; }
+
+/* ---------- Mode diaporama (?diaporama=1) ---------- */
+body.fusain-mode-diaporama .fusain-entete,
+body.fusain-mode-diaporama .fr-skiplinks,
+body.fusain-mode-diaporama #fusain-bandeau { display: none !important; }
+body.fusain-mode-diaporama { background: #0f111a; color: #f6f6f6; }
+.fusain-diapo { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; background: #0f111a; overflow: hidden; }
+.fusain-diapo__jauge { height: 4px; background: rgba(255, 255, 255, .15); flex: none; z-index: 10; }
+.fusain-diapo__jauge-barre { height: 100%; width: 0; background: #6a6af4; transition: width .25s ease; }
+.fusain-diapo__plateau { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: crosshair; user-select: none; -webkit-user-select: none; touch-action: none; }
+.fusain-diapo__plateau--zoome { display: block; overflow: auto; cursor: grab; }
+.fusain-diapo__toile { box-sizing: content-box; }
+.fusain-diapo__loupe { position: absolute; border: 2px dashed #6a6af4; background: rgba(106, 106, 244, .2); box-shadow: 0 0 0 1px rgba(255, 255, 255, .5); pointer-events: none; z-index: 25; }
+.fusain-diapo__feuille { margin: 0 auto; box-shadow: 0 12px 40px rgba(0, 0, 0, .65); transition: opacity .15s ease; }
+.fusain-diapo__plateau[aria-busy="true"] .fusain-diapo__feuille { opacity: .65; }
+.fusain-diapo__erreur { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); background: #ce0500; color: #fff; padding: .5rem 1rem; border-radius: .25rem; font-size: .875rem; max-width: 80%; z-index: 20; }
+.fusain-diapo__barre {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem;
+    padding: .5rem 1rem; background: rgba(22, 22, 22, .92); border-top: 1px solid rgba(255, 255, 255, .15);
+    backdrop-filter: blur(6px); transition: opacity .3s ease, transform .3s ease; z-index: 15;
+}
+.fusain-diapo--calme .fusain-diapo__barre { opacity: .12; }
+.fusain-diapo__barre:hover, .fusain-diapo__barre:focus-within { opacity: 1 !important; }
+.fusain-diapo__groupe { display: flex; align-items: center; gap: .375rem; min-width: 0; }
+.fusain-diapo__titre { font-size: .875rem; font-weight: 700; color: #e5e5e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22rem; }
+.fusain-diapo__select { min-width: 16rem; max-width: 26rem; margin: 0 !important; padding-top: .25rem !important; padding-bottom: .25rem !important; min-height: 2rem !important; font-size: .8125rem !important; background-color: #242424 !important; color: #f6f6f6 !important; box-shadow: inset 0 -2px 0 0 #6a6af4 !important; }
+.fusain-diapo__barre .fr-btn { margin: 0; color: #f6f6f6; }
+.fusain-diapo__barre .fr-btn:hover { background-color: rgba(255, 255, 255, .12); }
+.fusain-diapo__barre .fr-btn:disabled { opacity: .35; }

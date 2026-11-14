@@ -16,6 +16,7 @@ import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
 import { ouvrirImportReseau } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
+import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama } from './diaporama.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -54,7 +55,8 @@ function construireBarre() {
             bouton('Nouveau', { icone: 'file-add-line', onclick: nouveau }),
             bouton('Ouvrir', { icone: 'upload-line', titre: 'Ouvrir un fichier (Ctrl+O)', onclick: () => zones.fichier.click() }),
             bouton('Enregistrer', { icone: 'save-line', titre: 'Enregistrer en JSON (Ctrl+S)', onclick: enregistrer }),
-            bouton('Exporter', { icone: 'download-line', variante: 'secondary', onclick: ouvrirExport })),
+            bouton('Exporter', { icone: 'download-line', variante: 'secondary', onclick: ouvrirExport }),
+            bouton('Diaporama', { icone: 'external-link-line', variante: 'secondary', titre: 'Lancer le diaporama dans une nouvelle page web (F5)', onclick: lancerDiaporama })),
         groupe(boutons.annuler, boutons.retablir),
         groupe(
             bouton('Zoom arrière', { icone: 'zoom-out-line', seulIcone: true, titre: 'Zoom arrière (Ctrl+−, molette)', onclick: () => zoomer(ui.zoom / 1.25) }),
@@ -1074,12 +1076,24 @@ let attenteBrouillon = null;
 let sortieAutorisee = false;
 let miseAJourDemandee = false;
 
+async function lancerDiaporama() {
+    validerCodeEnAttente();
+    const json = serialiser(etat.doc);
+    enregistrerSessionDiaporama(json);
+    await enregistrerBrouillon(json);
+    window.open(`./?diaporama=1&page=${etat.index + 1}`, '_blank');
+}
+
 function brancherGlobal() {
     abonner((raison) => {
         if (raison !== 'enregistrement') rafraichir(); else majBarre();
         if (raison === 'modification' || raison === 'historique' || raison === 'chargement') {
             clearTimeout(attenteBrouillon);
-            attenteBrouillon = setTimeout(() => enregistrerBrouillon(serialiser(etat.doc)), 800);
+            attenteBrouillon = setTimeout(() => {
+                const json = serialiser(etat.doc);
+                enregistrerSessionDiaporama(json);
+                enregistrerBrouillon(json);
+            }, 800);
         }
     });
 
@@ -1091,6 +1105,11 @@ function brancherGlobal() {
     });
 
     document.addEventListener('keydown', (e) => {
+        if (e.key === 'F5' && !e.ctrlKey && !e.metaKey && !e.altKey && !document.querySelector('dialog[open]')) {
+            e.preventDefault();
+            lancerDiaporama();
+            return;
+        }
         if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
         const cle = e.key.toLowerCase();
         const saisie = e.target.matches?.('input, textarea, select');
@@ -1137,6 +1156,12 @@ function brancherGlobal() {
 }
 
 async function demarrer() {
+    if (estModeDiaporama()) {
+        await demarrerDiaporama();
+        brancherServiceWorker();
+        document.documentElement.dataset.fusainPret = '1';
+        return;
+    }
     construireBarre();
     brancherFeuille();
     brancherDeplacement();

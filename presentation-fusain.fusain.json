@@ -1,0 +1,1093 @@
+{
+  "format": "fusain",
+  "formatVersion": 2,
+  "application": "0.23.0",
+  "document": {
+    "titre": "Présentation complète de FUSAIN — Catalogue des 60 modèles",
+    "creeLe": "2026-11-14T20:00:00.000Z",
+    "modifieLe": "2026-11-14T20:00:00.000Z",
+    "theme": "bleu-france"
+  },
+  "pages": [
+    {
+      "id": "p01_diapo_titre",
+      "nom": "Couverture (Diapo Titre)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Page de couverture de la présentation générale de FUSAIN (modèle diapo-titre).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo titre\ntitre: FUSAIN — Fabrique Universelle<br>de Schémas Accessibles, Intuitifs et Normés\nsous-titre: Éditeur visuel de diagrammes Mermaid, de diapositives DSFR et de cartes thématiques au format A4 / A3\ndate: Novembre\nannee: 2026\n"
+    },
+    {
+      "id": "p02_diapo_titre_epure",
+      "nom": "Philosophie (Diapo Titre épurée)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Présentation de la philosophie sans serveur et souveraine de FUSAIN (modèle diapo-titre-epure).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo titre-epure\ntitre: Zéro serveur, zéro traceur,<br>100 % dans votre navigateur\nsous-titre: Aucun schéma ni aucune donnée ne quitte le poste de l'agent — utilisable hors ligne (PWA) et conforme au DSFR\n"
+    },
+    {
+      "id": "p03_diapo_sommaire",
+      "nom": "Sommaire général (Diapo Sommaire)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Sommaire général de la présentation en 4 grands axes (modèle diapo-sommaire).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo sommaire\ntitre: SOMMAIRE DE LA PRÉSENTATION\n- [illus:idee] 1. PRÉSENTATION ET PRINCIPES | Vision, souveraineté des données, ergonomie DSFR et fonctionnement hors ligne\n- [illus:organigramme] 2. PROCESSUS ET GESTION DE PROJET | Logigrammes, séquences, états, plannings Gantt, Kanban, parcours et exigences\n- [illus:tableau-de-bord] 3. ANALYSE, DONNÉES ET CARTES | Graphiques, Sankey, radars, treemaps, matrices et cartographie SimpleCarto\n- [illus:centre-de-donnees] 4. ARCHITECTURE, RÉSEAUX ET EXPORTS | Modèles C4, UML, import réseau HPE IMC / LLDP et export vectoriel PDF / Visio\n"
+    },
+    {
+      "id": "p04_diapo_sommaire_colonnes",
+      "nom": "Panorama des 7 familles (Sommaire col.)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Détail des familles de modèles embarquées dans FUSAIN (modèle diapo-sommaire-colonnes).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo sommaire-colonnes\ntitre: Panorama des familles de modèles\n- 1. Processus et structure | a. Logigrammes et couloirs ; b. Séquences et ZenUML ; c. Carte mentale, Ishikawa, états\n- 2. Projet et analyse | a. Gantt, frise et Kanban ; b. Parcours usager et exigences ; c. Camembert, Sankey, radar, treemap\n- 3. Architecture et réseaux | a. Modèle de données et classes ; b. Architecture, C4, blocs, paquets ; c. Réseaux physiques, VLAN et import IMC\n- 4. Diapositives et cartes | a. 13 mises en page DSFR ; b. 5 échelles cartographiques ; c. Page vierge et exports A4/A3\n"
+    },
+    {
+      "id": "p05_diapo_chiffres",
+      "nom": "Chiffres clés (Diapo Chiffres)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Indicateurs clés de la version 0.23.0 de FUSAIN (modèle diapo-chiffres).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo chiffres\n- [illus:feuille-de-route] 59 | Modèles prédéfinis prêts à l'emploi (schémas, diapositives DSFR et cartes)\n- [illus:site-web] 27 | Éditeurs visuels interactifs à la souris et au clavier, synchronisés avec le code\n- [illus:livrable] 1 472 | Icônes embarquées hors ligne (1 038 DSFR, 380 illustrées, 54 pictogrammes réseau)\n- [illus:export] 4 | Formats d'export directs : PDF vectoriel, Visio (.vsdx modifiable), SVG et PNG\n"
+    },
+    {
+      "id": "p06_diapo_colonnes",
+      "nom": "Double mode d'édition (Diapo Colonnes)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Comparaison entre le mode d'édition visuelle et le mode code Mermaid (modèle diapo-colonnes).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo colonnes\n- [illus:ordinateur-de-bureau] Mode Édition Visuelle | Construisez et modifiez vos schémas directement sur la feuille A4 ou A3 : sélection à la souris ou aux flèches, renommage sur place (Entrée / double-clic), poignée « + » pour relier les éléments et panneau de propriétés dédié.\n- [illus:code-source] Mode Code Mermaid & Diagnostic | Accédez à tout instant au code source Mermaid : aperçu en direct, index intégré des syntaxes avec exemples insérables, diagnostic précis des erreurs de syntaxe et propositions de réparations automatiques vérifiées.\n- [illus:cadenas] Sécurité par conception | Chaque schéma est filtré (liste blanche de directives, assainissement DOMPurify, politique CSP stricte et empreintes SRI) : aucun script ni ressource externe ne peut s'exécuter.\n"
+    },
+    {
+      "id": "p07_diapo_intercalaire",
+      "nom": "Partie 1 — Processus (Intercalaire)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Intercalaire de la Partie 1 consacrée aux schémas de processus et de structure (modèle diapo-intercalaire).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo intercalaire\nnumero: 1\ntitre: Processus, organisation et séquences\n"
+    },
+    {
+      "id": "p08_logigramme",
+      "nom": "Logigramme (flowchart TD)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Cycle de traitement d'un schéma (liens pleins, pointillés, colorés et animés)",
+      "sousTitre": "Modèle : Logigramme (flowchart TD) — Traits pleins, épais, pointillés, couleurs DSFR et flux animés",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Logigramme démontrant les traits pleins (-->), épais (==>), pointillés (-.->), les couleurs de liens (linkStyle) et l'animation de flux.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "flowchart",
+      "code": "flowchart TD\n    A([\"Saisie visuelle ou édition du code\"])\n    B[\"Filtrage des directives (nettoyerCode)\"]\n    C{\"Syntaxe Mermaid valide ?\"}\n    D[\"Rendu vectoriel SVG et assainissement DOMPurify\"]\n    E[\"Diagnostic de la ligne et réparations vérifiées\"]\n    F([\"Mise en page A4/A3 et brouillon IndexedDB\"])\n    A ==>|\"Flux actif (animé)\"| B\n    B -->|\"Trait plein\"| C\n    C ==>|\"Oui — Validé (animé)\"| D\n    C -.->|\"Non — Erreur (pointillé)\"| E\n    E -.->|\"Correction proposée (pointillé)\"| A\n    D ==>|\"Trait épais\"| F\n    linkStyle 0 stroke:#000091,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite\n    linkStyle 1 stroke:#3558a2,stroke-width:2.5px\n    linkStyle 2 stroke:#297254,stroke-width:3.5px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 18s linear infinite\n    linkStyle 3 stroke:#c9191e,stroke-width:2.5px\n    linkStyle 4 stroke:#b34000,stroke-width:2px\n    linkStyle 5 stroke:#297254,stroke-width:3.5px\n    style A fill:#e3e3fd,stroke:#000091,color:#161616\n    style D fill:#c3fad5,stroke:#297254,color:#161616\n    style E fill:#fddede,stroke:#c9191e,color:#161616\n    style F fill:#c3fad5,stroke:#297254,color:#161616\n"
+    },
+    {
+      "id": "p09_logigramme_icones",
+      "nom": "Logigramme illustré (flowchart LR)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Parcours de création et de partage (icônes, liens colorés et animés)",
+      "sousTitre": "Modèle : Logigramme illustré (icônes DSFR et illustrées) — Liens animés, pleins et pointillés",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Logigramme illustré combinant icônes embarquées, liens animés, traits pleins et retours en pointillé colorés.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "flowchart",
+      "code": "flowchart LR\n    agent@{ icon: \"illus:administrateur\", label: \"Agent public\", pos: \"b\" }\n    fusain@{ icon: \"dsfr:computer-line\", label: \"Application FUSAIN\", pos: \"b\" }\n    controle{\"Contrôle lisibilité A4/A3\"}\n    visio@{ icon: \"illus:livrable\", label: \"Export PDF / Visio .vsdx\", pos: \"b\" }\n    archive@{ icon: \"illus:archivage-numerique\", label: \"Sauvegarde .fusain.json\", pos: \"b\" }\n    agent ==>|\"Conçoit (flux animé)\"| fusain\n    fusain -->|\"Vérifie (trait plein)\"| controle\n    controle ==>|\"Validé (flux animé)\"| visio\n    controle -->|\"Sauvegardé (trait plein)\"| archive\n    controle -.->|\"À ajuster (pointillé)\"| fusain\n    linkStyle 0 stroke:#000091,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite\n    linkStyle 1 stroke:#3558a2,stroke-width:2.5px\n    linkStyle 2 stroke:#297254,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 18s linear infinite\n    linkStyle 3 stroke:#297254,stroke-width:2.5px\n    linkStyle 4 stroke:#c9191e,stroke-width:2.5px\n"
+    },
+    {
+      "id": "p10_sequence",
+      "nom": "Diagramme de séquence",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Séquence d'édition, de rendu et de sauvegarde automatique",
+      "sousTitre": "Modèle : Diagramme de séquence (sequenceDiagram) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Échanges internes dans le navigateur lors d'une modification par l'utilisateur.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "sequence",
+      "code": "sequenceDiagram\n    actor U as Utilisateur\n    participant A as Interface (app.js)\n    participant E as État & Historique (etat.js)\n    participant R as Moteur de rendu (rendu.js)\n    participant B as IndexedDB (brouillon.js)\n    U->>A: Modifie un élément sur la feuille A4\n    A->>E: modifier(doc) + instantané Ctrl+Z\n    E-->>A: Notification \"modification\"\n    A->>R: rendreSchema() + composerPage()\n    R-->>A: SVG assaini (DOMPurify)\n    A->>B: enregistrerBrouillon() après 800 ms\n"
+    },
+    {
+      "id": "p11_carte_mentale",
+      "nom": "Carte mentale (mindmap)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Écosystème fonctionnel de FUSAIN",
+      "sousTitre": "Modèle : Carte mentale (mindmap) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte mentale résumant les grands domaines fonctionnels de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "mindmap",
+      "code": "mindmap\n  n1((\"FUSAIN 0.23.0\"))\n    Édition hybride\n      27 éditeurs visuels\n      Éditeur de code Mermaid\n      Réparation automatique\n    Mise en page normée\n      Formats A4 et A3\n      Charte de l'État DSFR\n      7 thèmes de couleurs\n    Richesse graphique\n      1 038 icônes DSFR\n      380 icônes illustrées\n      Cartographie SimpleCarto\n    Interopérabilité\n      Export PDF vectoriel\n      Export Visio .vsdx\n      Import réseau IMC et LLDP\n"
+    },
+    {
+      "id": "p12_organigramme",
+      "nom": "Organigramme (flowchart TD)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Organisation modulaire du code source de FUSAIN",
+      "sousTitre": "Modèle : Organigramme — Liens pleins, épais, pointillés et couleurs par pôle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Structure des modules JavaScript ES natifs de FUSAIN avec coloration par domaine fonctionnel.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "flowchart",
+      "code": "flowchart TD\n    D[\"Orchestrateur (js/app.js)\"]\n    P1[\"Cœur d'état et sécurité\"]\n    P2[\"Moteurs de rendu graphique\"]\n    P3[\"Éditeurs et exports\"]\n    S1[\"etat.js / fichier.js / brouillon.js\"]\n    S2[\"securite.js / diagnostic.js\"]\n    S3[\"rendu.js / diapo.js / carte.js\"]\n    S4[\"27 modules dans js/diagrammes/\"]\n    S5[\"export.js / visio.js / import-reseau.js\"]\n    D === P1\n    D === P2\n    D === P3\n    P1 --- S1\n    P1 -.- S2\n    P2 --- S3\n    P3 --- S4\n    P3 -.- S5\n    linkStyle 0 stroke:#000091,stroke-width:3px\n    linkStyle 1 stroke:#297254,stroke-width:3px\n    linkStyle 2 stroke:#c9191e,stroke-width:3px\n    linkStyle 3 stroke:#000091,stroke-width:2px\n    linkStyle 4 stroke:#000091,stroke-width:2px\n    linkStyle 5 stroke:#297254,stroke-width:2.5px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite\n    linkStyle 6 stroke:#c9191e,stroke-width:2px\n    linkStyle 7 stroke:#c9191e,stroke-width:2px\n    style P1 fill:#e3e3fd,stroke:#000091,color:#161616\n    style P2 fill:#c3fad5,stroke:#297254,color:#161616\n    style P3 fill:#fddede,stroke:#c9191e,color:#161616\n"
+    },
+    {
+      "id": "p13_couloirs",
+      "nom": "Logigramme en couloirs (swimlane)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Chaîne d'import d'un schéma réseau (HPE IMC / LLDP)",
+      "sousTitre": "Modèle : Logigramme en couloirs (swimlane-beta LR) — Liens animés, pleins et pointillés",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Répartition des étapes lors de l'import tabulaire d'un réseau informatique dans FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "swimlane",
+      "code": "swimlane-beta LR\n    subgraph operateur [\"Architecte réseau\"]\n        exporte[\"Exporte les liens IMC ou LLDP (CSV / XLSX)\"]\n        ajuste([\"Ajuste et exporte en Visio ou PDF\"])\n    end\n    subgraph assistant [\"Assistant import-reseau.js\"]\n        detecte[\"Reconnaît les colonnes (équipements, ports, VLAN)\"]\n        valide{\"Plus de 25 équipements ?\"}\n    end\n    subgraph generateur [\"Moteur reseau.js\"]\n        decoupe[\"Génère une vue d'ensemble et une page par site\"]\n        cree[\"Insère les logigrammes modifiables\"]\n    end\n    exporte ==>|\"Fichier importé (animé)\"| detecte\n    detecte -->|\"Trait plein\"| valide\n    valide -.->|\"Oui (multi-sites)\"| decoupe\n    valide -->|\"Non (page unique)\"| cree\n    decoupe -.->|\"Agrégation\"| cree\n    cree ==>|\"Prêt (animé)\"| ajuste\n    linkStyle 0 stroke:#000091,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite\n    linkStyle 1 stroke:#3558a2,stroke-width:2px\n    linkStyle 2 stroke:#c9191e,stroke-width:2.5px\n    linkStyle 3 stroke:#297254,stroke-width:2.5px\n    linkStyle 4 stroke:#b34000,stroke-width:2px\n    linkStyle 5 stroke:#297254,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 18s linear infinite\n"
+    },
+    {
+      "id": "p14_ishikawa",
+      "nom": "Causes et effet (Ishikawa)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Facteurs garantissant un schéma lisible, sûr et normé",
+      "sousTitre": "Modèle : Causes et effet (ishikawa) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Diagramme d'Ishikawa présentant les garanties techniques et ergonomiques de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "ishikawa",
+      "code": "ishikawa\n    Schéma conforme et immédiatement exploitable\n        Mise en page\n            Cadre A4 ou A3 avec marges contrôlées\n            Alerte si le texte descend sous 8 points\n        Sécurité\n            Assainissement DOMPurify et CSP stricte\n            Validation JSON champ par champ\n        Ergonomie\n            Manipulation directe à la souris ou au clavier\n            Diagnostic syntaxique avec réparation en un clic\n        Souveraineté\n            Exécution 100 % locale sans serveur tiers\n            Bibliothèques embarquées avec empreintes SRI\n"
+    },
+    {
+      "id": "p15_etats",
+      "nom": "Diagramme d'états (stateDiagram-v2)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Cycle de vie d'un document dans FUSAIN",
+      "sousTitre": "Modèle : Diagramme d'états (stateDiagram-v2) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Transitions d'état d'un document entre création, brouillon, sauvegarde JSON et exports.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "stateDiagram",
+      "code": "stateDiagram-v2\n    state \"Initialisé\" as Initial\n    state \"Modifié en mémoire\" as Modifie\n    state \"Brouillon IndexedDB\" as Brouillon\n    state \"Enregistré (.fusain.json)\" as Enregistre\n    state \"Exporté (PDF / Visio / SVG / PNG)\" as Exporte\n    [*] --> Initial\n    Initial --> Modifie : Édition visuelle ou code\n    Modifie --> Brouillon : Sauvegarde auto (800 ms)\n    Brouillon --> Modifie : Nouvelles modifications / Ctrl+Z\n    Modifie --> Enregistre : Ctrl+S (vérification lireJson)\n    Enregistre --> Modifie : Reprise de l'édition\n    Enregistre --> Exporte : Modale Exporter\n    Exporte --> [*]\n"
+    },
+    {
+      "id": "p16_zenuml",
+      "nom": "Séquence ZenUML (zenuml)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Diagnostic syntaxique et vérification des propositions de réparation",
+      "sousTitre": "Modèle : Séquence ZenUML (zenuml) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Algorithme de diagnostic d'erreur Mermaid et test des réparations candidates.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "zenuml",
+      "code": "zenuml\n    title Diagnostic et réparation automatique d'une erreur Mermaid\n    @Actor Agent\n    App\n    @Control Diagnostic\n    @Entity Mermaid\n    Agent->App: Saisit une ligne contenant une faute\n    App->Diagnostic.diagnostiquer(code) {\n        return candidats\n    }\n    App->Mermaid.verifierPropositions(candidats) {\n        return reparationsValides\n    }\n    if (reparationsValides disponibles) {\n        App->Agent: Propose le bouton Appliquer\n    } else {\n        App->Agent: Affiche la syntaxe attendue et un exemple du type\n    }\n"
+    },
+    {
+      "id": "p17_diapo_intercalaire_centre",
+      "nom": "Partie 2 — Projet (Intercalaire centré)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Intercalaire centré introduisant les outils de gestion de projet et d'exigences (modèle diapo-intercalaire-centre).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo intercalaire-centre\ntitre: 2. Pilotage de projet, chronologie et exigences\n"
+    },
+    {
+      "id": "p18_gantt",
+      "nom": "Planning Gantt (gantt)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Cycles de construction et d'enrichissement de FUSAIN",
+      "sousTitre": "Modèle : Planning (gantt) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Planning de réalisation des briques majeures de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "gantt",
+      "code": "gantt\n    title Feuille de route des chantiers FUSAIN\n    dateFormat YYYY-MM-DD\n    axisFormat %d/%m\n    excludes weekends\n    section Socle et sécurité\n    Moteur A4/A3, DSFR et 25 éditeurs :done, t1, 2026-08-03, 25d\n    Politique CSP, SRI, SBOM et audit :done, t2, after t1, 15d\n    section Cartes et diapositives\n    Diapositives de l'État et icônes :done, t3, after t2, 15d\n    Moteur SimpleCarto et fonds IGN :done, t4, after t3, 15d\n    section Réseaux et interopérabilité\n    Import réseau HPE IMC / LLDP :done, t5, after t4, 10d\n    Export Visio .vsdx et Mermaid 12.3 :active, t6, after t5, 10d\n    Publication v0.23.0 :milestone, t7, after t6, 0d\n"
+    },
+    {
+      "id": "p19_frise",
+      "nom": "Frise chronologique (timeline)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Évolution des versions majeures de FUSAIN",
+      "sousTitre": "Modèle : Frise chronologique (timeline) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Historique des fonctionnalités clés introduites jusqu'à la version 0.23.0.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "timeline",
+      "code": "timeline\n    title Jalons clés du journal des versions de FUSAIN\n    0.1 à 0.10 : Socle PWA hors ligne et mise en page A4 / A3\n               : Édition visuelle des premiers types Mermaid et DSFR\n    0.11 à 0.17 : Intégration des diapositives de l'État (VALOR)\n                : Cartographie SimpleCarto et 1 400+ icônes embarquées\n    0.18 à 0.20 : Import de schémas réseau (HPE IMC, LLDP, Excel/CSV)\n                : Export Microsoft Visio (.vsdx) avec connecteurs collés\n    0.21 à 0.23 : Diagnostic syntaxique et réparations automatiques\n                : Mermaid 12.3, zoom ancré à 6400 % et paquet Debian\n"
+    },
+    {
+      "id": "p20_kanban",
+      "nom": "Tableau Kanban (kanban)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Tableau de suivi des fonctionnalités de FUSAIN",
+      "sousTitre": "Modèle : Tableau Kanban (kanban) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "État d'avancement des fonctionnalités de FUSAIN sous forme de tableau Kanban.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "kanban",
+      "code": "kanban\n    c1[\"Livré et vérifié (v0.23.0)\"]\n        c1k1[\"27 éditeurs visuels de schémas, diapositives et cartes\"]\n        c1k2[\"Export PDF vectoriel, PNG, SVG et Visio .vsdx\"]\n        c1k3[\"Import réseau HPE IMC / LLDP par site et local technique\"]\n        c1k4[\"Diagnostic des erreurs Mermaid avec réparation vérifiée\"]\n    c2[\"Contrôle continu (Recette)\"]\n        c2k1[\"Tests unitaires, robustesse (corpus hostile) et fidélité\"]\n        c2k2[\"Vérification SRI, cache Service Worker et SBOM CycloneDX\"]\n    c3[\"Perspectives d'évolution\"]\n        c3k1[\"Éditeurs visuels pour Cynefin, Wardley et cas d'utilisation\"]\n        c3k2[\"Nouveaux modèles métiers sectoriels\"]\n"
+    },
+    {
+      "id": "p21_parcours",
+      "nom": "Parcours usager (journey)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Expérience d'un agent réalisant un dossier d'architecture avec FUSAIN",
+      "sousTitre": "Modèle : Parcours usager (journey) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Parcours utilisateur montrant la simplicité de prise en main de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "journey",
+      "code": "journey\n    title Parcours de création d'un dossier multi-pages dans FUSAIN\n    section Démarrage\n      Ouverture instantanée sans compte ni installation: 5: Agent\n      Choix d'un modèle parmi les 7 catégories: 5: Agent\n    section Conception\n      Modification visuelle des boîtes et des liens: 5: Agent, FUSAIN\n      Import automatique des exports réseau CSV / Excel: 4: Agent, FUSAIN\n    section Mise en page et partage\n      Vérification de l'échelle A4/A3 et du thème DSFR: 5: Agent\n      Export en PDF vectoriel et en fichier Visio .vsdx: 5: Agent, Collègues\n"
+    },
+    {
+      "id": "p22_exigences",
+      "nom": "Diagramme d'exigences (requirement)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Traçabilité des exigences majeures du cahier des charges FUSAIN",
+      "sousTitre": "Modèle : Diagramme d'exigences (requirementDiagram) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Exigences de confidentialité, de sécurité et de qualité d'impression vérifiées par la recette.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "requirementDiagram",
+      "code": "requirementDiagram\n    requirement souverainete {\n        id: \"EX-CONF-01\"\n        text: \"Aucun schéma ni texte ne quitte le navigateur de l'utilisateur\"\n        risk: high\n        verifymethod: inspection\n    }\n    functionalRequirement cloisonnement_svg {\n        id: \"EX-SEC-02\"\n        text: \"Filtrage des directives Mermaid et assainissement DOMPurify du SVG\"\n        risk: high\n        verifymethod: test\n    }\n    performanceRequirement impression_vectorielle {\n        id: \"EX-EXP-03\"\n        text: \"Export PDF vectoriel et Visio .vsdx fidèle aux formats A4 et A3\"\n        risk: medium\n        verifymethod: demonstration\n    }\n    element suite_recette {\n        type: \"tests/tout.sh\"\n        docref: \"AUDIT_SECURITE_FUSAIN.md\"\n    }\n    souverainete - contains -> cloisonnement_svg\n    suite_recette - verifies -> souverainete\n    suite_recette - verifies -> cloisonnement_svg\n    suite_recette - verifies -> impression_vectorielle\n"
+    },
+    {
+      "id": "p23_diapo_texte_colonnes",
+      "nom": "Partie 3 — Données (Diapo Texte col.)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Présentation des capacités d'analyse et de visualisation de données de FUSAIN (modèle diapo-texte-colonnes).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo texte-colonnes\npartie: 3. Analyse et visualisation de données\nsous-partie: Des chiffres bruts aux représentations graphiques normées\ntitre: Transformer des tableaux et indicateurs en schémas lisibles\naccroche: FUSAIN réunit 9 types de graphiques d'analyse et d'aide à la décision, directement alimentables par saisie visuelle ou collage depuis un tableur.\n- Les graphiques quantitatifs (camembert, barres et courbes, diagramme de flux Sankey, carte proportionnelle treemap) acceptent le copier-coller direct de colonnes depuis LibreOffice Calc ou Microsoft Excel.\n- Les outils d'évaluation multicritère (diagramme radar, matrice à quatre quadrants avec déplacement des points à la souris, diagramme de Venn) facilitent les diagnostics et arbitrages.\n- Les cadres stratégiques de Mermaid 12.3 (cadre Cynefin et carte de Wardley) complètent la palette pour qualifier les situations complexes et cartographier les chaînes de valeur.\n"
+    },
+    {
+      "id": "p24_camembert",
+      "nom": "Camembert (pie)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Répartition des 59 modèles prédéfinis de FUSAIN par catégorie",
+      "sousTitre": "Modèle : Camembert (pie showData) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Diagramme circulaire de la répartition des modèles de la bibliothèque FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "pie",
+      "code": "pie showData\n    title Répartition des 59 modèles par catégorie\n    \"Ingénierie et architecture\" : 14\n    \"Diapositives de l'État\" : 13\n    \"Processus et structure\" : 9\n    \"Analyse et données\" : 9\n    \"Gestion de projet\" : 5\n    \"Cartes SimpleCarto\" : 5\n    \"Réseaux informatiques\" : 4\n"
+    },
+    {
+      "id": "p25_venn",
+      "nom": "Diagramme de Venn (venn-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Convergence des trois moteurs graphiques au sein de FUSAIN",
+      "sousTitre": "Modèle : Diagramme de Venn (venn-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Intersection entre schémas Mermaid, diapositives VALOR et cartographie SimpleCarto.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "venn",
+      "code": "venn-beta\n    title Unification des outils dans un même document A4/A3\n    set A[\"Schémas Mermaid\"]\n    set B[\"Diapositives DSFR (VALOR)\"]\n    set C[\"Cartes thématiques (SimpleCarto)\"]\n    union A,B[\"Icônes DSFR et illustrées\"]\n    union B,C[\"Palettes et typographie Marianne\"]\n    union A,B,C[\"Export PDF / Visio / JSON unifié\"]\n"
+    },
+    {
+      "id": "p26_cynefin",
+      "nom": "Cadre Cynefin (cynefin-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Choisir le bon mode de représentation avec le cadre Cynefin",
+      "sousTitre": "Modèle : Cadre Cynefin (cynefin-beta) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Classification des usages documentaires selon la complexité du sujet.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "cynefin",
+      "code": "cynefin-beta\n    title Qualifier le besoin de modélisation avec FUSAIN\n    complex\n        \"Cartographier une transformation SI\"\n        \"Analyser les causes d'un incident (Ishikawa)\"\n    complicated\n        \"Importer une topologie réseau HPE IMC\"\n        \"Concevoir une architecture C4 ou UML\"\n    clear\n        \"Documenter une procédure standard (Logigramme)\"\n        \"Produire un support de réunion DSFR\"\n    chaotic\n        \"Documenter une cellule de crise en urgence hors ligne\"\n    confusion\n        \"Notes éparses non structurées\"\n    complex --> complicated : \"Modélisation collaborative\"\n    chaotic --> clear : \"Usage hors ligne immédiat\"\n"
+    },
+    {
+      "id": "p27_wardley",
+      "nom": "Carte de Wardley (wardley-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Chaîne de valeur et autonomie technologique de FUSAIN",
+      "sousTitre": "Modèle : Carte de Wardley (wardley-beta) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte de Wardley positionnant les composants de FUSAIN de la valeur usager jusqu'aux standards web.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "wardley",
+      "code": "wardley-beta\n    title Chaîne de valeur d'un document produit avec FUSAIN\n    anchor \"Agent public\" [0.95, 0.60]\n    component \"Dossier A4/A3 normé (PDF, Visio)\" [0.84, 0.65]\n    component \"Éditeurs visuels et diagnostic\" [0.72, 0.45]\n    component \"Import réseau IMC et Cartes IGN\" [0.62, 0.40]\n    component \"Moteur Mermaid 12.3 et D3 embarqués\" [0.42, 0.78]\n    component \"Système de Design de l'État (DSFR)\" [0.50, 0.85]\n    component \"Navigateur Web (ES Modules, IndexedDB)\" [0.20, 0.92]\n    \"Agent public\" -> \"Dossier A4/A3 normé (PDF, Visio)\"\n    \"Dossier A4/A3 normé (PDF, Visio)\" -> \"Éditeurs visuels et diagnostic\"\n    \"Dossier A4/A3 normé (PDF, Visio)\" -> \"Import réseau IMC et Cartes IGN\"\n    \"Éditeurs visuels et diagnostic\" -> \"Moteur Mermaid 12.3 et D3 embarqués\"\n    \"Éditeurs visuels et diagnostic\" -> \"Système de Design de l'État (DSFR)\"\n    \"Moteur Mermaid 12.3 et D3 embarqués\" -> \"Navigateur Web (ES Modules, IndexedDB)\"\n    evolve \"Éditeurs visuels et diagnostic\" 0.70\n    note \"Zéro dépendance infonuagique\" [0.32, 0.80]\n"
+    },
+    {
+      "id": "p28_quadrant",
+      "nom": "Matrice quadrants (quadrantChart)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Positionnement de FUSAIN parmi les approches de schématisation",
+      "sousTitre": "Modèle : Matrice à quatre quadrants (quadrantChart) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Matrice comparant la simplicité d'usage et le niveau de maîtrise/souveraineté des données.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "quadrantChart",
+      "code": "quadrantChart\n    title Positionnement des solutions de création de schémas\n    x-axis Prise en main complexe --> Prise en main immédiate\n    y-axis Dépendance externe --> Souveraineté locale et hors ligne\n    quadrant-1 Cible idéale pour l'administration\n    quadrant-2 Outils experts pour spécialistes\n    quadrant-3 Logiciels lourds ou propriétaires\n    quadrant-4 Services en ligne grand public\n    \"FUSAIN (visuel + code hors ligne)\": [0.85, 0.92]\n    \"Code Mermaid brut en éditeur texte\": [0.30, 0.88]\n    \"Outils SaaS infonuagiques\": [0.78, 0.18]\n    \"Suites DAO bureautiques lourdes\": [0.35, 0.45]\n"
+    },
+    {
+      "id": "p29_graphique",
+      "nom": "Graphique en barres (xychart-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Progression de la couverture fonctionnelle de FUSAIN",
+      "sousTitre": "Modèle : Graphique en barres et courbe (xychart-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Évolution du nombre de modèles disponibles au fil des versions de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "xychart",
+      "code": "xychart-beta\n    title \"Croissance du catalogue de modèles FUSAIN\"\n    x-axis [\"v0.1\", \"v0.5\", \"v0.12\", \"v0.17\", \"v0.20\", \"v0.23\"]\n    y-axis \"Nombre de modèles\" 0 --> 65\n    bar [8, 18, 35, 48, 53, 59]\n    line [8, 18, 35, 48, 53, 59]\n"
+    },
+    {
+      "id": "p30_flux",
+      "nom": "Diagramme de flux Sankey (sankey-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Flux de transformation des entrées vers les formats de sortie",
+      "sousTitre": "Modèle : Diagramme de flux (sankey-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Diagramme Sankey illustrant comment les différentes sources alimentent le document et ses exports.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "sankey",
+      "code": "sankey-beta\n\nModeles FUSAIN,Document multi-pages,40\nEdition visuelle et code,Document multi-pages,35\nImports CSV et IMC,Document multi-pages,25\nDocument multi-pages,Export PDF vectoriel,40\nDocument multi-pages,Export Visio vsdx,30\nDocument multi-pages,Sauvegarde JSON,20\nDocument multi-pages,Export SVG et PNG,10\n"
+    },
+    {
+      "id": "p31_radar",
+      "nom": "Diagramme radar (radar-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Couverture des exigences de qualité logicielle par FUSAIN",
+      "sousTitre": "Modèle : Diagramme radar (radar-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Comparaison radar sur 5 axes : Sécurité, Accessibilité, Hors-ligne, Richesse, Interopérabilité.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "radar",
+      "code": "radar-beta\n    title Évaluation sur 5 axes de qualité\n    axis securite[\"Sécurité CSP/SRI\"], accessibilite[\"Accessibilité RGAA\"], horsligne[\"Autonomie hors ligne\"], richesse[\"Variété des schémas\"], export[\"Exports ouverts\"]\n    curve fusain[\"FUSAIN 0.23.0\"]{5, 5, 5, 5, 5}\n    curve editeur_code[\"Éditeur Mermaid brut\"]{3, 2, 4, 4, 2}\n    max 5\n    min 0\n"
+    },
+    {
+      "id": "p32_treemap",
+      "nom": "Carte proportionnelle (treemap-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Répartition des 1 472 icônes et pictogrammes embarqués dans FUSAIN",
+      "sousTitre": "Modèle : Carte proportionnelle (treemap-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Treemap détaillant le volume des trois banques d'icônes utilisables hors ligne.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "treemap",
+      "code": "treemap-beta\n\"Icônes embarquées dans FUSAIN (1 472)\"\n    \"Icônes du DSFR au trait (dsfr:)\"\n        \"Système, appareils et développement\": 380\n        \"Documents, bureautique et communication\": 340\n        \"Bâtiments, personnes, carte et divers\": 318\n    \"Icônes illustrées en couleur (illus:)\"\n        \"Informatique, logiciels et gestion de projet\": 83\n        \"Services publics, justice, santé et éducation\": 70\n        \"Énergie, transports, secours et environnement\": 122\n        \"Économie, finances, cadastre et agriculture\": 105\n    \"Pictogrammes réseau noir et blanc (picto:)\"\n        \"Équipements, serveurs, sécurité et VLAN\": 54\n"
+    },
+    {
+      "id": "p33_diapo_colonne",
+      "nom": "Partie 4 — Architecture (Une colonne)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Introduction à l'architecture technique et à la sécurité de FUSAIN (modèle diapo-colonne).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo colonne\ntitre: 4. INGÉNIERIE LOGICIELLE, SÉCURITÉ ET ARCHITECTURE SANS BUILD :\ntexte: Le code livré par FUSAIN est exactement le code écrit : des modules ECMAScript natifs, sans transpileur ni chaîne de compilation opaque. Chaque bibliothèque tierce (Mermaid 12.3, DOMPurify, D3, TopoJSON, jsPDF, svg2pdf, DSFR) est embarquée dans libs/, contrôlée par une empreinte cryptographique SHA-384 (Subresource Integrity) et répertoriée dans une nomenclature CycloneDX 1.7 vérifiée automatiquement par outils/generer.py et outils/veille.py.\n"
+    },
+    {
+      "id": "p34_arborescence",
+      "nom": "Arborescence (treeView-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Structure des répertoires du dépôt FUSAIN",
+      "sousTitre": "Modèle : Arborescence (treeView-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Vue arborescente des fichiers et dossiers qui composent FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "treeView",
+      "code": "treeView-beta\n    \"FUSAIN (racine du dépôt)\"\n        \"index.html, sw.js et manifest.webmanifest\"\n        \"js (modules ES natifs)\"\n            \"app.js, etat.js, rendu.js, fichier.js, securite.js\"\n            \"diagrammes (27 éditeurs visuels spécialisés)\"\n            \"visio.js, export.js, import-reseau.js, diagnostic.js\"\n        \"icones et cartes\"\n            \"1 038 icônes DSFR, 380 illustrées, 54 pictogrammes\"\n            \"Fonds TopoJSON monde, France, régions, EPCI, communes\"\n        \"outils, tests et deploiement\"\n            \"generer.py (SRI, cache SW, SBOM) et veille.py (OSV.dev)\"\n            \"tout.sh (recette logique, Chrome, robustesse, Firefox)\"\n            \"nginx-fusain.conf et paquet Debian fusain-server\"\n"
+    },
+    {
+      "id": "p35_entites",
+      "nom": "Modèle de données (erDiagram)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Schéma entités-associations d'un document FUSAIN (.fusain.json)",
+      "sousTitre": "Modèle : Modèle de données (erDiagram) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Structure des données validées par js/fichier.js et schema/fusain.schema.json.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "erDiagram",
+      "code": "erDiagram\n    FICHIER_FUSAIN ||--|| DOCUMENT_META : decrit\n    FICHIER_FUSAIN ||--|{ PAGE : contient\n    PAGE ||--|| AJUSTEMENT : configure\n    FICHIER_FUSAIN {\n        string format PK \"Constante fusain\"\n        int formatVersion \"Version 2\"\n        string application \"Version ex 0.23.0\"\n    }\n    DOCUMENT_META {\n        string titre \"Max 200 caracteres\"\n        datetime creeLe \"ISO 8601\"\n        datetime modifieLe \"ISO 8601\"\n        string theme \"Palette DSFR\"\n    }\n    PAGE {\n        string id PK \"Identifiant unique\"\n        string nom \"Nom dans le volet\"\n        string format \"A4 ou A3\"\n        string orientation \"portrait ou paysage\"\n        number margesMm \"0 a 50 mm\"\n        string code \"Source Mermaid diapo ou carte\"\n    }\n    AJUSTEMENT {\n        string mode \"page largeur hauteur manuel\"\n        number echelle \"10 a 400 pourcent\"\n        string alignement \"haut centre bas\"\n    }\n"
+    },
+    {
+      "id": "p36_classes",
+      "nom": "Diagramme de classes (classDiagram)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Architecture des modules et contrat d'un éditeur visuel",
+      "sousTitre": "Modèle : Diagramme de classes (classDiagram) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Interface commune exposée par les 27 éditeurs visuels de js/diagrammes/.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "classDiagram",
+      "code": "classDiagram\n    class EtatDocument {\n        +Object doc\n        +int index\n        +boolean modifie\n        +charger(doc)\n        +modifier(fonction)\n        +annuler()\n        +retablir()\n    }\n    class EditeurVisuel {\n        +String type\n        +String nom\n        +analyser(code)\n        +ecrire(modele)\n        +elements(modele)\n        +reperer(svg, modele)\n        +panneau(contexte)\n    }\n    class MoteurRendu {\n        +rendreSchema(code, theme, page)\n        +composerPage(page, schema, options)\n        +verifierPropositions(diagnostic, theme, page)\n    }\n    EtatDocument \"1\" --> \"*\" EditeurVisuel : pilote\n    EtatDocument \"1\" --> \"1\" MoteurRendu : déclenche\n"
+    },
+    {
+      "id": "p37_architecture",
+      "nom": "Architecture technique (architecture)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Architecture d'exécution locale dans le navigateur (PWA)",
+      "sousTitre": "Modèle : Architecture technique (architecture-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Composants internes s'exécutant dans le navigateur de l'utilisateur avec cache Service Worker.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "architecture",
+      "code": "architecture-beta\n    group navigateur(cloud)[Navigateur du poste client]\n    service ui(server)[Interface DSFR et Editeurs] in navigateur\n    service moteur(server)[Moteur Mermaid D3 et Cartes] in navigateur\n    service sw(disk)[Service Worker Cache SHA256] in navigateur\n    service idb(database)[IndexedDB Brouillon local] in navigateur\n    service fichiers(disk)[Fichiers JSON PDF Visio SVG]\n\n    ui:R -- L:moteur\n    ui:B -- T:idb\n    sw:T -- B:ui\n    ui:L -- R:fichiers\n"
+    },
+    {
+      "id": "p38_versions",
+      "nom": "Historique de versions (gitGraph)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Flux Git, recette automatisée et publication de version",
+      "sousTitre": "Modèle : Historique de versions (gitGraph) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Organisation des branches et contrôles avant chaque publication de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "gitGraph",
+      "code": "gitGraph\n    commit id: \"v0.21.0\" tag: \"Diagnostic\"\n    branch evolution\n    checkout evolution\n    commit id: \"import-imc\"\n    commit id: \"export-vsdx\"\n    checkout main\n    merge evolution id: \"v0.22.0\" tag: \"Recette OK\"\n    branch mermaid-12-3\n    checkout mermaid-12-3\n    commit id: \"nouveaux-types\"\n    commit id: \"generer-sri-sbom\"\n    checkout main\n    merge mermaid-12-3 id: \"v0.23.0\" tag: \"Publication\"\n"
+    },
+    {
+      "id": "p39_paquet",
+      "nom": "Paquet réseau / binaire (packet-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Structure d'une entrée locale ZIP (générée par js/zip.js pour Visio .vsdx)",
+      "sousTitre": "Modèle : Structure de paquet (packet-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "En-tête binaire d'un fichier ZIP non compressé tel que construit par js/zip.js pour l'export Visio.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "packet",
+      "code": "packet-beta\n    title En-tête de fichier local ZIP (Open Packaging Conventions .vsdx)\n    0-31: \"Signature 0x04034b50\"\n    32-47: \"Version 20 (2.0)\"\n    48-63: \"Drapeaux UTF-8 (0x0800)\"\n    64-79: \"Méthode 0 (STORE)\"\n    80-111: \"Date et heure DOS\"\n    112-143: \"Empreinte CRC-32\"\n    144-175: \"Taille compressée\"\n    176-207: \"Taille réelle\"\n    208-223: \"Longueur du nom\"\n    224-239: \"Longueur extra (0)\"\n"
+    },
+    {
+      "id": "p40_c4",
+      "nom": "Contexte C4 (C4Context)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Diagramme de contexte (C4) de l'application FUSAIN",
+      "sousTitre": "Modèle : Contexte du système (C4Context) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Vue C4 de niveau 1 montrant les acteurs et l'absence de serveur applicatif externe.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "C4Context",
+      "code": "C4Context\n    title Contexte opérationnel de FUSAIN\n    Person(agent, \"Agent public / Architecte\", \"Conçoit des schémas, des cartes et des présentations A4/A3\")\n    Person(lecteur, \"Destinataire / Décideur\", \"Consulte les livrables PDF, Visio ou SVG\")\n    Enterprise_Boundary(poste, \"Poste de travail de l'agent\") {\n        System(fusain, \"Application web FUSAIN\", \"Éditeur visuel et code 100 % côté client (PWA hors ligne)\")\n        SystemDb(stockage, \"Système de fichiers & IndexedDB\", \"Sauvegardes .fusain.json, exports et brouillon local\")\n    }\n    System_Ext(hebergeur, \"Serveur de fichiers statiques\", \"GitHub/GitLab Pages, Nginx Debian ou serveur-local.ps1\")\n    Rel(agent, fusain, \"Édite ses schémas visuellement ou en code\")\n    Rel(fusain, stockage, \"Lit et enregistre les fichiers localement\")\n    Rel(hebergeur, fusain, \"Sert les fichiers statiques vérifiés par SRI\", \"HTTPS / Localhost\")\n    Rel(agent, lecteur, \"Transmet le PDF vectoriel ou le fichier Visio .vsdx\")\n    UpdateRelStyle(agent, fusain, $lineColor=\"#000091\", $textColor=\"#000091\")\n    UpdateRelStyle(fusain, stockage, $lineColor=\"#297254\", $textColor=\"#297254\")\n    UpdateRelStyle(hebergeur, fusain, $lineColor=\"#b34000\", $textColor=\"#b34000\")\n    UpdateRelStyle(agent, lecteur, $lineColor=\"#c9191e\", $textColor=\"#c9191e\")\n"
+    },
+    {
+      "id": "p41_c4_dynamique",
+      "nom": "Scénario dynamique C4 (C4Dynamic)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Scénario dynamique (C4) : conversion d'un document en fichier Visio (.vsdx)",
+      "sousTitre": "Modèle : Scénario dynamique (C4Dynamic) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Étapes d'exécution de l'export Microsoft Visio (.vsdx) dans le navigateur.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "C4Dynamic",
+      "code": "C4Dynamic\n    title Export d'un document multi-pages vers Microsoft Visio (.vsdx)\n    Person(agent, \"Agent public\", \"Demande un export Visio\")\n    Container(app, \"Interface FUSAIN\", \"js/app.js\", \"Modale d'export\")\n    Container_Boundary(moteur, \"Moteur d'export Visio côté client\") {\n        Component(visio, \"Convertisseur SVG vers Visio\", \"js/visio.js\", \"Analyse les groupes, formes et connecteurs collés\")\n        Component(xml, \"Générateur OpenXML\", \"js/visio-format.js\", \"Construit les feuilles pageN.xml et les maîtres\")\n        Component(zip, \"Archiveur ZIP\", \"js/zip.js\", \"Assemble le paquet .vsdx avec contrôle CRC-32\")\n    }\n    Rel(agent, app, \"Choisit le format Visio (.vsdx)\")\n    Rel(app, visio, \"Transmet les pages composées en SVG\")\n    Rel(visio, xml, \"Produit les formes géométriques et connecteurs\")\n    Rel(xml, zip, \"Empaquette les fichiers XML de l'archive\")\n    UpdateRelStyle(agent, app, $lineColor=\"#000091\", $textColor=\"#000091\")\n    UpdateRelStyle(app, visio, $lineColor=\"#3558a2\", $textColor=\"#3558a2\")\n    UpdateRelStyle(visio, xml, $lineColor=\"#297254\", $textColor=\"#297254\")\n    UpdateRelStyle(xml, zip, $lineColor=\"#c9191e\", $textColor=\"#c9191e\")\n"
+    },
+    {
+      "id": "p42_c4_deploiement",
+      "nom": "Déploiement C4 (C4Deployment)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Modes de déploiement de FUSAIN (Poste isolé, Intranet Debian ou Forge)",
+      "sousTitre": "Modèle : Déploiement (C4Deployment) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Trois modes de déploiement supportés : serveur PowerShell local, paquet Debian Nginx ou GitLab/GitHub Pages.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "C4Deployment",
+      "code": "C4Deployment\n    title Déploiement de FUSAIN en environnement administratif\n    Deployment_Node(poste, \"Poste de travail Windows ou Linux\", \"Navigateur moderne\") {\n        Container(pwa, \"Application FUSAIN (PWA)\", \"ES Modules + Service Worker\", \"Fonctionne hors ligne après le premier chargement\")\n        Container(ps1, \"Serveur local autonome\", \"serveur-local.ps1\", \"Écoute sur 127.0.0.1:8090 sans droits admin\")\n    }\n    Deployment_Node(intranet, \"Serveur Intranet Ministère\", \"Debian 13 + paquet fusain-server\") {\n        Deployment_Node(nginx, \"Nginx durci\", \"deploiement/nginx-fusain.conf\") {\n            Container(statique, \"Fichiers statiques FUSAIN\", \"/usr/share/fusain\", \"En-têtes CSP, HSTS, X-Frame-Options et TLS\")\n        }\n    }\n    Rel(pwa, ps1, \"Chargement hors ligne sur poste isolé\", \"HTTP localhost\")\n    Rel(pwa, statique, \"Chargement et mise à jour sur intranet\", \"HTTPS / TLS\")\n"
+    },
+    {
+      "id": "p43_cas_utilisation",
+      "nom": "Cas d'utilisation (usecase-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Principaux cas d'utilisation de FUSAIN par profil métier",
+      "sousTitre": "Modèle : Cas d'utilisation (usecase-beta) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Diagramme des cas d'utilisation couvrant les besoins des agents publics.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "usecase",
+      "code": "usecase-beta\n    direction LR\n    actor Agent(\"Agent / Rédacteur\")\n    actor Architecte(\"Architecte SI / Réseau\")\n    actor ChargeEtudes(\"Chargé d'études territoriales\")\n    systemBoundary \"Application FUSAIN\"\n        Concevoir(\"Concevoir un logigramme ou une diapo DSFR\")\n        ImporterReseau(\"Importer un export réseau HPE IMC / LLDP\")\n        Cartographier(\"Produire une carte statistique par commune ou département\")\n        Exporter(\"Exporter en PDF vectoriel ou Visio .vsdx\")\n    end\n    Agent --> Concevoir\n    Architecte --> ImporterReseau\n    ChargeEtudes --> Cartographier\n    Concevoir ..> : include Exporter\n    ImporterReseau ..> : include Exporter\n    Cartographier ..> : include Exporter\n"
+    },
+    {
+      "id": "p44_evenements",
+      "nom": "Modélisation événements (eventmodeling)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Modélisation par événements du moteur d'état et d'annulation (Ctrl+Z)",
+      "sousTitre": "Modèle : Modélisation par événements (eventmodeling) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Flux événementiel entre l'interface, la pile d'historique et le brouillon IndexedDB.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "eventmodeling",
+      "code": "eventmodeling\n    tf 01 ui FeuilleInteractiveSVG\n    tf 02 cmd ModifierElementVisuel { cle: texte, valeur: texte }\n    tf 03 evt InstantaneEmpileDansPasse\n    tf 04 rmo ModeleReecritEnCodeMermaid\n    tf 05 ui ApercuPageEtPanneauProprietes\n    tf 06 cmd DeclencherAnnulationCtrlZ\n    tf 07 evt EtatPrecedentRestaure\n    tf 08 pcr MinuterieBrouillon800ms\n    tf 09 cmd EnregistrerDansIndexedDB\n    tf 10 evt BrouillonLocalSynchronise\n"
+    },
+    {
+      "id": "p45_agents",
+      "nom": "Flux d'agents IA (agentflow-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Orchestration de l'assistant de diagnostic et de réparation syntaxique",
+      "sousTitre": "Modèle : Flux d'agents (agentflow-beta TB) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Représentation du moteur déterministe d'analyse et de réparation des fautes Mermaid.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "agentflow",
+      "code": "agentflow-beta TB\n    erreur[\"Erreur levée par Mermaid\"]@{ shape: input }\n    flow analyseur[\"Analyseur syntaxique (diagnostic.js)\"]\n        localiser[\"Localiser la ligne réelle et la ligne précédente\"]@{ shape: task }\n        identifier[\"Identifier l'objet visé dans syntaxes.js\"]@{ shape: tool }\n        grammaire[\"Catalogue SYNTAXES des 27 types\"]@{ shape: refdoc }\n        generer[\"Générer les candidats de réparation\"]@{ shape: task }\n        localiser --> identifier --> generer\n        identifier -.- grammaire\n    end\n    flow verificateur[\"Vérificateur d'exécution (rendu.js)\"]\n        tester[\"Essayer chaque candidat avec Mermaid\"]@{ shape: tool }\n        valide{\"Rendu sans erreur ?\"}@{ shape: decision }\n        tester --> valide\n    end\n    afficher[\"Afficher le diagnostic et le bouton Appliquer\"]@{ shape: action }\n    erreur --> analyseur\n    generer --> verificateur\n    valide -- oui --> afficher\n    valide -- non --> afficher\n    verificateur --x analyseur\n    linkStyle 0 stroke:#000091,stroke-width:2.5px\n    linkStyle 1 stroke:#000091,stroke-width:2.5px\n    linkStyle 2 stroke:#b34000,stroke-width:2px\n    linkStyle 3 stroke:#3558a2,stroke-width:2.5px\n    linkStyle 4 stroke:#c9191e,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite\n    linkStyle 5 stroke:#000091,stroke-width:3px,stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 18s linear infinite\n    linkStyle 6 stroke:#297254,stroke-width:3px\n    linkStyle 7 stroke:#c9191e,stroke-width:2.5px\n    linkStyle 8 stroke:#c9191e,stroke-width:2px\n"
+    },
+    {
+      "id": "p46_syntaxique",
+      "nom": "Diagramme syntaxique (railroad-ebnf)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Grammaire EBNF d'un identifiant d'icône embarquée dans FUSAIN",
+      "sousTitre": "Modèle : Diagramme syntaxique (railroad-ebnf-beta) — Par le code",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Chemin de fer syntaxique décrivant la notation des icônes dsfr:, illus: et picto:.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "railroad-ebnf",
+      "code": "railroad-ebnf-beta\n    title \"Référence d'une icône embarquée dans FUSAIN\"\n    icone_embarquee = jeu \":\" identifiant ;\n    jeu = \"dsfr\" | \"illus\" | \"picto\" ;\n    identifiant = segment ( \"-\" segment )* ;\n    segment = ( lettre | chiffre )+ ;\n"
+    },
+    {
+      "id": "p47_blocs",
+      "nom": "Diagramme de blocs (block-beta)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Agencement ergonomique de l'écran de travail FUSAIN",
+      "sousTitre": "Modèle : Diagramme de blocs (block-beta) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Disposition des zones de l'interface utilisateur de FUSAIN et des couches sous-jacentes.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "block",
+      "code": "block-beta\n    columns 3\n    entete[\"En-tête DSFR & Barre d'outils (Nouveau, Ouvrir, Enregistrer, Exporter, Zoom, Mode, Modèles)\"]:3\n    pages[\"Volet des pages (Vignettes lazy-load & Ajouter une page)\"]\n    scene[\"Scène centrale (Feuille A4/A3 interactive, Bandeau diagnostic & Éditeur de code)\"]\n    panneau[\"Panneau de propriétés (Élément sélectionné, Mise en page & Document)\"]\n    block:socle:3\n        columns 3\n        mermaid[(\"Moteur Mermaid 12.3 & DOMPurify\")]\n        carto[(\"Moteur D3 / TopoJSON & Fonds IGN\")]\n        exporteur[(\"Générateurs PDF, Visio .vsdx, PNG, SVG\")]\n    end\n    pages --> scene\n    scene --> panneau\n"
+    },
+    {
+      "id": "p48_diapo_frise",
+      "nom": "Partie 5 — Réseaux (Diapo Frise)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Présentation en 3 étapes de la modélisation et de l'import de réseaux informatiques (modèle diapo-frise).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo frise\n- [illus:commutateur-switch] 1. Modèles d'architecture réseau | Démarrez avec 4 topologies types (réseau physique illustré, réseau logique VLAN en pictogrammes ou en couleur, interconnexion multi-sites WAN/VPN).\n- [illus:flux-de-donnees] 2. Import automatique HPE IMC & LLDP | Importez vos fichiers Excel (.xlsx) ou CSV de liens et d'équipements : reconnaissance automatique des colonnes, débits, agrégats LACP, liens en panne, VLAN et regroupement par site et local technique.\n- [illus:livrable] 3. Édition visuelle et export Visio (.vsdx) | Retouchez librement les pages générées dans FUSAIN, puis exportez-les vers Microsoft Visio (.vsdx) ou LibreOffice Draw avec des formes groupées et des connecteurs collés.\n"
+    },
+    {
+      "id": "p49_reseau_physique",
+      "nom": "Réseau physique illustré (architecture)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Topologie physique d'un hébergement interne de FUSAIN (illustré)",
+      "sousTitre": "Modèle : Réseau physique illustré (architecture-beta + illus:) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Schéma physique d'une infrastructure locale hébergeant fusain-server avec icônes illustrées.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "architecture",
+      "code": "architecture-beta\n    group baie(illus:baie-de-brassage)[Salle serveurs - baie principale]\n    group bureaux(illus:ordinateur-de-bureau)[Bureaux des services metiers]\n    group reunion(illus:point-d-acces-wi-fi)[Espace mobilite et reunion]\n    service fibre(illus:fibre-optique)[Lien RIE operateur]\n    service routeur(illus:routeur)[Routeur de bordure]\n    service fw(illus:pare-feu)[Pare-feu interne] in baie\n    service coeur(illus:commutateur-switch)[Commutateur de coeur] in baie\n    service srv(illus:serveur)[Serveur Debian fusain-server] in baie\n    service nas(illus:stockage-nas)[Partage documentaire NAS] in baie\n    service sw1(illus:commutateur-switch)[Commutateur etage] in bureaux\n    service pc1(illus:ordinateur-de-bureau)[Postes agents] in bureaux\n    service imp1(illus:imprimante)[Imprimante A3/A4] in bureaux\n    service sw2(illus:commutateur-switch)[Commutateur PoE] in reunion\n    service wifi(illus:point-d-acces-wi-fi)[Borne Wi-Fi interne] in reunion\n    fibre:R -- L:routeur\n    routeur:R -[cuivre]- L:fw\n    fw:R -- L:coeur\n    coeur:B -- T:srv\n    srv:R -- L:nas\n    coeur:R -[fibre]- L:sw1\n    sw1:R -[cat 6]- L:pc1\n    sw1:B -- T:imp1\n    coeur:T -[fibre]- B:sw2\n    sw2:R -[PoE]- L:wifi\n"
+    },
+    {
+      "id": "p50_reseau_logique",
+      "nom": "Réseau logique pictogrammes",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Segmentation logique VLAN d'un hébergement FUSAIN (pictogrammes)",
+      "sousTitre": "Modèle : Réseau logique (architecture-beta + picto:) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Schéma logique par VLAN utilisant les 54 pictogrammes réseau noir et blanc.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "architecture",
+      "code": "architecture-beta\n    group dmz(picto:dmz)[DMZ Publication VLAN 99]\n    group v10(picto:vlan)[VLAN 10 Administration 10.0.10.0]\n    group v20(picto:vlan)[VLAN 20 Services internes 10.0.20.0]\n    group v30(picto:vlan)[VLAN 30 Postes agents 10.0.30.0]\n    service rie(picto:reseau-etendu)[Reseau interministeriel]\n    service fw(picto:pare-feu)[Pare-feu filtrant]\n    service proxy(picto:proxy)[Proxy inverse TLS] in dmz\n    service fusain(picto:application-web)[Serveur Nginx FUSAIN] in dmz\n    service coeur(picto:commutateur-niveau-3)[Coeur de reseau L3]\n    service annuaire(picto:annuaire)[Annuaire interne] in v10\n    service sup(picto:supervision)[Supervision IMC] in v10\n    service forge(picto:serveur)[GitLab interne] in v20\n    service partage(picto:serveur-de-fichiers)[Dossiers partages] in v20\n    service postes(picto:groupe)[Navigateurs des agents] in v30\n    rie:R -- L:fw\n    fw:B -- T:proxy\n    proxy:B -- T:fusain\n    fw:R -[trunk 802.1Q]- L:coeur\n    coeur:T -- B:annuaire\n    annuaire:R -- L:sup\n    coeur:R -- L:forge\n    forge:R -- L:partage\n    coeur:B -- T:postes\n"
+    },
+    {
+      "id": "p51_reseau_logique_illustre",
+      "nom": "Réseau logique illustré",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Segmentation logique VLAN avec icônes illustrées en couleur",
+      "sousTitre": "Modèle : Réseau logique illustré (architecture-beta + illus:) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Même topologie logique VLAN habillée avec les icônes illustrées en couleur de FUSAIN.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "architecture",
+      "code": "architecture-beta\n    group dmz(illus:dmz)[DMZ Publication VLAN 99]\n    group v10(illus:vlan)[VLAN 10 Administration 10.0.10.0]\n    group v20(illus:vlan)[VLAN 20 Services internes 10.0.20.0]\n    group v30(illus:vlan)[VLAN 30 Postes agents 10.0.30.0]\n    service rie(illus:reseau-etendu-wan)[Reseau interministeriel]\n    service fw(illus:pare-feu)[Pare-feu filtrant]\n    service proxy(illus:proxy)[Proxy inverse TLS] in dmz\n    service fusain(illus:site-web)[Serveur Nginx FUSAIN] in dmz\n    service coeur(illus:commutateur-niveau-3)[Coeur de reseau L3]\n    service annuaire(illus:annuaire)[Annuaire interne] in v10\n    service sup(illus:serveur-de-supervision)[Supervision IMC] in v10\n    service forge(illus:serveur)[GitLab interne] in v20\n    service partage(illus:serveur-de-fichiers)[Dossiers partages] in v20\n    service postes(illus:groupe-d-utilisateurs)[Navigateurs des agents] in v30\n    rie:R -- L:fw\n    fw:B -- T:proxy\n    proxy:B -- T:fusain\n    fw:R -[trunk 802.1Q]- L:coeur\n    coeur:T -- B:annuaire\n    annuaire:R -- L:sup\n    coeur:R -- L:forge\n    forge:R -- L:partage\n    coeur:B -- T:postes\n"
+    },
+    {
+      "id": "p52_reseau_sites",
+      "nom": "Interconnexion de sites (architecture)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Diffusion multi-sites et usage en mobilité hors ligne",
+      "sousTitre": "Modèle : Interconnexion de sites (architecture-beta + picto:) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Architecture d'accès à FUSAIN depuis l'administration centrale, les sites distants et les postes nomades.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "architecture",
+      "code": "architecture-beta\n    group centrale(picto:batiment)[Administration centrale]\n    group dreal(picto:batiment)[Direction regionale Lyon]\n    group ddt(picto:batiment)[Direction departementale Rennes]\n    service fwc(picto:pare-feu)[Pare-feu central] in centrale\n    service coeur(picto:commutateur-niveau-3)[Coeur de reseau] in centrale\n    service depot(picto:baie-de-serveurs)[Serveur FUSAIN et GitLab] in centrale\n    service wan(picto:reseau-etendu)[Reseau interministeriel RIE]\n    service internet(picto:internet)[Acces nomade]\n    service r1(picto:routeur)[Routeur site Lyon] in dreal\n    service sw1(picto:commutateur)[Postes Lyon] in dreal\n    service r2(picto:routeur)[Routeur site Rennes] in ddt\n    service sw2(picto:commutateur)[Postes Rennes] in ddt\n    service vpn(picto:vpn)[Passerelle VPN]\n    service nomades(picto:ordinateur-portable)[Agents en mobilite PWA hors ligne]\n    depot:R -- L:coeur\n    coeur:R -- L:fwc\n    fwc:R -[MPLS]- L:wan\n    wan:R -- L:r1\n    r1:R -- L:sw1\n    wan:B -- T:r2\n    r2:R -- L:sw2\n    fwc:T -- B:internet\n    internet:R -- L:vpn\n    vpn:R -[tunnel chiffre]- L:nomades\n"
+    },
+    {
+      "id": "p53_carte_monde",
+      "nom": "Carte Monde (carte monde)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Fonds cartographique mondial embarqué (moteur SimpleCarto)",
+      "sousTitre": "Modèle : Carte Monde (carte monde) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte thématique à l'échelle mondiale utilisant des codes ISO alpha-3.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "carte",
+      "code": "carte monde\netiquettes: aucune\n- FRA | 100 | France\n- DEU | 85 | Allemagne\n- ESP | 78 | Espagne\n- ITA | 75 | Italie\n- BEL | 88 | Belgique\n- CHE | 82 | Suisse\n- GBR | 80 | Royaume-Uni\n- CAN | 90 | Canada\n- USA | 72 | États-Unis\n- BRA | 65 | Brésil\n- JPN | 84 | Japon\n- AUS | 79 | Australie\n"
+    },
+    {
+      "id": "p54_carte_region_du_monde",
+      "nom": "Carte Région du monde (UEURO)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Cadrage sur une région du monde : Union européenne (UEURO)",
+      "sousTitre": "Modèle : Carte Région du monde (carte region-du-monde) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte centrée sur l'Union européenne avec étiquettes de noms des pays.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "carte",
+      "code": "carte region-du-monde\nzone: UEURO\ntaille-etiquettes: 9\n- FRA | 95\n- DEU | 88\n- ITA | 82\n- ESP | 84\n- BEL | 91\n- NLD | 89\n- LUX | 93\n- IRL | 80\n- PRT | 78\n- AUT | 85\n- POL | 76\n- SWE | 87\n- FIN | 86\n- DNK | 88\n- GRC | 74\n"
+    },
+    {
+      "id": "p55_carte_france",
+      "nom": "Carte France départements",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Carte de France par département (avec DROM-COM en médaillons)",
+      "sousTitre": "Modèle : Carte France départements (carte france) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte de la population municipale 2022 (INSEE / ADMIN EXPRESS) sur l'ensemble des départements.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "carte",
+      "code": "carte france\netiquettes: aucune\n- 01 | 671289\n- 02 | 525558\n- 03 | 334715\n- 04 | 167179\n- 05 | 141677\n- 06 | 1114579\n- 07 | 333229\n- 08 | 267204\n- 09 | 155339\n- 10 | 311076\n- 11 | 377773\n- 12 | 279736\n- 13 | 2069811\n- 14 | 704605\n- 15 | 144399\n- 16 | 351603\n- 17 | 668160\n- 18 | 299496\n- 19 | 240120\n- 21 | 537577\n- 22 | 609598\n- 23 | 115529\n- 24 | 416325\n- 25 | 548662\n- 26 | 521432\n- 27 | 601305\n- 28 | 432950\n- 29 | 927912\n- 2A | 166045\n- 2B | 185231\n- 30 | 764010\n- 31 | 1456261\n- 32 | 192649\n- 33 | 1674980\n- 34 | 1217331\n- 35 | 1109232\n- 36 | 216809\n- 37 | 616326\n- 38 | 1291380\n- 39 | 258405\n- 40 | 428427\n- 41 | 328953\n- 42 | 772041\n- 43 | 228161\n- 44 | 1473156\n- 45 | 687063\n- 46 | 175620\n- 47 | 332226\n- 48 | 76503\n- 49 | 828151\n- 50 | 496815\n- 51 | 564107\n- 52 | 169865\n- 53 | 305437\n- 54 | 732898\n- 55 | 180745\n- 56 | 776103\n- 57 | 1050721\n- 58 | 202299\n- 59 | 2616909\n- 60 | 830725\n- 61 | 276144\n- 62 | 1460184\n- 63 | 664385\n- 64 | 699473\n- 65 | 231453\n- 66 | 492964\n- 67 | 1156963\n- 68 | 767800\n- 69 | 1907982\n- 70 | 233920\n- 71 | 549136\n- 72 | 566129\n- 73 | 445288\n- 74 | 849583\n- 75 | 2113705\n- 76 | 1260205\n- 77 | 1452399\n- 78 | 1470778\n- 79 | 375415\n- 80 | 565540\n- 81 | 396168\n- 82 | 264924\n- 83 | 1108364\n- 84 | 568702\n- 85 | 706343\n- 86 | 438688\n- 87 | 372438\n- 88 | 358700\n- 89 | 333896\n- 90 | 140082\n- 91 | 1324546\n- 92 | 1647435\n- 93 | 1681725\n- 94 | 1419531\n- 95 | 1270845\n- 971 | 383569\n- 972 | 361019\n- 973 | 288382\n- 974 | 881348\n- 976 | 256518\n- NR | 48099\n"
+    },
+    {
+      "id": "p56_carte_region",
+      "nom": "Carte Région départements (Bretagne)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Carte régionale par département : exemple de la Bretagne (code 53)",
+      "sousTitre": "Modèle : Carte Région départements (carte region) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte régionale affichant le nom et la valeur sur chaque département breton.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "carte",
+      "code": "carte region\nzone: 53\netiquettes: nom-valeur\ntaille-etiquettes: 14\n- 22 | 609598\n- 29 | 927912\n- 35 | 1109232\n- 56 | 776103\n"
+    },
+    {
+      "id": "p57_carte_epci",
+      "nom": "Carte EPCI communes (Métropole Lyon)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Carte intercommunale à la maille communale : Métropole de Lyon",
+      "sousTitre": "Modèle : Carte EPCI communes (carte epci) — Édition visuelle",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Carte des 59 communes de la Métropole de Lyon (SIREN 200046977) issue des fonds ADMIN EXPRESS.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "carte",
+      "code": "carte epci\nzone: 200046977\netiquettes: aucune\n- 69003 | 3013\n- 69029 | 42850\n- 69033 | 2951\n- 69034 | 43479\n- 69040 | 6124\n- 69044 | 5272\n- 69046 | 4670\n- 69063 | 4604\n- 69068 | 2541\n- 69069 | 12170\n- 69071 | 1186\n- 69072 | 8980\n- 69081 | 18019\n- 69085 | 1549\n- 69087 | 3070\n- 69088 | 7005\n- 69089 | 15664\n- 69091 | 20943\n- 69096 | 9941\n- 69100 | 8909\n- 69116 | 3933\n- 69117 | 3193\n- 69123 | 520774\n- 69127 | 3711\n- 69142 | 6554\n- 69143 | 7807\n- 69149 | 37928\n- 69153 | 1394\n- 69163 | 3620\n- 69168 | 1546\n- 69191 | 6113\n- 69194 | 7405\n- 69199 | 19549\n- 69202 | 21893\n- 69204 | 21329\n- 69205 | 5370\n- 69207 | 3037\n- 69233 | 1241\n- 69244 | 22819\n- 69250 | 4460\n- 69256 | 52448\n- 69259 | 66701\n- 69260 | 5175\n- 69266 | 162207\n- 69271 | 11214\n- 69273 | 11196\n- 69275 | 29905\n- 69276 | 9727\n- 69278 | 5632\n- 69279 | 6109\n- 69282 | 36437\n- 69283 | 13716\n- 69284 | 3270\n- 69286 | 31479\n- 69290 | 49193\n- 69292 | 7039\n- 69293 | 2418\n- 69296 | 3131\n"
+    },
+    {
+      "id": "p58_diapo_blocs",
+      "nom": "Formats d'export (Diapo Blocs)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Synthèse des 4 modes d'export et de sauvegarde de FUSAIN (modèle diapo-blocs).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo blocs\npartie: 5. Diffusion, sauvegarde et interopérabilité\nsous-partie: Des livrables prêts pour l'impression, la bureautique et l'archivage\ntitre: Exporter et partager vos documents en toute fidélité\ntexte: Chaque page ou le document entier peut être exporté en un clic, sans serveur tiers, dans le format adapté à vos destinataires.\n- [illus:livrable] PDF vectoriel (A4 / A3) | Conversion vectorielle directe (svg2pdf + jsPDF) avec textes sélectionnables et repli automatique à 300 ppp si nécessaire.\n- [illus:organigramme] Microsoft Visio (.vsdx) | Un fichier .vsdx multi-pages lisible par Visio 2013+ et LibreOffice Draw, avec formes modifiables et connecteurs collés.\n- [illus:carte-topographique] Images PNG et SVG | Export haute définition (150, 300 ou 600 ppp, fond transparent, page entière ou schéma seul) et SVG autonome assaini.\n- [illus:archivage-numerique] Sauvegarde .fusain.json | Format JSON texte ouvert, validé par schéma (schema/fusain.schema.json) et contrôlé dès l'enregistrement.\n"
+    },
+    {
+      "id": "p59_diapo_libre",
+      "nom": "Aide-mémoire & Raccourcis (Diapo Libre)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "",
+      "sousTitre": "",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Récapitulatif des raccourcis clavier et des commandes utiles (modèle diapo-libre).",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "diapo",
+      "code": "diapo libre\n[illus:code-source]\n# Aide-mémoire des raccourcis et de l'exploitation\n## Manipulation rapide au clavier et à la souris\nTous les raccourcis fonctionnent directement dans le navigateur, en ligne comme **hors ligne** :\n- **Ctrl+S / Ctrl+O** : enregistrer le document en `.fusain.json` ou ouvrir un fichier (`.json`, `.mmd`, `.txt`)\n- **Ctrl+Z / Ctrl+Y** : annuler ou rétablir jusqu'à 100 étapes d'historique\n- **Flèches / Entrée / Suppr / Inser** : parcourir les éléments du schéma, renommer sur place, supprimer ou ajouter un élément lié\n| Action ou commande | Raccourci ou script | Effet dans FUSAIN |\n| Zoomer / Ajuster la feuille | Molette, Ctrl+0, Ctrl+1 | Zoom ancré sous le pointeur jusqu'à 6400 % ou ajustement auto |\n| Lancer en local sous Windows | lancer-site-local.bat | Démarre serveur-local.ps1 sur localhost:8090 sans installation |\n| Vérifier l'intégrité et le SBOM | python3 outils/generer.py --verifier | Contrôle les empreintes SRI, le Service Worker et CycloneDX |\n"
+    },
+    {
+      "id": "p60_page_vierge",
+      "nom": "Page vierge (Notes et annexes)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Annexe — Exemple de page vierge (sans schéma)",
+      "sousTitre": "Modèle : Page vierge — Seuls le titre, le sous-titre et le pied de page sont imprimés",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Page vierge illustrant la possibilité d'insérer des pages intercalaires ou de garde sans schéma.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "",
+      "code": ""
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.23.0-cc238cd8c4';
+const VERSION_CACHE = 'fusain-0.23.0-0a05616b94';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
@@ -26,7 +26,7 @@ const FICHIERS = [
     ['./cartes/index.json', 'e5a8969f0db9d5c0852b9376c2cd67ea9bd0f783096769ce678d10546c4c7c21'],
     ['./cartes/monde.json', 'd3a4565c2e995afa458d4b2a71351295c9c391c068bdc6d10efc3177794d84e0'],
     ['./cartes/regions-du-monde.json', '5d5472cd7eb79f1538e61855cd14dbeef92e4d74497d3c1b5666ca72ecdce2a1'],
-    ['./css/fusain.css', '9bfe12fad96650fa55d41cd83eaad93268a39a416f8b0626b82211ae35d6f8c4'],
+    ['./css/fusain.css', '51bee93826abe9fbaab7bc728316e8bc4461bb96987d44964b1a79f78c8745f2'],
     ['./icones/fusain-192.png', '799ed7660947f98cd3dca9bc24c8471ed2be1fb186c544a1a2f40788930e5a64'],
     ['./icones/fusain-512.png', '5305d17891b39cef137db3273833527db43460ba67be57d569888016df709a1a'],
     ['./icones/fusain.svg', 'd08a962fa1876ac73c1d7991d1850d5673ea70bf960953c69b4d9f89c7dc01ef'],
@@ -51,13 +51,13 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '81e9a2691a93a1d154c14c9ff9b47b69d3612b76d94e5961f8c5e624ddc26257'],
-    ['./index.html', '81e9a2691a93a1d154c14c9ff9b47b69d3612b76d94e5961f8c5e624ddc26257'],
-    ['./js/app.js', '831f60a73ade14bc40f2991eb5223f5dc5031619a0bea9cd6c05289e962be811'],
+    ['./', '4b033d1a7c8a7b04b0ed9858cf35ac6f4c6ab89e9d2e5f7aa3359df5bf18b05b'],
+    ['./index.html', '4b033d1a7c8a7b04b0ed9858cf35ac6f4c6ab89e9d2e5f7aa3359df5bf18b05b'],
+    ['./js/app.js', '615f711d9ae8dd781a630ae4641a127ff38dada8cbee2a501f3eeba3dc481c38'],
     ['./js/brouillon.js', '8eaefb98fc4dda95f498e795466c2058c89544b2eb6fc86602388185efb6c95e'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
-    ['./js/diagnostic.js', '3f59256b48013b92988cf3ec43de8e5f6e157aba7a579fe37384f00747ef142f'],
+    ['./js/diagnostic.js', 'a4f004fd9d48b04e637ba6aedb52073fdd41686c638240d822a18485ccc9c9ec'],
     ['./js/diagrammes/arbre.js', '2de684eb0d7fdd3d98403e44ec614443b4020d8780067f8e75da0c4f6697ebec'],
     ['./js/diagrammes/architecture.js', '76b00e57401c4c30e87f5deaa59057556b93775d83f00515bc69973453ee2248'],
     ['./js/diagrammes/blocs.js', '9a977fc44de97533048a0105b1f5338d78ad0d3323d5b64cc728860f3b62ef45'],
@@ -88,6 +88,7 @@ const FICHIERS = [
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/diagrammes/zenuml.js', '2af815e497545725741b2ffbbc7eb38c821941c20d4a7c587cb9ae48f7ebc49f'],
     ['./js/diapo.js', '40647c88946327a492c76a8cce03bfe01e2711fe7d052ff1e9eb865cc077bd14'],
+    ['./js/diaporama.js', 'dbf91f6279ef06dfc75682d210e8df654dbe8363ebb454c04c0f28d38f388a6b'],
     ['./js/dom.js', '2bcc1aa8e327b8973b145365f6b67915f8ddf2497b3d4310f89f29ae9a2b4509'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
     ['./js/export.js', '8ad12dc2e55e713406dce91bf4aef3af41169d34718c6f084acc428dea02a186'],
@@ -104,7 +105,7 @@ const FICHIERS = [
     ['./js/rendu.js', '18d9c2e72ad4b74b572fb7661480b893ca2a689dbda18011935e2f933e8eea42'],
     ['./js/reseau.js', 'baf4e052604e054b8e56d3a590d0d82c45338f643c3d08f80fef64c1a7ce2cc3'],
     ['./js/securite.js', '5c702977bf8dd068dfabd50bad376cf017f5f5b9634b4e2d277be80bc3da4756'],
-    ['./js/syntaxes.js', '2cd3c86c211ad1459178faa5dcbebedd09a47c4f513cef4f4e3263a837bc1180'],
+    ['./js/syntaxes.js', 'abc7c310982092942cdc400512f9917ae39705e93abe280085f0a01e644216f1'],
     ['./js/version.js', '2626672cb425941b6a1b93c84db5c880aa010e8fad68e98c648b4fa0c221096a'],
     ['./js/visio-format.js', 'f9f176b214a19dcf4969626d00d99b03938dd9524ff25e1cfab9d37c239f3474'],
     ['./js/visio.js', 'e5fed842ba2aade4f0197d7f191e4fe583a3d1e2d6a4894756fca620f331b56b'],

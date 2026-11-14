@@ -105,7 +105,8 @@ export function typeDiagramme(code) {
     const texte = String(code).replace(/^\s*---[ \t]*\n[\s\S]*?\n[ \t]*---[ \t]*\n?/, '').replace(/%%\{[\s\S]*?\}%%/g, '');
     for (const ligne of texte.split('\n')) {
         const l = ligne.trim();
-        if (!l || l.startsWith('%%')) continue;
+        if (!l || l.startsWith('%%') || l.startsWith("'")) continue;
+        if (/^@start(uml|mindmap|wbs|gantt)\b/i.test(l)) return 'plantuml';
         const mot = l.match(/^[A-Za-z0-9-]+/)?.[0] || '';
         return SYNONYMES[mot] || mot.replace(/-beta$/, '');
     }

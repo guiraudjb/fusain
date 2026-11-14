@@ -2,6 +2,11 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.25.0 — 14 novembre 2026 — prise en charge native de PlantUML (@startuml)
+
+- **PlantUML (`js/plantuml.js`)** : interprétation et traduction 100 % locales (sans bibliothèque externe) des blocs `@startuml … @enduml`, `@startmindmap … @endmindmap`, `@startwbs … @endwbs` et `@startgantt … @endgantt` pour neuf familles de diagrammes (séquence, classes, états, activité, entités-relations, composants/cas d'utilisation, C4-PlantUML, carte mentale et Gantt).
+- **Conversion visuelle et import `.puml`** : bouton « Convertir pour l'édition visuelle » permettant d'éditer un schéma PlantUML à la souris (annulable par `Ctrl+Z`), ouverture directe des fichiers `.puml`, `.plantuml` et `.iuml`, modèle dédié dans le catalogue, fiche dans l'index des syntaxes et diagnostic de fermeture.
+
 ## 0.24.0 — 14 novembre 2026 — mode diaporama et document de démonstration par défaut
 
 - **Document de démonstration (`presentation-fusain.fusain.json`)** : catalogue complet de 60 pages illustrant tous les modèles de schémas de FUSAIN, avec liens colorés, liens animés, traits pleins, traits épais et pointillés. Ouvert par défaut à l'arrivée sur le site lorsqu'aucun brouillon personnel n'est enregistré.

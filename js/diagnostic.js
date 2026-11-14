@@ -6,7 +6,7 @@ import { SYNTAXES, objetDe } from './syntaxes.js';
 import { DISPOSITIONS } from './diagrammes/diapo.js';
 import { ECHELLES, OPTIONS } from './diagrammes/carte.js';
 
-const PROPRES = new Set(['diapo', 'carte']); // écritures de FUSAIN, lues ligne à ligne sans Mermaid
+const PROPRES = new Set(['diapo', 'carte', 'plantuml']); // écritures de FUSAIN, lues ligne à ligne sans Mermaid
 
 // ---------- Outils ----------
 
@@ -438,6 +438,16 @@ function reglesPropres(type, t, ctx) {
         }
         const donnee = t.match(/^-\s*([^|]+)\|\s*(-?[\d\s]+,\d+)\s*(\|.*)?$/);
         if (donnee) r.push({ apres: `- ${donnee[1].trim()} | ${nombreFr(donnee[2])}${donnee[3] ? ` ${donnee[3]}` : ''}`, libelle: 'Écrire la valeur avec un point décimal', cause: 'Les nombres s\'écrivent avec un point décimal.' });
+    }
+    if (type === 'plantuml') {
+        const enteteTxt = (ctx.lignes[ctx.entete] || '').trim().toLowerCase();
+        const fermeture = enteteTxt.startsWith('@startmindmap') ? '@endmindmap' : enteteTxt.startsWith('@startgantt') ? '@endgantt' : enteteTxt.startsWith('@startwbs') ? '@endwbs' : '@enduml';
+        if (!ctx.lignes.some((l) => /^@end(uml|mindmap|gantt|wbs)\b/i.test(l.trim()))) {
+            r.push({ code: `${ctx.code.trimEnd()}\n${fermeture}`, libelle: `Ajouter « ${fermeture} » à la fin du code`, cause: `Le bloc PlantUML n'est pas refermé par « ${fermeture} ».` });
+        }
+        if (!t.startsWith("'") && ctx.i !== ctx.entete) {
+            r.push({ apres: `' ${t}`, libelle: 'Mettre la ligne en commentaire PlantUML (\')', cause: 'Cette instruction PlantUML n\'est pas reconnue.' });
+        }
     }
     return r;
 }

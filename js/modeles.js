@@ -615,6 +615,27 @@ Transition ecologique,Mobilite,150
     { id: 'carte-france', categorie: 'cartes', nom: 'France (départements)', code: carteInitiale('france', '', paires(POPULATION_DEPARTEMENTS), { etiquettes: 'aucune' }) },
     { id: 'carte-region', categorie: 'cartes', nom: 'Région (départements)', code: carteInitiale('region', '53', paires(POPULATION_DEPARTEMENTS).filter(([c]) => ['22', '29', '35', '56'].includes(c)), { etiquettes: 'nom-valeur', 'taille-etiquettes': 14 }) },
     { id: 'carte-epci', categorie: 'cartes', nom: 'EPCI (communes)', code: carteInitiale('epci', '200046977', paires(POPULATION_METROPOLE_LYON), { etiquettes: 'aucune' }) },
+    { id: 'plantuml', categorie: 'architecture', nom: 'Schéma PlantUML (@startuml)', code: `@startuml
+autonumber
+actor "Usager" as u
+participant "Portail démarches" as portail
+participant "Service instructeur" as instr
+database "Base dossiers" as bdd
+
+u -> portail : Déposer la demande
+activate portail
+portail -> bdd : Enregistrer le dépôt
+bdd --> portail : Numéro de dossier
+portail -> instr : Notifier le nouveau dossier
+alt Dossier complet
+    instr -> bdd : Valider l'instruction
+    instr --> u : Décision favorable
+else Pièce justificative manquante
+    instr --> u : Demande de complément
+end
+deactivate portail
+@enduml
+` },
 ];
 
 export const MODELE_INITIAL = MODELES[0];

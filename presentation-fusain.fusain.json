@@ -1072,7 +1072,25 @@
       "code": "diapo libre\n[illus:code-source]\n# Aide-mémoire des raccourcis et de l'exploitation\n## Manipulation rapide au clavier et à la souris\nTous les raccourcis fonctionnent directement dans le navigateur, en ligne comme **hors ligne** :\n- **Ctrl+S / Ctrl+O** : enregistrer le document en `.fusain.json` ou ouvrir un fichier (`.json`, `.mmd`, `.txt`)\n- **Ctrl+Z / Ctrl+Y** : annuler ou rétablir jusqu'à 100 étapes d'historique\n- **Flèches / Entrée / Suppr / Inser** : parcourir les éléments du schéma, renommer sur place, supprimer ou ajouter un élément lié\n| Action ou commande | Raccourci ou script | Effet dans FUSAIN |\n| Zoomer / Ajuster la feuille | Molette, Ctrl+0, Ctrl+1 | Zoom ancré sous le pointeur jusqu'à 6400 % ou ajustement auto |\n| Lancer en local sous Windows | lancer-site-local.bat | Démarre serveur-local.ps1 sur localhost:8090 sans installation |\n| Vérifier l'intégrité et le SBOM | python3 outils/generer.py --verifier | Contrôle les empreintes SRI, le Service Worker et CycloneDX |\n"
     },
     {
-      "id": "p60_page_vierge",
+      "id": "p60_plantuml",
+      "nom": "Schéma PlantUML (@startuml)",
+      "format": "A4",
+      "orientation": "paysage",
+      "margesMm": 15,
+      "titre": "Prise en charge native de PlantUML (@startuml … @enduml) et conversion visuelle",
+      "sousTitre": "Modèle : Schéma PlantUML (@startuml) — Interprétation locale et bouton « Convertir pour l'édition visuelle »",
+      "piedDePage": "FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}",
+      "description": "Séquence PlantUML illustrant la lecture directe des fichiers .puml/.plantuml et la conversion en un clic vers l'édition visuelle.",
+      "ajustement": {
+        "mode": "page",
+        "echelle": 100,
+        "alignement": "centre"
+      },
+      "type": "plantuml",
+      "code": "@startuml\nautonumber\nactor \"Agent rédacteur\" as agent\nparticipant \"Analyseur PlantUML (plantuml.js)\" as puml\nparticipant \"Moteur de rendu (rendu.js)\" as rendu\ndatabase \"Export PDF / Visio (.vsdx)\" as export\n\nagent -> puml : Saisir @startuml ou ouvrir un fichier .puml\nactivate puml\npuml -> rendu : Traduire vers le modèle FUSAIN\nalt Mode code conservé\n    rendu --> agent : Afficher le schéma vectoriel (thème DSFR)\n    rendu -> export : Exporter en PDF, SVG, PNG ou Visio .vsdx\nelse Clic sur « Convertir pour l'édition visuelle »\n    puml --> agent : Activer le déplacement et les poignées à la souris\nend\ndeactivate puml\n@enduml"
+    },
+    {
+      "id": "p61_page_vierge",
       "nom": "Page vierge (Notes et annexes)",
       "format": "A4",
       "orientation": "paysage",

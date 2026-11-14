@@ -125,8 +125,8 @@ test('noms de fichiers nettoyés', () => {
 
 // ---------- Éditeurs ajoutés en 0.6.0 ----------
 
-// Types arrivés avec Mermaid 12.3 : modèle et aide à la syntaxe, édition en code seulement pour l'instant
-const EN_CODE_SEULEMENT = new Set(['agentflow', 'cynefin', 'eventmodeling', 'railroad-ebnf', 'usecase', 'wardley']);
+// Types arrivés avec Mermaid 12.3 et PlantUML : modèle et aide à la syntaxe, édition en code (ou conversion en un clic pour PlantUML)
+const EN_CODE_SEULEMENT = new Set(['agentflow', 'cynefin', 'eventmodeling', 'plantuml', 'railroad-ebnf', 'usecase', 'wardley']);
 test('tous les modèles proposés ont un éditeur visuel', () => {
     for (const m of MODELES) {
         const type = typeDiagramme(m.code);
@@ -908,4 +908,30 @@ test('ZIP : une archive dont le contenu dépasse la taille admise est arrêtée'
     const lire = await lireZip(archive, { tailleMax: 1000 });
     await assert.rejects(() => lire('a.txt'));
     assert.equal((await (await lireZip(archive))('a.txt')).length, 200000);
+});
+
+test('PlantUML : traduction des familles et compatibilité avec l\'édition visuelle', async () => {
+    const { traduirePlantUml, detecterFamillePlantUml } = await import('../js/plantuml.js');
+    const exemples = [
+        ['sequence', '@startuml\nactor "Usager" as u\nparticipant "Portail" as p\nu -> p : Dépôt\np --> u : Accusé\n@enduml'],
+        ['classDiagram', '@startuml\nclass Dossier {\n  +id : String\n  +valider()\n}\nclass Piece\nDossier "1" *-- "0..*" Piece : contient\n@enduml'],
+        ['stateDiagram', '@startuml\n[*] --> Brouillon\nBrouillon --> Instruit : déposer\nInstruit --> [*]\n@enduml'],
+        ['erDiagram', '@startuml\nentity "DOSSIER" as d {\n  * id : int <<PK>>\n  statut : string\n}\nentity "PIECE" as p\nd ||--o{ p : "comporte"\n@enduml'],
+        ['activity', '@startuml\nstart\n:Recevoir le dossier;\nif (Complet ?) then (oui)\n  :Instruire;\nelse (non)\n  :Relancer;\nendif\nstop\n@enduml'],
+        ['component', '@startuml\npackage "Socle" {\n  [Portail] --> [API]\n  [API] --> (Instruction)\n}\n@enduml'],
+        ['c4', '@startuml\nPerson(u, "Usager", "Citoyen")\nSystem(s, "FUSAIN", "Éditeur")\nRel(u, s, "Utilise")\n@enduml'],
+        ['mindmap', '@startmindmap\n* FUSAIN\n** Éditeur\n*** Visuel\n*** Code\n** Diaporama\n@endmindmap'],
+        ['gantt', '@startgantt\nProject starts 2026-01-05\n-- Cadrage --\n[Analyse] as [a] lasts 5 days\n[Recette] lasts 3 days\n[a] -> [Recette]\n@endgantt'],
+    ];
+    for (const [familleAttendue, puml] of exemples) {
+        assert.equal(typeDiagramme(puml), 'plantuml');
+        assert.equal(detecterFamillePlantUml(puml), familleAttendue);
+        const traduit = traduirePlantUml(puml);
+        const typeCible = typeDiagramme(traduit);
+        const editeur = editeurPour(typeCible);
+        assert.ok(editeur, `pas d'éditeur pour la traduction de ${familleAttendue} (${typeCible})`);
+        const modele = editeur.analyser(traduit);
+        assert.ok(editeur.ecrire(modele).length > 10, familleAttendue);
+    }
+    assert.throws(() => traduirePlantUml('@startuml\nA -> B : test'), /non fermé/);
 });

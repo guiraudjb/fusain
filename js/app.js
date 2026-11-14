@@ -17,6 +17,7 @@ import { rendreMarkdown } from './markdown.js';
 import { ouvrirImportReseau } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
 import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama, estBrouillonParDefaut, chargerDocumentDemonstration } from './diaporama.js';
+import { traduirePlantUml } from './plantuml.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -181,7 +182,9 @@ function analyserPage() {
     vue = { editeur, modele: null, motif: '', vierge: !page.code.trim() };
     if (vue.vierge) return;
     if (!editeur) {
-        vue.motif = 'L\'édition visuelle n\'est pas encore disponible pour ce type de schéma : il se modifie par le code.';
+        vue.motif = typeDiagramme(page.code) === 'plantuml'
+            ? 'Ce schéma est écrit en syntaxe PlantUML (@startuml … @enduml). Vous pouvez le modifier dans le code ou le convertir en un clic pour activer l\'édition visuelle à la souris.'
+            : 'L\'édition visuelle n\'est pas encore disponible pour ce type de schéma : il se modifie par le code.';
         return;
     }
     try {
@@ -665,6 +668,20 @@ function blocDocument() {
         champSelect('Thème des schémas', Object.entries(THEMES).map(([id, t]) => [id, t.nom]), d.theme, (v) => modifier((doc) => { doc.document.theme = v; })));
 }
 
+function convertirPlantUmlVisuel() {
+    validerCodeEnAttente();
+    const page = pageCourante();
+    try {
+        const traduit = traduirePlantUml(page.code);
+        ui.selection = null;
+        majPage((p) => { p.code = traduit; });
+        if (ui.mode === 'code') zones.zoneCode.value = pageCourante().code;
+        message('Converti pour l\'édition visuelle', 'Le schéma PlantUML a été converti en schéma FUSAIN modifiable à la souris (Ctrl+Z pour revenir au code PlantUML).', 'success', 6000);
+    } catch (e) {
+        message('Conversion impossible', e.message, 'error', 8000);
+    }
+}
+
 function afficherPanneau() {
     // Le panneau est reconstruit à chaque changement : le champ actif est retrouvé par son libellé (son rang parmi les
     // champs de même libellé), à défaut par son rang. Un bloc qui apparaît ou disparaît au-dessus ne déplace plus le focus.
@@ -688,10 +705,13 @@ function afficherPanneau() {
                     bouton('Choisir un schéma', { icone: 'layout-grid-line', variante: 'secondary', onclick: () => ouvrirModeles('remplacer') }),
                     bouton('Écrire du code', { icone: 'code-s-slash-line', onclick: () => changerMode('code') }))));
         } else {
+            const estPuml = typeDiagramme(pageCourante().code) === 'plantuml';
             blocs.push(h('div', { class: 'fusain-bloc' },
-                h('h2', {}, 'Page en « code seul »'),
+                h('h2', {}, estPuml ? 'Schéma PlantUML' : 'Page en « code seul »'),
                 h('p', { class: 'fr-text--sm' }, vue.motif),
-                bouton('Modifier le code', { icone: 'code-s-slash-line', variante: 'secondary', onclick: () => changerMode('code') })));
+                h('div', { class: 'fusain-actions' },
+                    estPuml ? bouton('Convertir pour l\'édition visuelle', { icone: 'drag-move-2-line', variante: 'primary', onclick: convertirPlantUmlVisuel }) : null,
+                    bouton('Modifier le code', { icone: 'code-s-slash-line', variante: 'secondary', onclick: () => changerMode('code') }))));
         }
     }
     blocs.push(blocPage(), blocDocument());
@@ -864,7 +884,7 @@ async function ouvrir(fichier) {
     if (!fichier) return;
     try {
         const texte = await lireFichier(fichier);
-        if (/\.(mmd|mermaid|txt)$/i.test(fichier.name)) {
+        if (/\.(mmd|mermaid|txt|puml|plantuml|iuml)$/i.test(fichier.name)) {
             // Code trop long : refusé plutôt que coupé au milieu d'une ligne
             const max = typeDiagramme(texte) === 'carte' ? TAILLE_MAX_CARTE : TAILLE_MAX_CODE;
             if (texte.length > max) throw new Error(`Le code dépasse la taille maximale d'une page (${max} caractères).`);

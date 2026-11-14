@@ -40,7 +40,7 @@ export function estBrouillonParDefaut(doc) {
     }
     if (
         doc.document.titre === 'Présentation complète de FUSAIN — Catalogue des 60 modèles' &&
-        doc.pages.some((p) => p.code.includes('erreur ==> analyseur'))
+        (doc.pages.length < 61 || doc.pages.some((p) => p.code.includes('erreur ==> analyseur')))
     ) {
         return true;
     }

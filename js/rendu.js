@@ -5,6 +5,7 @@ import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } 
 import { localiser } from './diagnostic.js';
 import { rendreDiapo } from './diapo.js';
 import { rendreCarte } from './carte.js';
+import { traduirePlantUml } from './plantuml.js';
 import { PREFIXE, jeuPourMermaid } from './icones.js';
 import { PREFIXE_ILLUS, jeuPourMermaid as jeuIllustre, incorporerImages } from './illustrations.js';
 import { PREFIXE_PICTO, jeuPourMermaid as jeuPictogrammes } from './pictogrammes.js';
@@ -102,9 +103,10 @@ function chargerZenuml() {
 
 async function rendre(code, idTheme) {
     await document.fonts.ready;
-    if (typeDiagramme(code) === 'zenuml') await chargerZenuml();
+    const source = typeDiagramme(code) === 'plantuml' ? traduirePlantUml(code) : code;
+    if (typeDiagramme(source) === 'zenuml') await chargerZenuml();
     configurer(idTheme);
-    const propre = nettoyerCode(code);
+    const propre = nettoyerCode(source);
     if (!propre.trim()) throw new Error('La page ne contient aucun code.');
     numero += 1;
     const id = `fusain-${graine}-${numero}`;

@@ -192,6 +192,22 @@ const CARTE = {
     ],
 };
 
+const PLANTUML = {
+    nom: 'PlantUML (@startuml)',
+    entete: ['@startuml', '@startmindmap', '@startgantt', '@startwbs'],
+    motsCles: ['@startuml', '@enduml', '@startmindmap', '@endmindmap', '@startgantt', '@endgantt', 'actor', 'participant', 'database', 'class', 'interface', 'state', 'entity', 'usecase', 'component', 'package', 'node', 'partition', 'autonumber', 'activate', 'deactivate', 'note'],
+    objets: [
+        { id: 'fermeture', nom: 'Fin de bloc PlantUML', reconnait: /^@end(uml|mindmap|gantt|wbs)\b/i, syntaxe: ['@enduml', '@endmindmap', '@endgantt'], exemple: '@enduml', aide: 'Ferme le bloc ouvert par @startuml, @startmindmap ou @startgantt.' },
+        { id: 'participant', nom: 'Acteur ou participant (séquence, cas d\'utilisation)', reconnait: /^(actor|participant|boundary|control|database|collections|queue)\b/i, syntaxe: ['actor "Nom" as id', 'participant "Service" as id', 'database "Base" as db'], exemple: 'actor "Usager" as u', aide: '' },
+        { id: 'message', nom: 'Message, transition ou relation', reconnait: /^("[^"]+"|\[[^\]]+\]|\([^)]+\)|:[^:]+:|[A-Za-z0-9_]+)\s*(<--|-->>|->>|-->|->|\.\.>|<\|--|\*--|o--|\|\|--o\{)\s*/, syntaxe: ['A -> B : message', 'A --> B : réponse', 'ClasseA <|-- ClasseB', '[*] --> Etat'], exemple: 'u -> portail : Déposer le dossier', aide: '' },
+        { id: 'classe', nom: 'Classe, interface, état ou entité', reconnait: /^(abstract\s+class|class|interface|enum|entity|state)\b/i, syntaxe: ['class Nom {\n  +attribut : Type\n  +methode()\n}', 'entity "Table" as id {\n  * id : int <<PK>>\n}'], exemple: 'class Dossier {\n    +id : String\n    +valider()\n}', aide: '' },
+        { id: 'activite', nom: 'Étape ou condition d\'activité', reconnait: /^(start|stop|end|:[^:]+;|if\s*\(|else\b|endif\b|fork\b|end\s+fork\b)/i, syntaxe: ['start', ':Action;', 'if (Condition ?) then (oui)', 'else (non)', 'endif', 'stop'], exemple: ':Vérifier la complétude du dossier;', aide: '' },
+        { id: 'branche', nom: 'Branche de carte mentale (@startmindmap)', reconnait: /^[*+-]+\s+/, syntaxe: ['* Racine', '** Branche', '*** Sous-branche'], exemple: '* Architecture FUSAIN', aide: 'Nombre d\'astérisques selon la profondeur.' },
+        { id: 'tache', nom: 'Tâche de Gantt (@startgantt)', reconnait: /^(Project\s+starts|--\s*.+\s*--|\[[^\]]+\])/i, syntaxe: ['Project starts 2026-01-05', '[Tâche] lasts 5 days', '[A] -> [B]'], exemple: '[Instruction] lasts 5 days', aide: '' },
+        { id: 'commentaire', nom: 'Commentaire PlantUML', reconnait: /^'/, syntaxe: ["' commentaire"], exemple: "' Note interne", aide: '' },
+    ],
+};
+
 export const SYNTAXES = {
     flowchart: LOGIGRAMME,
     sequence: SEQUENCE,
@@ -205,6 +221,7 @@ export const SYNTAXES = {
     ...SIMPLES,
     diapo: DIAPO,
     carte: CARTE,
+    plantuml: PLANTUML,
 };
 SYNTAXES.C4Container = SYNTAXES.C4Context;
 SYNTAXES.C4Component = SYNTAXES.C4Context;

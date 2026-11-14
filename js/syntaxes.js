@@ -170,11 +170,12 @@ const SIMPLES = {
 const DIAPO = {
     nom: 'Diapositive de texte',
     entete: ['diapo titre', 'diapo sommaire', 'diapo colonnes', 'diapo chiffres', 'diapo libre'],
-    motsCles: ['diapo', 'titre', 'sous-titre', 'date', 'annee', 'numero', 'texte', 'partie', 'sous-partie', 'accroche'],
+    motsCles: ['diapo', 'titre', 'sous-titre', 'date', 'annee', 'numero', 'texte', 'partie', 'sous-partie', 'accroche', '@style'],
     objets: [
         { id: 'champ', nom: 'Champ', reconnait: /^[\p{L}-]+\s*:/u, syntaxe: ['clé: valeur'], exemple: 'titre: Titre de la<br>présentation', aide: 'Les champs admis dépendent de la mise en page (voir l\'en-tête). Un retour à la ligne s\'écrit <br>.' },
         { id: 'element', nom: 'Élément répété', reconnait: /^-/, syntaxe: ['- Titre | Texte', '- [dsfr:nom-icone] Titre | Texte'], exemple: '- ÉLÉMENT 1 | Descriptif de cette partie', aide: 'Les deux parties sont séparées par une barre verticale.' },
         { id: 'bloc', nom: 'Bloc (texte libre)', reconnait: /^(#|##|\||\[)/, syntaxe: ['# Titre', '## Sous-titre', '- Puce', '| cellule | cellule', '[dsfr:nom-icone]', 'Paragraphe'], exemple: '# Titre de la diapositive', aide: 'Mise en page « libre » seulement.' },
+        { id: 'style', nom: 'Taille et alignement d\'un texte', reconnait: /^@style\b/, syntaxe: ['@style cible taille=20 align=justifie'], exemple: '@style defaut taille=18 align=justifie', aide: 'Cibles : defaut, c:texte, e:0.1, b:0… Alignements : gauche, centre, droite, justifie.' },
     ],
 };
 

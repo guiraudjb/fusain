@@ -1,7 +1,7 @@
 // Dessin d'une diapositive de texte en SVG. Les mesures (en pixels CSS) sont celles des diapositives libres de VALOR,
 // relevées dans un navigateur : zone de 1474 px de large, fond gris, filet bleu à gauche, police Marianne.
 import { s } from './dom.js';
-import { analyser } from './diagrammes/diapo.js';
+import { analyser, lireStyle } from './diagrammes/diapo.js';
 import { chargerIcones } from './icones.js';
 import { adresseImage } from './illustrations.js';
 import { PREFIXE_PICTO, pictogramme, dessinerPictogramme } from './pictogrammes.js';
@@ -19,6 +19,7 @@ const Y0 = 32;
 const LI = LARGEUR - 2 * 32 - 4;
 
 let toile = null;
+let modeleActif = null;
 function regler(taille, gras) {
     toile ||= document.createElement('canvas').getContext('2d');
     toile.font = `${gras ? 700 : 400} ${taille}px ${POLICE}`;
@@ -26,31 +27,90 @@ function regler(taille, gras) {
 }
 const largeurDe = (texte, taille, gras) => regler(taille, gras).measureText(texte).width;
 
-// Découpe un texte en lignes de mots ; « ** » bascule le gras, <br> force le retour à la ligne
+function decouperMotTropLong(mot, taille, gras, limite) {
+    const morceaux = [];
+    let courant = '';
+    for (const ch of Array.from(mot)) {
+        const essai = courant + ch;
+        if (courant && largeurDe(essai, taille, gras) > limite) {
+            morceaux.push(courant);
+            courant = ch;
+        } else {
+            courant = essai;
+        }
+    }
+    if (courant) morceaux.push(courant);
+    return morceaux.length ? morceaux : [mot];
+}
+
+// Découpe un texte en lignes de mots ; « ** » bascule le gras, <br> force le retour à la ligne.
+// Une marge de sécurité de 8 % absorbe les écarts d'approche entre Canvas 2D et le rendu SVG de Marianne,
+// et les mots plus larges qu'une colonne sont scindés pour ne jamais déborder de la colonne.
 function couper(texte, taille, gras, max) {
     const lignes = [];
-    const espace = largeurDe(' ', taille, gras);
+    const limite = Math.max(20, max * 0.92);
     for (const paragraphe of String(texte).split(/<br\s*\/?>/i)) {
         let fort = false;
         let ligne = [];
         let largeur = 0;
         for (const morceau of paragraphe.split(/(\*\*)/)) {
             if (morceau === '**') { fort = !fort; continue; }
-            for (const mot of morceau.split(/\s+/).filter(Boolean)) {
-                const l = largeurDe(mot, taille, gras || fort);
-                if (ligne.length && largeur + espace + l > max) { lignes.push({ mots: ligne, largeur }); ligne = []; largeur = 0; }
-                largeur += (ligne.length ? espace : 0) + l;
-                ligne.push({ t: mot, gras: gras || fort });
+            const g = gras || fort;
+            const espace = largeurDe(' ', taille, g);
+            for (const motBrut of morceau.split(/\s+/).filter(Boolean)) {
+                const lBrut = largeurDe(motBrut, taille, g);
+                const sousMots = lBrut > limite ? decouperMotTropLong(motBrut, taille, g, limite) : [motBrut];
+                for (const mot of sousMots) {
+                    const l = largeurDe(mot, taille, g);
+                    if (ligne.length && largeur + espace + l > limite) {
+                        lignes.push({ mots: ligne, largeur, finParagraphe: false });
+                        ligne = [];
+                        largeur = 0;
+                    }
+                    largeur += (ligne.length ? espace : 0) + l;
+                    ligne.push({ t: mot, gras: g });
+                }
             }
         }
-        lignes.push({ mots: ligne, largeur });
+        lignes.push({ mots: ligne, largeur, finParagraphe: true });
     }
     return lignes;
 }
 
+function estCibleTexteDefaut(cle) {
+    if (!cle || !modeleActif) return false;
+    if (cle === 'c:texte' || cle === 'c:accroche' || cle === 'c:sous-titre') return true;
+    if (cle === 'c:titre' && ['titre', 'titre-epure', 'intercalaire', 'intercalaire-centre'].includes(modeleActif.disposition)) return true;
+    if (cle.startsWith('e:') && cle.endsWith('.1')) return true;
+    if (cle.startsWith('e:') && cle.endsWith('.0') && modeleActif.disposition === 'texte-colonnes') return true;
+    if (cle.startsWith('b:')) {
+        const b = modeleActif.blocs?.[Number(cle.slice(2))];
+        return !b || ['p', 'li', 'ligne'].includes(b.t);
+    }
+    return false;
+}
+
+function resoudreStyleTexte(cle, taille, interligne, align, fige = false) {
+    if (fige || !modeleActif) return { taille, interligne, align };
+    const direct = cle ? lireStyle(modeleActif, cle) : { taille: null, align: '' };
+    const defaut = estCibleTexteDefaut(cle) ? lireStyle(modeleActif, 'defaut') : { taille: null, align: '' };
+    const tailleFinale = direct.taille || defaut.taille || taille;
+    const interligneFinal = tailleFinale !== taille
+        ? Math.max(tailleFinale * 1.3, Math.round(interligne * (tailleFinale / taille) * 100) / 100)
+        : interligne;
+    const codeAlign = direct.align || defaut.align || '';
+    const tableAlign = { gauche: 'start', centre: 'center', droite: 'end', justifie: 'justify' };
+    return {
+        taille: tailleFinale,
+        interligne: interligneFinal,
+        align: tableAlign[codeAlign] || align,
+    };
+}
+
 // Écrit un texte replié dans une largeur et rend sa hauteur. La ligne de base est placée comme le ferait le navigateur
 // pour une boîte de ligne de la hauteur donnée.
-function ecrire(g, texte, { x, y, l, taille, interligne, gras = false, couleur = NOIR, align = 'start', majuscules = false, cle = null }) {
+function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneBase, gras = false, couleur = NOIR, align: alignBase = 'start', majuscules = false, cle = null, fige = false }) {
+    const { taille, interligne, align } = resoudreStyleTexte(cle, tailleBase, interligneBase, alignBase, fige);
     const contenu = majuscules ? String(texte).toLocaleUpperCase('fr') : String(texte);
     const lignes = couper(contenu, taille, gras, l);
     const m = regler(taille, gras).measureText('Hg');
@@ -58,7 +118,9 @@ function ecrire(g, texte, { x, y, l, taille, interligne, gras = false, couleur =
     const bas = m.fontBoundingBoxDescent ?? taille * 0.25;
     const base = (interligne - (haut + bas)) / 2 + haut;
     const ancre = align === 'center' ? x + l / 2 : align === 'end' ? x + l : x;
-    const el = s('text', { 'font-family': POLICE, 'font-size': taille, 'font-weight': gras ? 700 : 400, fill: couleur, 'text-anchor': align === 'center' ? 'middle' : align, 'data-champ': cle });
+    const anchorSvg = align === 'center' ? 'middle' : align === 'end' ? 'end' : 'start';
+    const el = s('text', { 'font-family': POLICE, 'font-size': taille, 'font-weight': gras ? 700 : 400, fill: couleur, 'text-anchor': anchorSvg, 'data-champ': cle });
+    const cibleJustifie = Math.max(20, Math.round(l * 0.95));
     lignes.forEach((ligne, n) => {
         // Les mots de même graisse qui se suivent forment un seul fragment
         const fragments = [];
@@ -66,10 +128,34 @@ function ecrire(g, texte, { x, y, l, taille, interligne, gras = false, couleur =
             const dernier = fragments[fragments.length - 1];
             if (dernier && dernier.gras === mot.gras) dernier.t += ` ${mot.t}`; else fragments.push({ t: mot.t, gras: mot.gras });
         }
-        fragments.forEach((f, k) => el.append(s('tspan', { ...(k ? {} : { x: ancre, y: y + n * interligne + base }), 'font-weight': f.gras ? 700 : 400 }, `${k ? ' ' : ''}${f.t}`)));
+        const justifierLigne = align === 'justify' && !ligne.finParagraphe && ligne.mots.length > 1;
+        const ecartMots = justifierLigne && ligne.largeur < cibleJustifie
+            ? Math.max(0, Math.round(((cibleJustifie - ligne.largeur) / (ligne.mots.length - 1)) * 100) / 100)
+            : 0;
+        fragments.forEach((f, k) => {
+            const attrs = {
+                ...(k ? {} : { x: ancre, y: y + n * interligne + base }),
+                'font-weight': f.gras ? 700 : 400,
+            };
+            if (justifierLigne && fragments.length === 1) {
+                attrs.textLength = cibleJustifie;
+                attrs.lengthAdjust = 'spacing';
+            } else if (justifierLigne && ecartMots > 0) {
+                attrs['word-spacing'] = `${ecartMots}px`;
+            } else if (fragments.length === 1 && ligne.largeur > l * 0.96 && l >= 24) {
+                attrs.textLength = Math.round(l * 0.96);
+                attrs.lengthAdjust = 'spacingAndGlyphs';
+            }
+            el.append(s('tspan', attrs, `${k ? ' ' : ''}${f.t}`));
+        });
     });
     if (lignes.some((ligne) => ligne.mots.length)) g.append(el);
-    return { hauteur: lignes.length * interligne, largeur: Math.max(0, ...lignes.map((ligne) => ligne.largeur)) };
+    return {
+        hauteur: lignes.length * interligne,
+        largeur: Math.min(l, Math.max(0, ...lignes.map((ligne) => ligne.largeur))),
+        taille,
+        interligne,
+    };
 }
 
 // Icônes : l'emplacement est posé tout de suite, le dessin (tracé du DSFR, pictogramme ou image illustrée) arrive quand le jeu est lu.
@@ -106,8 +192,9 @@ const pastille = (g, cx, cy, r, cle) => g.append(s('circle', { cx, cy, r, fill: 
 function filAriane(g, m, y) {
     const partie = m.champs.partie || '';
     const a = ecrire(g, partie, { x: X0, y, l: LI, taille: 24, interligne: 40, gras: true, couleur: BLEU, cle: 'c:partie' });
-    if (m.champs['sous-partie']) ecrire(g, `> ${m.champs['sous-partie']}`, { x: X0 + a.largeur + (partie ? 7 : 0), y, l: LI, taille: 19.2, interligne: 40, couleur: GRIS, cle: 'c:sous-partie' });
-    return 40 + 26;
+    const dec = a.largeur + (partie ? 7 : 0);
+    if (m.champs['sous-partie']) ecrire(g, `> ${m.champs['sous-partie']}`, { x: X0 + dec, y, l: Math.max(120, LI - dec), taille: 19.2, interligne: 40, couleur: GRIS, cle: 'c:sous-partie' });
+    return Math.max(40, a.hauteur) + 26;
 }
 
 const colonnes = (n, ecart) => { const l = (LI - ecart * (n - 1)) / n; return Array.from({ length: n }, (_, i) => ({ x: X0 + i * (l + ecart), l })); };
@@ -143,7 +230,7 @@ const DESSINS = {
             // Une icône prend la place du numéro
             let nl = 64;
             if (item.icone) icone(g, item.icone, X0, y + 6.4, 64, BLEU, `e:${n}.0`);
-            else nl = ecrire(g, numero, { x: X0, y, l: 200, taille: 48, interligne: 76.8, gras: true, couleur: BLEU, cle: `e:${n}.0` }).largeur;
+            else nl = ecrire(g, numero, { x: X0, y, l: 200, taille: 48, interligne: 76.8, gras: true, couleur: BLEU, cle: `e:${n}.0`, fige: true }).largeur;
             const x = X0 + nl + 32;
             const titre = ecrire(g, item[0], { x, y: y + 6.4, l: LI - nl - 32, taille: 24, interligne: 32, gras: true, cle: `e:${n}.0` }).hauteur;
             const texte = ecrire(g, item[1], { x, y: y + 6.4 + titre + 8, l: LI - nl - 32, taille: 16, interligne: 24, couleur: GRIS, cle: `e:${n}.1` }).hauteur;
@@ -159,7 +246,7 @@ const DESSINS = {
             if (!item) return;
             let yc = y + ecrire(g, item[0], { x: c.x, y, l: c.l, taille: 20.8, interligne: 36, gras: true, cle: `e:${n}.0` }).hauteur + 24;
             const liste = s('g', { 'data-champ': `e:${n}.1` });
-            for (const sous of item[1].split(';').map((x) => x.trim()).filter(Boolean)) yc += ecrire(liste, sous, { x: c.x + 16, y: yc, l: c.l - 16, taille: 19.2, interligne: 34.56, couleur: GRIS }).hauteur + 4;
+            for (const sous of item[1].split(';').map((x) => x.trim()).filter(Boolean)) yc += ecrire(liste, sous, { x: c.x + 16, y: yc, l: c.l - 16, taille: 19.2, interligne: 34.56, couleur: GRIS, cle: `e:${n}.1` }).hauteur + 4;
             g.append(liste);
         });
     },
@@ -174,9 +261,10 @@ const DESSINS = {
     },
     'intercalaire-centre'(g, m, hi) {
         const corps = s('g', {});
+        const st = resoudreStyleTexte('c:titre', 64, 76.8, 'center');
         // Sur une ligne, la boîte fait 40 px comme dans VALOR ; sur plusieurs, les lignes sont espacées pour ne pas se toucher
-        const plusieurs = couper(m.champs.titre || '', 64, true, LI).length > 1;
-        const h = ecrire(corps, m.champs.titre || '', { x: X0, y: 0, l: LI, taille: 64, interligne: plusieurs ? 76.8 : 40, gras: true, couleur: BLEU, align: 'center', cle: 'c:titre' }).hauteur;
+        const plusieurs = couper(m.champs.titre || '', st.taille, true, LI).length > 1;
+        const h = ecrire(corps, m.champs.titre || '', { x: X0, y: 0, l: LI, taille: 64, interligne: plusieurs ? 76.8 : Math.min(40, st.taille), gras: true, couleur: BLEU, align: 'center', cle: 'c:titre' }).hauteur;
         corps.setAttribute('transform', `translate(0, ${Y0 + Math.max(0, (hi - h) / 2)})`);
         g.append(corps);
     },
@@ -190,22 +278,34 @@ const DESSINS = {
     colonnes(g, m, hi) {
         const deux = m.items.length <= 2;
         const y = Y0 + 16;
-        colonnes(Math.max(1, m.items.length), deux ? 32 : 24).forEach((c, n) => {
+        const taille = deux ? 28 : 24;
+        const interligne = deux ? 36 : 32;
+        const marge = deux ? 24 : 16;
+        const places = colonnes(Math.max(1, m.items.length), deux ? 32 : 24);
+        const hauteursTitres = places.map((c, n) => {
             const item = m.items[n];
-            if (!item) return;
-            const taille = deux ? 28 : 24;
-            const interligne = deux ? 36 : 32;
-            const numero = ecrire(g, `${n + 1}.`, { x: c.x, y, l: c.l, taille, interligne, gras: true, couleur: BLEU, cle: `e:${n}.0` }).largeur;
-            const titre = ecrire(g, item[0], { x: c.x + numero + taille * 0.25, y, l: c.l - numero - taille * 0.25, taille, interligne, gras: true, cle: `e:${n}.0` }).hauteur;
-            const yb = y + Math.max(interligne, titre) + (deux ? 16 : 8);
-            const marge = deux ? 24 : 16;
+            if (!item) return interligne;
+            const numero = ecrire(g, `${n + 1}.`, { x: c.x, y, l: c.l, taille, interligne, gras: true, couleur: BLEU, cle: `e:${n}.0`, fige: true }).largeur;
+            const dec = numero + taille * 0.25;
+            const titre = ecrire(g, item[0], { x: c.x + dec, y, l: Math.max(40, c.l - dec), taille, interligne, gras: true, cle: `e:${n}.0` }).hauteur;
+            return Math.max(interligne, titre);
+        });
+        const yb = y + Math.max(interligne, ...hauteursTitres) + (deux ? 16 : 8);
+        const contenus = places.map((c, n) => {
+            const item = m.items[n];
             const corps = s('g', {});
+            if (!item) return { corps, h: 0 };
             const decalage = item.icone ? 56 : 0;
             if (item.icone) icone(corps, item.icone, c.x + marge, yb + 4 + marge, 40, BLEU, `e:${n}.1`);
             const h = decalage + ecrire(corps, item[1], { x: c.x + marge, y: yb + 4 + marge + decalage, l: c.l - 2 * marge, taille: 16, interligne: 24, cle: `e:${n}.1` }).hauteur;
-            // À deux colonnes, les blocs descendent jusqu'en bas ; à trois et plus, ils font au moins 200 px
-            bloc(g, c.x, yb, c.l, deux ? Math.max(Y0 + hi - yb, 4 + 2 * marge + h + 24) : Math.max(200, 4 + 2 * marge + h + 24), `e:${n}.1`);
-            g.append(corps);
+            return { corps, h };
+        });
+        const hMax = Math.max(0, ...contenus.map((c) => c.h));
+        const hauteurBloc = deux ? Math.max(Y0 + hi - yb, 4 + 2 * marge + hMax + 24) : Math.max(200, 4 + 2 * marge + hMax + 24);
+        places.forEach((c, n) => {
+            if (!m.items[n]) return;
+            bloc(g, c.x, yb, c.l, hauteurBloc, `e:${n}.1`);
+            g.append(contenus[n].corps);
         });
     },
     'texte-colonnes'(g, m) {
@@ -255,7 +355,7 @@ const DESSINS = {
             if (item.icone && illustree(item.icone)) { rect(g, X0, y, 50, 50, { fill: FOND }); icone(g, item.icone, X0, y, 50, BLEU, `e:${n}.0`); } else {
                 pastille(g, X0 + 25, y + 25, 25, `e:${n}.0`);
                 if (item.icone) icone(g, item.icone, X0 + 11, y + 11, 28, '#ffffff', `e:${n}.0`);
-                else ecrire(g, String(n + 1), { x: X0, y: y + 25 - 19.2, l: 50, taille: 24, interligne: 38.4, gras: true, couleur: '#ffffff', align: 'center', cle: `e:${n}.0` });
+                else ecrire(g, String(n + 1), { x: X0, y: y + 25 - 19.2, l: 50, taille: 24, interligne: 38.4, gras: true, couleur: '#ffffff', align: 'center', cle: `e:${n}.0`, fige: true });
             }
             g.append(corps);
             y += h + 32;
@@ -290,7 +390,8 @@ const DESSINS = {
             else if (b.t === 'h3') y += ecrire(g, b.texte, { x: X0, y, l: LI, taille: 28, interligne: 36, gras: true, couleur: BLEU, cle }).hauteur + 24;
             else if (b.t === 'p') y += ecrire(g, b.texte, { x: X0, y, l: LI, taille: 16, interligne: 24, cle }).hauteur + 24;
             else if (b.t === 'icone') { icone(g, b.texte, X0, y, 96, BLEU, cle); y += 96 + 24; } else if (b.t === 'li') {
-                g.append(s('circle', { cx: X0 + 22, cy: y + 15.36, r: 3.2, fill: NOIR }));
+                const st = resoudreStyleTexte(cle, 19.2, 30.72, 'start');
+                g.append(s('circle', { cx: X0 + 22, cy: y + st.interligne / 2, r: 3.2, fill: NOIR }));
                 y += ecrire(g, b.texte, { x: X0 + 40, y, l: LI - 40, taille: 19.2, interligne: 30.72, cle }).hauteur + 4;
                 if (m.blocs[n + 1]?.t !== 'li') y += 24;
             } else {
@@ -301,9 +402,10 @@ const DESSINS = {
                 const nb = Math.max(1, ...rangees.map((r) => r.length));
                 const lc = LI / nb;
                 rangees.forEach((cellules, r) => {
-                    const corps = s('g', { 'data-champ': `b:${debut + r}` });
-                    const h = 16 + Math.max(24, ...Array.from({ length: nb }, (_, c) => ecrire(corps, cellules[c] || '', { x: X0 + c * lc + 8, y: y + 8, l: lc - 16, taille: 16, interligne: 24, gras: r === 0 }).hauteur));
-                    for (let c = 0; c < nb; c += 1) rect(g, X0 + c * lc, y, lc, h, { fill: r === 0 ? '#f0f0f0' : '#ffffff', stroke: '#cccccc', 'stroke-width': 1, 'data-champ': `b:${debut + r}` });
+                    const cleLigne = `b:${debut + r}`;
+                    const corps = s('g', { 'data-champ': cleLigne });
+                    const h = 16 + Math.max(24, ...Array.from({ length: nb }, (_, c) => ecrire(corps, cellules[c] || '', { x: X0 + c * lc + 8, y: y + 8, l: lc - 16, taille: 16, interligne: 24, gras: r === 0, cle: cleLigne }).hauteur));
+                    for (let c = 0; c < nb; c += 1) rect(g, X0 + c * lc, y, lc, h, { fill: r === 0 ? '#f0f0f0' : '#ffffff', stroke: '#cccccc', 'stroke-width': 1, 'data-champ': cleLigne });
                     g.append(corps);
                     y += h;
                 });
@@ -317,7 +419,7 @@ const DESSINS = {
 // Rend le schéma d'une diapositive : même forme de résultat qu'un schéma Mermaid ({ svg, l, h }).
 // « rapport » est le rapport hauteur / largeur de la zone à remplir sur la page.
 export async function rendreDiapo(code, rapport = HAUTEUR / LARGEUR) {
-    await Promise.all([document.fonts.load(`400 16px ${POLICE}`), document.fonts.load(`700 16px ${POLICE}`)]).catch(() => {});
+    await Promise.all([document.fonts.load('400 16px Marianne'), document.fonts.load('700 16px Marianne')]).catch(() => {});
     const modele = analyser(code);
     const h = Math.round(LARGEUR * Math.max(0.3, Math.min(3, rapport)));
     const svg = s('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${LARGEUR} ${h}`, class: 'fusain-diapo' },
@@ -328,7 +430,8 @@ export async function rendreDiapo(code, rapport = HAUTEUR / LARGEUR) {
     // Le dessin est synchrone : les chargements d'icônes qu'il déclenche sont attendus ensuite
     const chargements = [];
     attente = chargements;
-    try { DESSINS[modele.disposition](g, modele, h - 2 * Y0); } finally { attente = null; }
+    modeleActif = modele;
+    try { DESSINS[modele.disposition](g, modele, h - 2 * Y0); } finally { attente = null; modeleActif = null; }
     await Promise.all(chargements);
     return { svg, l: LARGEUR, h, htmlIncorpore: false };
 }

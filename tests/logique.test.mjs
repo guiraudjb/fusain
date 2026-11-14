@@ -935,3 +935,25 @@ test('PlantUML : traduction des familles et compatibilité avec l\'édition visu
     }
     assert.throws(() => traduirePlantUml('@startuml\nA -> B : test'), /non fermé/);
 });
+
+test('diapo : taille de police et alignement (@style gauche, centre, droite, justifie)', async () => {
+    const diapo = editeurPour('diapo');
+    const m = diapo.analyser('diapo colonnes\n- Colonne A | Texte A\n- Colonne B | Texte B\n');
+    assert.deepEqual(diapo.lireStyle(m, 'defaut'), { taille: null, align: '' });
+    diapo.definirStyle(m, 'defaut', { taille: 18, align: 'justifie' });
+    diapo.definirStyle(m, 'e:0.0', { taille: 26, align: 'centre' });
+    diapo.definirStyle(m, 'e:1.1', { taille: 14, align: 'droite' });
+    const code = diapo.ecrire(m);
+    assert.ok(code.includes('@style defaut taille=18 align=justifie'));
+    assert.ok(code.includes('@style e:0.0 taille=26 align=centre'));
+    assert.ok(code.includes('@style e:1.1 taille=14 align=droite'));
+    const relu = diapo.analyser(code);
+    assert.equal(diapo.ecrire(relu), code);
+    assert.deepEqual(diapo.lireStyle(relu, 'defaut'), { taille: 18, align: 'justifie' });
+    assert.deepEqual(diapo.lireStyle(relu, 'e:0.0'), { taille: 26, align: 'centre' });
+    assert.deepEqual(diapo.lireStyle(relu, 'e:1.1'), { taille: 14, align: 'droite' });
+
+    const libre = diapo.analyser('diapo libre\n# Titre\nParagraphe libre\n- Puce\n@style b:1 taille=22 align=gauche\n');
+    assert.deepEqual(diapo.lireStyle(libre, 'b:1'), { taille: 22, align: 'gauche' });
+    assert.equal(diapo.ecrire(diapo.analyser(diapo.ecrire(libre))), diapo.ecrire(libre));
+});

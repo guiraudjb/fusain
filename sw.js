@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.25.0-2f6d0ec807';
+const VERSION_CACHE = 'fusain-0.25.0-adfcb702ba';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
@@ -66,7 +66,7 @@ const FICHIERS = [
     ['./js/diagrammes/carte.js', '902b266dd9dc20ad7f02b44a9089dedaff4751c583bda0eea15492ad63afb631'],
     ['./js/diagrammes/classes.js', 'd06157d33248204ae692bdcc5f2e7d610010e45cd46750baa08c9d6a019d43cd'],
     ['./js/diagrammes/commun.js', '443d4137599960b2e365e547ab55ea7e0f386d8cd548a9d02b4057a5f4a521f2'],
-    ['./js/diagrammes/diapo.js', 'ce5a9455c165c690e5affb4e66ebe1075f6b2bb35ec93b069e8268a7e5f99592'],
+    ['./js/diagrammes/diapo.js', '7607d9845b9560f0719a0fa8b5ee3cd404d42fa790ce44a7bf2c4a09c6bf557f'],
     ['./js/diagrammes/entites.js', '3b3174ed2572bbda6ff719956194c99a1759dbad3811187ffe8b0cc173078af5'],
     ['./js/diagrammes/etats.js', '5e5f1f27f35be3fa569b12c180007b1c053161a6f66acd7f09ba95443d8f0e1c'],
     ['./js/diagrammes/exigences.js', 'c08be41c8b6c57e272562b8493563368a6477d1a735a2dda47060669e3c5006a'],
@@ -87,7 +87,7 @@ const FICHIERS = [
     ['./js/diagrammes/venn.js', 'f47b8c8b035af4707211a1eaf755e834838f239f3853c0ac7e8bbb685d8a7cdf'],
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/diagrammes/zenuml.js', '2af815e497545725741b2ffbbc7eb38c821941c20d4a7c587cb9ae48f7ebc49f'],
-    ['./js/diapo.js', '40647c88946327a492c76a8cce03bfe01e2711fe7d052ff1e9eb865cc077bd14'],
+    ['./js/diapo.js', 'b548fd7d922f8ec682cfca212dcbf12a27d332cfb77b1dc181cb3b317d91b7cd'],
     ['./js/diaporama.js', '319a73158dad85457d98cbb4b671ad57cb6c872c90a10b3842e7c8363535f5b4'],
     ['./js/dom.js', '2bcc1aa8e327b8973b145365f6b67915f8ddf2497b3d4310f89f29ae9a2b4509'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
@@ -106,7 +106,7 @@ const FICHIERS = [
     ['./js/rendu.js', '4ec90fbbc13af52aa111bffc562b1fc440fff4ebfa1cab4b188a54476304e02d'],
     ['./js/reseau.js', 'baf4e052604e054b8e56d3a590d0d82c45338f643c3d08f80fef64c1a7ce2cc3'],
     ['./js/securite.js', 'e52e93a5c8745c47b5f3e213efcf12c8cbff06cdf46a646079c4759e39ab41a3'],
-    ['./js/syntaxes.js', 'a912fba1f601261b41f994d372a8a70312dca4cf3cfde1cd1734e50542b105d2'],
+    ['./js/syntaxes.js', 'ee591f692cb94b728cae886cd639d45546420577c84a18a1ea3193e5bf3ac211'],
     ['./js/version.js', 'c8ef7929caaa2680337cce0eb4239dbbdff561b704a1b05e78d32159227d18ec'],
     ['./js/visio-format.js', 'f9f176b214a19dcf4969626d00d99b03938dd9524ff25e1cfab9d37c239f3474'],
     ['./js/visio.js', 'e5fed842ba2aade4f0197d7f191e4fe583a3d1e2d6a4894756fca620f331b56b'],

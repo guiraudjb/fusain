@@ -22,7 +22,7 @@ from pathlib import Path
 RACINE = Path(__file__).resolve().parent.parent
 # Fichiers servis par l'application, donc mis en cache pour le fonctionnement hors ligne
 DOSSIERS_CACHE = ["css", "js", "libs", "icones", "sbom", "schema", "Documentation", "cartes"]
-FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "AUDIT_SECURITE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
+FICHIERS_CACHE = ["index.html", "manifest.webmanifest", "presentation-fusain.fusain.json", "FUSAIN_cahier_des_charges.md", "NOMENCLATURE_LOGICIELLE_FUSAIN.md", "AUDIT_SECURITE_FUSAIN.md", "JOURNAL_DES_VERSIONS.md"]
 EXCLUS = {"sbom/composants.json"}
 # Fonds de carte volumineux : hors du préchargement, téléchargés à la première carte qui en a besoin, mais vérifiés
 # par le service worker avant d'entrer dans son cache, comme le reste

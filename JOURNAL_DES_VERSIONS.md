@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.24.0 — 14 novembre 2026 — mode diaporama et document de démonstration par défaut
+
+- **Document de démonstration (`presentation-fusain.fusain.json`)** : catalogue complet de 60 pages illustrant tous les modèles de schémas de FUSAIN, avec liens colorés, liens animés, traits pleins, traits épais et pointillés. Ouvert par défaut à l'arrivée sur le site lorsqu'aucun brouillon personnel n'est enregistré.
+- **Mode diaporama (`?diaporama=1`, touche `F5` ou bouton « Diaporama »)** : ouverture du document dans une nouvelle page web en plein écran, défilement clavier et lecture automatique, sélection d'une zone à la souris pour zoomer dessus, zoom au double-clic ou à la molette, et retour immédiat à la taille initiale (`Échap`, `0`, `1`, double-clic ou bouton « Taille initiale »).
+- **Diagnostic (`agentflow-beta`)** : proposition de réparation automatique des flèches épaisses (`==>`) ou pointillées à texte (`-. texte .->`) vers les opérateurs de liaison pris en charge par `agentflow-beta`.
+
 ## 0.23.0 — 4 novembre 2026 — types de Mermaid 12.3
 
 - **Inventaire** : FUSAIN couvrait 28 des 34 types de schémas de Mermaid 12.3. Il manquait les six types arrivés avec la 12.x, ainsi que les variantes dynamique et déploiement du C4.

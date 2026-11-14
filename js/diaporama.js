@@ -13,6 +13,8 @@ const DELAI_LECTURE_MS = 6000;
 const ZOOM_REL_MAX = 16;
 const SEUIL_GLISSER = 6;
 
+export const FICHIER_DEMONSTRATION = './presentation-fusain.fusain.json';
+
 export function estModeDiaporama() {
     const params = new URLSearchParams(location.search);
     return params.has('diaporama');
@@ -22,6 +24,35 @@ export function enregistrerSessionDiaporama(json) {
     try {
         localStorage.setItem(CLE_SESSION, json);
     } catch { /* quota dépassé : le brouillon IndexedDB prend le relais */ }
+}
+
+export function estBrouillonParDefaut(doc) {
+    if (!doc) return true;
+    if (
+        doc.pages.length === 1 &&
+        doc.document.titre === 'Sans titre' &&
+        doc.pages[0].code.trim() === MODELE_INITIAL.code.trim() &&
+        !doc.pages[0].titre &&
+        !doc.pages[0].sousTitre &&
+        !doc.pages[0].notes
+    ) {
+        return true;
+    }
+    if (
+        doc.document.titre === 'Présentation complète de FUSAIN — Catalogue des 60 modèles' &&
+        doc.pages.some((p) => p.code.includes('erreur ==> analyseur'))
+    ) {
+        return true;
+    }
+    return false;
+}
+
+export async function chargerDocumentDemonstration() {
+    try {
+        const rep = await fetch(FICHIER_DEMONSTRATION);
+        if (rep.ok) return lireJson(await rep.text());
+    } catch { /* fichier de démonstration absent ou ouverture hors serveur */ }
+    return nouveauDocument(MODELE_INITIAL.code);
 }
 
 async function chargerDocumentInitial() {
@@ -35,17 +66,19 @@ async function chargerDocumentInitial() {
     }
     try {
         const session = localStorage.getItem(CLE_SESSION);
-        if (session) return lireJson(session);
+        if (session) {
+            const doc = lireJson(session);
+            if (!estBrouillonParDefaut(doc)) return doc;
+        }
     } catch { /* lecture impossible */ }
     try {
         const brouillon = await lireBrouillon();
-        if (brouillon) return lireJson(brouillon);
+        if (brouillon) {
+            const doc = lireJson(brouillon);
+            if (!estBrouillonParDefaut(doc)) return doc;
+        }
     } catch { /* brouillon indisponible */ }
-    try {
-        const rep = await fetch('./presentation-fusain.fusain.json');
-        if (rep.ok) return lireJson(await rep.text());
-    } catch { /* fichier de démonstration absent */ }
-    return nouveauDocument(MODELE_INITIAL.code);
+    return chargerDocumentDemonstration();
 }
 
 export async function demarrerDiaporama() {
@@ -434,15 +467,13 @@ export async function demarrerDiaporama() {
         champFichier.value = '';
         if (!f) return;
         try {
-            const lu = await lireFichier(f);
-            if (lu.genre === 'document') {
-                doc = lu.doc;
-                enregistrerSessionDiaporama(JSON.stringify(doc));
-                index = 0;
-                remplirSelect();
-                await afficher();
-                message('Diaporama chargé', `« ${doc.document.titre} » (${doc.pages.length} diapositives).`, 'success', 4000);
-            }
+            const texte = await lireFichier(f);
+            doc = lireJson(texte);
+            enregistrerSessionDiaporama(JSON.stringify(doc));
+            index = 0;
+            remplirSelect();
+            await afficher();
+            message('Diaporama chargé', `« ${doc.document.titre} » (${doc.pages.length} diapositives).`, 'success', 4000);
         } catch (err) {
             message('Ouverture impossible', err.message, 'error', 8000);
         }

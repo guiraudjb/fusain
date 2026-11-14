@@ -9,7 +9,7 @@ set -eu
 DEST="${1:?dossier de destination attendu}"
 cd "$(dirname "$0")/.."
 mkdir -p "$DEST"
-cp -r index.html manifest.webmanifest sw.js css js libs icones cartes sbom schema Documentation \
+cp -r index.html manifest.webmanifest presentation-fusain.fusain.json sw.js css js libs icones cartes sbom schema Documentation \
       FUSAIN_cahier_des_charges.md NOMENCLATURE_LOGICIELLE_FUSAIN.md AUDIT_SECURITE_FUSAIN.md JOURNAL_DES_VERSIONS.md "$DEST/"
 # Source de la nomenclature : le CycloneDX publié suffit
 rm -f "$DEST/sbom/composants.json"

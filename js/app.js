@@ -16,7 +16,7 @@ import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
 import { ouvrirImportReseau } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
-import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama } from './diaporama.js';
+import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama, estBrouillonParDefaut, chargerDocumentDemonstration } from './diaporama.js';
 
 const $ = (id) => document.getElementById(id);
 const zones = {
@@ -1175,10 +1175,15 @@ async function demarrer() {
     appliquerTheme(preference('theme') === 'sombre');
 
     let doc = null;
+    let brouillonRepris = false;
     const brouillon = await lireBrouillon();
     if (brouillon) {
         try {
-            doc = lireJson(brouillon);
+            const lu = lireJson(brouillon);
+            if (!estBrouillonParDefaut(lu)) {
+                doc = lu;
+                brouillonRepris = lu.document.titre !== 'Présentation complète de FUSAIN — Catalogue des 60 modèles';
+            }
         } catch (e) {
             // Le brouillon serait écrasé par le document neuf : il est d'abord mis de côté, et l'utilisateur prévenu
             doc = null;
@@ -1186,8 +1191,9 @@ async function demarrer() {
             message('Brouillon non repris', `Le dernier brouillon n'a pas pu être relu (${e.message}). Il est conservé à part dans ce navigateur ; « Effacer les données locales » le supprime.`, 'warning', 0);
         }
     }
-    charger(doc || nouveauDocument(MODELE_INITIAL.code), { modifie: false });
-    if (doc) message('Brouillon repris', 'Votre dernier travail a été rechargé depuis ce navigateur. Pensez à l\'enregistrer dans un fichier.', 'info', 7000);
+    if (!doc) doc = await chargerDocumentDemonstration();
+    charger(doc, { modifie: false });
+    if (brouillonRepris) message('Brouillon repris', 'Votre dernier travail a été rechargé depuis ce navigateur. Pensez à l\'enregistrer dans un fichier.', 'info', 7000);
     brancherServiceWorker();
     document.documentElement.dataset.fusainPret = '1';
 }

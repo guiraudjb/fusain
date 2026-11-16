@@ -2,6 +2,19 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.29.0 — 16 novembre 2026 — placer les éléments à la souris
+
+- **Constat** : la disposition se réglait par des paramètres abstraits (côtés de chaque liaison dans des listes pour les réseaux ; pour le logigramme, seulement le sens de lecture et le groupe).
+- **Geste** : on glisse une étape, un service ou un groupe sur un autre élément. Une croix de zones entoure la cible (à gauche, au-dessus, en dessous, à droite ; au centre d'un groupe : « ranger dans »), la zone visée s'allume et un libellé dit ce qui sera fait. Lâché dans le vide de la feuille, l'élément sort de son groupe ; Échap annule ; une seule étape d'annulation. Placé à côté d'un élément, il rejoint son groupe. La poignée « + » garde son rôle (relier).
+- **Architecture / réseaux** : le geste fixe les côtés de la liaison entre les deux services (créée s'il n'y en a pas), en gardant son libellé et ses flèches.
+- **Logigramme** : selon le sens de lecture, « après » ou « avant » s'écrit par un lien invisible `~~~` ; « à côté », dans le même rang, par les mêmes prédécesseurs (liens invisibles écrits juste avant ou après le lien vers la cible) et l'ordre d'écriture. Les anciens liens invisibles de l'élément sont remplacés ; les liens visibles ne sont jamais touchés. Pas de placement pour le flux d'agents.
+- **Clavier** : bloc « Placer » dans le panneau (élément de référence + quatre boutons flèches), même traduction.
+- **Recette** : tests de logique (côtés, création de liaison, groupes, liens invisibles, même rang, sortie de groupe) ; dans Chrome, les quatre côtés vérifiés sur la position réelle rendue, pour un réseau et un logigramme.
+
+## 0.28.2 — 16 novembre 2026 — retrait des pastilles
+
+- Les pastilles posées sur chaque élément du diagramme d'Ishikawa (0.28.1) sont retirées : le mécanisme n'est pas généralisé. Restent le repérage par catégorie, les zones de clic sur les flèches et les libellés, la poignée « + » à gauche du texte et la mise en couleur de l'élément sélectionné.
+
 ## 0.28.1 — 16 novembre 2026 — Ishikawa : pastilles et sélection fiable
 
 - **Constat** : une cause qui a des sous-causes était repérée par sa flèche, longue et presque vide ; un clic au milieu ne la sélectionnait pas, et la poignée « + » se plaçait loin du texte. Deux causes de même texte dans deux catégories pouvaient être confondues.

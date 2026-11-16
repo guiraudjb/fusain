@@ -414,50 +414,23 @@ function selectionner(cle, { panneau = true } = {}) {
 
 function rectangleRelatif(cle) {
     const marque = elementsMarques(cle)[0];
-    // Éditeur à pastilles : la poignée se cale sur le texte de l'élément, pas sur sa flèche (parfois très longue)
-    const el = vue.editeur?.pastilles ? marque?.querySelector('text') || marque : marque;
+    // Poignée calée sur le texte de l'élément, pas sur sa flèche (parfois très longue : Ishikawa)
+    const el = vue.editeur?.poigneeSurTexte ? marque?.querySelector('text') || marque : marque;
     if (!el) return null;
     const r = el.getBoundingClientRect();
     const f = zones.feuille.getBoundingClientRect();
     return { x: r.left - f.left, y: r.top - f.top, l: r.width, h: r.height };
 }
 
-// Pastilles : une petite poignée sur chaque élément modifiable ; un clic le sélectionne et ouvre son texte dans le panneau.
-// Le clavier garde ses chemins (flèches sur le schéma, plan du panneau) : les pastilles restent hors de l'ordre de tabulation.
-function placerPastilles() {
-    for (const p of zones.feuille.querySelectorAll('.fusain-pastille')) p.remove();
-    const { editeur, modele } = vue;
-    if (ui.mode !== 'visuel' || !modele || !editeur?.pastilles) return;
-    const f = zones.feuille.getBoundingClientRect();
-    for (const { cle, nom } of editeur.elements(modele)) {
-        const marque = elementsMarques(cle)[0];
-        const cible = marque?.querySelector('text') || marque;
-        if (!cible) continue;
-        const r = cible.getBoundingClientRect();
-        if (!r.width) continue;
-        const pastille = h('button', { type: 'button', class: `fusain-pastille${cle === ui.selection ? ' fusain-pastille--active' : ''}`, tabindex: '-1', 'aria-hidden': 'true', title: `Modifier « ${nom} »` });
-        // Coin haut droit, juste au-dessus du texte : la pastille ne masque ni une lettre ni la flèche
-        pastille.style.left = `${r.right - f.left - 2}px`;
-        pastille.style.top = `${r.top - f.top - 13}px`;
-        pastille.addEventListener('click', (e) => {
-            e.stopPropagation();
-            ui.focusTexte = true;
-            selectionner(cle);
-        });
-        zones.feuille.append(pastille);
-    }
-}
-
 function placerPoignee() {
-    placerPastilles();
     zones.feuille.querySelector('.fusain-poignee')?.remove();
     const { editeur, modele } = vue;
     if (ui.mode !== 'visuel' || !modele || !ui.selection || !editeur.relier || !editeur.peutRelier(ui.selection)) return;
     const r = rectangleRelatif(ui.selection);
     if (!r) return;
     const poignee = h('button', { type: 'button', class: 'fusain-poignee', title: 'Cliquer pour ajouter un élément lié, ou glisser vers un autre élément pour les relier', 'aria-label': 'Ajouter un élément lié' }, '+');
-    // Éditeur à pastilles : à gauche du texte, le côté droit étant pris par la flèche et la pastille
-    poignee.style.left = editeur.pastilles ? `${r.x - 34}px` : `${r.x + r.l - 8}px`;
+    // Poignée calée sur le texte : à gauche, le côté droit étant pris par la flèche
+    poignee.style.left = editeur.poigneeSurTexte ? `${r.x - 34}px` : `${r.x + r.l - 8}px`;
     poignee.style.top = `${r.y + r.h / 2 - 14}px`;
     zones.feuille.append(poignee);
 
@@ -766,6 +739,9 @@ function attendreRendu() {
 function peutDeplacerElement(e) {
     const { editeur, modele } = vue;
     const marque = e.target.closest?.('[data-fusain]');
+    if (ui.mode === 'visuel' && modele && editeur?.placer && marque && zones.feuille.contains(marque) && !e.target.closest('.fusain-poignee')) {
+        return Boolean(editeur.placable?.(marque.getAttribute('data-fusain'), modele));
+    }
     if (ui.mode !== 'visuel' || !modele || !editeur?.deplacer || !marque || !zones.feuille.contains(marque)) return false;
     if (editeur.deplacable && !editeur.deplacable(marque.getAttribute('data-fusain'))) return false;
     return !!editeur.zoneDeplacement(zones.feuille.querySelector('.fusain-schema'));
@@ -804,9 +780,114 @@ function brancherDeplacement() {
     });
 }
 
+// ---------- Placer un élément par rapport à un autre (éditeurs qui exposent placer) ----------
+// On glisse l'élément sur un autre : une croix de quatre zones entoure la cible (gauche, dessus, dessous, droite), plus une
+// zone centrale sur un groupe (« ranger dans »). La zone sous le pointeur s'allume et un libellé dit ce qui sera fait.
+// Lâché dans le vide de la feuille, l'élément sort de son groupe. Échap annule. L'éditeur traduit le geste en Mermaid.
+const LIBELLES_PLACEMENT = { gauche: 'À gauche de', droite: 'À droite de', dessus: 'Au-dessus de', dessous: 'En dessous de', dans: 'Ranger dans' };
+let ignorerClic = false;
+
+function zonePlacement(cle, cible, x, y) {
+    const r = rectangleRelatif(cible);
+    if (!r || !r.l || !r.h) return null;
+    const px = (x - r.x) / r.l - 0.5;
+    const py = (y - r.y) / r.h - 0.5;
+    // Sur un groupe, tout l'intérieur range dedans ; seule une bande de 12 % le long du bord place à côté du groupe
+    // (et pas du tout là où l'éditeur ne sait placer qu'à l'intérieur). Ailleurs, le côté le plus proche (diagonales).
+    if (cible.startsWith('g:') && (vue.editeur.groupeSeulementDans || (Math.abs(px) < 0.38 && Math.abs(py) < 0.38))) return { r, cote: 'dans' };
+    return { r, cote: Math.abs(px) > Math.abs(py) ? (px < 0 ? 'gauche' : 'droite') : (py < 0 ? 'dessus' : 'dessous') };
+}
+
+function dessinerPlacement(calque, nom, x, y, zone, nomCible, sortie) {
+    const elements = [];
+    if (zone) {
+        const { r, cote } = zone;
+        const cx = r.x + r.l / 2;
+        const cy = r.y + r.h / 2;
+        const t = 9; // demi-largeur des triangles
+        // Chaque triangle pointe vers l'endroit où ira l'élément
+        const triangles = {
+            gauche: [[r.x - 6 - 2 * t, cy], [r.x - 6, cy - t], [r.x - 6, cy + t]],
+            droite: [[r.x + r.l + 6 + 2 * t, cy], [r.x + r.l + 6, cy - t], [r.x + r.l + 6, cy + t]],
+            dessus: [[cx, r.y - 6 - 2 * t], [cx - t, r.y - 6], [cx + t, r.y - 6]],
+            dessous: [[cx, r.y + r.h + 6 + 2 * t], [cx - t, r.y + r.h + 6], [cx + t, r.y + r.h + 6]],
+        };
+        elements.push(s('rect', { x: r.x - 3, y: r.y - 3, width: r.l + 6, height: r.h + 6, rx: 4, class: 'fusain-placement__cible' }));
+        for (const [c, pts] of Object.entries(triangles)) elements.push(s('polygon', { points: pts.map((p) => p.join(',')).join(' '), class: `fusain-placement__zone${c === cote ? ' fusain-placement__zone--active' : ''}` }));
+        if (zone.groupe) elements.push(s('rect', { x: cx - 12, y: cy - 12, width: 24, height: 24, rx: 3, class: `fusain-placement__zone${cote === 'dans' ? ' fusain-placement__zone--active' : ''}` }));
+    }
+    const libelle = zone ? `${LIBELLES_PLACEMENT[zone.cote]} « ${nomCible} »` : sortie ? 'Sortir du groupe' : null;
+    const texte = `${nom}${libelle ? ` — ${libelle}` : ''}`;
+    const largeur = Math.min(420, 16 + texte.length * 7.2);
+    elements.push(s('g', { class: 'fusain-placement__fantome', transform: `translate(${x + 14},${y + 10})` },
+        s('rect', { width: largeur, height: 26, rx: 13 }),
+        s('text', { x: 12, y: 17 }, texte)));
+    calque.replaceChildren(...elements);
+}
+
+function brancherPlacement() {
+    let glisse = null;
+    const calque = () => zones.feuille.querySelector('.fusain-calque');
+    const nomDe = (cle) => vue.editeur.elements(vue.modele).find((e) => e.cle === cle)?.nom?.replace(/^Groupe : /, '') || cle;
+    const viser = (e) => {
+        const f = zones.feuille.getBoundingClientRect();
+        const x = e.clientX - f.left;
+        const y = e.clientY - f.top;
+        const sous = document.elementFromPoint(e.clientX, e.clientY);
+        const dansFeuille = sous && zones.feuille.contains(sous);
+        // Les zones de clic d'un lien portent la clé du lien : seules les étapes, services et groupes sont des cibles
+        let cible = dansFeuille ? sous.closest('[data-fusain]')?.getAttribute('data-fusain') : null;
+        if (cible && (cible === glisse.cle || !vue.editeur.placable?.(cible, vue.modele))) cible = null;
+        // Intérieur vide d'un cadre de groupe (souvent transparent au pointeur) : le plus petit groupe qui contient le point
+        if (!cible && dansFeuille) {
+            let aire = Infinity;
+            for (const { cle } of vue.editeur.elements(vue.modele)) {
+                if (!cle.startsWith('g:') || cle === glisse.cle || !vue.editeur.placable?.(cle, vue.modele)) continue;
+                const r = rectangleRelatif(cle);
+                if (r && x >= r.x && x <= r.x + r.l && y >= r.y && y <= r.y + r.h && r.l * r.h < aire) { aire = r.l * r.h; cible = cle; }
+            }
+        }
+        const zone = cible ? zonePlacement(glisse.cle, cible, x, y) : null;
+        if (zone) zone.groupe = cible.startsWith('g:');
+        return { x, y, cible: zone ? cible : null, zone, vide: dansFeuille && !cible && Boolean(vue.editeur.groupeDe?.(vue.modele, glisse.cle)) };
+    };
+    zones.feuille.addEventListener('pointerdown', (e) => {
+        const { editeur, modele } = vue;
+        if (ui.mode !== 'visuel' || !modele || !editeur?.placer || e.button !== 0 || e.target.closest('.fusain-poignee, .fusain-saisie')) return;
+        const cle = e.target.closest?.('[data-fusain]')?.getAttribute('data-fusain');
+        if (!cle || !editeur.placable?.(cle, modele)) return;
+        glisse = { cle, x: e.clientX, y: e.clientY, bouge: false };
+    });
+    window.addEventListener('pointermove', (e) => {
+        if (!glisse) return;
+        if (!glisse.bouge && Math.hypot(e.clientX - glisse.x, e.clientY - glisse.y) < 8) return;
+        glisse.bouge = true;
+        document.body.classList.add('fusain-en-placement');
+        const v = viser(e);
+        glisse.dernier = v;
+        dessinerPlacement(calque(), nomDe(glisse.cle), v.x, v.y, v.zone, v.cible && nomDe(v.cible), v.vide);
+    });
+    const finir = () => { glisse = null; calque()?.replaceChildren(); document.body.classList.remove('fusain-en-placement'); };
+    window.addEventListener('pointerup', (e) => {
+        if (!glisse) return;
+        const { cle, bouge } = glisse;
+        if (!bouge) { glisse = null; return; }
+        const v = viser(e);
+        finir();
+        ignorerClic = true; // le clic qui suit le lâcher ne doit pas sélectionner la cible
+        setTimeout(() => { ignorerClic = false; }, 0);
+        if (!v.zone && !v.vide) return; // lâché hors de la feuille, ou dans le vide sans groupe à quitter : abandon
+        appliquer((m) => vue.editeur.placer(m, cle, v.cible, v.zone?.cote ?? null), () => cle);
+        annoncer(v.zone ? `${nomDe(cle)} : ${LIBELLES_PLACEMENT[v.zone.cote].toLowerCase()} ${nomDe(v.cible)}` : `${nomDe(cle)} : sorti du groupe`);
+    });
+    window.addEventListener('pointercancel', () => { if (glisse) finir(); });
+    window.addEventListener('keydown', (e) => { if (glisse?.bouge && e.key === 'Escape') { e.preventDefault(); finir(); } }, true);
+}
+
 function brancherFeuille() {
     zones.feuille.addEventListener('click', (e) => {
-        if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-pastille, .fusain-saisie')) return;
+        if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-saisie')) return;
+        if (ignorerClic) { ignorerClic = false; return; }
         const cle = e.target.closest('[data-fusain]')?.getAttribute('data-fusain') || null;
         selectionner(cle);
         if (cle && estDiapo()) ouvrirSaisieDiapo(cle, { x: e.clientX, y: e.clientY });
@@ -1535,6 +1616,7 @@ async function demarrer() {
     construireBarre();
     brancherFeuille();
     brancherDeplacement();
+    brancherPlacement();
     // La feuille est posée sur une toile : en zoom manuel, la toile porte la marge de travail autour d'elle
     const toile = h('div', { class: 'fusain-toile' });
     zones.feuille.before(toile);

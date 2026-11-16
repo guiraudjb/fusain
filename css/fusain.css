@@ -89,19 +89,19 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 
 .fusain-calque { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .fusain-calque line { stroke: #e4794a; stroke-width: 2; stroke-dasharray: 6 4; }
+/* Placement à la souris : cible entourée, croix de zones (la zone visée en orange), fantôme qui suit le pointeur */
+.fusain-placement__cible { fill: none; stroke: #e4794a; stroke-width: 1.5; stroke-dasharray: 5 3; }
+.fusain-placement__zone { fill: #fff; stroke: #e4794a; stroke-width: 1.5; }
+.fusain-placement__zone--active { fill: #e4794a; }
+.fusain-placement__fantome rect { fill: #161616; fill-opacity: .85; }
+.fusain-placement__fantome text { fill: #fff; font: 600 12px Marianne, arial, sans-serif; }
+body.fusain-en-placement, body.fusain-en-placement * { cursor: grabbing !important; user-select: none; }
 .fusain-poignee {
     position: absolute; width: 1.75rem; height: 1.75rem; border-radius: 50%;
     background: #e4794a; color: #fff; border: 2px solid #fff; cursor: crosshair;
     display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .4); touch-action: none; padding: 0;
 }
-.fusain-pastille {
-    position: absolute; z-index: 2; width: .875rem; height: .875rem; padding: 0; border-radius: 50%;
-    border: 2px solid #e4794a; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
-}
-.fusain-pastille:hover, .fusain-pastille--active { background: #e4794a; }
-.fusain-pastille:hover { transform: scale(1.25); }
-.fusain-feuille:has(.fusain-saisie) .fusain-pastille { display: none; }
 .fusain-visuel .fusain-touche-libelle { fill: transparent; stroke: none; pointer-events: all; }
 .fusain-visuel g.fusain-sel > text { fill: #a94645 !important; font-weight: 700; }
 .fusain-visuel g.fusain-sel > line:not(.fusain-touche) { stroke: #e4794a !important; stroke-width: 2px !important; }

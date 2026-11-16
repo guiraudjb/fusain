@@ -1,6 +1,6 @@
 // Architecture technique : services, groupes et liaisons
 import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
-import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible } from './commun.js';
+import { separerPreambule, sansGuillemets, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, ligneAccessible, blocPlacement } from './commun.js';
 import { PREFIXE, choisirIcone } from '../icones.js';
 
 const ICONES = [['server', 'Serveur'], ['database', 'Base de données'], ['disk', 'Disque'], ['cloud', 'Nuage'], ['internet', 'Internet'], ['blank', 'Carré plein'], ['', 'Sans icône']];
@@ -116,6 +116,52 @@ export function relier(modele, de, vers) {
     return `n:${s.id}`;
 }
 
+// ---------- Placement à la souris ----------
+// « A à droite de B » : la liaison entre A et B part du côté droit de B et arrive sur le côté gauche de A. Une liaison
+// existante entre les deux garde son libellé et ses flèches, seuls ses côtés changent ; sinon une liaison est créée
+// (Mermaid architecture n'a pas de liaison invisible). Placé à côté d'un service, A rejoint aussi son groupe.
+const COTE_MERMAID = { gauche: 'L', droite: 'R', dessus: 'T', dessous: 'B' };
+const OPPOSE = { L: 'R', R: 'L', T: 'B', B: 'T' };
+
+export const placable = (cle) => cle.startsWith('n:') || cle.startsWith('g:');
+export const groupeDe = (modele, cle) => (placable(cle) ? viser(modele, cle).bloc?.parent || null : null);
+
+function descendantsDe(modele, id) {
+    const interdits = new Set([id]);
+    for (let change = true; change;) {
+        change = false;
+        for (const g of modele.groupes) if (interdits.has(g.parent) && !interdits.has(g.id)) { interdits.add(g.id); change = true; }
+    }
+    return interdits;
+}
+
+// cible : clé d'un élément, ou null (lâché dans le vide : sortir du groupe) ; cote : gauche | droite | dessus | dessous | dans
+export function placer(modele, cle, cible, cote) {
+    const a = viser(modele, cle).bloc;
+    if (!a) return;
+    if (!cible) {
+        if (a.parent) a.parent = modele.groupes.find((g) => g.id === a.parent)?.parent || '';
+        return;
+    }
+    const b = cible.startsWith('l:') ? null : viser(modele, cible).bloc;
+    if (!b || b === a) return;
+    const groupeA = cle.startsWith('g:');
+    if (cote === 'dans' || cible.startsWith('g:')) {
+        // Ranger dans un groupe (jamais dans lui-même ni dans un de ses sous-groupes)
+        if (!cible.startsWith('g:') || (groupeA && descendantsDe(modele, a.id).has(b.id))) return;
+        a.parent = b.id;
+        return;
+    }
+    // Un groupe se place par ses liaisons, qui partent de services : seul « ranger dans » s'applique à lui
+    if (groupeA) return;
+    a.parent = b.parent;
+    const cote2 = COTE_MERMAID[cote];
+    if (!cote2) return;
+    const lien = modele.liens.find((l) => (l.de === b.id && l.vers === a.id) || (l.de === a.id && l.vers === b.id));
+    if (!lien) { modele.liens.push({ de: b.id, coteDe: cote2, flecheDe: false, texte: '', flecheVers: false, coteVers: OPPOSE[cote2], vers: a.id }); return; }
+    if (lien.de === b.id) { lien.coteDe = cote2; lien.coteVers = OPPOSE[cote2]; } else { lien.coteVers = cote2; lien.coteDe = OPPOSE[cote2]; }
+}
+
 // Un groupe ne peut pas être rangé dans lui-même ni dans un de ses sous-groupes
 function groupesPossibles(modele, bloc) {
     const interdits = new Set([bloc.id]);
@@ -138,7 +184,7 @@ export function panneau(ctx) {
                 let cle;
                 appliquer((m) => { const g = { id: nomLibre('groupe', pris(m)), icone: 'cloud', nom: 'Nouveau groupe', parent: '' }; m.groupes.push(g); nouveauService(m, g.id); cle = `g:${g.id}`; }, () => cle);
             } })),
-        h('p', { class: 'fusain-aide' }, 'Mermaid place les services d\'après les côtés choisis pour chaque liaison.'))];
+        h('p', { class: 'fusain-aide' }, 'Pour placer un service, glissez-le sur un autre : des zones apparaissent à gauche, à droite, dessus et dessous ; au centre d\'un groupe, il y est rangé. Mermaid traduit le geste par les côtés de la liaison entre les deux.'))];
 
     if (v.bloc) {
         const groupe = selection.startsWith('g:');
@@ -164,6 +210,11 @@ export function panneau(ctx) {
             })));
     }
 
+    if (v.bloc && !selection.startsWith('g:')) {
+        const autres = modele.services.filter((s) => s !== v.bloc).map((s) => [`n:${s.id}`, s.nom || s.id]);
+        blocs.push(blocPlacement({ cle: selection, cibles: autres, appliquer, placer, aide: 'À la souris : glissez le service sur une zone autour d\'un autre, ou au centre d\'un groupe pour l\'y ranger. La liaison entre les deux prend les côtés voulus (elle est créée s\'il n\'y en a pas).' }));
+    }
+
     if (v.lien) {
         const l = v.lien;
         const modifier = (fonction) => appliquer((m) => fonction(m.liens[v.i]));
@@ -181,4 +232,4 @@ export function panneau(ctx) {
     return blocs;
 }
 
-export default { type: 'architecture', nom: 'Architecture technique', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+export default { type: 'architecture', nom: 'Architecture technique', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, placer, placable, groupeDe, groupeSeulementDans: true, panneau };

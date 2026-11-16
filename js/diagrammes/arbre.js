@@ -13,7 +13,7 @@ const ecrireTexte = (t, guillemets) => {
 };
 const comparable = (t) => String(t).replace(/[\s​]+/g, '');
 
-function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi, marques, repererPropre, apresAffichage, pastilles = false }) {
+function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi, marques, repererPropre, apresAffichage, poigneeSurTexte = false }) {
     function analyser(code) {
         const { preambule, corps } = separerPreambule(code);
         if ((corps[0] || '').trim() !== entete) throw new Error(`La première ligne doit être « ${entete} ».`);
@@ -151,7 +151,7 @@ function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi,
         return blocs;
     }
 
-    return { type, nom, pastilles, apresAffichage, analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+    return { type, nom, poigneeSurTexte, apresAffichage, analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
 }
 
 // Ishikawa : Mermaid dessine chaque catégorie (« ishikawa-label-group ») suivie, au même niveau, des groupes de ses causes
@@ -211,9 +211,9 @@ function ajouterToucheTexte(g, cle) {
 
 export const ishikawa = fabriquer({
     type: 'ishikawa', entete: 'ishikawa', nom: 'Diagramme d\'Ishikawa', unique: true, guillemets: false,
-    marques: '.ishikawa-head-label, .ishikawa-label', repererPropre: repererIshikawa, apresAffichage: apresAffichageIshikawa, pastilles: true,
+    marques: '.ishikawa-head-label, .ishikawa-label', repererPropre: repererIshikawa, apresAffichage: apresAffichageIshikawa, poigneeSurTexte: true,
     nouveau: (niveau) => (niveau <= 1 ? 'Nouvelle catégorie' : 'Nouvelle cause'),
-    aide: 'Chaque élément porte une petite pastille : un clic ouvre son texte ici, prêt à modifier. Un clic sur l\'élément le sélectionne ; la poignée « + » lui ajoute une cause.',
+    aide: 'Sélectionnez l\'effet, une catégorie ou une cause sur le schéma ou dans le plan. La poignée « + » ajoute une cause.',
     quoi: { racine: 'l\'effet étudié', fille: 'Cause', soeur: 'Cause de même niveau', niveau: (n) => (n === 1 ? 'Effet étudié' : n === 2 ? 'Catégorie de causes' : 'Cause') },
 });
 

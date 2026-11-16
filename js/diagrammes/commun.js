@@ -1,5 +1,5 @@
 // Outils partagés par les éditeurs visuels
-import { h, bouton } from '../dom.js';
+import { h, bouton, champSelect } from '../dom.js';
 
 // Couleurs proposées pour les éléments : fonds et bordures du Système de Design de l'État
 export const COULEURS = [
@@ -170,4 +170,23 @@ export function nomLibre(prefixe, pris) {
     let n = 1;
     while (pris(`${prefixe}${n}`)) n += 1;
     return `${prefixe}${n}`;
+}
+
+// ---------- Placement d'un élément par rapport à un autre ----------
+// Mermaid ne connaît pas de coordonnées : un éditeur qui sait « placer » traduit « à droite de B » dans son écriture
+// (côtés d'une liaison, liens invisibles, ordre des déclarations). Le geste à la souris (glisser l'élément sur une des
+// zones qui entourent la cible) et ce bloc du panneau, son équivalent au clavier, appellent la même fonction placer().
+export const COTES_PLACEMENT = [['gauche', 'À gauche de', 'arrow-left-line'], ['dessus', 'Au-dessus de', 'arrow-up-line'], ['dessous', 'En dessous de', 'arrow-down-line'], ['droite', 'À droite de', 'arrow-right-line']];
+
+export function blocPlacement({ cle, cibles, appliquer, placer, aide }) {
+    if (!cibles.length) return null;
+    let cible = cibles[0][0];
+    return h('div', { class: 'fusain-bloc' },
+        h('h2', {}, 'Placer'),
+        champSelect('Par rapport à', cibles, cible, (v) => { cible = v; }),
+        h('div', { class: 'fusain-actions' }, COTES_PLACEMENT.map(([cote, libelle, icone]) => bouton(libelle.replace(/ de$/, ''), {
+            icone, seulIcone: true, titre: `${libelle} l'élément choisi`,
+            onclick: () => appliquer((m) => placer(m, cle, cible, cote), () => cle),
+        }))),
+        h('p', { class: 'fusain-aide' }, aide || 'À la souris : glissez l\'élément sur la zone voulue autour d\'un autre (gauche, droite, dessus, dessous) ou au centre d\'un groupe pour l\'y ranger ; lâché dans le vide, il sort de son groupe.'));
 }

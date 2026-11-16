@@ -1,7 +1,7 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
 import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
 import { choisirIcone } from '../icones.js';
-import { nuancier, nuancierTrait, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit, ligneAccessible } from './commun.js';
+import { nuancier, nuancierTrait, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit, ligneAccessible, blocPlacement } from './commun.js';
 
 // [nom, ouvrant, fermant, libellé] — les ouvrants les plus longs sont testés en premier
 const FORMES = [
@@ -350,6 +350,74 @@ function nouveauLien(de, vers) {
     return { de, vers, debut: '', fin: '>', texte: '', trait: 'plein', longueur: 1 };
 }
 
+// ---------- Placement à la souris ----------
+// Mermaid range les étapes en rangs successifs dans le sens de lecture, et dans un rang à peu près dans l'ordre où elles
+// sont écrites. « A à droite de B » se traduit donc selon le sens : en LR, A passe après B (lien invisible « B ~~~ A ») ;
+// en TD, A se met à côté de B, dans le même rang (mêmes prédécesseurs par liens invisibles, écrit juste après B).
+// Les anciens liens invisibles de A sont retirés à chaque placement ; les liens visibles ne sont jamais touchés.
+const RANGS = {
+    LR: { droite: 'apres', gauche: 'avant', dessus: 'cote-avant', dessous: 'cote-apres' },
+    RL: { gauche: 'apres', droite: 'avant', dessus: 'cote-avant', dessous: 'cote-apres' },
+    TD: { dessous: 'apres', dessus: 'avant', gauche: 'cote-avant', droite: 'cote-apres' },
+    BT: { dessus: 'apres', dessous: 'avant', gauche: 'cote-avant', droite: 'cote-apres' },
+};
+const lienInvisible = (de, vers) => ({ de, vers, debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
+
+export const placable = (cle, modele) => !modele?.agents && (cle.startsWith('n:') || cle.startsWith('g:'));
+export const groupeDe = (modele, cle) => (cle.startsWith('g:') ? modele.groupes.find((g) => g.id === cle.slice(2))?.parent : modele.noeuds.find((n) => n.id === cle.slice(2))?.groupe) || null;
+
+function descendantsGroupe(modele, id) {
+    const descendants = new Set([id]);
+    for (let ajout = true; ajout;) {
+        ajout = false;
+        for (const x of modele.groupes) if (x.parent && descendants.has(x.parent) && !descendants.has(x.id)) { descendants.add(x.id); ajout = true; }
+    }
+    return descendants;
+}
+
+// cible : clé d'une étape ou d'un groupe, ou null (lâché dans le vide : sortir du groupe) ;
+// cote : gauche | droite | dessus | dessous | dans
+export function placer(modele, cle, cible, cote) {
+    if (!placable(cle, modele)) return;
+    const estGroupe = cle.startsWith('g:');
+    const id = cle.slice(2);
+    const a = estGroupe ? modele.groupes.find((g) => g.id === id) : modele.noeuds.find((n) => n.id === id);
+    if (!a) return;
+    const champ = estGroupe ? 'parent' : 'groupe';
+    // Ranger A dans le groupe g (null : hors de tout groupe), jamais un groupe dans lui-même ou un de ses sous-groupes
+    const ranger = (g) => { if (!(estGroupe && g && descendantsGroupe(modele, id).has(g))) a[champ] = g || null; };
+    if (!cible) { ranger(modele.groupes.find((g) => g.id === a[champ])?.parent ?? null); return; }
+    const idB = cible.slice(2);
+    if (idB === id || !placable(cible, modele)) return;
+    const bGroupe = cible.startsWith('g:');
+    const b = bGroupe ? modele.groupes.find((g) => g.id === idB) : modele.noeuds.find((n) => n.id === idB);
+    if (!b) return;
+    if (cote === 'dans') { if (bGroupe) ranger(idB); return; }
+
+    // À côté de B : A rejoint le groupe de B
+    ranger(bGroupe ? b.parent : b.groupe);
+    const groupeCommun = modele.groupes.find((g) => g.id === (bGroupe ? b.parent : b.groupe));
+    const sens = (groupeCommun?.sens || modele.sens || 'TD').replace('TB', 'TD');
+    const geste = (RANGS[sens] || RANGS.TD)[cote];
+    if (!geste) return;
+    modele.liens = modele.liens.filter((l) => !(l.trait === 'invisible' && (l.de === id || l.vers === id)));
+    const existe = (de, vers) => modele.liens.some((l) => l.de === de && l.vers === vers);
+    if (geste === 'apres') { if (!existe(idB, id)) modele.liens.push(lienInvisible(idB, id)); return; }
+    if (geste === 'avant') { if (!existe(id, idB)) modele.liens.push(lienInvisible(id, idB)); return; }
+    // Même rang que B : mêmes prédécesseurs, puis écrit juste avant ou juste après B
+    // Le lien invisible est écrit juste avant ou juste après le lien vers B : Mermaid ordonne un rang d'après l'ordre des liens
+    const predecesseurs = [...new Set(modele.liens.filter((l) => l.vers === idB && l.de !== id).map((l) => l.de))];
+    for (const p of predecesseurs) {
+        if (existe(p, id)) continue;
+        const rang = modele.liens.findIndex((l) => l.de === p && l.vers === idB);
+        modele.liens.splice(geste === 'cote-apres' ? rang + 1 : rang, 0, lienInvisible(p, id));
+    }
+    const liste = estGroupe ? modele.groupes : modele.noeuds;
+    if (estGroupe !== bGroupe) return;
+    liste.splice(liste.indexOf(a), 1);
+    liste.splice(liste.indexOf(b) + (geste === 'cote-apres' ? 1 : 0), 0, a);
+}
+
 function supprimerNoeud(modele, id) {
     modele.noeuds = modele.noeuds.filter((n) => n.id !== id);
     modele.liens = modele.liens.filter((l) => l.de !== id && l.vers !== id);
@@ -566,11 +634,13 @@ export function panneau(ctx) {
 
     const genre = selection?.slice(0, 1);
     const id = selection?.slice(2);
+    const blocsPlacement = [];
 
     if (genre === 'n' && modele.noeuds.some((n) => n.id === id)) {
         const n = modele.noeuds.find((x) => x.id === id);
         const maj = (f) => appliquer((m) => f(m.noeuds.find((x) => x.id === id), m));
         const autres = [...modele.noeuds.filter((x) => x.id !== id).map((x) => [`n:${x.id}`, nomNoeud(x)]), ...modele.groupes.map((g) => [`g:${g.id}`, `${g.global ? 'Zone commune' : modele.agents ? `Agent : ${g.titre}` : `Groupe : ${g.titre}`}`])];
+        if (placable(selection, modele)) blocsPlacement.push(blocPlacement({ cle: selection, cibles: autres, appliquer, placer }));
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Étape sélectionnée'),
             champTexte('Texte', n.texte ?? n.id, (v) => maj((x) => { x.texte = v.trim() || x.id; }), { multiligne: true, id: 'fusain-champ-texte' }),
@@ -662,10 +732,15 @@ export function panneau(ctx) {
                     appliquer((m) => { cle = `n:${ajouterNoeud(m, id).id}`; }, () => cle);
                 } }),
                 bouton('Dissoudre le groupe', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimerGroupe(m, id), () => null) }))));
+        const desc = descendantsGroupe(modele, id);
+        const cibles = [...modele.noeuds.map((x) => [`n:${x.id}`, nomNoeud(x)]), ...modele.groupes.filter((x) => !desc.has(x.id)).map((x) => [`g:${x.id}`, `Groupe : ${x.titre}`])];
+        if (placable(selection, modele)) blocsPlacement.push(blocPlacement({ cle: selection, cibles, appliquer, placer }));
     }
+
+    blocs.push(...blocsPlacement);
 
     blocs.push(h('div', { class: 'fusain-bloc' }, h('h2', {}, 'Plan du schéma'), plan(elements(modele), selection, selectionner)));
     return blocs;
 }
 
-export default { type: 'flowchart', types: ['flowchart', 'swimlane', 'agentflow'], nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+export default { type: 'flowchart', types: ['flowchart', 'swimlane', 'agentflow'], nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, placer, placable, groupeDe, panneau };

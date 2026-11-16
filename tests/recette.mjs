@@ -140,6 +140,21 @@ ok('erreur affichée, dernier rendu conservé', await p.locator('#fusain-erreur 
 await p.fill('#fusain-code-zone', 'flowchart LR\n  A@{ shape: cyl, label: "Base" } --> B'); await p.waitForTimeout(1200);
 ok('bascule code seul', (await p.textContent('#fusain-code-etat')) === 'Code seul' && await p.locator('#fusain-erreur .fr-alert').count() === 0, await p.getAttribute('#fusain-code-etat', 'title'));
 await p.screenshot({ path: OUT + '/e2e-code.png' });
+// 8 ter. Placer à la souris : C glissé sur la zone droite de B (logigramme de haut en bas) se retrouve à droite de B
+await p.fill('#fusain-code-zone', 'flowchart TD\n  A["Alpha"] --> B["Bravo"]\n  C["Charlie"]'); await p.waitForTimeout(1200);
+await p.click('button:has-text("Visuel")'); await p.waitForTimeout(1200);
+{
+    const boite = async (cle) => p.locator(`#fusain-feuille [data-fusain="${cle}"]:not(.fusain-touche)`).first().boundingBox();
+    const [c0, b0] = [await boite('n:C'), await boite('n:B')];
+    await p.mouse.move(c0.x + c0.width / 2, c0.y + c0.height / 2); await p.mouse.down();
+    for (let i = 1; i <= 10; i += 1) await p.mouse.move(c0.x + c0.width / 2 + (b0.x + b0.width * 0.97 - c0.x - c0.width / 2) * i / 10, c0.y + c0.height / 2 + (b0.y + b0.height / 2 - c0.y - c0.height / 2) * i / 10);
+    const indication = await p.textContent('.fusain-placement__fantome text').catch(() => '');
+    await p.mouse.up(); await p.waitForTimeout(1500);
+    const [c1, b1] = [await boite('n:C'), await boite('n:B')];
+    const code = await lireCode();
+    ok('placer à la souris : zone indiquée, élément à droite de la cible, lien invisible écrit', indication.includes('À droite de « Bravo »') && c1.x > b1.x + b1.width / 2 && Math.abs((c1.y + c1.height / 2) - (b1.y + b1.height / 2)) < 10 && code.includes('A ~~~ C'), `${indication} | ${code.replace(/\n/g, ' / ')}`);
+    await p.click('button:has-text("Code")'); await p.waitForTimeout(400);
+}
 // 9. modèles : ajouter une page de chaque type visuel et vérifier le repérage
 for (const [nom, sel, titre] of [['Diagramme de séquence', '[data-fusain^="i:"]', 'Diagramme de séquence'], ['Carte mentale', '[data-fusain^="r"]', 'Carte mentale'], ['Planning (Gantt)', '[data-fusain^="i:"]', 'Diagramme de Gantt'], ['Camembert', '[data-fusain^="p:"]', 'Camembert'], ['Frise chronologique', '[data-fusain^="e:"]', 'Frise chronologique'], ['Tableau Kanban', '[data-fusain^="k:"]', 'Tableau Kanban'], ["Diagramme d'états", '[data-fusain^="n:"]', "Diagramme d'états"], ['Matrice (quadrants)', '[data-fusain^="p:"]', 'Matrice']]) {
   await p.click('button:has-text("Visuel")');
@@ -299,12 +314,6 @@ for (const [nom, cle] of [['Logigramme en couloirs', 'g:usager'], ['Causes et ef
     await p.click(`#fusain-modale-modeles .fusain-modele:has(.fusain-modele__nom:text-is("${nom}"))`); await p.waitForTimeout(1500);
     const marque = p.locator(`#fusain-feuille [data-fusain="${cle}"]:not(.fusain-touche)`).first();
     ok(`« ${nom} » : élément repéré sur le schéma`, await marque.count() === 1 && await p.evaluate(() => document.querySelector('#fusain-feuille').classList.contains('fusain-visuel')));
-    if (nom.includes('Ishikawa')) {
-        // Une pastille par élément ; un clic dessus sélectionne l'élément et place le curseur dans son texte
-        const pastilles = await p.locator('#fusain-feuille .fusain-pastille').count();
-        await p.locator('#fusain-feuille .fusain-pastille').nth(2).click(); await p.waitForTimeout(300);
-        ok('« Ishikawa » : une pastille par élément, qui ouvre son texte', pastilles === 11 && await p.evaluate(() => document.activeElement?.id === 'fusain-champ-texte' && Boolean(document.querySelector('#fusain-feuille .fusain-sel'))), `${pastilles} pastilles`);
-    }
     await marque.click({ force: true }); await p.waitForTimeout(300);
     await p.fill('#fusain-champ-texte', 'Texte <b>modifié</b>'); await p.press('#fusain-champ-texte', 'Tab'); await p.waitForTimeout(1200);
     ok(`« ${nom} » : texte modifié depuis le panneau, écrit comme du texte`, (await p.textContent('#fusain-feuille')).replace(/\s/g, '').includes('Texte<b>modifié</b>') && !await p.locator('#fusain-feuille b').count());

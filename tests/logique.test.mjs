@@ -1175,3 +1175,46 @@ test('aide au débogage : lignes orphelines en rouge, énoncés découpés en ja
     for (const page of doc.pages) assert.deepEqual(controlerCode(page.code), [], page.nom);
     for (const m of MODELES) assert.deepEqual(controlerCode(m.code), [], m.id);
 });
+
+test('placement à la souris : architecture — côtés de la liaison, liaison créée au besoin, rangement dans un groupe', async () => {
+    const architecture = (await import('../js/diagrammes/architecture.js')).default;
+    const m = architecture.analyser('architecture-beta\n    group g(cloud)[G]\n    service a(server)[A]\n    service b(server)[B]\n    service c(server)[C] in g\n    a:R --> L:b\n');
+    architecture.placer(m, 'n:a', 'n:b', 'dessous');
+    assert.deepEqual([m.liens.length, m.liens[0].coteDe, m.liens[0].coteVers, m.liens[0].flecheVers], [1, 'T', 'B', true]);
+    architecture.placer(m, 'n:c', 'n:a', 'droite');
+    assert.equal(m.services.find((x) => x.id === 'c').parent, '');
+    assert.match(architecture.ecrire(m), /a:R -- L:c/);
+    architecture.placer(m, 'n:b', 'g:g', 'dans');
+    assert.equal(m.services.find((x) => x.id === 'b').parent, 'g');
+    architecture.placer(m, 'n:b', null, null);
+    assert.equal(m.services.find((x) => x.id === 'b').parent, '');
+    assert.deepEqual(architecture.analyser(architecture.ecrire(m)), m);
+});
+
+test('placement à la souris : logigramme — liens invisibles selon le sens, même rang, groupes', async () => {
+    const { default: logigramme } = await import('../js/diagrammes/logigramme.js');
+    const m = logigramme.analyser('flowchart LR\n    A --> B\n    C\n    subgraph G ["G"]\n        D\n    end\n');
+    logigramme.placer(m, 'n:C', 'n:B', 'droite');
+    assert.match(logigramme.ecrire(m), /B ~~~ C/);
+    logigramme.placer(m, 'n:C', 'n:A', 'gauche');
+    let code = logigramme.ecrire(m);
+    assert.ok(!code.includes('B ~~~ C') && code.includes('C ~~~ A'), code);
+    // En LR, « en dessous » = même rang que B : mêmes prédécesseurs, écrit juste après B
+    logigramme.placer(m, 'n:C', 'n:B', 'dessous');
+    code = logigramme.ecrire(m);
+    assert.ok(code.includes('A ~~~ C') && !code.includes('C ~~~ A'), code);
+    assert.deepEqual(m.noeuds.map((n) => n.id), ['A', 'B', 'C', 'D']);
+    // Placé à côté d'une étape d'un groupe, il rejoint ce groupe ; lâché dans le vide, il en sort
+    logigramme.placer(m, 'n:C', 'n:D', 'droite');
+    assert.equal(m.noeuds.find((n) => n.id === 'C').groupe, 'G');
+    logigramme.placer(m, 'n:C', null, null);
+    assert.equal(m.noeuds.find((n) => n.id === 'C').groupe, null);
+    logigramme.placer(m, 'n:A', 'g:G', 'dans');
+    assert.equal(m.noeuds.find((n) => n.id === 'A').groupe, 'G');
+    // Les liens visibles ne sont jamais retirés ; un groupe ne se range pas dans lui-même
+    assert.ok(m.liens.some((l) => l.de === 'A' && l.vers === 'B' && l.trait === 'plein'));
+    logigramme.placer(m, 'g:G', 'g:G', 'dans');
+    assert.equal(m.groupes[0].parent, null);
+    const relu = logigramme.analyser(logigramme.ecrire(m));
+    assert.equal(logigramme.ecrire(relu), logigramme.ecrire(m));
+});

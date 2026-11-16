@@ -13,7 +13,7 @@ const ecrireTexte = (t, guillemets) => {
 };
 const comparable = (t) => String(t).replace(/[\s​]+/g, '');
 
-function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi, marques }) {
+function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi, marques, repererPropre, apresAffichage, pastilles = false }) {
     function analyser(code) {
         const { preambule, corps } = separerPreambule(code);
         if ((corps[0] || '').trim() !== entete) throw new Error(`La première ligne doit être « ${entete} ».`);
@@ -67,6 +67,7 @@ function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi,
 
     // Mermaid ne numérote pas ses éléments : ils sont retrouvés par leur texte, dans l'ordre du code
     function reperer(svg, modele) {
+        if (repererPropre) { repererPropre(svg, modele, aplatir(modele)); return; }
         const restants = aplatir(modele);
         for (const el of svg.querySelectorAll(marques)) {
             const t = comparable(el.textContent);
@@ -150,14 +151,69 @@ function fabriquer({ type, entete, nom, unique, nouveau, guillemets, aide, quoi,
         return blocs;
     }
 
-    return { type, nom, analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+    return { type, nom, pastilles, apresAffichage, analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+}
+
+// Ishikawa : Mermaid dessine chaque catégorie (« ishikawa-label-group ») suivie, au même niveau, des groupes de ses causes
+// (« ishikawa-sub-group » : une flèche et un texte, sans imbrication, dans un ordre qui n'est pas celui du code). Les causes
+// sont donc retrouvées par leur texte parmi celles de leur catégorie seulement : deux causes de même texte dans deux
+// catégories ne sont plus confondues. La flèche d'une cause qui a des sous-causes est longue : des zones de clic sont
+// ajoutées sur la flèche et sur le texte, pour que l'élément se sélectionne partout où il se voit.
+function repererIshikawa(svg, modele, liste) {
+    const tete = svg.querySelector('.ishikawa-head-group');
+    const effet = liste.find((x) => x.profondeur === 0);
+    if (tete && effet) marquer(tete, effet.cle);
+    const categories = liste.filter((x) => x.profondeur === 1);
+    const groupes = [...svg.querySelectorAll('.ishikawa-label-group, .ishikawa-sub-group')];
+    let causes = [];
+    for (const g of groupes) {
+        const t = comparable(g.querySelector('text')?.textContent || '');
+        if (g.classList.contains('ishikawa-label-group')) {
+            const i = categories.findIndex((x) => comparable(x.nom) === t);
+            if (i < 0) { causes = []; continue; }
+            const cat = categories.splice(i, 1)[0];
+            marquer(g, cat.cle);
+            causes = liste.filter((x) => x.cle.startsWith(`${cat.cle}.`));
+            continue;
+        }
+        const i = causes.findIndex((x) => comparable(x.nom) === t);
+        if (i < 0) continue;
+        const cle = causes.splice(i, 1)[0].cle;
+        marquer(g, cle);
+        const fleche = g.querySelector('line');
+        if (fleche) {
+            const touche = fleche.cloneNode(false);
+            touche.removeAttribute('marker-start');
+            touche.setAttribute('class', 'fusain-touche');
+            marquer(touche, cle);
+            g.prepend(touche);
+        }
+    }
+}
+
+// Une fois le schéma affiché (les dimensions des textes sont alors connues) : un rectangle transparent sous chaque
+// libellé, pour que le clic entre les lettres sélectionne aussi l'élément
+function apresAffichageIshikawa(svg) {
+    for (const g of svg.querySelectorAll('g[data-fusain]')) ajouterToucheTexte(g, g.getAttribute('data-fusain'));
+}
+
+function ajouterToucheTexte(g, cle) {
+    const texte = g.querySelector('text');
+    let b = null;
+    try { b = texte?.getBBox(); } catch { b = null; }
+    if (!b || !b.width) return;
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    for (const [a, v] of Object.entries({ x: b.x - 4, y: b.y - 3, width: b.width + 8, height: b.height + 6, class: 'fusain-touche fusain-touche-libelle' })) rect.setAttribute(a, v);
+    if (texte.getAttribute('transform')) rect.setAttribute('transform', texte.getAttribute('transform'));
+    marquer(rect, cle);
+    texte.before(rect);
 }
 
 export const ishikawa = fabriquer({
     type: 'ishikawa', entete: 'ishikawa', nom: 'Diagramme d\'Ishikawa', unique: true, guillemets: false,
-    marques: '.ishikawa-head-label, .ishikawa-label',
+    marques: '.ishikawa-head-label, .ishikawa-label', repererPropre: repererIshikawa, apresAffichage: apresAffichageIshikawa, pastilles: true,
     nouveau: (niveau) => (niveau <= 1 ? 'Nouvelle catégorie' : 'Nouvelle cause'),
-    aide: 'Sélectionnez l\'effet, une catégorie ou une cause sur le schéma ou dans le plan. La poignée « + » ajoute une cause.',
+    aide: 'Chaque élément porte une petite pastille : un clic ouvre son texte ici, prêt à modifier. Un clic sur l\'élément le sélectionne ; la poignée « + » lui ajoute une cause.',
     quoi: { racine: 'l\'effet étudié', fille: 'Cause', soeur: 'Cause de même niveau', niveau: (n) => (n === 1 ? 'Effet étudié' : n === 2 ? 'Catégorie de causes' : 'Cause') },
 });
 

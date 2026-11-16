@@ -31,6 +31,7 @@ Trente-quatre types de schémas Mermaid s'éditent visuellement : logigramme, lo
 |---|---|
 | Clic sur un élément | Le sélectionne ; ses propriétés apparaissent à droite |
 | Double-clic | Modifie son texte sur place (Entrée pour valider, Échap pour annuler) |
+| Clic sur une pastille (petit rond orange, diagramme d'Ishikawa) | Sélectionne l'élément et place le curseur dans son texte, à droite |
 | Pastille orange « + » | Clic : ajoute un élément relié. Glisser vers un autre élément : les relie |
 | Suppr | Supprime l'élément sélectionné |
 

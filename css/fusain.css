@@ -95,6 +95,16 @@ body { display: flex; flex-direction: column; overflow: hidden; }
     display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .4); touch-action: none; padding: 0;
 }
+.fusain-pastille {
+    position: absolute; z-index: 2; width: .875rem; height: .875rem; padding: 0; border-radius: 50%;
+    border: 2px solid #e4794a; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+}
+.fusain-pastille:hover, .fusain-pastille--active { background: #e4794a; }
+.fusain-pastille:hover { transform: scale(1.25); }
+.fusain-feuille:has(.fusain-saisie) .fusain-pastille { display: none; }
+.fusain-visuel .fusain-touche-libelle { fill: transparent; stroke: none; pointer-events: all; }
+.fusain-visuel g.fusain-sel > text { fill: #a94645 !important; font-weight: 700; }
+.fusain-visuel g.fusain-sel > line:not(.fusain-touche) { stroke: #e4794a !important; stroke-width: 2px !important; }
 .fusain-saisie { position: absolute; z-index: 5; min-width: 8rem; padding: .25rem .5rem; border: 2px solid #e4794a; background: #fff; color: #161616; font: inherit; text-align: center; }
 /* Saisie directe d'un texte de diapositive : mêmes police, taille, couleur et alignement que le texte dessiné */
 .fusain-feuille .fusain-saisie-diapo { min-width: 0; padding: 0; border: 0; background: transparent; font-family: Marianne, arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; outline: 2px dashed #e4794a; outline-offset: 6px; cursor: text; caret-color: #e4794a; box-sizing: content-box; }

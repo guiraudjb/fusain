@@ -297,8 +297,14 @@ for (const chemin of ['Documentation/GUIDE_UTILISATEUR.md', 'sbom/fusain-sbom-cy
 for (const [nom, cle] of [['Logigramme en couloirs', 'g:usager'], ['Causes et effet (Ishikawa)', 'r.0.1'], ['Arborescence', 'r.0.1.0'], ['Diagramme de Venn', 'u:0']]) {
     await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
     await p.click(`#fusain-modale-modeles .fusain-modele:has(.fusain-modele__nom:text-is("${nom}"))`); await p.waitForTimeout(1500);
-    const marque = p.locator(`#fusain-feuille [data-fusain="${cle}"]`).first();
+    const marque = p.locator(`#fusain-feuille [data-fusain="${cle}"]:not(.fusain-touche)`).first();
     ok(`« ${nom} » : élément repéré sur le schéma`, await marque.count() === 1 && await p.evaluate(() => document.querySelector('#fusain-feuille').classList.contains('fusain-visuel')));
+    if (nom.includes('Ishikawa')) {
+        // Une pastille par élément ; un clic dessus sélectionne l'élément et place le curseur dans son texte
+        const pastilles = await p.locator('#fusain-feuille .fusain-pastille').count();
+        await p.locator('#fusain-feuille .fusain-pastille').nth(2).click(); await p.waitForTimeout(300);
+        ok('« Ishikawa » : une pastille par élément, qui ouvre son texte', pastilles === 11 && await p.evaluate(() => document.activeElement?.id === 'fusain-champ-texte' && Boolean(document.querySelector('#fusain-feuille .fusain-sel'))), `${pastilles} pastilles`);
+    }
     await marque.click({ force: true }); await p.waitForTimeout(300);
     await p.fill('#fusain-champ-texte', 'Texte <b>modifié</b>'); await p.press('#fusain-champ-texte', 'Tab'); await p.waitForTimeout(1200);
     ok(`« ${nom} » : texte modifié depuis le panneau, écrit comme du texte`, (await p.textContent('#fusain-feuille')).replace(/\s/g, '').includes('Texte<b>modifié</b>') && !await p.locator('#fusain-feuille b').count());

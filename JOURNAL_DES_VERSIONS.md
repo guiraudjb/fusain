@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.28.1 — 16 novembre 2026 — Ishikawa : pastilles et sélection fiable
+
+- **Constat** : une cause qui a des sous-causes était repérée par sa flèche, longue et presque vide ; un clic au milieu ne la sélectionnait pas, et la poignée « + » se plaçait loin du texte. Deux causes de même texte dans deux catégories pouvaient être confondues.
+- **Repérage** : les causes sont retrouvées parmi celles de leur catégorie seulement ; zones de clic ajoutées sur chaque flèche et sous chaque libellé (le clic entre deux mots sélectionne aussi).
+- **Pastilles** : une petite poignée sur chaque élément (effet, catégories, causes) ; un clic sélectionne l'élément et place le curseur dans son champ « Texte » du panneau. Elles restent hors de l'ordre de tabulation : au clavier, les flèches et le plan donnent le même accès. La poignée « + » se place à gauche du texte sélectionné ; le texte et la flèche de l'élément choisi passent en couleur.
+- **Recette** : pastilles comptées et cliquées dans la recette Chrome (11 sur le modèle) ; repérage vérifié sur le modèle, la page de démonstration et un exemple à cinq niveaux avec textes en double.
+
 ## 0.28.0 — 16 novembre 2026 — aide au débogage dans le code
 
 - **Constat** : des logigrammes écrits à la main contenaient des écritures acceptées par Mermaid mais fautives : propriétés `id@{ … }` restées après la suppression de leur lien (Mermaid dessine alors une boîte portant l'identifiant), nœuds déclarés et reliés à rien, libellés coupés par un retour à la ligne.

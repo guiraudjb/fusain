@@ -377,6 +377,7 @@ function afficherFeuille(page, schema, erreur) {
     const garde = saisieDiapo?.zone.parentNode === zones.feuille ? saisieDiapo.zone : null;
     for (const enfant of [...zones.feuille.children]) if (enfant !== garde) enfant.remove();
     zones.feuille.prepend(svg, s('svg', { class: 'fusain-calque', 'aria-hidden': 'true' }));
+    if (visuel && interne && vue.editeur.apresAffichage) vue.editeur.apresAffichage(interne);
     if (avaitFocus) svg.focus({ preventScroll: true });
 
     // L'alerte est posée au-dessus de la scène : elle en change la hauteur, la feuille est dimensionnée ensuite
@@ -412,21 +413,51 @@ function selectionner(cle, { panneau = true } = {}) {
 }
 
 function rectangleRelatif(cle) {
-    const el = elementsMarques(cle)[0];
+    const marque = elementsMarques(cle)[0];
+    // Éditeur à pastilles : la poignée se cale sur le texte de l'élément, pas sur sa flèche (parfois très longue)
+    const el = vue.editeur?.pastilles ? marque?.querySelector('text') || marque : marque;
     if (!el) return null;
     const r = el.getBoundingClientRect();
     const f = zones.feuille.getBoundingClientRect();
     return { x: r.left - f.left, y: r.top - f.top, l: r.width, h: r.height };
 }
 
+// Pastilles : une petite poignée sur chaque élément modifiable ; un clic le sélectionne et ouvre son texte dans le panneau.
+// Le clavier garde ses chemins (flèches sur le schéma, plan du panneau) : les pastilles restent hors de l'ordre de tabulation.
+function placerPastilles() {
+    for (const p of zones.feuille.querySelectorAll('.fusain-pastille')) p.remove();
+    const { editeur, modele } = vue;
+    if (ui.mode !== 'visuel' || !modele || !editeur?.pastilles) return;
+    const f = zones.feuille.getBoundingClientRect();
+    for (const { cle, nom } of editeur.elements(modele)) {
+        const marque = elementsMarques(cle)[0];
+        const cible = marque?.querySelector('text') || marque;
+        if (!cible) continue;
+        const r = cible.getBoundingClientRect();
+        if (!r.width) continue;
+        const pastille = h('button', { type: 'button', class: `fusain-pastille${cle === ui.selection ? ' fusain-pastille--active' : ''}`, tabindex: '-1', 'aria-hidden': 'true', title: `Modifier « ${nom} »` });
+        // Coin haut droit, juste au-dessus du texte : la pastille ne masque ni une lettre ni la flèche
+        pastille.style.left = `${r.right - f.left - 2}px`;
+        pastille.style.top = `${r.top - f.top - 13}px`;
+        pastille.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ui.focusTexte = true;
+            selectionner(cle);
+        });
+        zones.feuille.append(pastille);
+    }
+}
+
 function placerPoignee() {
+    placerPastilles();
     zones.feuille.querySelector('.fusain-poignee')?.remove();
     const { editeur, modele } = vue;
     if (ui.mode !== 'visuel' || !modele || !ui.selection || !editeur.relier || !editeur.peutRelier(ui.selection)) return;
     const r = rectangleRelatif(ui.selection);
     if (!r) return;
     const poignee = h('button', { type: 'button', class: 'fusain-poignee', title: 'Cliquer pour ajouter un élément lié, ou glisser vers un autre élément pour les relier', 'aria-label': 'Ajouter un élément lié' }, '+');
-    poignee.style.left = `${r.x + r.l - 8}px`;
+    // Éditeur à pastilles : à gauche du texte, le côté droit étant pris par la flèche et la pastille
+    poignee.style.left = editeur.pastilles ? `${r.x - 34}px` : `${r.x + r.l - 8}px`;
     poignee.style.top = `${r.y + r.h / 2 - 14}px`;
     zones.feuille.append(poignee);
 
@@ -775,7 +806,7 @@ function brancherDeplacement() {
 
 function brancherFeuille() {
     zones.feuille.addEventListener('click', (e) => {
-        if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-saisie')) return;
+        if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-pastille, .fusain-saisie')) return;
         const cle = e.target.closest('[data-fusain]')?.getAttribute('data-fusain') || null;
         selectionner(cle);
         if (cle && estDiapo()) ouvrirSaisieDiapo(cle, { x: e.clientX, y: e.clientY });

@@ -8,8 +8,9 @@ const COTES = [['L', 'Gauche'], ['R', 'Droite'], ['T', 'Haut'], ['B', 'Bas']];
 const RE_BLOC = /^(group|service)\s+([A-Za-z0-9_]+)(?:\(([A-Za-z0-9_:-]+)\))?(?:\[(.+)\])?(?:\s+in\s+([A-Za-z0-9_]+))?$/;
 const RE_LIEN = /^([A-Za-z0-9_]+):([TBLR])\s+(<)?-(?:-|\[(.+)\]-)(>)?\s+([TBLR]):([A-Za-z0-9_]+)$/;
 
-// Un libellé n'admet que lettres, chiffres, espaces et quelques signes
-const propre = (t) => String(t).replace(/[^\p{L}\p{N} _.-]/gu, ' ').replace(/\s+/g, ' ').trim();
+// Un libellé n'admet que lettres, chiffres, espaces et les signes que Mermaid 12.3 accepte entre crochets
+// (les guillemets et les crochets fermeraient le libellé ; chevrons, accolades, # et @ sont écartés par prudence)
+const propre = (t) => String(t).replace(/[^\p{L}\p{N} _.\-/(),:'&+!?%*=;]/gu, ' ').replace(/\s+/g, ' ').trim();
 
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);

@@ -29,6 +29,17 @@ export function nuancier(fondActuel, surChoix) {
         }));
 }
 
+// Couleur d'un trait (lien, relation) : les bordures du DSFR ; « Couleur du thème » rend la main au thème
+export function nuancierTrait(actuelle, surChoix) {
+    return h('div', { class: 'fusain-couleurs', role: 'group', 'aria-label': 'Couleur du trait' },
+        COULEURS.filter(([, , bord], i) => i === 0 || bord !== '#161616').map(([nom, , bord]) => {
+            const b = h('button', { type: 'button', class: 'fusain-couleur', title: nom, 'aria-label': nom,
+                'aria-pressed': String((actuelle || null) === (bord || null)), onclick: () => surChoix(bord || '') });
+            b.style.background = bord || 'repeating-linear-gradient(45deg, #fff 0 4px, #ddd 4px 8px)';
+            return b;
+        }));
+}
+
 // Texte d'un libellé Mermaid : guillemets et retours à la ligne ne peuvent pas « sortir » du libellé (§7.3).
 // Les entités de Mermaid (« #9829; ») sont laissées telles quelles, comme Mermaid les lit : « #42; » saisi dans un
 // libellé s'affiche donc « * » (comportement documenté de Mermaid, voir l'audit F18).

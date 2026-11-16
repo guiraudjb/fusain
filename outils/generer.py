@@ -14,6 +14,7 @@ Ce script ne fait pas partie du produit livré : il ne s'exécute que sur le pos
 import base64
 import hashlib
 import json
+import os
 import re
 import sys
 import uuid
@@ -53,9 +54,18 @@ def fichiers_caches():
     liste = [f for f in FICHIERS_CACHE if (RACINE / f).is_file()]
     for dossier in DOSSIERS_CACHE:
         base = RACINE / dossier
-        if base.is_dir():
-            liste += [p.relative_to(RACINE).as_posix() for p in base.rglob("*") if p.is_file()]
-    return sorted(f for f in liste if f not in EXCLUS and not ADRESSES_COMMUNES.match(f))
+        if not base.is_dir():
+            continue
+        for racine_dir, sous_dossiers, noms in os.walk(base):
+            rel_dir = Path(racine_dir).relative_to(RACINE).as_posix()
+            # Ne pas parcourir les 35 000 fichiers des sous-dossiers de cartes/adresses/
+            if rel_dir == "cartes/adresses":
+                sous_dossiers[:] = []
+            for nom in noms:
+                f = f"{rel_dir}/{nom}"
+                if f not in EXCLUS and not ADRESSES_COMMUNES.match(f):
+                    liste.append(f)
+    return sorted(liste)
 
 
 def fichiers_a_la_demande():
@@ -74,6 +84,11 @@ def index_avec_sri():
     html = re.sub(r'<link\b[^>]*rel="stylesheet"[^>]*\b(href)="\./((?:libs|css)/[^"]+)"[^>]*>', remplacer, html)
     # Bibliothèque chargée à la demande : la balise ne déclenche aucun chargement, elle porte l'adresse et l'empreinte
     html = re.sub(r'<link\b[^>]*rel="fusain-extension"[^>]*\b(href)="\./((?:libs|icones|cartes)/[^"]+)"[^>]*>', remplacer, html)
+    # Empreintes SRI de tous les modules ES propres à FUSAIN dès le tout premier chargement
+    modules = sorted(p.relative_to(RACINE).as_posix() for p in (RACINE / "js").rglob("*.js") if p.is_file())
+    liens_modules = [f'    <link rel="modulepreload" href="./{m}" integrity="{sri(m)}">' for m in modules if m not in ("js/app.js", "js/confiance.js")]
+    bloc_modules = "<!-- DEBUT-MODULES -->\n" + "\n".join(liens_modules) + "\n    <!-- FIN-MODULES -->"
+    html = re.sub(r"<!-- DEBUT-MODULES -->.*?<!-- FIN-MODULES -->", lambda _: bloc_modules, html, flags=re.S)
     return html
 
 

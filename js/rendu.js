@@ -1,7 +1,7 @@
 // Rendu Mermaid et composition de la page au format d'impression
 import { s } from './dom.js';
 import { dimensions, MM_PAR_PX } from './formats.js';
-import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX } from './securite.js';
+import { nettoyerCode, assainirSvg, typeDiagramme, TAILLE_MAX_CODE, LIENS_MAX, DELAI_MAX_RENDU } from './securite.js';
 import { localiser } from './diagnostic.js';
 import { rendreDiapo } from './diapo.js';
 import { rendreCarte } from './carte.js';
@@ -110,9 +110,15 @@ async function rendre(code, idTheme) {
     if (!propre.trim()) throw new Error('La page ne contient aucun code.');
     numero += 1;
     const id = `fusain-${graine}-${numero}`;
+    let minuterie = null;
     try {
-        await window.mermaid.parse(propre);
-        const { svg: chaine } = await window.mermaid.render(id, propre);
+        const delai = new Promise((_, rejeter) => {
+            minuterie = setTimeout(() => rejeter(new Error(`Le rendu du schéma a dépassé le délai maximal autorisé (${DELAI_MAX_RENDU / 1000} s). Allégez le schéma ou réduisez le nombre de liens.`)), DELAI_MAX_RENDU);
+        });
+        const { svg: chaine } = await Promise.race([
+            window.mermaid.parse(propre).then(() => window.mermaid.render(id, propre)),
+            delai,
+        ]);
         const svg = assainirSvg(chaine);
         // Icônes illustrées : posées ici, après l'assainissement, à partir des fichiers embarqués
         await incorporerImages(svg);
@@ -141,6 +147,7 @@ async function rendre(code, idTheme) {
         fondsDesLibelles(svg, l, h);
         return { svg, l, h, htmlIncorpore: Boolean(svg.querySelector('foreignObject')) };
     } finally {
+        clearTimeout(minuterie);
         nettoyerOrphelins(id);
     }
 }

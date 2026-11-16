@@ -1,7 +1,7 @@
 // Logigramme : analyse du code Mermaid en modèle, réécriture, édition visuelle
 import { h, bouton, champTexte, champSelect, champCase, message } from '../dom.js';
 import { choisirIcone } from '../icones.js';
-import { nuancier, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit, ligneAccessible } from './commun.js';
+import { nuancier, nuancierTrait, echapper, desechapper, sansGuillemets, separerPreambule, plan, marquer, lireInit, ecrireInit, ligneAccessible } from './commun.js';
 
 // [nom, ouvrant, fermant, libellé] — les ouvrants les plus longs sont testés en premier
 const FORMES = [
@@ -28,7 +28,20 @@ const ESPACEMENTS = [['', 'Normal'], ['compact', 'Resserré'], ['aere', 'Aéré'
 const VALEURS_ESPACEMENT = { compact: 30, aere: 90 };
 const TRACES = [['', 'Courbes'], ['linear', 'Droits'], ['step', 'En escalier']];
 const MOTS_BRUTS = ['classDef', 'class', 'linkStyle'];
-const RESERVES = new Set(['end', 'subgraph', 'direction', 'style', 'click', 'graph', 'flowchart', ...MOTS_BRUTS]);
+const RESERVES = new Set(['end', 'subgraph', 'flow', 'global', 'direction', 'style', 'click', 'graph', 'flowchart', ...MOTS_BRUTS]);
+
+// Flux d'agents (agentflow-beta) : même écriture que le logigramme, avec une nature par étape (« @{ shape: … } »),
+// des conteneurs « flow id["Agent"] … end » ou « global … end », et trois sortes de liens seulement
+const NATURES_AGENT = [['', 'Aucune (forme seule)'], ['task', 'Tâche d\'un agent'], ['tool', 'Outil appelé'], ['input', 'Donnée d\'entrée'],
+    ['decision', 'Décision'], ['refdoc', 'Document consulté'], ['action', 'Action (envoi, écriture)'], ['rect', 'Rectangle simple']];
+const LIENS_AGENT = [['enchainement', 'Enchaînement (flèche)'], ['consultation', 'Consultation (pointillé)'], ['echec', 'Chemin d\'échec (croix)']];
+const RE_NATURE = /^@\{\s*shape:\s*([a-z]+)\s*\}/;
+
+// Style d'un lien (« linkStyle ») : couleur, épaisseur et animation se règlent dans le panneau, le reste est gardé
+const EPAISSEURS = [['', 'Par défaut'], ['1px', 'Fine (1 px)'], ['2px', 'Moyenne (2 px)'], ['2.5px', '2,5 px'], ['3px', 'Épaisse (3 px)'], ['3.5px', '3,5 px'], ['5px', 'Très épaisse (5 px)']];
+const ANIMATIONS = [['', 'Aucune'], ['lente', 'Flux animé lent'], ['rapide', 'Flux animé rapide']];
+const DUREES_ANIMATION = { lente: '20s', rapide: '8s' };
+const PROPRIETES_ANIMATION = ['stroke-dasharray', 'stroke-dashoffset', 'animation'];
 const RE_ID = /^[\p{L}\p{N}_]+/u;
 const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
 const RE_LIEN = /^([<ox])?(-{2,}|={2,}|-\.+-|~{3,})([>ox])?/;
@@ -77,6 +90,12 @@ function lireEnonce(texte, modele, groupe) {
             noeud.texte = desechapper(libelle);
             noeud.forme = forme[0];
             pos = apres + forme[2].length;
+            if (modele.agents && texte.startsWith('@{', pos)) {
+                const nature = texte.slice(pos).match(RE_NATURE);
+                if (!nature || !NATURES_AGENT.some(([n]) => n && n === nature[1])) throw new Inconnu('nature d\'étape inconnue');
+                noeud.nature = nature[1];
+                pos += nature[0].length;
+            }
         } else if (texte.startsWith('@{', pos)) {
             // Seule forme étendue gérée : l'étape représentée par une icône embarquée, telle que FUSAIN l'écrit
             const icone = texte.slice(pos).match(RE_ICONE);
@@ -143,9 +162,9 @@ function lireEnonce(texte, modele, groupe) {
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);
     // Le logigramme en couloirs (swimlane-beta de Mermaid) a la même écriture : chaque groupe y est un couloir
-    const entete = (corps[0] || '').trim().match(/^(flowchart|graph|swimlane-beta)(?:\s+(TB|TD|BT|LR|RL))?\s*;?$/);
+    const entete = (corps[0] || '').trim().match(/^(flowchart|graph|swimlane-beta|agentflow-beta)(?:\s+(TB|TD|BT|LR|RL))?\s*;?$/);
     if (!entete) throw new Error('La première ligne doit être « flowchart » suivi du sens (TD, LR…).');
-    const modele = { preambule, couloirs: entete[1] === 'swimlane-beta', sens: entete[2] === 'TB' ? 'TD' : entete[2] || 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
+    const modele = { preambule, couloirs: entete[1] === 'swimlane-beta', agents: entete[1] === 'agentflow-beta', sens: entete[2] === 'TB' ? 'TD' : entete[2] || 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
     // « linkStyle 2 … » désigne un lien par son rang : le style est rattaché au lien, et son rang recalculé à l'écriture
     const stylesLiens = [];
     const pile = [];
@@ -157,7 +176,27 @@ export function analyser(code) {
         const groupe = pile[pile.length - 1] || null;
         try {
             if (ligne.startsWith('%%')) { modele.brut.push(ligne); return; }
-            if (mot === 'subgraph') {
+            if (modele.agents && (mot === 'flow' || mot === 'global') && (ligne.length === mot.length || /[\s[]/.test(ligne[mot.length]))) {
+                // « flow id["Nom de l'agent"] » ou « global » : un conteneur, fermé par « end »
+                const reste = ligne.slice(mot.length).trim();
+                let id;
+                let titre;
+                if (mot === 'global') {
+                    if (reste) throw new Inconnu('« global » ne porte pas de nom');
+                    id = nouvelId(modele, 'global');
+                    titre = '';
+                } else {
+                    const m = reste.match(/^([\p{L}\p{N}_]+)\s*(?:\[(.*)\])?$/u);
+                    if (!m) throw new Inconnu('flux invalide');
+                    id = m[1];
+                    titre = m[2] === undefined ? m[1] : desechapper(sansGuillemets(m[2]));
+                }
+                if (modele.groupes.some((g) => g.id === id)) throw new Inconnu('flux en double');
+                modele.groupes.push({ id, titre, parent: groupe, sens: null, global: mot === 'global' });
+                pile.push(id);
+                return;
+            }
+            if (mot === 'subgraph' && !modele.agents) {
                 const reste = ligne.slice(8).trim();
                 const m = reste.match(/^([\p{L}\p{N}_]+)\s*\[(.*)\]$/u);
                 let id;
@@ -216,8 +255,8 @@ function ecrireNoeud(n) {
     // Étape représentée par une icône : le texte passe dessous. La barre oblique inverse s'écrit par son code.
     if (n.icone) return `${n.id}@{ icon: "${n.icone}", label: "${echapper(n.texte ?? n.id).replace(/\\/g, '#92;')}", pos: "b" }${n.classe ? `:::${n.classe}` : ''}`;
     const forme = FORMES.find((f) => f[0] === n.forme) || FORMES.find((f) => f[0] === 'rectangle');
-    const corps = n.texte === null && n.forme === 'rectangle' ? '' : `${forme[1]}"${echapper(n.texte ?? n.id)}"${forme[2]}`;
-    return n.id + corps + (n.classe ? `:::${n.classe}` : '');
+    const corps = n.texte === null && n.forme === 'rectangle' && !n.nature ? '' : `${forme[1]}"${echapper(n.texte ?? n.id)}"${forme[2]}`;
+    return n.id + corps + (n.nature ? `@{ shape: ${n.nature} }` : '') + (n.classe ? `:::${n.classe}` : '');
 }
 
 function ecrireLien(l) {
@@ -233,12 +272,16 @@ function ecrireLien(l) {
 }
 
 export function ecrire(modele) {
-    const lignes = [...modele.preambule, `${modele.couloirs ? 'swimlane-beta' : 'flowchart'} ${modele.sens}`];
+    const entete = modele.agents ? 'agentflow-beta' : modele.couloirs ? 'swimlane-beta' : 'flowchart';
+    // Le flux d'agents n'admet que TB et LR
+    const sens = modele.agents ? (['LR', 'RL'].includes(modele.sens) ? 'LR' : 'TB') : modele.sens;
+    const lignes = [...modele.preambule, `${entete} ${sens}`];
     const marge = (p) => '    '.repeat(p);
     const ecrireGroupe = (idParent, p) => {
         for (const n of modele.noeuds.filter((x) => x.groupe === idParent)) lignes.push(marge(p) + ecrireNoeud(n));
         for (const g of modele.groupes.filter((x) => x.parent === idParent)) {
-            lignes.push(`${marge(p)}subgraph ${g.id} ["${echapper(g.titre)}"]`);
+            if (modele.agents) lignes.push(g.global ? `${marge(p)}global` : `${marge(p)}flow ${g.id}["${echapper(g.titre)}"]`);
+            else lignes.push(`${marge(p)}subgraph ${g.id} ["${echapper(g.titre)}"]`);
             if (g.sens) lignes.push(`${marge(p + 1)}direction ${g.sens}`);
             ecrireGroupe(g.id, p + 1);
             lignes.push(`${marge(p)}end`);
@@ -303,6 +346,52 @@ function appliquerFleche(l, type) {
     l.fin = { fin: '>', double: '>', rond: 'o', croix: 'x', aucune: '' }[type];
 }
 
+function sorteLienAgent(l) {
+    if (l.trait === 'pointille') return 'consultation';
+    return l.fin === 'x' ? 'echec' : 'enchainement';
+}
+
+function appliquerSorteAgent(l, sorte) {
+    l.debut = '';
+    l.longueur = 1;
+    if (sorte === 'consultation') { l.trait = 'pointille'; l.fin = ''; } else { l.trait = 'plein'; l.fin = sorte === 'echec' ? 'x' : '>'; }
+}
+
+// « stroke:#000091,stroke-width:3px » ↔ [['stroke', '#000091'], ['stroke-width', '3px']] ; l'ordre est conservé
+export function lireStyleLien(style) {
+    const paires = [];
+    for (const morceau of String(style || '').split(/,(?=\s*[\w-]+\s*:)/)) {
+        const i = morceau.indexOf(':');
+        if (i > 0) paires.push([morceau.slice(0, i).trim(), morceau.slice(i + 1).trim()]);
+    }
+    return paires;
+}
+
+const ecrireStyleLien = (paires) => paires.filter(([, v]) => v !== '' && v !== null && v !== undefined).map(([k, v]) => `${k}:${v}`).join(',') || null;
+
+export function animationLien(style) {
+    const anim = lireStyleLien(style).find(([k]) => k === 'animation')?.[1] || '';
+    if (!anim) return '';
+    const duree = parseFloat(anim.match(/(\d+(?:\.\d+)?)s\b/)?.[1]);
+    return Number.isFinite(duree) && duree < 14 ? 'rapide' : 'lente';
+}
+
+// Change une propriété du style d'un lien ; « animation » pose ou retire le pointillé qui défile (images-clés « dash » de Mermaid)
+export function reglerStyleLien(style, propriete, valeur) {
+    let paires = lireStyleLien(style);
+    if (propriete === 'animation') {
+        paires = paires.filter(([k]) => !PROPRIETES_ANIMATION.includes(k));
+        if (valeur) paires.push(['stroke-dasharray', '9 5'], ['stroke-dashoffset', '900'], ['animation', `dash ${DUREES_ANIMATION[valeur] || '20s'} linear infinite`]);
+    } else {
+        const i = paires.findIndex(([k]) => k === propriete);
+        if (i >= 0) paires[i] = [propriete, valeur]; else paires.push([propriete, valeur]);
+    }
+    return ecrireStyleLien(paires);
+}
+
+const valeurStyle = (style, propriete) => lireStyleLien(style).find(([k]) => k === propriete)?.[1] || '';
+
+
 function espacement(modele) {
     const n = Number(lireInit(modele.preambule).flowchart?.nodeSpacing);
     if (!Number.isFinite(n) || n === 0) return '';
@@ -330,7 +419,7 @@ export function elements(modele) {
     return [
         ...modele.noeuds.map((n) => ({ cle: `n:${n.id}`, nom: nomNoeud(n) })),
         ...modele.liens.map((l, i) => ({ cle: `l:${i}`, nom: `${nomExtremite(modele, l.de)} → ${nomExtremite(modele, l.vers)}${l.texte ? ` (${l.texte})` : ''}` })),
-        ...modele.groupes.map((g) => ({ cle: `g:${g.id}`, nom: `Groupe : ${g.titre}` })),
+        ...modele.groupes.map((g) => ({ cle: `g:${g.id}`, nom: `${g.global ? 'Zone commune' : modele.agents ? `Agent : ${g.titre}` : `Groupe : ${g.titre}`}` })),
     ];
 }
 
@@ -339,7 +428,7 @@ export function reperer(svg, modele) {
     const prefixe = `${svg.id}-`;
     // Une étape-icône n'a pas la classe « node » des autres étapes
     for (const g of svg.querySelectorAll('g.node, g.icon-shape')) {
-        const m = g.id.startsWith(prefixe) && g.id.slice(prefixe.length).match(/^flowchart-(.+)-\d+$/);
+        const m = g.id.startsWith(prefixe) && g.id.slice(prefixe.length).match(/^(?:flowchart|agentflow)-(.+)-\d+$/);
         if (m && modele.noeuds.some((n) => n.id === m[1])) marquer(g, `n:${m[1]}`);
     }
     const chemins = [...svg.querySelectorAll('path.flowchart-link')];
@@ -406,10 +495,12 @@ export function panneau(ctx) {
     const blocs = [];
 
     blocs.push(h('div', { class: 'fusain-bloc' },
-        h('h2', {}, modele.couloirs ? 'Logigramme en couloirs' : 'Logigramme'),
-        champSelect('Sens de lecture', SENS, modele.sens, (v) => appliquer((m) => { m.sens = v; })),
-        champCase('Groupes en couloirs (un par acteur)', modele.couloirs, (v) => appliquer((m) => { m.couloirs = v; })),
-        h('div', { class: 'fusain-ligne' },
+        h('h2', {}, modele.agents ? 'Flux d\'agents' : modele.couloirs ? 'Logigramme en couloirs' : 'Logigramme'),
+        modele.agents
+            ? champSelect('Sens de lecture', [['TD', 'De haut en bas'], ['LR', 'De gauche à droite']], ['LR', 'RL'].includes(modele.sens) ? 'LR' : 'TD', (v) => appliquer((m) => { m.sens = v; }))
+            : champSelect('Sens de lecture', SENS, modele.sens, (v) => appliquer((m) => { m.sens = v; })),
+        modele.agents ? null : champCase('Groupes en couloirs (un par acteur)', modele.couloirs, (v) => appliquer((m) => { m.couloirs = v; })),
+        modele.agents ? null : h('div', { class: 'fusain-ligne' },
             champSelect('Espacement', ESPACEMENTS, espacement(modele), (v) => appliquer((m) => reglerDisposition(m, { nodeSpacing: VALEURS_ESPACEMENT[v], rankSpacing: VALEURS_ESPACEMENT[v] }, v ? 'dagre' : ''))),
             champSelect('Tracé des liens', TRACES, TRACES.some(([t]) => t === lireInit(modele.preambule).flowchart?.curve) ? lireInit(modele.preambule).flowchart.curve : '', (v) => appliquer((m) => reglerDisposition(m, { curve: v })))),
         h('div', { class: 'fusain-actions' },
@@ -417,11 +508,11 @@ export function panneau(ctx) {
                 let cle;
                 appliquer((m) => { cle = `n:${ajouterNoeud(m).id}`; }, () => cle);
             } }),
-            bouton(modele.couloirs ? 'Ajouter un couloir' : 'Ajouter un groupe', { icone: 'add-line', onclick: () => {
+            bouton(modele.agents ? 'Ajouter un agent' : modele.couloirs ? 'Ajouter un couloir' : 'Ajouter un groupe', { icone: 'add-line', onclick: () => {
                 let cle;
                 appliquer((m) => {
-                    const id = nouvelId(m, 'groupe');
-                    m.groupes.push({ id, titre: m.couloirs ? 'Nouvel acteur' : 'Nouveau groupe', parent: null, sens: null });
+                    const id = nouvelId(m, m.agents ? 'agent' : 'groupe');
+                    m.groupes.push({ id, titre: m.agents ? 'Nouvel agent' : m.couloirs ? 'Nouvel acteur' : 'Nouveau groupe', parent: null, sens: null });
                     ajouterNoeud(m, id);
                     cle = `g:${id}`;
                 }, () => cle);
@@ -433,13 +524,14 @@ export function panneau(ctx) {
     if (genre === 'n' && modele.noeuds.some((n) => n.id === id)) {
         const n = modele.noeuds.find((x) => x.id === id);
         const maj = (f) => appliquer((m) => f(m.noeuds.find((x) => x.id === id), m));
-        const autres = [...modele.noeuds.filter((x) => x.id !== id).map((x) => [`n:${x.id}`, nomNoeud(x)]), ...modele.groupes.map((g) => [`g:${g.id}`, `Groupe : ${g.titre}`])];
+        const autres = [...modele.noeuds.filter((x) => x.id !== id).map((x) => [`n:${x.id}`, nomNoeud(x)]), ...modele.groupes.map((g) => [`g:${g.id}`, `${g.global ? 'Zone commune' : modele.agents ? `Agent : ${g.titre}` : `Groupe : ${g.titre}`}`])];
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Étape sélectionnée'),
             champTexte('Texte', n.texte ?? n.id, (v) => maj((x) => { x.texte = v.trim() || x.id; }), { multiligne: true, id: 'fusain-champ-texte' }),
             n.icone ? h('p', { class: 'fusain-aide' }, `Étape représentée par l'icône « ${n.icone.split(':')[1]} » : le texte s'affiche dessous.`)
                 : champSelect('Forme', FORMES.map((f) => [f[0], f[3]]), n.forme, (v) => maj((x) => { x.forme = v; if (x.texte === null) x.texte = x.id; })),
-            h('div', { class: 'fusain-actions' },
+            modele.agents ? champSelect('Nature de l\'étape', NATURES_AGENT, n.nature || '', (v) => maj((x) => { x.nature = v || null; if (x.texte === null) x.texte = x.id; })) : null,
+            modele.agents ? null : h('div', { class: 'fusain-actions' },
                 bouton(n.icone ? 'Changer d\'icône…' : 'Représenter par une icône…', { icone: 'layout-grid-line', onclick: () => choisirIcone(n.icone || '', (val) => maj((x) => { x.icone = val; if (x.texte === null) x.texte = x.id; })).catch((e) => message('Icônes indisponibles', e.message, 'error')) }),
                 n.icone ? bouton('Retirer l\'icône', { icone: 'close-line', onclick: () => maj((x) => { x.icone = null; }) }) : null),
             modele.groupes.length ? champSelect('Groupe', [['', 'Aucun'], ...modele.groupes.map((g) => [g.id, g.titre])], n.groupe || '', (v) => maj((x) => { x.groupe = v || null; })) : null,
@@ -460,6 +552,7 @@ export function panneau(ctx) {
                         const copie = ajouterNoeud(m, origine.groupe, origine.texte ?? origine.id);
                         copie.forme = origine.forme;
                         copie.icone = origine.icone || null;
+                        copie.nature = origine.nature || null;
                         if (m.styles[id]) m.styles[copie.id] = { ...m.styles[id] };
                         cle = `n:${copie.id}`;
                     }, () => cle);
@@ -476,14 +569,23 @@ export function panneau(ctx) {
         const i = Number(id);
         const l = modele.liens[i];
         const maj = (f) => appliquer((m) => f(m.liens[i]));
+        const style = (propriete, valeur) => maj((x) => { const s = reglerStyleLien(x.style, propriete, valeur); if (s) x.style = s; else delete x.style; });
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Lien sélectionné'),
             h('p', { class: 'fusain-aide' }, `${nomExtremite(modele, l.de)} → ${nomExtremite(modele, l.vers)}`),
             champTexte('Texte du lien', l.texte, (v) => maj((x) => { x.texte = v.trim(); }), { id: 'fusain-champ-texte' }),
+            modele.agents
+                ? champSelect('Sorte de lien', LIENS_AGENT, sorteLienAgent(l), (v) => maj((x) => appliquerSorteAgent(x, v)))
+                : h('div', { class: 'fusain-ligne' },
+                    champSelect('Trait', TRAITS, l.trait, (v) => maj((x) => { x.trait = v; })),
+                    champSelect('Extrémité', FLECHES, typeFleche(l), (v) => maj((x) => appliquerFleche(x, v)))),
+            modele.agents ? null : champSelect('Longueur', [[1, 'Normale'], [2, 'Longue'], [3, 'Très longue']].map(([v, nom]) => [String(v), nom]), String(Math.min(l.longueur, 3)), (v) => maj((x) => { x.longueur = Number(v); })),
+            h('p', { class: 'fr-label fusain-champ' }, 'Couleur du trait'),
+            nuancierTrait(valeurStyle(l.style, 'stroke'), (v) => style('stroke', v)),
             h('div', { class: 'fusain-ligne' },
-                champSelect('Trait', TRAITS, l.trait, (v) => maj((x) => { x.trait = v; })),
-                champSelect('Extrémité', FLECHES, typeFleche(l), (v) => maj((x) => appliquerFleche(x, v)))),
-            champSelect('Longueur', [[1, 'Normale'], [2, 'Longue'], [3, 'Très longue']].map(([v, nom]) => [String(v), nom]), String(Math.min(l.longueur, 3)), (v) => maj((x) => { x.longueur = Number(v); })),
+                champSelect('Épaisseur', EPAISSEURS.some(([e]) => e === valeurStyle(l.style, 'stroke-width')) ? EPAISSEURS : [...EPAISSEURS, [valeurStyle(l.style, 'stroke-width'), valeurStyle(l.style, 'stroke-width')]],
+                    valeurStyle(l.style, 'stroke-width'), (v) => style('stroke-width', v)),
+                champSelect('Animation', ANIMATIONS, animationLien(l.style), (v) => style('animation', v))),
             h('div', { class: 'fusain-actions' },
                 bouton('Inverser le sens', { icone: 'arrow-left-right-line', onclick: () => maj((x) => { [x.de, x.vers] = [x.vers, x.de]; }) }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => { m.liens.splice(i, 1); }, () => null) }))));
@@ -500,8 +602,9 @@ export function panneau(ctx) {
         }
         const parents = modele.groupes.filter((x) => !descendants.has(x.id));
         blocs.push(h('div', { class: 'fusain-bloc' },
-            h('h2', {}, 'Groupe sélectionné'),
-            champTexte('Titre', g.titre, (v) => maj((x) => { if (v.trim()) x.titre = v.trim(); }), { id: 'fusain-champ-texte' }),
+            h('h2', {}, modele.agents ? (g.global ? 'Zone commune sélectionnée' : 'Agent sélectionné') : 'Groupe sélectionné'),
+            g.global ? h('p', { class: 'fusain-aide' }, 'Zone « global » : elle ne porte pas de nom.')
+                : champTexte(modele.agents ? 'Nom de l\'agent' : 'Titre', g.titre, (v) => maj((x) => { if (v.trim()) x.titre = v.trim(); }), { id: 'fusain-champ-texte' }),
             champSelect('Sens à l\'intérieur du groupe', [['', 'Comme le schéma'], ...SENS], g.sens || '', (v) => maj((x) => { x.sens = v || null; })),
             parents.length ? champSelect('Rangé dans', [['', 'Aucun groupe'], ...parents.map((x) => [x.id, x.titre])], g.parent || '', (v) => maj((x) => { x.parent = v || null; })) : null,
             h('div', { class: 'fusain-actions' },
@@ -516,4 +619,4 @@ export function panneau(ctx) {
     return blocs;
 }
 
-export default { type: 'flowchart', types: ['flowchart', 'swimlane'], nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };
+export default { type: 'flowchart', types: ['flowchart', 'swimlane', 'agentflow'], nom: 'Logigramme', analyser, ecrire, elements, reperer, texte, renommer, supprimer, relier, peutRelier, panneau };

@@ -4,6 +4,7 @@ export const TAILLE_MAX_CODE = 50000;
 // Une carte porte une ligne par territoire : jusqu'à plusieurs milliers de communes
 export const TAILLE_MAX_CARTE = 400000;
 export const LIENS_MAX = 500;
+export const DELAI_MAX_RENDU = 10000;
 
 const CLES_INTERDITES = new Set([
     '__proto__', 'constructor', 'prototype',

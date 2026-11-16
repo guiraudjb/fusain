@@ -26,9 +26,15 @@ import diapo from './diapo.js';
 import carte from './carte.js';
 import venn from './venn.js';
 import { ishikawa, arborescence } from './arbre.js';
+import cynefin from './cynefin.js';
+import wardley from './wardley.js';
+import usecase from './usecase.js';
+import evenements from './evenements.js';
+import syntaxique from './syntaxique.js';
+import plantuml from './plantuml.js';
 
 // Un éditeur peut couvrir plusieurs types voisins (les trois niveaux d'un diagramme C4)
-const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet, exigences, c4, blocs, radar, treemap, zenuml, diapo, carte, venn, ishikawa, arborescence]
+const EDITEURS = new Map([logigramme, sequence, mentale, gantt, camembert, frise, kanban, quadrant, etats, parcours, graphique, flux, entites, classes, architecture, versions, paquet, exigences, c4, blocs, radar, treemap, zenuml, diapo, carte, venn, ishikawa, arborescence, cynefin, wardley, usecase, evenements, syntaxique, plantuml]
     .flatMap((e) => (e.types || [e.type]).map((type) => [type, e])));
 
 export function editeurPour(type) {

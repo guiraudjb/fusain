@@ -17,14 +17,16 @@ Hors ligne sous Windows, sans rien installer : double-cliquer `lancer-site-local
 
 | Fonction | État |
 |---|---|
-| Édition visuelle de 27 types : logigramme, logigramme en couloirs, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4, blocs, exigences, radar, treemap, ZenUML, Ishikawa, arborescence, Venn | Disponible |
-| 1 038 icônes du DSFR et 380 icônes illustrées embarquées, pour l'architecture, le logigramme et les diapositives | Disponible |
-| Mode code avec aperçu en direct, pour tous les types Mermaid | Disponible |
-| Diapositives de texte aux mises en page de la charte de l'État (titre, sommaire, intercalaire, colonnes, chiffres clés, frise, blocs, texte libre) | Disponible |
-| 24 modèles de schémas et 13 de diapositives, page vierge | Disponible |
-| Export PDF / PNG / SVG / Visio, sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
+| Édition visuelle de 34 types Mermaid : logigramme, logigramme en couloirs, flux d'agents, séquence, carte mentale, Gantt, camembert, frise, Kanban, matrice, états, parcours usager, graphique, flux (Sankey), modèle de données, classes, architecture, historique de versions, paquet réseau, C4 (contexte, conteneurs, composants, dynamique, déploiement), blocs, exigences, radar, treemap, ZenUML, Ishikawa, arborescence, Venn, cas d'utilisation, modélisation par événements, diagramme syntaxique, cadre Cynefin, carte de Wardley ; et des diagrammes de séquence PlantUML, sans quitter PlantUML | Disponible |
+| Prise en charge native de PlantUML (`@startuml`, `@startmindmap`, `@startwbs`, `@startgantt`, import `.puml`) et conversion vers l'édition visuelle | Disponible |
+| Cartes thématiques (moteur de SimpleCarto : du monde à la commune, import CSV, fonds IGN, géocodage BAN hors ligne) | Disponible |
+| Import de topologies réseau (HPE IMC, LLDP / CDP en CSV ou Excel `.xlsx`) en schémas physiques et logiques (VLAN) | Disponible |
+| 1 038 icônes du DSFR, 54 pictogrammes au trait et 380 icônes illustrées embarquées, pour l'architecture, le logigramme, les cartes et les diapositives | Disponible |
+| Mode code avec aperçu en direct, diagnostic des erreurs en français, réparations vérifiées et index des syntaxes pour tous les types Mermaid (dont `usecase`, `eventmodeling`, `agentflow`, `railroad-ebnf`, `cynefin`, `wardley`) | Disponible |
+| Diapositives de texte aux mises en page de la charte de l'État (13 modèles) et mode diaporama plein écran (`F5`, zoom sur zone) | Disponible |
+| 60 modèles de départ (42 de schémas, 13 de diapositives et 5 de cartes), document de démonstration de 60 pages, page vierge | Disponible |
+| Export PDF (vectoriel), PNG, SVG et Visio (`.vsdx`), sauvegarde JSON, brouillon automatique, annuler / rétablir | Disponible |
 | Fonctionnement hors ligne | Disponible |
-| Édition visuelle du déploiement et du diagramme dynamique C4 | À venir |
 
 Le détail de ce qui reste à faire figure dans le [cahier des charges](FUSAIN_cahier_des_charges.md), section « État de réalisation ».
 

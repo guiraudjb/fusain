@@ -860,27 +860,60 @@ function ouvrirModeles(action) {
 
 // ---------- Fichiers ----------
 
+// Poignée du fichier d'origine (File System Access API), lorsque le navigateur et le mode d'ouverture la fournissent
+let poigneeFichier = null;
+
 async function nouveau() {
     if (etat.modifie && !await confirmer('Nouveau document', 'Les modifications non enregistrées dans un fichier seront perdues.', 'Créer un nouveau document')) return;
+    poigneeFichier = null;
     ui.selection = null;
     derniersRendus.clear();
     charger(nouveauDocument(MODELE_INITIAL.code));
 }
 
-function enregistrer() {
+async function enregistrer(options = {}) {
+    const choisirEmplacement = Boolean(options?.choisirEmplacement || options?.shiftKey);
     validerCodeEnAttente();
     const texte = serialiser(etat.doc);
-    telecharger(new Blob([texte], { type: 'application/json' }), `${nomDocument(etat.doc)}.fusain.json`);
+    const nomParDefaut = `${nomDocument(etat.doc)}.fusain.json`;
+    if (choisirEmplacement && typeof window.showSaveFilePicker === 'function') {
+        try {
+            poigneeFichier = await window.showSaveFilePicker({
+                suggestedName: nomParDefaut,
+                types: [{ description: 'Document FUSAIN (.fusain.json)', accept: { 'application/json': ['.fusain.json', '.json'] } }],
+            });
+        } catch (e) {
+            if (e?.name === 'AbortError') return;
+            poigneeFichier = null;
+        }
+    }
+    let ecritDansOrigine = false;
+    if (poigneeFichier?.createWritable) {
+        try {
+            const flux = await poigneeFichier.createWritable();
+            await flux.write(texte);
+            await flux.close();
+            ecritDansOrigine = true;
+        } catch (e) {
+            if (e?.name === 'AbortError') return;
+            poigneeFichier = null;
+        }
+    }
+    if (!ecritDansOrigine) {
+        telecharger(new Blob([texte], { type: 'application/json' }), nomParDefaut);
+    }
     marquerEnregistre();
     // Le fichier est relu comme à l'ouverture : un document que FUSAIN refuserait est signalé tout de suite
     try { lireJson(texte); } catch (e) {
         message('Fichier enregistré, mais il ne pourra pas être rouvert', `${e.message} Réduisez la page concernée, puis enregistrez de nouveau.`, 'error', 0);
         return;
     }
-    message('Document enregistré', 'Le fichier JSON a été remis à votre navigateur.', 'success', 4000);
+    message('Document enregistré', ecritDansOrigine
+        ? `Enregistré directement dans « ${poigneeFichier.name || nomParDefaut} ».`
+        : 'Le fichier JSON a été remis à votre navigateur.', 'success', 4000);
 }
 
-async function ouvrir(fichier) {
+async function ouvrir(fichier, poignee = null) {
     if (!fichier) return;
     try {
         const texte = await lireFichier(fichier);
@@ -895,6 +928,7 @@ async function ouvrir(fichier) {
         }
         const doc = lireJson(texte);
         if (etat.modifie && !await confirmer('Ouvrir un document', 'Les modifications non enregistrées dans un fichier seront perdues.', 'Ouvrir')) return;
+        poigneeFichier = poignee;
         ui.selection = null;
         derniersRendus.clear();
         charger(doc);
@@ -1000,7 +1034,8 @@ function ouvrirAPropos() {
         ouvrirDocument(href, texte);
     } }, texte);
     const raccourcis = [
-        ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer en JSON'], ['Ctrl+O', 'Ouvrir un fichier'],
+        ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S / Ctrl+Maj+S', 'Enregistrer en JSON / Enregistrer sous…'], ['Ctrl+O', 'Ouvrir un fichier'],
+        ['F5', 'Lancer le diaporama en plein écran'],
         ['Molette', 'Zoomer sous le pointeur (Maj + molette : défiler)'], ['Glisser', 'Déplacer la vue (Espace + glisser : partout)'],
         ['Clic molette', 'Zoom à 100 %'], ['Ctrl++ / Ctrl+−', 'Zoom avant / arrière'], ['Ctrl+0 / Ctrl+1', 'Zoom à 100 % / ajuster à la fenêtre'],
         ['Flèches', 'Parcourir les éléments du schéma'], ['Entrée ou F2', 'Renommer l\'élément sélectionné'],
@@ -1133,7 +1168,7 @@ function brancherGlobal() {
         if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
         const cle = e.key.toLowerCase();
         const saisie = e.target.matches?.('input, textarea, select');
-        if (cle === 's') { e.preventDefault(); enregistrer(); }
+        if (cle === 's') { e.preventDefault(); enregistrer({ choisirEmplacement: e.shiftKey }); }
         else if (cle === 'o') { e.preventDefault(); zones.fichier.click(); }
         else if (saisie) return; // dans un champ, l'annulation native du navigateur s'applique
         else if (cle === 'z' && !e.shiftKey) { e.preventDefault(); annuler(); }
@@ -1152,12 +1187,21 @@ function brancherGlobal() {
     window.addEventListener('dragenter', (e) => { if (avecFichier(e)) { profondeur += 1; document.body.classList.add('fusain-glisser'); } });
     window.addEventListener('dragleave', (e) => { if (avecFichier(e)) { profondeur -= 1; if (profondeur <= 0) document.body.classList.remove('fusain-glisser'); } });
     window.addEventListener('dragover', (e) => { if (avecFichier(e)) e.preventDefault(); });
-    window.addEventListener('drop', (e) => {
+    window.addEventListener('drop', async (e) => {
         if (!avecFichier(e)) return;
         e.preventDefault();
         profondeur = 0;
         document.body.classList.remove('fusain-glisser');
-        ouvrir(e.dataTransfer.files[0]);
+        const fichier = e.dataTransfer.files[0];
+        let poignee = null;
+        try {
+            const item = e.dataTransfer.items?.[0];
+            if (item?.getAsFileSystemHandle) {
+                const h = await item.getAsFileSystemHandle();
+                if (h?.kind === 'file') poignee = h;
+            }
+        } catch { /* navigateur sans File System Access API */ }
+        ouvrir(fichier, poignee);
     });
 
     window.addEventListener('resize', () => {

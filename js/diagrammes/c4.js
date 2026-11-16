@@ -1,6 +1,6 @@
 // Diagrammes C4 (contexte, conteneurs, composants) : acteurs, systèmes, limites et relations
 import { h, bouton, champTexte, champSelect, champCase } from '../dom.js';
-import { separerPreambule, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre } from './commun.js';
+import { separerPreambule, plan, marquer, marquerLien, Inconnu, parLigne, nomLibre, nuancierTrait } from './commun.js';
 
 const TITRES = { C4Context: 'Diagramme de contexte (C4)', C4Container: 'Diagramme de conteneurs (C4)', C4Component: 'Diagramme de composants (C4)', C4Dynamic: 'Diagramme dynamique (C4)', C4Deployment: 'Diagramme de déploiement (C4)' };
 // Nature d'un élément : radical de l'instruction Mermaid, à laquelle « _Ext » s'ajoute pour un élément externe
@@ -38,10 +38,13 @@ export function analyser(code) {
     if (!TITRES[entete]) throw new Error('La première ligne doit être « C4Context », « C4Container », « C4Component », « C4Dynamic » ou « C4Deployment ».');
     const modele = { preambule, entete, titre: '', items: [], relations: [], brut: [] };
     const pile = [];
+    const stylesRelations = [];
     parLigne(corps.slice(1), preambule, (ligne) => {
         if (ligne === '}') { if (!pile.length) throw new Inconnu('accolade inattendue'); pile.pop(); return; }
         let m = ligne.match(/^title\s+(.*)$/);
         if (m) { modele.titre = m[1].trim(); return; }
+        m = ligne.match(RE_STYLE_RELATION);
+        if (m) { stylesRelations.push({ de: m[1], vers: m[2], reglages: m[3], ligne }); return; }
         if (/^(Update\w+\s*\(|accTitle|accDescr)/.test(ligne)) { modele.brut.push(ligne); return; }
         m = ligne.match(/^([A-Za-z_]+)\s*\((.*)\)\s*(\{)?$/);
         if (!m) throw new Inconnu('instruction inconnue');
@@ -68,10 +71,33 @@ export function analyser(code) {
         modele.items.push({ t: 'noeud', nature, externe: macro.endsWith('_Ext'), id: args[0], nom: args[1] ?? '', techno: avecTechno(nature) ? args[2] ?? '' : '', desc: (avecTechno(nature) ? args[3] : args[2]) ?? '', parent });
     });
     if (pile.length) throw new Error('Une limite n\'est pas refermée par « } ».');
+    // « UpdateRelStyle(de, vers, $lineColor=…, $textColor=…) » se rattache à sa relation ; à défaut, la ligne est gardée telle quelle
+    for (const st of stylesRelations) {
+        const r = modele.relations.find((x) => x.de === st.de && x.vers === st.vers && !x.style);
+        const reglages = lireReglagesStyle(st.reglages);
+        if (r && reglages) r.style = reglages; else modele.brut.push(st.ligne);
+    }
     return modele;
 }
 
 const cite = (t) => `"${propre(t)}"`;
+
+// Style d'une relation : couleur du trait, du texte, décalage du libellé
+const RE_STYLE_RELATION = /^UpdateRelStyle\s*\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)\s*,(.*)\)$/;
+const CLES_STYLE = ['lineColor', 'textColor', 'offsetX', 'offsetY'];
+function lireReglagesStyle(texte) {
+    const reglages = {};
+    for (const morceau of texte.split(',')) {
+        const m = morceau.trim().match(/^\$(\w+)\s*=\s*"?([^"]*)"?$/);
+        if (!m || !CLES_STYLE.includes(m[1])) return null;
+        reglages[m[1]] = m[2].trim();
+    }
+    return Object.keys(reglages).length ? reglages : null;
+}
+const ecrireStyleRelation = (r) => {
+    const parties = CLES_STYLE.filter((k) => r.style?.[k]).map((k) => (/^offset/.test(k) ? `$${k}="${String(r.style[k]).replace(/[^-\d]/g, '')}"` : `$${k}="${String(r.style[k]).replace(/[^#\w]/g, '')}"`));
+    return parties.length ? `UpdateRelStyle(${r.de}, ${r.vers}, ${parties.join(', ')})` : null;
+};
 
 export function ecrire(modele) {
     const lignes = [...modele.preambule, modele.entete];
@@ -93,6 +119,7 @@ export function ecrire(modele) {
     ecrireNiveau('', '    ');
     for (const r of modele.relations) lignes.push(`    ${r.macro}(${r.de}, ${r.vers}, ${cite(r.texte)}${propre(r.techno) ? `, ${cite(r.techno)}` : ''})`);
     for (const b of modele.brut) lignes.push(`    ${b}`);
+    for (const r of modele.relations) { const st = ecrireStyleRelation(r); if (st) lignes.push(`    ${st}`); }
     return lignes.join('\n') + '\n';
 }
 
@@ -273,6 +300,12 @@ export function panneau(ctx) {
             champTexte('Libellé', r.texte, (val) => modifier((y) => { y.texte = propre(val); }), { id: 'fusain-champ-texte' }),
             champTexte('Technologie ou protocole', r.techno, (val) => modifier((y) => { y.techno = propre(val); })),
             champSelect('Sens du tracé', SENS, r.macro, (val) => modifier((y) => { y.macro = val; })),
+            h('p', { class: 'fr-label fusain-champ' }, 'Couleur de la relation'),
+            nuancierTrait(r.style?.lineColor || '', (val) => modifier((y) => {
+                // Le trait et son libellé prennent la même couleur
+                if (val) y.style = { ...y.style, lineColor: val, textColor: val };
+                else if (y.style) { delete y.style.lineColor; delete y.style.textColor; if (!Object.keys(y.style).length) delete y.style; }
+            })),
             h('div', { class: 'fusain-actions' },
                 bouton('Inverser le sens', { icone: 'arrow-left-right-line', onclick: () => modifier((y) => { [y.de, y.vers] = [y.vers, y.de]; }) }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => supprimer(m, selection), () => null) }))));

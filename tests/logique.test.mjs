@@ -126,7 +126,8 @@ test('noms de fichiers nettoyés', () => {
 // ---------- Éditeurs ajoutés en 0.6.0 ----------
 
 // Types arrivés avec Mermaid 12.3 et PlantUML : modèle et aide à la syntaxe, édition en code (ou conversion en un clic pour PlantUML)
-const EN_CODE_SEULEMENT = new Set(['agentflow', 'cynefin', 'eventmodeling', 'plantuml', 'railroad-ebnf', 'usecase', 'wardley']);
+// Depuis la 0.26.0, tous les types proposés ont un éditeur visuel ; la liste reste pour un futur type « code seul »
+const EN_CODE_SEULEMENT = new Set([]);
 test('tous les modèles proposés ont un éditeur visuel', () => {
     for (const m of MODELES) {
         const type = typeDiagramme(m.code);
@@ -713,7 +714,7 @@ test('syntaxes : chaque type a un nom, un en-tête et des objets complets ; chaq
             const tete = t === 'gantt' ? 'gantt\n    dateFormat YYYY-MM-DD\n    section S' : t === 'carte' ? 'carte region\nzone: 84' : SYNTAXES[t].entete[0];
             const decale = ['diapo', 'carte', 'treemap'].includes(t) ? '' : '    ';
             try { editeur.analyser(`${tete}\n${o.exemple.split('\n').map((l) => decale + l).join('\n')}\n`); } catch (e) {
-                assert.match(e.message, /n'est pas gérée par l'édition visuelle/, `${t}/${o.id} : ${e.message}`);
+                assert.match(e.message, /n'est pas géré(e)? par l'édition visuelle/, `${t}/${o.id} : ${e.message}`);
             }
         }
     }
@@ -956,4 +957,187 @@ test('diapo : taille de police et alignement (@style gauche, centre, droite, jus
     const libre = diapo.analyser('diapo libre\n# Titre\nParagraphe libre\n- Puce\n@style b:1 taille=22 align=gauche\n');
     assert.deepEqual(diapo.lireStyle(libre, 'b:1'), { taille: 22, align: 'gauche' });
     assert.equal(diapo.ecrire(diapo.analyser(diapo.ecrire(libre))), diapo.ecrire(libre));
+});
+
+// ---------- 0.26.0 : édition visuelle de tout le document de démonstration ----------
+
+test('document de démonstration : chaque page a un éditeur visuel, et sa réécriture est stable', async () => {
+    const { readFileSync } = await import('node:fs');
+    const doc = JSON.parse(readFileSync(new URL('../presentation-fusain.fusain.json', import.meta.url), 'utf8'));
+    for (const [i, page] of doc.pages.entries()) {
+        if (!page.code.trim()) continue;
+        const editeur = editeurPour(typeDiagramme(page.code));
+        assert.ok(editeur, `page ${i + 1} sans éditeur visuel (${typeDiagramme(page.code)})`);
+        const une = editeur.ecrire(editeur.analyser(page.code));
+        assert.equal(editeur.ecrire(editeur.analyser(une)), une, `page ${i + 1} : réécriture instable`);
+        // Rien n'est laissé de côté : chaque ligne du code d'origine se retrouve, à la mise en forme près
+        const lignes = (c) => c.split('\n').map((l) => l.trim().replace(/\s+/g, ' ')).filter(Boolean);
+        const relu = lignes(une);
+        const perdues = lignes(page.code).filter((l) => !relu.includes(l)
+            && !/^(localiser|valide|FICHIER_FUSAIN|PAGE|"Code Mermaid)|\[\d\.\d0\]|\s0\.\d0$/.test(l)); // chaînes de liens et nombres réécrits
+        assert.deepEqual(perdues, [], `page ${i + 1} : lignes perdues`);
+    }
+});
+
+test('logigramme : style d\'un lien (couleur, épaisseur, animation) réglé sans perdre le reste', async () => {
+    const { reglerStyleLien, animationLien, lireStyleLien } = await import('../js/diagrammes/logigramme.js');
+    let st = reglerStyleLien('stroke:#000091,stroke-width:3px,opacity:0.5', 'animation', 'rapide');
+    assert.equal(animationLien(st), 'rapide');
+    assert.ok(st.includes('animation:dash 8s linear infinite') && st.includes('opacity:0.5'));
+    st = reglerStyleLien(st, 'animation', '');
+    assert.equal(st, 'stroke:#000091,stroke-width:3px,opacity:0.5');
+    st = reglerStyleLien(st, 'stroke', '#c9191e');
+    assert.deepEqual(lireStyleLien(st)[0], ['stroke', '#c9191e']);
+    assert.equal(reglerStyleLien('stroke-width:2px', 'stroke-width', ''), null);
+    const m = logigramme.analyser('flowchart LR\n    A --> B\n    B --> C\n    linkStyle 1 stroke:#297254,stroke-width:3px\n');
+    m.liens[0].style = reglerStyleLien(null, 'animation', 'lente');
+    const code = logigramme.ecrire(m);
+    assert.match(code, /linkStyle 0 stroke-dasharray:9 5,stroke-dashoffset:900,animation:dash 20s linear infinite/);
+    assert.match(code, /linkStyle 1 stroke:#297254,stroke-width:3px/);
+});
+
+test('flux d\'agents (agentflow-beta) : natures d\'étape, agents, zone commune et liens relus et réécrits', () => {
+    const agents = editeurPour('agentflow');
+    assert.equal(agents, logigramme);
+    const code = 'agentflow-beta LR\n    a["Demande"]@{ shape: input }\n    flow accueil["Agent d\'accueil"]\n        t["Trier"]@{ shape: task }\n        d{"Complet ?"}@{ shape: decision }\n    end\n    global\n        g["Guide"]@{ shape: refdoc }\n    end\n    a --> accueil\n    t -.- g\n    d --x t\n    d -->|"oui"| a\n';
+    const m = agents.analyser(code);
+    assert.equal(m.agents, true);
+    assert.deepEqual(m.noeuds.map((n) => n.nature), ['input', 'task', 'decision', 'refdoc']);
+    assert.deepEqual(m.groupes.map((g) => [g.titre, Boolean(g.global)]), [['Agent d\'accueil', false], ['', true]]);
+    const une = agents.ecrire(m);
+    assert.match(une, /^agentflow-beta LR\n/);
+    assert.match(une, /flow accueil\["Agent d'accueil"\]/);
+    assert.match(une, /\n {4}global\n/);
+    assert.match(une, /d\{"Complet \?"\}@\{ shape: decision \}/);
+    assert.equal(agents.ecrire(agents.analyser(une)), une);
+    assert.throws(() => agents.analyser('agentflow-beta TB\n    a["A"]@{ shape: inconnue }\n'), /pas gérée/);
+});
+
+test('C4 : UpdateRelStyle rattaché à sa relation, suivi lors d\'une inversion, retiré avec la couleur', () => {
+    const c4 = editeurPour('C4Context');
+    const code = 'C4Context\n    Person(a, "A")\n    System(b, "B")\n    Rel(a, b, "Utilise")\n    UpdateRelStyle(a, b, $lineColor="#000091", $textColor="#000091")\n    UpdateElementStyle(a, $bgColor="red")\n';
+    const m = c4.analyser(code);
+    assert.deepEqual(m.relations[0].style, { lineColor: '#000091', textColor: '#000091' });
+    assert.deepEqual(m.brut, ['UpdateElementStyle(a, $bgColor="red")']);
+    assert.equal(c4.ecrire(c4.analyser(c4.ecrire(m))), c4.ecrire(m));
+    [m.relations[0].de, m.relations[0].vers] = [m.relations[0].vers, m.relations[0].de];
+    assert.match(c4.ecrire(m), /UpdateRelStyle\(b, a, \$lineColor="#000091"/);
+    delete m.relations[0].style;
+    assert.doesNotMatch(c4.ecrire(m), /UpdateRelStyle/);
+});
+
+test('architecture : la barre oblique et la parenthèse restent dans les libellés', () => {
+    const archi = editeurPour('architecture');
+    const code = 'architecture-beta\n    service imp(server)[Imprimante A3/A4 (couleur)]\n';
+    assert.equal(archi.ecrire(archi.analyser(code)), code);
+});
+
+test('cadre Cynefin : domaines, situations et passages', () => {
+    const cy = editeurPour('cynefin');
+    const code = 'cynefin-beta\n    title Situations\n    complex\n        "Explorer"\n    clear\n        "Appliquer"\n    complex --> clear : "Stabilisé"\n';
+    const m = cy.analyser(code);
+    assert.equal(cy.ecrire(m), code);
+    cy.renommer(m, 's:0', 'Texte "cité"');
+    cy.relier(m, 'd:clear', 'd:chaotic');
+    const une = cy.ecrire(m);
+    assert.match(une, /"Texte ”cité”"/);
+    assert.match(une, /clear --> chaotic\n/);
+    assert.equal(cy.ecrire(cy.analyser(une)), une);
+});
+
+test('carte de Wardley : position [visibilité, évolution], déplacement et renommage suivi par les liens', () => {
+    const w = editeurPour('wardley');
+    const code = 'wardley-beta\n    title Carte\n    anchor "Usager" [0.95, 0.50]\n    component "Démarche" [0.70, 0.40] (build)\n    "Usager" -> "Démarche"\n    evolve "Démarche" 0.80\n    note "Mutualiser" [0.30, 0.70]\n';
+    const m = w.analyser(code);
+    assert.equal(w.ecrire(m), code);
+    w.deplacer(m, 'c:1', 0.25, 0.6);
+    w.renommer(m, 'c:1', 'Démarche en ligne');
+    const une = w.ecrire(m);
+    assert.match(une, /component "Démarche en ligne" \[0\.60, 0\.25\] \(build\)/);
+    assert.match(une, /"Usager" -> "Démarche en ligne"/);
+    assert.match(une, /evolve "Démarche en ligne" 0\.80/);
+    w.supprimer(m, 'c:1');
+    assert.doesNotMatch(w.ecrire(m), /Démarche|->|evolve/);
+});
+
+test('cas d\'utilisation : acteurs, limites, relations et textes nettoyés', () => {
+    const uc = editeurPour('usecase');
+    const code = 'usecase-beta\n    direction LR\n    actor Agent("Agent instructeur")\n    systemBoundary "Téléservice"\n        Deposer("Déposer")\n        Joindre["Joindre"]\n    end\n    Agent -- dépose --> Deposer\n    Deposer ..> : include Joindre\n    Joindre --|> Deposer\n';
+    const m = uc.analyser(code);
+    assert.equal(uc.ecrire(m), code);
+    uc.renommer(m, 'r:0', 'lit -- <b>(tout)</b>');
+    uc.renommer(m, 'a:0', '`Agent "instructeur"');
+    const une = uc.ecrire(m);
+    assert.match(une, /Agent -- lit b tout \/b --> Deposer/);
+    assert.match(une, /actor Agent\("’Agent ”instructeur”"\)/);
+    uc.supprimer(m, 'b:0');
+    assert.doesNotMatch(uc.ecrire(m), /systemBoundary/);
+    assert.match(uc.ecrire(m), /\n {4}Deposer\("Déposer"\)/);
+    assert.throws(() => uc.analyser('usecase-beta\n    actor A\n    A --> Inconnu\n'), /pas gérée par l'édition visuelle/);
+});
+
+test('modélisation par événements : identifiants sûrs, renumérotation et liens « ->> » suivis', () => {
+    const ev = editeurPour('eventmodeling');
+    const code = 'eventmodeling\n    tf 01 ui Ecran\n    tf 02 cmd Deposer { usager: texte }\n    tf 03 evt Depose\n    tf 04 rmo Liste ->> 03\n';
+    const m = ev.analyser(code);
+    assert.equal(ev.ecrire(m), code);
+    ev.renommer(m, 'e:0', 'title écran d\'accueil');
+    ev.renommer(m, 'e:2', '59 déposé');
+    ev.supprimer(m, 'e:1');
+    const une = ev.ecrire(m);
+    assert.match(une, /tf 01 ui TitleEcranDAccueil/);
+    assert.match(une, /tf 02 evt E59Depose/);
+    assert.match(une, /tf 03 rmo Liste ->> 02/);
+});
+
+test('diagramme syntaxique : règles sur une ou plusieurs lignes, renommage reporté dans les expressions', () => {
+    const rr = editeurPour('railroad-ebnf');
+    assert.equal(rr, editeurPour('railroad-peg'));
+    const code = 'railroad-ebnf-beta\n    title "Numéro"\n    numero = annee "-" rang ;\n    annee = chiffre chiffre ;\n    rang = chiffre+ ;\n    chiffre = "0" | "1" ;\n';
+    const m = rr.analyser(code);
+    assert.equal(rr.ecrire(m), code);
+    rr.renommer(m, 'r:3', 'title chiffre');
+    const une = rr.ecrire(m);
+    assert.match(une, /annee = r_title_chiffre r_title_chiffre ;/);
+    assert.match(une, /"0" \| "1"/);
+    assert.equal(rr.analyser('railroad-ebnf-beta\n    a = "x"\n        | "y" ;\n').regles[0].expr, '"x" | "y"');
+    const peg = rr.analyser('railroad-peg-beta\n    a <- "x" b ;\n    b <- "y" ;\n');
+    assert.equal(rr.ecrire(peg), 'railroad-peg-beta\n    a <- "x" b ;\n    b <- "y" ;\n');
+});
+
+test('PlantUML : un diagramme de séquence s\'édite sans quitter PlantUML', async () => {
+    const { traduirePlantUml } = await import('../js/plantuml.js');
+    const pu = editeurPour('plantuml');
+    const code = '@startuml\ntitle Dépôt\nautonumber\nactor "Usager" as u\ndatabase "Base" as bdd\nu -> bdd ++ : Déposer\n== Instruction ==\nnote right of bdd : Contrôle\nreturn Numéro\n@enduml';
+    const m = pu.analyser(code);
+    assert.deepEqual(m.participants.map((p) => p.forme), ['actor', 'database']);
+    assert.equal(m.items.filter((x) => x.t === 'message').length, 2);
+    const une = pu.ecrire(m);
+    assert.match(une, /^@startuml\ntitle Dépôt\nautonumber\nactor "Usager" as u\ndatabase "Base" as bdd\n/);
+    assert.match(une, /u -> bdd \+\+ : Déposer\n== Instruction ==\nnote right of bdd : Contrôle\nreturn Numéro\n@enduml/);
+    assert.equal(pu.ecrire(pu.analyser(une)), une);
+    // Les messages et notes repérés sur le dessin sont ceux de la traduction, dans le même ordre
+    const traduit = editeurPour('sequence').analyser(traduirePlantUml(une));
+    assert.equal(traduit.items.filter((x) => x.t === 'message').length, 2);
+    assert.equal(traduit.items.filter((x) => x.t === 'note').length, 2);
+    m.versMermaid = true;
+    assert.equal(typeDiagramme(pu.ecrire(m)), 'sequence');
+    assert.throws(() => pu.analyser('@startuml\nclass A\nclass B\nA <|-- B\n@enduml'), /Convertissez-le/);
+});
+
+test('séquence : supprimer un bloc retire tout son cadre, supprimer un participant retire ses activations', () => {
+    const seq = editeurPour('sequence');
+    const m = seq.analyser('sequenceDiagram\n    participant A\n    participant B\n    alt Oui\n        A->>B: un\n    else Non\n        A->>B: deux\n    end\n    activate B\n    B->>A: trois\n    deactivate B\n');
+    seq.supprimer(m, 'i:2');
+    assert.deepEqual(m.items.map((x) => x.ligne || x.texte), ['un', 'deux', 'activate B', 'trois', 'deactivate B']);
+    seq.renommer(m, 'i:2', 'ignoré');
+    assert.equal(m.items[2].ligne, 'activate B');
+    seq.supprimer(m, 'i:2');
+    assert.deepEqual(m.items.map((x) => x.ligne || x.texte), ['un', 'deux', 'trois']);
+    const n = seq.analyser('sequenceDiagram\n    participant A\n    participant B\n    loop Chaque jour\n        A->>B: x\n    end\n    activate A\n    deactivate A\n');
+    assert.equal(seq.texte(n, 'i:0'), 'Chaque jour');
+    seq.renommer(n, 'i:0', 'Chaque nuit; vite');
+    assert.equal(n.items[0].ligne, 'loop Chaque nuit, vite');
+    seq.supprimer(n, 'p:0');
+    assert.ok(!n.items.some((x) => /activate/.test(x.ligne || '')));
 });

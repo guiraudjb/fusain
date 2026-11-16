@@ -99,6 +99,18 @@ export function elements(modele) {
 }
 
 export function reperer(svg, modele) {
+    // Participants : la boîte (ou le personnage) du haut porte l'identifiant du participant
+    modele.participants.forEach((p, i) => {
+        for (const g of svg.querySelectorAll(`g[data-et="participant"][data-id="${CSS.escape(p.id)}"]`)) marquer(g, `p:${i}`);
+    });
+    // Boîtes du bas : sans identifiant, elles sont retrouvées par le nom affiché
+    for (const t of svg.querySelectorAll('text.actor')) {
+        if (t.closest('[data-fusain]')) continue;
+        const i = modele.participants.findIndex((p) => String(p.nom).replace(/\s+/g, ' ').trim() === t.textContent.replace(/\s+/g, ' ').trim());
+        if (i < 0) continue;
+        marquer(t, `p:${i}`);
+        if (t.previousElementSibling?.matches('rect.actor')) marquer(t.previousElementSibling, `p:${i}`);
+    }
     const indices = (t) => modele.items.map((item, i) => [item, i]).filter(([item]) => item.t === t).map(([, i]) => i);
     const messages = [...svg.querySelectorAll('.messageText')];
     const idxMessages = indices('message');
@@ -108,11 +120,22 @@ export function reperer(svg, modele) {
     if (notes.length === idxNotes.length) notes.forEach((el, n) => marquer(el, `i:${idxNotes[n]}`));
 }
 
+// Instruction brute : seul le libellé d'un bloc (« alt Condition ») ou d'un commentaire se renomme ;
+// « end », « activate », « rect rgb(…) »… gardent leur écriture
+const motDe = (ligne) => (ligne.match(/^[A-Za-z]+/)?.[0] || '').toLowerCase();
+const LIBELLES = new Set([...BLOCS.map((b) => b[0]), ...MILIEU, 'else', 'group']);
+function libelleBrut(ligne) {
+    if (LIBELLES.has(motDe(ligne))) return ligne.slice(motDe(ligne).length).trim();
+    const commentaire = ligne.match(/^(%%|')\s?(.*)$/);
+    return commentaire ? commentaire[2] : null;
+}
+
 export function texte(modele, cle) {
     const i = Number(cle.slice(2));
     if (cle.startsWith('p:')) return modele.participants[i]?.nom ?? null;
     const item = modele.items[i];
-    return item ? (item.t === 'brut' ? item.ligne : item.texte) : null;
+    if (!item) return null;
+    return item.t === 'brut' ? libelleBrut(item.ligne) ?? item.ligne : item.texte;
 }
 
 export function renommer(modele, cle, valeur) {
@@ -121,7 +144,12 @@ export function renommer(modele, cle, valeur) {
     if (cle.startsWith('p:')) { if (modele.participants[i] && v) modele.participants[i].nom = v; return; }
     const item = modele.items[i];
     if (!item) return;
-    if (item.t === 'brut') { if (v) item.ligne = v.replace(/\s+/g, ' '); } else item.texte = v;
+    if (item.t !== 'brut') { item.texte = v; return; }
+    if (libelleBrut(item.ligne) === null) return;
+    const libelle = v.replace(/\s+/g, ' ').replace(/;/g, ',');
+    const commentaire = item.ligne.match(/^(%%|')/);
+    if (commentaire) item.ligne = `${commentaire[1]} ${libelle}`.trim();
+    else item.ligne = `${item.ligne.match(/^[A-Za-z]+/)[0]} ${libelle}`.trim();
 }
 
 function supprimerParticipant(modele, i) {
@@ -129,13 +157,52 @@ function supprimerParticipant(modele, i) {
     if (!p) return;
     modele.items = modele.items.filter((item) => !(item.t === 'message' && (item.de === p.id || item.vers === p.id)));
     for (const item of modele.items) if (item.t === 'note') item.cibles = item.cibles.filter((c) => c !== p.id);
-    modele.items = modele.items.filter((item) => !(item.t === 'note' && !item.cibles.length));
+    // Une note sans participant disparaît ; le séparateur « == … == » de PlantUML, qui couvre tout le schéma, reste
+    modele.items = modele.items.filter((item) => !(item.t === 'note' && !item.cibles.length && !item.separateur));
+    // Ses activations disparaissent aussi : elles le feraient réapparaître
+    const activation = new RegExp(`^(activate|deactivate)\\s+"?${p.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"?$`, 'i');
+    modele.items = modele.items.filter((item) => !(item.t === 'brut' && activation.test(item.ligne)));
+}
+
+// Supprimer l'ouverture, une branche ou la fin d'un bloc retire tout son cadre (ouverture, « else », « end ») ;
+// les messages qu'il contenait restent
+const OUVERTURE = new Set([...OUVRE, 'group']);
+function cadreDuBloc(items, i) {
+    const mot = (k) => (items[k]?.t === 'brut' ? motDe(items[k].ligne) : '');
+    let debut = i;
+    if (!OUVERTURE.has(mot(i))) {
+        for (let k = i - 1, p = 0; k >= 0; k -= 1) {
+            if (mot(k) === 'end') p += 1;
+            else if (OUVERTURE.has(mot(k))) { if (p === 0) { debut = k; break; } p -= 1; }
+        }
+        if (debut === i) return [i];
+    }
+    const cadre = [debut];
+    for (let k = debut + 1, p = 0; k < items.length; k += 1) {
+        if (OUVERTURE.has(mot(k))) p += 1;
+        else if (mot(k) === 'end') { if (p === 0) { cadre.push(k); break; } p -= 1; } else if (p === 0 && (MILIEU.has(mot(k)) || mot(k) === 'else')) cadre.push(k);
+    }
+    return cadre;
 }
 
 export function supprimer(modele, cle) {
     const i = Number(cle.slice(2));
-    if (cle.startsWith('p:')) supprimerParticipant(modele, i);
-    else modele.items.splice(i, 1);
+    if (cle.startsWith('p:')) { supprimerParticipant(modele, i); return; }
+    const item = modele.items[i];
+    if (!item) return;
+    const mot = item.t === 'brut' ? motDe(item.ligne) : '';
+    const rangs = OUVERTURE.has(mot) || MILIEU.has(mot) || mot === 'else' || mot === 'end' ? new Set(cadreDuBloc(modele.items, i)) : new Set([i]);
+    // « activate X » et le « deactivate X » qui lui répond vont ensemble : l'un sans l'autre est refusé
+    if (mot === 'activate' || mot === 'deactivate') {
+        const cible = item.ligne.slice(mot.length).trim().toLowerCase();
+        const sens = mot === 'activate' ? 1 : -1;
+        const visee = (k, m) => modele.items[k]?.t === 'brut' && motDe(modele.items[k].ligne) === m && modele.items[k].ligne.slice(m.length).trim().toLowerCase() === cible;
+        for (let k = i + sens, p = 0; k >= 0 && k < modele.items.length; k += sens) {
+            if (visee(k, mot)) p += 1;
+            else if (visee(k, mot === 'activate' ? 'deactivate' : 'activate')) { if (p === 0) { rangs.add(k); break; } p -= 1; }
+        }
+    }
+    modele.items = modele.items.filter((_, k) => !rangs.has(k));
 }
 
 function idLibre(modele) {
@@ -189,7 +256,7 @@ export function panneau(ctx) {
         const ordre = actionsListe({
             monter: () => appliquer(() => {}, (m) => `i:${deplacer(m.items, i, -1)}`),
             descendre: () => appliquer(() => {}, (m) => `i:${deplacer(m.items, i, 1)}`),
-            supprimer: () => appliquer((m) => { m.items.splice(i, 1); }, () => null),
+            supprimer: () => appliquer((m) => supprimer(m, selection), () => null),
         });
         if (item.t === 'message') {
             blocs.push(h('div', { class: 'fusain-bloc' },

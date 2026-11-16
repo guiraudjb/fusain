@@ -4,8 +4,8 @@
 
 | Champ | Valeur |
 |---|---|
-| Date | 4 novembre 2026 |
-| Version de FUSAIN | 0.22.0 |
+| Date | 14 novembre 2026 |
+| Version de FUSAIN | 0.25.0 |
 | Périmètre | Tout ce qui est servi au navigateur : code propre à FUSAIN, huit bibliothèques embarquées, fonds de carte et icônes |
 | Format | Ce document (lecture) + `sbom/fusain-sbom-cyclonedx.json` (CycloneDX 1.7, validé contre le schéma officiel : empreinte SHA-256 de chaque fichier embarqué, composants inclus identifiés, jeux de données, analyse des avis connus) |
 | Source | `sbom/composants.json`, tenu à la main ; le reste est calculé par `outils/generer.py` |

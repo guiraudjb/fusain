@@ -6,7 +6,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 | Zone | Rôle |
 |---|---|
-| Barre d'outils | Nouveau, Ouvrir, Enregistrer, Exporter, Annuler / Rétablir, zoom, bascule Visuel / Code, Modèles |
+| Barre d'outils | Nouveau, Ouvrir, Enregistrer, Exporter, Diaporama, Annuler / Rétablir, zoom, bascule Visuel / Code, Modèles |
 | Colonne de gauche | Les pages du document. « Ajouter une page » propose une page vierge ou un modèle de départ |
 | Centre | La page, à ses proportions réelles. Le cadre en pointillés montre les marges (il n'est pas exporté) |
 | Colonne de droite | Les propriétés de l'élément sélectionné, puis celles de la page et du document |
@@ -23,7 +23,7 @@ FUSAIN sert à produire des schémas (logigrammes, plannings, organigrammes, car
 
 ## 2. Construire un schéma sans coder
 
-Vingt-sept types de schémas s'éditent visuellement : logigramme, logigramme en couloirs, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4, diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap), séquence ZenUML, diagramme d'Ishikawa, arborescence et diagramme de Venn. Seules quelques écritures avancées (déploiement C4…) se modifient par le code (§6).
+Trente-quatre types de schémas Mermaid s'éditent visuellement : logigramme, logigramme en couloirs, flux d'agents, diagramme de séquence, carte mentale, Gantt, camembert, frise chronologique, tableau Kanban, matrice à quadrants, diagramme d'états, parcours usager, graphique en barres et courbes, diagramme de flux, modèle de données, diagramme de classes, architecture technique, historique de versions, structure de paquet, diagramme C4 (contexte, conteneurs, composants, scénario dynamique, déploiement), diagramme de blocs, diagramme d'exigences, diagramme radar, carte proportionnelle (treemap), séquence ZenUML, diagramme d'Ishikawa, arborescence, diagramme de Venn, cas d'utilisation, modélisation par événements, diagramme syntaxique, cadre Cynefin et carte de Wardley ; s'y ajoutent les diagrammes de séquence PlantUML. Quelques écritures avancées se modifient par le code (§6).
 
 **Gestes communs**
 
@@ -41,6 +41,10 @@ Vous ne placez pas les éléments au pixel : FUSAIN calcule la disposition. Vous
 **Logigramme** — une étape peut être représentée par une icône (« Représenter par une icône… », parmi les icônes du DSFR, les pictogrammes en noir et blanc et les icônes illustrées) : son texte s'affiche alors dessous. Sens de lecture, espacement (resserré, normal, aéré), tracé des liens (courbes, droits, en escalier), étapes (texte, forme, couleur, groupe, duplication), liens (texte, trait, extrémité, longueur, inversion), groupes imbriquables.
 
 **Logigramme en couloirs** — un logigramme dont chaque groupe est le couloir d'un acteur (« Ajouter un couloir »). La case « Groupes en couloirs » fait passer n'importe quel logigramme d'une présentation à l'autre.
+
+**Style d'un lien** (logigramme, couloirs, flux d'agents) — dans le panneau du lien : couleur du trait, épaisseur et « Flux animé » (lent ou rapide), un pointillé qui défile dans le sens du lien. Les autres réglages écrits dans le code (`linkStyle`) sont gardés.
+
+**Flux d'agents** — des étapes dont la nature est précisée (tâche d'un agent, outil appelé, donnée d'entrée, décision, document consulté, action), rangées dans des agents (« Ajouter un agent ») ou une zone commune, et trois sortes de liens : enchaînement, consultation (pointillé) et chemin d'échec (croix).
 
 **Diagramme de séquence** — participants (boîte ou personnage), messages, notes, blocs (boucle, alternative…), numérotation. Les ajouts se placent après l'élément sélectionné ; les flèches haut / bas le déplacent.
 
@@ -87,7 +91,7 @@ Pour obtenir ces fichiers depuis IMC (menus, colonnes, solutions de repli), voir
 
 **Structure de paquet** — une suite de champs, chacun d'une taille en bits ; les positions sont recalculées quand vous ajoutez, déplacez ou redimensionnez un champ.
 
-**Diagramme C4** (contexte, conteneurs, composants) — personnes, systèmes, conteneurs et composants, internes ou externes, rangés dans des limites imbriquables, et reliés par des relations (libellé, technologie, sens du tracé). Une limite vide n'est pas admise : elle disparaît avec son dernier élément.
+**Diagramme C4** (contexte, conteneurs, composants, scénario dynamique, déploiement) — personnes, systèmes, conteneurs et composants, internes ou externes, rangés dans des limites ou des nœuds de déploiement (`Deployment_Node`, `Node`) imbriquables, et reliés par des relations (libellé, technologie, sens du tracé). Une limite vide n'est pas admise : elle disparaît avec son dernier élément.
 
 **Diagramme de blocs** — des blocs rangés en colonnes : choisissez le nombre de colonnes, la forme et la largeur de chaque bloc, insérez des espaces, regroupez des blocs dans un groupe qui a ses propres colonnes, et reliez-les par des liens.
 
@@ -104,6 +108,16 @@ Pour obtenir ces fichiers depuis IMC (menus, colonnes, solutions de repli), voir
 **Arborescence** — une hiérarchie d'éléments (organigramme de services, plan de site, dossiers), avec les mêmes gestes que le diagramme d'Ishikawa ; elle peut avoir plusieurs éléments de premier niveau.
 
 **Diagramme de Venn** — jusqu'à six ensembles et les intersections que vous nommez (cochez les ensembles concernés). Une taille facultative règle la surface relative de chaque ensemble ou intersection.
+
+**Cas d'utilisation** — acteurs, cas (ellipse ou rectangle) rangés dans des limites de système, et relations : association (avec un texte facultatif), inclusion, extension, généralisation. La pastille « + » d'un acteur crée un cas associé, celle d'un cas un cas inclus. Supprimer une limite garde ses cas.
+
+**Modélisation par événements** — une frise d'étapes : écran, commande, événement, vue de lecture, automate, chacune avec ses données et l'étape qui l'alimente. Les numéros se recalculent quand vous ajoutez, déplacez ou supprimez une étape. Les noms s'écrivent sans espace ni accent : « Dépôt validé » devient « DepotValide ».
+
+**Diagramme syntaxique** — une grammaire en EBNF, ABNF ou PEG : une règle par tracé, avec son nom et son expression (l'aide sous le titre rappelle l'écriture). Renommer une règle met à jour ses emplois dans les autres règles.
+
+**Cadre Cynefin** — les situations rangées dans les cinq domaines (complexe, compliqué, évident, chaotique, confus) et les passages d'un domaine à l'autre. Cliquez sur le nom d'un domaine pour y ajouter une situation ; tirez sa pastille vers un autre domaine pour créer un passage.
+
+**Carte de Wardley** — ancres et composants placés selon leur visibilité (de bas en haut) et leur évolution (de gauche à droite) : glissez-les à la souris sur la carte, comme les notes. Dépendances, évolution prévue (flèche rouge), mode de fourniture (fait maison, acheté…). Renommer un composant renomme ses dépendances.
 
 **Page vierge** — une page sans schéma, pour une page de garde ou un intercalaire : seuls son titre, son sous-titre et son pied de page sont imprimés. Vous pouvez lui donner un schéma plus tard (« Choisir un schéma »).
 
@@ -172,12 +186,20 @@ Le bouton **Syntaxes**, au-dessus du code, ouvre l'index : pour chaque type de s
 
 L'étiquette au-dessus de l'éditeur indique si la page reste éditable visuellement. Si vous utilisez une écriture avancée que l'éditeur visuel ne connaît pas, la page passe en « code seul » : rien n'est perdu, elle se modifie simplement par le code.
 
+### Schémas PlantUML (`@startuml`)
+
+FUSAIN interprète localement (sans serveur ni bibliothèque externe) les blocs `@startuml … @enduml`, `@startmindmap … @endmindmap`, `@startwbs … @endwbs` et `@startgantt … @endgantt` pour neuf familles de diagrammes : séquence, classes, états, activité, entités-relations, composants / cas d'utilisation, C4-PlantUML, carte mentale et Gantt.
+
+- Un **diagramme de séquence** PlantUML s'édite directement à la souris, comme un diagramme de séquence Mermaid : le code reste écrit en PlantUML. La forme PlantUML de chaque participant (base de données, file, entité…) se choisit dans son panneau ; « Convertir en code Mermaid » fait passer la page en syntaxe Mermaid.
+- Pour les autres familles, le bouton **« Convertir pour l'édition visuelle »** traduit le code PlantUML en code Mermaid équivalent afin de poursuivre l'édition à la souris (`Ctrl+Z` annule la conversion).
+
 Pour quitter la zone de code au clavier : Échap, puis Tab.
 
-## 7. Enregistrer et exporter
+## 7. Enregistrer, présenter et exporter
 
-- **Enregistrer** produit un fichier `.fusain.json` contenant tout le document. C'est votre sauvegarde : conservez-le.
-- **Ouvrir** recharge un tel fichier (ou glissez-le sur la fenêtre). Un fichier `.mmd` ou `.txt` contenant du code Mermaid est ajouté comme nouvelle page.
+- **Enregistrer** (`Ctrl+S`) produit un fichier `.fusain.json` contenant tout le document. Sur les navigateurs qui le prennent en charge, `Ctrl+Maj+S` (ou `Maj+Clic` sur « Enregistrer », ou le dépôt d'un fichier `.fusain.json` sur la fenêtre) lie le document à ce fichier : les `Ctrl+S` suivants enregistrent alors directement dans le fichier d'origine.
+- **Ouvrir** recharge un tel fichier (ou glissez-le sur la fenêtre). Un fichier `.mmd`, `.txt`, `.puml`, `.plantuml` ou `.iuml` contenant du code Mermaid ou PlantUML est ajouté comme nouvelle page.
+- **Diaporama** (`F5` ou bouton « Diaporama ») ouvre le document dans un onglet plein écran : navigation au clavier (flèches, Espace, Début / Fin), lecture automatique réglable, sélection d'une zone à la souris pour zoomer dessus, zoom au double-clic ou à la molette, et retour à la taille initiale (`Échap`, `0`, `1`).
 - **Exporter** : PDF (vectoriel, une page par page du document), PNG (150, 300 ou 600 ppp, fond transparent possible, schéma seul possible), SVG ou Visio.
 
 ### Exporter vers Microsoft Visio
@@ -198,8 +220,9 @@ Le brouillon conservé automatiquement par le navigateur est une commodité, pas
 | Touches | Effet |
 |---|---|
 | Ctrl+Z / Ctrl+Y | Annuler / rétablir |
-| Ctrl+S | Enregistrer |
+| Ctrl+S / Ctrl+Maj+S | Enregistrer / Enregistrer sous… |
 | Ctrl+O | Ouvrir |
+| F5 | Lancer le diaporama |
 | Molette / Maj + molette | Zoom sous le pointeur / défilement horizontal |
 | Glisser, Espace + glisser | Déplacer la vue |
 | Clic molette | Zoom à 100 % |

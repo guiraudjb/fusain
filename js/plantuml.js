@@ -5,7 +5,7 @@ function echapperGuillemets(texte) {
     return String(texte || '').replace(/"/g, '#quot;').trim();
 }
 
-function nettoyerId(brut, defaut = 'n') {
+export function nettoyerId(brut, defaut = 'n') {
     const propre = String(brut || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -298,7 +298,7 @@ function traduireC4(lignes, enteteTitre) {
 
 // ---------- Diagramme de séquence (@startuml) ----------
 
-function extraireParticipantSequence(texte) {
+export function extraireParticipantSequence(texte) {
     // Supporte : actor "Nom long" as id   OU   actor id as "Nom long"   OU   actor "Nom"   OU   actor id
     const m = texte.match(/^(actor|participant|boundary|control|entity|database|collections|queue)\s+(.+?)(?:\s+#[0-9A-Za-z]+)?$/i);
     if (!m) return null;

@@ -105,6 +105,10 @@ const CORPUS = [
     'flowchart LR\n    a@{ icon: "dsfr:user-line", label: "Usager", pos: "b" }\n    b@{ icon: "illus:serveur", label: "Serveur", pos: "b" }\n    c{"Choix"}\n    a --> b\n    b -->|"oui"| c',
     'flowchart LR\n    a@{ icon: "fa:user", label: "Usager" } --> b@{ shape: cyl }',
 ];
+// Les schémas du document de démonstration (hors diapositives, cartes et ZenUML, qui ne sont pas comparés ainsi)
+const { readFileSync } = await import('node:fs');
+const demonstration = JSON.parse(readFileSync(new URL('../presentation-fusain.fusain.json', import.meta.url), 'utf8'));
+for (const page of demonstration.pages) if (page.code.trim() && !/^\s*(diapo|carte|zenuml)\b/.test(page.code)) CORPUS.push(page.code);
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });
 const p = await (await b.newContext({ viewport: { width: 1500, height: 950 } })).newPage();
 p.on('pageerror', (e) => console.log('[pageerror]', e.message.slice(0, 200)));

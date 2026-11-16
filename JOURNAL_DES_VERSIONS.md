@@ -2,6 +2,23 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.26.0 — 16 novembre 2026 — tout le document de démonstration s'édite à la souris
+
+- **Mesure** : sur les 61 pages du document de démonstration (0.24.0), 52 s'ouvraient dans leur éditeur visuel. Sept types n'en avaient pas : cadre Cynefin, carte de Wardley, cas d'utilisation, modélisation par événements, flux d'agents, diagramme syntaxique et PlantUML. Trois écritures étaient conservées sans être modifiables : le style des liens (`linkStyle` : couleur, épaisseur, flux animé), la couleur des relations C4 (`UpdateRelStyle`), et l'éditeur d'architecture supprimait la barre oblique des libellés (« A3/A4 » devenait « A3 A4 »).
+- **Six nouveaux éditeurs visuels** (`js/diagrammes/`) :
+  - `cynefin.js` : situations rangées par domaine, passages entre domaines (tirés à la poignée d'un domaine) ;
+  - `wardley.js` : ancres et composants placés en glissant à la souris sur la carte (visibilité, évolution), dépendances, évolutions prévues, notes, mode de fourniture ; renommer un composant renomme ses dépendances ;
+  - `usecase.js` : acteurs, cas (ellipse ou rectangle), limites de système, associations, inclusions, extensions, généralisations ;
+  - `evenements.js` : frise d'étapes (écran, commande, événement, vue de lecture, automate), données, étape source ; numéros recalculés et liens `->>` suivis ; noms ramenés à des identifiants admis par Mermaid ;
+  - `syntaxique.js` : règles EBNF, ABNF ou PEG, sur une ou plusieurs lignes ; renommer une règle met à jour ses emplois ;
+  - `plantuml.js` : un diagramme de séquence PlantUML se modifie à la souris **sans quitter PlantUML** (participants et leur forme : base de données, file…, messages, `++`/`--`, `return`, notes sur une ou plusieurs lignes, séparateurs `== … ==`, blocs). Le panneau et le repérage sont ceux de l'éditeur de séquence ; un bouton convertit en code Mermaid. Les autres familles PlantUML gardent « Convertir pour l'édition visuelle ».
+- **Flux d'agents** : l'éditeur de logigramme lit et écrit `agentflow-beta` (conteneurs `flow … end` et `global … end`, nature de chaque étape `@{ shape: task | tool | input | decision | refdoc | action }`, trois sortes de liens : enchaînement, consultation, échec).
+- **Style des liens** (logigramme, couloirs, flux d'agents) : couleur du trait, épaisseur et flux animé (lent ou rapide) se règlent dans le panneau du lien ; les autres propriétés du `linkStyle` sont gardées.
+- **C4** : `UpdateRelStyle` est rattaché à sa relation ; une couleur se choisit dans le panneau et suit la relation quand on l'inverse.
+- **Séquence** : les participants sont cliquables sur le dessin ; supprimer l'ouverture, une branche ou la fin d'un bloc retire tout son cadre ; supprimer un participant ou un `activate` retire les activations qui lui répondent ; renommer un bloc ne change que son libellé.
+- **Architecture** : la barre oblique, les parenthèses et la plupart des signes restent dans les libellés.
+- **Recette** : chaque page de la démonstration a un éditeur et se réécrit sans perte (test de logique) ; les 41 schémas comparables restent fidèles après réécriture (même textes, formes et traits), et rejoignent le corpus de `tests/fidelite.mjs` ; les sept nouveaux modèles rejoignent `tests/robustesse.mjs` (libellés hostiles et opérations aléatoires : 60 sur 60 par type, aucune exécution). Les caractères admis ont été mesurés dans Mermaid 12.3 : identifiant d'étape commençant par une lettre et pas par « title » en minuscules, pas de `[`, `(`, `{`, `>`, `\` ni `'` dans le texte d'une relation de cas d'utilisation, pas d'accent grave en tête d'un libellé.
+
 ## 0.25.0 — 14 novembre 2026 — prise en charge native de PlantUML (@startuml)
 
 - **PlantUML (`js/plantuml.js`)** : interprétation et traduction 100 % locales (sans bibliothèque externe) des blocs `@startuml … @enduml`, `@startmindmap … @endmindmap`, `@startwbs … @endwbs` et `@startgantt … @endgantt` pour neuf familles de diagrammes (séquence, classes, états, activité, entités-relations, composants/cas d'utilisation, C4-PlantUML, carte mentale et Gantt).

@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.28.0 — 16 novembre 2026 — aide au débogage dans le code
+
+- **Constat** : des logigrammes écrits à la main contenaient des écritures acceptées par Mermaid mais fautives : propriétés `id@{ … }` restées après la suppression de leur lien (Mermaid dessine alors une boîte portant l'identifiant), nœuds déclarés et reliés à rien, libellés coupés par un retour à la ligne.
+- **Repères dans le mode code** (`js/controles.js`, logique pure) : les lignes orphelines sont surlignées en rouge (propriétés qui ne visent aucun lien, nœud relié à rien, guillemet jamais refermé), les énoncés découpés sur plusieurs lignes en jaune. Le numéro de ligne prend la même couleur (son infobulle donne le message) et la liste sous le code explique chaque repère et la correction à faire ; un clic sur « Ligne N » sélectionne le passage.
+- **Recette** : test de logique sur un exemple neutre ; aucune fausse alerte sur les 61 pages de la démonstration ni sur les modèles ; affichage vérifié dans Chrome (bandes alignées sur les lignes, sélection au clic).
+
 ## 0.27.1 — 16 novembre 2026 — logigrammes écrits à la main
 
 - **Constat** : un logigramme écrit à la main passait en « code seul » (plus rien de cliquable) dès qu'il contenait l'une de trois écritures admises par Mermaid : un libellé sur plusieurs lignes dans `@{ … }`, un identifiant de lien avec ses propriétés (`A e1@-.- B` puis `e1@{ animation: fast }`), ou un lien pointillé à texte fermé par `-.-` (`A -. texte -.- B`).

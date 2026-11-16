@@ -165,6 +165,13 @@ Chaque page a son propre format : un même document peut mêler A4 et A3.
 
 Le bouton « Code » affiche le code Mermaid de la page à côté de l'aperçu, mis à jour pendant la frappe. En cas d'erreur, le dernier aperçu valide reste affiché.
 
+### Repères d'aide au débogage
+
+Dans un logigramme, certaines écritures sont acceptées par Mermaid mais trahissent souvent une erreur. Le mode code les surligne, avec un message dans la liste sous le code (un clic sur « Ligne N » sélectionne le passage) :
+
+- **en rouge, les lignes orphelines** : propriétés d'un lien (`e3@{ animation: fast }`) alors qu'aucun lien ne s'appelle `e3` (Mermaid dessine à la place une boîte « e3 ») ; élément déclaré mais relié à rien ; guillemet jamais refermé ;
+- **en jaune, les énoncés découpés** sur plusieurs lignes : un texte entre guillemets qui continue à la ligne suivante. Mermaid l'accepte (le retour à la ligne apparaît dans le libellé) ; écrivez plutôt `<br/>` pour garder une déclaration par ligne.
+
 ### Erreurs de syntaxe : diagnostic et réparation
 
 Quand une ligne est mal écrite, le message d'erreur indique :

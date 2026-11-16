@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
   "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
-  "serialNumber": "urn:uuid:b86d95f1-3370-5e5e-9461-b116cd33608b",
+  "serialNumber": "urn:uuid:67a361a0-7606-54d1-a7e9-29817ee95d33",
   "version": 1,
   "metadata": {
     "timestamp": "2026-11-16T00:00:00Z",
@@ -16,13 +16,13 @@
         {
           "type": "application",
           "name": "outils/generer.py",
-          "version": "0.27.1"
+          "version": "0.28.0"
         }
       ]
     },
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.27.1",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.28.0",
       "supplier": {
         "name": "guiraudjb",
         "url": [
@@ -30,9 +30,9 @@
         ]
       },
       "name": "FUSAIN",
-      "version": "0.27.1",
+      "version": "0.28.0",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.27.1",
+      "purl": "pkg:github/guiraudjb/fusain@0.28.0",
       "externalReferences": [
         {
           "type": "vcs",
@@ -1911,7 +1911,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.27.1#donnees/fonds-de-carte",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.28.0#donnees/fonds-de-carte",
       "supplier": {
         "name": "IGN, INSEE, Natural Earth, Base Adresse Nationale (via SimpleCarto)"
       },
@@ -1954,7 +1954,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.27.1#donnees/icones-illustrees",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.28.0#donnees/icones-illustrees",
       "supplier": {
         "name": "FUSAIN"
       },
@@ -1989,7 +1989,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.27.1#donnees/pictogrammes",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.28.0#donnees/pictogrammes",
       "supplier": {
         "name": "FUSAIN"
       },
@@ -2025,7 +2025,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.27.1",
+      "ref": "pkg:github/guiraudjb/fusain@0.28.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.3.0",

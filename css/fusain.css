@@ -113,7 +113,22 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .fusain-code__editeur { flex: 1; min-height: 0; display: flex; border-top: 1px solid var(--border-default-grey); font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: .875rem; line-height: 1.5; }
 .fusain-code__lignes { flex: 0 0 3rem; overflow: hidden; padding: .5rem .5rem .5rem 0; text-align: right; color: var(--text-mention-grey); background: var(--background-alt-grey); white-space: pre; user-select: none; }
 .fusain-code__lignes .fusain-ligne-erreur { background: var(--background-flat-error); color: #fff; }
-.fusain-code__zone { flex: 1; min-width: 0; resize: none; border: 0; padding: .5rem; font: inherit; color: var(--text-default-grey); background: var(--background-default-grey); white-space: pre; overflow: auto; tab-size: 4; }
+/* Aide au débogage : lignes orphelines en rouge, énoncés découpés sur plusieurs lignes en jaune */
+.fusain-code__editeur { position: relative; }
+.fusain-code__fond { position: absolute; top: 0; bottom: 0; left: 3rem; right: 0; overflow: hidden; pointer-events: none; background: var(--background-default-grey); }
+.fusain-code__bandes { padding-top: .5rem; }
+.fusain-code__bandes > div { height: 1.5em; }
+.fusain-code__bandes > .fusain-bande-orpheline { background: rgba(225, 0, 15, .16); }
+.fusain-code__bandes > .fusain-bande-decoupee { background: rgba(255, 202, 0, .32); }
+.fusain-code__lignes .fusain-ligne-orpheline { background: #ce0500; color: #fff; }
+.fusain-code__lignes .fusain-ligne-decoupee { background: #ffca00; color: #161616; }
+.fusain-code__controles { flex: none; max-height: 30%; overflow-y: auto; margin: 0; padding: .5rem .75rem; list-style: none; border-top: 1px solid var(--border-default-grey); background: var(--background-default-grey); font-size: .8125rem; line-height: 1.4; }
+.fusain-code__controles[hidden] { display: none; }
+.fusain-controle { margin: 0 0 .375rem; padding: .25rem .5rem; border-left: 4px solid; }
+.fusain-controle--orpheline { border-color: #ce0500; background: rgba(225, 0, 15, .08); }
+.fusain-controle--decoupee { border-color: #ffca00; background: rgba(255, 202, 0, .14); }
+.fusain-controle__ligne { padding: 0; border: 0; background: none; font: inherit; font-weight: 700; color: var(--text-action-high-blue-france); text-decoration: underline; cursor: pointer; }
+.fusain-code__zone { position: relative; z-index: 1; flex: 1; min-width: 0; resize: none; border: 0; padding: .5rem; font: inherit; color: var(--text-default-grey); background: transparent; white-space: pre; overflow: auto; tab-size: 4; }
 .fusain-code__zone:focus { outline: 2px solid #0a76f6; outline-offset: -2px; }
 
 /* ---------- Panneau de propriétés ---------- */

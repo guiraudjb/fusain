@@ -16,6 +16,7 @@ import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
 import { ouvrirImportReseau } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
+import { controlerCode } from './controles.js';
 import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama, estBrouillonParDefaut, chargerDocumentDemonstration } from './diaporama.js';
 import { traduirePlantUml } from './plantuml.js';
 
@@ -810,11 +811,52 @@ function validerCodeEnAttente() {
     if (code !== pageCourante().code) modifier((doc) => { doc.pages[etat.index].code = code; }, { fusion: `code-${pageCourante().id}` });
 }
 
+// Numéros de ligne, et repères d'aide au débogage : lignes orphelines en rouge, énoncés découpés en jaune
 function numeroterLignes(ligneErreur) {
     const total = zones.zoneCode.value.split('\n').length;
+    let constats = [];
+    try { constats = controlerCode(zones.zoneCode.value); } catch (e) { console.warn('Contrôles du code impossibles', e); }
+    const niveau = new Map();
+    const message = new Map();
+    for (const c of constats) {
+        for (let i = c.debut; i <= c.fin; i += 1) {
+            if (niveau.get(i) !== 'orpheline') niveau.set(i, c.niveau);
+            message.set(i, [message.get(i), c.message].filter(Boolean).join('\n'));
+        }
+    }
     vider(zones.lignes);
-    for (let i = 1; i <= total; i += 1) zones.lignes.append(h('div', { class: i === ligneErreur ? 'fusain-ligne-erreur' : null }, i));
+    vider(zones.bandes);
+    for (let i = 1; i <= total; i += 1) {
+        const classe = i === ligneErreur ? 'fusain-ligne-erreur' : niveau.has(i) ? `fusain-ligne-${niveau.get(i)}` : null;
+        zones.lignes.append(h('div', { class: classe, title: message.get(i) || null }, i));
+        zones.bandes.append(h('div', { class: niveau.has(i) ? `fusain-bande-${niveau.get(i)}` : null }));
+    }
+    vider(zones.controles);
+    zones.controles.hidden = !constats.length;
+    for (const c of constats) {
+        const etiquette = c.fin > c.debut ? `Lignes ${c.debut} à ${c.fin}` : `Ligne ${c.debut}`;
+        zones.controles.append(h('li', { class: `fusain-controle fusain-controle--${c.niveau}` },
+            h('button', { type: 'button', class: 'fusain-controle__ligne', title: 'Sélectionner dans le code', onclick: () => selectionnerLignes(c.debut, c.fin) }, etiquette),
+            h('span', {}, ` ${c.message}`)));
+    }
+    synchroniserDefilement();
+}
+
+function synchroniserDefilement() {
     zones.lignes.scrollTop = zones.zoneCode.scrollTop;
+    zones.bandes.style.transform = `translateY(${-zones.zoneCode.scrollTop}px)`;
+}
+
+function selectionnerLignes(debut, fin) {
+    const lignes = zones.zoneCode.value.split('\n');
+    const avant = lignes.slice(0, debut - 1).join('\n').length + (debut > 1 ? 1 : 0);
+    const longueur = lignes.slice(debut - 1, fin).join('\n').length;
+    zones.zoneCode.focus();
+    zones.zoneCode.setSelectionRange(avant, avant + longueur);
+    // La ligne est amenée dans la vue (environ au tiers de la hauteur)
+    const hauteurLigne = parseFloat(getComputedStyle(zones.zoneCode).lineHeight) || 21;
+    zones.zoneCode.scrollTop = Math.max(0, (debut - 1) * hauteurLigne - zones.zoneCode.clientHeight / 3);
+    synchroniserDefilement();
 }
 
 function afficherCode(erreur) {
@@ -829,13 +871,18 @@ function afficherCode(erreur) {
 }
 
 function brancherCode() {
+    // Fond du code : une bande par ligne, colorée pour les repères d'aide ; liste des repères sous le code
+    zones.bandes = h('div', { class: 'fusain-code__bandes' });
+    zones.zoneCode.before(h('div', { class: 'fusain-code__fond', 'aria-hidden': 'true' }, zones.bandes));
+    zones.controles = h('ul', { class: 'fusain-code__controles', 'aria-live': 'polite', 'aria-label': 'Aide au débogage du code', hidden: true });
+    zones.zoneCode.closest('.fusain-code__editeur').after(zones.controles);
     zones.etatCode.before(bouton('Syntaxes', { icone: 'question-line', titre: 'Écriture de chaque objet du schéma, avec un exemple', onclick: () => ouvrirSyntaxes() }));
     zones.zoneCode.addEventListener('input', () => {
         clearTimeout(attenteCode);
         attenteCode = setTimeout(validerCodeEnAttente, 300);
         numeroterLignes(null);
     });
-    zones.zoneCode.addEventListener('scroll', () => { zones.lignes.scrollTop = zones.zoneCode.scrollTop; });
+    zones.zoneCode.addEventListener('scroll', synchroniserDefilement);
     zones.zoneCode.addEventListener('keydown', (e) => {
         if (e.key !== 'Tab' || e.shiftKey || e.ctrlKey || e.altKey) return;
         // Tab indente ; Échap puis Tab permet de quitter la zone au clavier

@@ -1161,3 +1161,17 @@ test('logigramme : libellé sur plusieurs lignes, identifiants et propriétés d
     const orphelin = logigramme.analyser('flowchart LR\n    A --> B\n    e9@{ animation: fast }\n');
     assert.deepEqual(orphelin.brut, ['e9@{ animation: fast }']);
 });
+
+test('aide au débogage : lignes orphelines en rouge, énoncés découpés en jaune, sans fausse alerte sur la démonstration', async () => {
+    const { controlerCode } = await import('../js/controles.js');
+    const code = 'flowchart LR\n    A@{ icon: "picto:serveur", label: "Ligne 1\nLigne 2", pos: "b" }\n    B["B"]\n    C["Seul"]\n    A e1@--> B\n    e1@{ animation: fast }\n    e9@{ animation: fast }\n';
+    assert.deepEqual(controlerCode(code).map((c) => [c.niveau, c.debut, c.fin]), [['decoupee', 2, 3], ['orpheline', 5, 5], ['orpheline', 8, 8]]);
+    assert.match(controlerCode(code)[2].message, /« e9 »/);
+    // Un nœud rangé dans un groupe relié n'est pas isolé ; un guillemet jamais fermé est signalé
+    assert.deepEqual(controlerCode('flowchart LR\n    subgraph G ["G"]\n        X\n    end\n    Y --> G\n'), []);
+    assert.equal(controlerCode('flowchart LR\n    A["ouvert\n    B --> C\n')[0].niveau, 'orpheline');
+    const { readFileSync } = await import('node:fs');
+    const doc = JSON.parse(readFileSync(new URL('../presentation-fusain.fusain.json', import.meta.url), 'utf8'));
+    for (const page of doc.pages) assert.deepEqual(controlerCode(page.code), [], page.nom);
+    for (const m of MODELES) assert.deepEqual(controlerCode(m.code), [], m.id);
+});

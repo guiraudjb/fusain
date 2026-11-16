@@ -12,7 +12,8 @@ p.on('pageerror', e => { errs.push(e.message); console.log('[pageerror]', e.mess
 p.on('response', r => { if (r.status() >= 400) console.log('[http]', r.status(), r.url()); });
 const ok = (nom, cond, detail='') => console.log(cond ? 'OK   ' : 'ECHEC', nom, detail);
 const code = () => p.evaluate(() => JSON.parse(JSON.stringify(window.__etat?.doc?.pages?.map(x => x.code) || null)));
-await p.goto(process.env.FUSAIN_URL || 'http://127.0.0.1:8765/');
+// ?demo=0 : la recette part d'un document neuf, pas du document de démonstration ouvert par défaut
+await p.goto(`${process.env.FUSAIN_URL || 'http://127.0.0.1:8765/'}?demo=0`);
 await p.waitForSelector('html[data-fusain-pret]'); await p.waitForTimeout(900);
 const lireCode = async () => { await p.click('button:has-text("Code")'); await p.waitForTimeout(500); const v = await p.inputValue('#fusain-code-zone'); await p.click('button:has-text("Visuel")'); await p.waitForTimeout(500); return v; };
 

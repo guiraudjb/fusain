@@ -1069,6 +1069,8 @@ test('cas d\'utilisation : acteurs, limites, relations et textes nettoyés', () 
     uc.renommer(m, 'a:0', '`Agent "instructeur"');
     const une = uc.ecrire(m);
     assert.match(une, /Agent -- lit b tout \/b --> Deposer/);
+    uc.renommer(m, 'r:0', 'a:::b');
+    assert.equal(m.relations[0].texte, 'a::b');
     assert.match(une, /actor Agent\("’Agent ”instructeur”"\)/);
     uc.supprimer(m, 'b:0');
     assert.doesNotMatch(uc.ecrire(m), /systemBoundary/);

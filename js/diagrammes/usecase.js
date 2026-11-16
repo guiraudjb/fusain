@@ -18,7 +18,8 @@ const RE_FLECHE = new RegExp(`^(${ID})\\s*(-->|--\\|>|--|<--)\\s*(${ID})$`);
 // Un libellé va entre guillemets droits ; l'accent grave en tête ouvrirait un texte Markdown
 const propre = (t) => String(t ?? '').replace(/\s+/g, ' ').replace(/"/g, '”').replace(/`/g, '’').trim();
 // Le texte d'une association n'est pas entre guillemets : seuls lettres, chiffres, espaces et quelques signes y sont admis
-const propreLien = (t) => propre(t).replace(/[^\p{L}\p{N} .,!?%+*=&:#_/]|-{2,}/gu, ' ').replace(/\s+/g, ' ').trim();
+// « ::: » (trois deux-points ou plus) est lu par Mermaid comme l'attribution d'une classe : ramené à « :: »
+const propreLien = (t) => propre(t).replace(/[^\p{L}\p{N} .,!?%+*=&:#_/]|-{2,}/gu, ' ').replace(/:{3,}/g, '::').replace(/\s+/g, ' ').trim();
 
 export function analyser(code) {
     const { preambule, corps } = separerPreambule(code);

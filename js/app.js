@@ -1255,7 +1255,8 @@ async function demarrer() {
             message('Brouillon non repris', `Le dernier brouillon n'a pas pu être relu (${e.message}). Il est conservé à part dans ce navigateur ; « Effacer les données locales » le supprime.`, 'warning', 0);
         }
     }
-    if (!doc) doc = await chargerDocumentDemonstration();
+    // « ?demo=0 » ouvre un document neuf au lieu de la démonstration (le brouillon personnel reste repris)
+    if (!doc) doc = new URLSearchParams(location.search).get('demo') === '0' ? nouveauDocument(MODELE_INITIAL.code) : await chargerDocumentDemonstration();
     charger(doc, { modifie: false });
     if (brouillonRepris) message('Brouillon repris', 'Votre dernier travail a été rechargé depuis ce navigateur. Pensez à l\'enregistrer dans un fichier.', 'info', 7000);
     brancherServiceWorker();

@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.26.0-e730765a23';
+const VERSION_CACHE = 'fusain-0.26.0-4491a46a41';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
@@ -18,7 +18,7 @@ const FICHIERS = [
     ['./Documentation/exemples-reseau/lldp-voisins.csv', 'e268acb050dce66e0c719edf058d580174a8cf5a7e3ffb753394b0033029ac3c'],
     ['./Documentation/outils/Exporter-ReseauIMC.ps1', '713c7428241de802477a0c2a86c0d03a88dbc7f6def715d10d781c1ad9e5c7ae'],
     ['./FUSAIN_cahier_des_charges.md', 'e84962260b33ba4884c462d485b9df5ce5da9f2cd4e3a4a8062a66034a7fa77b'],
-    ['./JOURNAL_DES_VERSIONS.md', '3b6097b298abae497fb7a675823754cd5e4ebf5bf007d7201f7013ec853307a8'],
+    ['./JOURNAL_DES_VERSIONS.md', '641a6d8faadc11561d85d9420fcc468ace39c1ed8e7f2cbcca8f91078d20b435'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '0a785f200f1128af45f64c705d1c9839ab575caf7645283f1fd3f457935d00d9'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -51,9 +51,9 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', 'c5fd9a0bc8add6b473ef0d1302994765ae929201f6b610ae6f1c04416efe432e'],
-    ['./index.html', 'c5fd9a0bc8add6b473ef0d1302994765ae929201f6b610ae6f1c04416efe432e'],
-    ['./js/app.js', '42a91316bd35adcc9c89364da150a11c1ca12bf1f346f9602ebf65f5cf8e3f68'],
+    ['./', '65df2fc0f6bb90ab66b39b3719a7358da5bbd816c3b9a080715a40fc1913a035'],
+    ['./index.html', '65df2fc0f6bb90ab66b39b3719a7358da5bbd816c3b9a080715a40fc1913a035'],
+    ['./js/app.js', '7836b99748b91db115c20c59cf527b29ea4867e51a62c661d3a8670de500abae'],
     ['./js/brouillon.js', '8eaefb98fc4dda95f498e795466c2058c89544b2eb6fc86602388185efb6c95e'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
@@ -88,7 +88,7 @@ const FICHIERS = [
     ['./js/diagrammes/sequence.js', '1ecfff23eb9c385e19033764746848cbe5e55fe67b2bd5a655f92920c0153026'],
     ['./js/diagrammes/syntaxique.js', '2650b6d1ad4248978bf6095edde6cf23ddb3ec8fb389b92ca263fc70421670e7'],
     ['./js/diagrammes/treemap.js', 'f61c53e054b4e2c2999da379518115ddd898bdda702833291b8814e4f5a75c90'],
-    ['./js/diagrammes/usecase.js', '7fdc6b282c8ce93958eabb8a143e416b4ad95a2c6d318467af0bbbb71bd70408'],
+    ['./js/diagrammes/usecase.js', 'f1e7006fd0fac631cbdb310a0a05ee659fbdca9c44d5c46dcf0d74a78d19f1c6'],
     ['./js/diagrammes/venn.js', 'f47b8c8b035af4707211a1eaf755e834838f239f3853c0ac7e8bbb685d8a7cdf'],
     ['./js/diagrammes/versions.js', 'd7bd9c603d836a92f67c5b4d9a5897a28d123cdc748e6b4f05a042e0cd880166'],
     ['./js/diagrammes/wardley.js', 'c5440954620051c83bfe3f40900a64ed094ccd4f09e0f09aeb58f515acd038f9'],

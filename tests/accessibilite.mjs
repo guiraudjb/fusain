@@ -7,7 +7,7 @@ const axe = fs.readFileSync(process.argv[2], 'utf8');
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: true });
 const ctx = await b.newContext({ viewport: { width: 1500, height: 950 }, bypassCSP: true });
 const p = await ctx.newPage();
-await p.goto(process.env.FUSAIN_URL || 'http://127.0.0.1:8765/'); await p.waitForSelector('html[data-fusain-pret]'); await p.waitForTimeout(900);
+await p.goto(`${process.env.FUSAIN_URL || 'http://127.0.0.1:8765/'}?demo=0`); await p.waitForSelector('html[data-fusain-pret]'); await p.waitForTimeout(900);
 await p.evaluate(axe);
 let total = 0;
 const controler = async (etat) => {

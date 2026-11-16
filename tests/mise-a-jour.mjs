@@ -9,7 +9,7 @@ const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bi
 const p = await (await b.newContext({ viewport: { width: 1500, height: 900 } })).newPage();
 p.on('pageerror', e => console.log('[pageerror]', e.message.slice(0, 200)));
 const ok = (n, c, d = '') => console.log(c ? 'OK   ' : 'ECHEC', n, d);
-await p.goto('http://127.0.0.1:8766/'); await p.waitForSelector('html[data-fusain-pret]');
+await p.goto('http://127.0.0.1:8766/?demo=0'); await p.waitForSelector('html[data-fusain-pret]');
 await p.evaluate(() => navigator.serviceWorker.ready); await p.waitForTimeout(3000);
 // un travail en cours : renommer une étape
 await p.dblclick('#fusain-feuille [data-fusain="n:C"]'); await p.fill('.fusain-saisie', 'Travail en cours'); await p.keyboard.press('Enter'); await p.waitForTimeout(1500);

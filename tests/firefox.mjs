@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const BASE = process.env.WEBDRIVER || 'http://127.0.0.1:4444';
-const URL_APP = process.env.FUSAIN_URL || 'http://127.0.0.1:8765/';
+const URL_APP = `${process.env.FUSAIN_URL || 'http://127.0.0.1:8765/'}?demo=0`;
 const dossier = fs.mkdtempSync(path.join(process.env.FUSAIN_SORTIE || os.tmpdir(), 'fusain-ff-'));
 const appel = async (methode, chemin, corps) => {
     const r = await fetch(BASE + chemin, { method: methode, headers: { 'content-type': 'application/json' }, body: corps ? JSON.stringify(corps) : undefined });

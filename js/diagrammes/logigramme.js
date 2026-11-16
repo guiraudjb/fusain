@@ -43,7 +43,12 @@ const ANIMATIONS = [['', 'Aucune'], ['lente', 'Flux animé lent'], ['rapide', 'F
 const DUREES_ANIMATION = { lente: '20s', rapide: '8s' };
 const PROPRIETES_ANIMATION = ['stroke-dasharray', 'stroke-dashoffset', 'animation'];
 const RE_ID = /^[\p{L}\p{N}_]+/u;
-const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
+// Mermaid ferme un lien pointillé à texte par « .- », « .-> » ou « -.- » (le tiret initial est facultatif)
+const RE_LIEN_TEXTE = /^([<ox])?(--|==|-\.)\s+("[^"]*"|.+?)\s+(-{2,}|={2,}|-?\.+-)([>ox])?(?=\s|$|[\p{L}\p{N}_])/u;
+// Identifiant de lien (« A e1@--> B »), qui porte ensuite des propriétés (« e1@{ animation: fast } »)
+const RE_ID_LIEN = /^([\p{L}\p{N}_]+)@(?=[<ox]?[-=~.])/u;
+const RE_PROPRIETES = /^([\p{L}\p{N}_]+)@\{\s*([^{}]*?)\s*\}$/u;
+const ANIMATIONS_MERMAID = { fast: 'rapide', slow: 'lente' };
 const RE_LIEN = /^([<ox])?(-{2,}|={2,}|-\.+-|~{3,})([>ox])?/;
 
 const RE_ICONE = /^@\{ icon: "((?:dsfr|illus|picto):[a-z0-9-]+)", label: "([^"]*)", pos: "b" \}/;
@@ -118,6 +123,8 @@ function lireEnonce(texte, modele, groupe) {
 
     const lireLien = () => {
         blancs();
+        const idLien = texte.slice(pos).match(RE_ID_LIEN);
+        if (idLien) pos += idLien[0].length;
         const reste = texte.slice(pos);
         let m = reste.match(RE_LIEN_TEXTE);
         let lien;
@@ -125,7 +132,7 @@ function lireEnonce(texte, modele, groupe) {
             const corps = m[4];
             lien = { debut: m[1] || '', fin: m[5] || '', texte: desechapper(sansGuillemets(m[3])).replace(/#124;/g, '|'),
                 trait: m[2] === '==' ? 'epais' : m[2] === '-.' ? 'pointille' : 'plein',
-                longueur: m[2] === '-.' ? corps.length - 1 : corps.length - (m[5] ? 1 : 2) };
+                longueur: m[2] === '-.' ? (corps.match(/\./g) || []).length : corps.length - (m[5] ? 1 : 2) };
         } else {
             m = reste.match(RE_LIEN);
             if (!m) throw new Inconnu('lien attendu');
@@ -145,6 +152,7 @@ function lireEnonce(texte, modele, groupe) {
         }
         if (/^`[\s\S]*`$/.test(lien.texte.trim())) throw new Inconnu('texte au format Markdown');
         lien.longueur = Math.max(1, Math.min(lien.longueur, 6));
+        if (idLien) lien.id = idLien[1];
         return lien;
     };
 
@@ -153,6 +161,7 @@ function lireEnonce(texte, modele, groupe) {
     while (pos < texte.length) {
         const lien = lireLien();
         const cibles = lireGroupe();
+        if (lien.id && (sources.length > 1 || cibles.length > 1 || modele.liens.some((x) => x.id === lien.id))) throw new Inconnu('identifiant de lien en double');
         for (const de of sources) for (const vers of cibles) modele.liens.push({ ...lien, de, vers });
         sources = cibles;
         blancs();
@@ -168,8 +177,18 @@ export function analyser(code) {
     // « linkStyle 2 … » désigne un lien par son rang : le style est rattaché au lien, et son rang recalculé à l'écriture
     const stylesLiens = [];
     const pile = [];
+    // « id@{ … } » : propriétés d'un lien (rattachées après lecture de tous les liens) ou forme étendue d'un nœud
+    const proprietes = [];
 
+    // Un libellé entre guillemets peut s'étendre sur plusieurs lignes : l'énoncé est relu d'un seul tenant
+    const lignes = [];
     corps.slice(1).forEach((ligneBrute, n) => {
+        const precedente = lignes[lignes.length - 1];
+        if (precedente?.ouverte) { precedente.texte += `\n${ligneBrute.trim()}`; precedente.ouverte = (precedente.texte.match(/"/g) || []).length % 2 === 1; return; }
+        lignes.push({ texte: ligneBrute, n, ouverte: (ligneBrute.match(/"/g) || []).length % 2 === 1 && !ligneBrute.trim().startsWith('%%') });
+    });
+
+    lignes.forEach(({ texte: ligneBrute, n }) => {
         const ligne = ligneBrute.trim().replace(/;$/, '').trim();
         if (!ligne) return;
         const mot = ligne.match(/^[A-Za-z]+/)?.[0] || '';
@@ -233,6 +252,8 @@ export function analyser(code) {
             const ls = ligne.match(/^linkStyle\s+(\d+(?:\s*,\s*\d+)*)\s+(.+?);?$/);
             if (ls) { for (const rang of ls[1].split(',')) stylesLiens.push([Number(rang), ls[2]]); return; }
             if (MOTS_BRUTS.includes(mot) && /\s/.test(ligne[mot.length] || '')) { modele.brut.push(ligne); return; }
+            const props = ligne.match(RE_PROPRIETES);
+            if (props && !/^\s*(shape|icon|img)\s*:/.test(props[2])) { proprietes.push({ id: props[1], valeur: props[2], ligne, groupe, n }); return; }
             lireEnonce(ligne, modele, groupe);
         } catch (e) {
             if (e instanceof Inconnu) throw new Error(`Ligne ${n + 2 + preambule.length} : cette écriture n'est pas gérée par l'édition visuelle (${e.message}).`);
@@ -240,6 +261,17 @@ export function analyser(code) {
         }
     });
     if (pile.length) throw new Error('Un groupe n\'est pas fermé par « end ».');
+    for (const p of proprietes) {
+        const lien = modele.liens.find((l) => l.id === p.id);
+        if (lien) { lien.proprietes = p.valeur; continue; }
+        // Propriétés de lien restées sans lien (« e3@{ animation: fast } » après suppression du lien e3) : Mermaid
+        // en fait une boîte « e3 ». La ligne est gardée telle quelle pour ne pas bloquer l'édition du reste.
+        if (!/(^|,)\s*(shape|icon|img|label|pos|h|w|form|constraint)\s*:/.test(p.valeur)) { modele.brut.push(p.ligne); continue; }
+        try { lireEnonce(p.ligne, modele, p.groupe); } catch (e) {
+            if (e instanceof Inconnu) throw new Error(`Ligne ${p.n + 2 + preambule.length} : cette écriture n'est pas gérée par l'édition visuelle (${e.message}).`);
+            throw e;
+        }
+    }
     // Un rang sans lien ferait échouer le rendu : il est abandonné
     for (const [rang, style] of stylesLiens) if (modele.liens[rang]) modele.liens[rang] = { ...modele.liens[rang], style };
 
@@ -268,7 +300,7 @@ function ecrireLien(l) {
     const fleche = l.trait === 'invisible' ? '~~~' : `${l.debut}${corps}${l.fin}`;
     // La barre verticale délimite le texte d'un lien : dans le texte, elle s'écrit par son code
     const texte = l.texte ? `|"${echapper(l.texte).replace(/\|/g, '#124;')}"|` : '';
-    return `${l.de} ${fleche}${texte} ${l.vers}`;
+    return `${l.de} ${l.id ? `${l.id}@` : ''}${fleche}${texte} ${l.vers}`;
 }
 
 export function ecrire(modele) {
@@ -289,6 +321,7 @@ export function ecrire(modele) {
     };
     ecrireGroupe(null, 1);
     for (const l of modele.liens) lignes.push(marge(1) + ecrireLien(l));
+    for (const l of modele.liens) if (l.id && l.proprietes) lignes.push(`${marge(1)}${l.id}@{ ${l.proprietes.replace(/[{}\n]/g, ' ').trim()} }`);
     modele.liens.forEach((l, i) => { if (l.style) lignes.push(`${marge(1)}linkStyle ${i} ${String(l.style).replace(/[\n;]/g, ' ').trim()}`); });
     for (const [id, proprietes] of Object.entries(modele.styles)) {
         const paires = Object.entries(proprietes).map(([k, v]) => `${k}:${v}`);
@@ -358,6 +391,19 @@ function appliquerSorteAgent(l, sorte) {
 }
 
 // « stroke:#000091,stroke-width:3px » ↔ [['stroke', '#000091'], ['stroke-width', '3px']] ; l'ordre est conservé
+// Propriétés « clé: valeur » d'un lien identifié (« e1@{ animation: fast } ») ; « animate: true » vaut une animation lente
+export function proprieteLien(l, cle) {
+    const paires = Object.fromEntries(String(l.proprietes || '').split(',').map((x) => x.split(':').map((y) => y.trim())).filter(([k, v]) => k && v !== undefined));
+    if (cle === 'animation') return paires.animation ?? (paires.animate === 'true' ? 'slow' : null);
+    return paires[cle] ?? null;
+}
+
+function reglerAnimationMermaid(l, valeur) {
+    const autres = String(l.proprietes || '').split(',').map((x) => x.trim()).filter((x) => x && !/^(animation|animate)\s*:/.test(x));
+    if (valeur) autres.push(`animation: ${valeur === 'rapide' ? 'fast' : 'slow'}`);
+    if (autres.length) l.proprietes = autres.join(', '); else delete l.proprietes;
+}
+
 export function lireStyleLien(style) {
     const paires = [];
     for (const morceau of String(style || '').split(/,(?=\s*[\w-]+\s*:)/)) {
@@ -569,7 +615,10 @@ export function panneau(ctx) {
         const i = Number(id);
         const l = modele.liens[i];
         const maj = (f) => appliquer((m) => f(m.liens[i]));
-        const style = (propriete, valeur) => maj((x) => { const s = reglerStyleLien(x.style, propriete, valeur); if (s) x.style = s; else delete x.style; });
+        const style = (propriete, valeur) => maj((x) => {
+            if (propriete === 'animation' && x.id && proprieteLien(x, 'animation') !== null) { reglerAnimationMermaid(x, valeur); return; }
+            const s = reglerStyleLien(x.style, propriete, valeur); if (s) x.style = s; else delete x.style;
+        });
         blocs.push(h('div', { class: 'fusain-bloc' },
             h('h2', {}, 'Lien sélectionné'),
             h('p', { class: 'fusain-aide' }, `${nomExtremite(modele, l.de)} → ${nomExtremite(modele, l.vers)}`),
@@ -585,7 +634,7 @@ export function panneau(ctx) {
             h('div', { class: 'fusain-ligne' },
                 champSelect('Épaisseur', EPAISSEURS.some(([e]) => e === valeurStyle(l.style, 'stroke-width')) ? EPAISSEURS : [...EPAISSEURS, [valeurStyle(l.style, 'stroke-width'), valeurStyle(l.style, 'stroke-width')]],
                     valeurStyle(l.style, 'stroke-width'), (v) => style('stroke-width', v)),
-                champSelect('Animation', ANIMATIONS, animationLien(l.style), (v) => style('animation', v))),
+                champSelect('Animation', ANIMATIONS, l.id && proprieteLien(l, 'animation') !== null ? ANIMATIONS_MERMAID[proprieteLien(l, 'animation')] || 'lente' : animationLien(l.style), (v) => style('animation', v))),
             h('div', { class: 'fusain-actions' },
                 bouton('Inverser le sens', { icone: 'arrow-left-right-line', onclick: () => maj((x) => { [x.de, x.vers] = [x.vers, x.de]; }) }),
                 bouton('Supprimer', { icone: 'delete-bin-line', onclick: () => appliquer((m) => { m.liens.splice(i, 1); }, () => null) }))));

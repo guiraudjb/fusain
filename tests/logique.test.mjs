@@ -1143,3 +1143,21 @@ test('séquence : supprimer un bloc retire tout son cadre, supprimer un particip
     seq.supprimer(n, 'p:0');
     assert.ok(!n.items.some((x) => /activate/.test(x.ligne || '')));
 });
+
+test('logigramme : libellé sur plusieurs lignes, identifiants et propriétés de liens, pointillé à texte fermé par « -.- »', async () => {
+    const { proprieteLien } = await import('../js/diagrammes/logigramme.js');
+    const code = 'flowchart LR\n    A@{ icon: "picto:serveur", label: "Ligne 1\nLigne 2", pos: "b" }\n    B\n    C\n    B e4@-.- C\n    e4@{ animation: fast}\n    A e1@-. un texte -.-  B\n    e1@{ animation: fast }\n';
+    const m = logigramme.analyser(code);
+    assert.equal(m.noeuds.find((n) => n.id === 'A').texte, 'Ligne 1\nLigne 2');
+    assert.deepEqual(m.liens.map((l) => [l.id, l.trait, l.longueur, l.texte, proprieteLien(l, 'animation')]), [['e4', 'pointille', 1, '', 'fast'], ['e1', 'pointille', 1, 'un texte', 'fast']]);
+    const une = logigramme.ecrire(m);
+    assert.match(une, /label: "Ligne 1<br\/>Ligne 2"/);
+    assert.match(une, /\n {4}B e4@-\.- C\n/);
+    assert.match(une, /\n {4}A e1@-\.-\|"un texte"\| B\n/);
+    assert.match(une, /\n {4}e4@\{ animation: fast \}\n {4}e1@\{ animation: fast \}\n/);
+    assert.equal(logigramme.ecrire(logigramme.analyser(une)), une);
+    assert.throws(() => logigramme.analyser('flowchart LR\n    A & B e1@--> C\n'), /identifiant de lien en double/);
+    // Des propriétés qui ne visent plus aucun lien ne bloquent pas l'édition : la ligne est gardée telle quelle
+    const orphelin = logigramme.analyser('flowchart LR\n    A --> B\n    e9@{ animation: fast }\n');
+    assert.deepEqual(orphelin.brut, ['e9@{ animation: fast }']);
+});

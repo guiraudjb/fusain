@@ -2,6 +2,12 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.27.1 — 16 novembre 2026 — logigrammes écrits à la main
+
+- **Constat** : un logigramme écrit à la main passait en « code seul » (plus rien de cliquable) dès qu'il contenait l'une de trois écritures admises par Mermaid : un libellé sur plusieurs lignes dans `@{ … }`, un identifiant de lien avec ses propriétés (`A e1@-.- B` puis `e1@{ animation: fast }`), ou un lien pointillé à texte fermé par `-.-` (`A -. texte -.- B`).
+- **Correction** : les trois sont lues et réécrites. Le retour à la ligne d'un libellé est gardé et s'écrit `<br/>` ; l'identifiant et les propriétés d'un lien sont conservés, et « Animation » du panneau règle `animation: fast | slow` d'un lien qui en a ; un énoncé dont un guillemet reste ouvert se poursuit sur les lignes suivantes. Des propriétés qui ne visent plus aucun lien (le lien a été supprimé, la ligne `id@{ animation: … }` est restée) ne bloquent plus l'édition : la ligne est gardée telle quelle (Mermaid en dessine une boîte portant l'identifiant, qu'il suffit de retirer du code).
+- **Recette** : un schéma réunissant ces écritures est relu, réécrit à l'identique au second passage, dessiné de la même façon (textes, nœuds, liens, animations) et tous ses éléments sont repérés ; un test de logique reprend ces écritures sur un exemple neutre. Robustesse : 400 essais sur 400 pour le logigramme, les couloirs, le flux d'agents et le réseau physique.
+
 ## 0.27.0 — 16 novembre 2026 — saisie directe sur les diapositives
 
 - **Constat** : le texte d'une diapositive se modifiait dans le panneau (appliqué seulement à la sortie du champ) ou par un double-clic qui ouvrait une petite zone d'une ligne, sans la police ni la mise en page, et qui perdait les retours à la ligne.

@@ -109,10 +109,13 @@ function resoudreStyleTexte(cle, taille, interligne, align, fige = false) {
 
 // Écrit un texte replié dans une largeur et rend sa hauteur. La ligne de base est placée comme le ferait le navigateur
 // pour une boîte de ligne de la hauteur donnée.
-function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneBase, gras = false, couleur = NOIR, align: alignBase = 'start', majuscules = false, cle = null, fige = false }) {
-    const { taille, interligne, align } = resoudreStyleTexte(cle, tailleBase, interligneBase, alignBase, fige);
+function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneBase, gras = false, couleur = NOIR, align: alignBase = 'start', majuscules = false, cle = null, fige = false, sep = '' }) {
+    const { taille, interligne: interligneVoulu, align } = resoudreStyleTexte(cle, tailleBase, interligneBase, alignBase, fige);
     const contenu = majuscules ? String(texte).toLocaleUpperCase('fr') : String(texte);
     const lignes = couper(contenu, taille, gras, l);
+    // Certaines boîtes de VALOR ont un interligne plus petit que la police (prévu pour une seule ligne) : sur plusieurs
+    // lignes, l'interligne est porté à 1,2 fois la police pour que les lignes ne se chevauchent pas
+    const interligne = lignes.length > 1 && interligneVoulu < taille * 1.15 ? Math.round(taille * 1.2 * 100) / 100 : interligneVoulu;
     const m = regler(taille, gras).measureText('Hg');
     const haut = m.fontBoundingBoxAscent ?? taille * 0.95;
     const bas = m.fontBoundingBoxDescent ?? taille * 0.25;
@@ -120,6 +123,17 @@ function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneB
     const ancre = align === 'center' ? x + l / 2 : align === 'end' ? x + l : x;
     const anchorSvg = align === 'center' ? 'middle' : align === 'end' ? 'end' : 'start';
     const el = s('text', { 'font-family': POLICE, 'font-size': taille, 'font-weight': gras ? 700 : 400, fill: couleur, 'text-anchor': anchorSvg, 'data-champ': cle });
+    // Saisie directe sur la diapositive : la boîte du texte (position, largeur de coupe, police) est notée sur l'élément
+    const saisissable = cle && !fige;
+    if (saisissable) {
+        const limite = Math.max(20, l * 0.92);
+        const gauche = align === 'center' ? x + (l - limite) / 2 : align === 'end' ? x + l - limite : x;
+        Object.entries({ x: gauche, y, l: limite, taille, interligne, align, gras: gras ? 1 : 0, couleur, maj: majuscules ? 1 : 0 })
+            .forEach(([k, v]) => el.setAttribute(`data-saisie-${k}`, String(v)));
+        el.setAttribute('data-saisie', '1');
+        // Un élément dessiné en plusieurs textes (sous-parties « ; », cellules « | ») se saisit d'un bloc
+        if (sep) el.setAttribute('data-saisie-sep', sep);
+    }
     const cibleJustifie = Math.max(20, Math.round(l * 0.95));
     lignes.forEach((ligne, n) => {
         // Les mots de même graisse qui se suivent forment un seul fragment
@@ -149,7 +163,8 @@ function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneB
             el.append(s('tspan', attrs, `${k ? ' ' : ''}${f.t}`));
         });
     });
-    if (lignes.some((ligne) => ligne.mots.length)) g.append(el);
+    // Un texte vide reste posé (sans rien dessiner) pour pouvoir être saisi sur place
+    if (saisissable || lignes.some((ligne) => ligne.mots.length)) g.append(el);
     return {
         hauteur: lignes.length * interligne,
         largeur: Math.min(l, Math.max(0, ...lignes.map((ligne) => ligne.largeur))),
@@ -246,7 +261,7 @@ const DESSINS = {
             if (!item) return;
             let yc = y + ecrire(g, item[0], { x: c.x, y, l: c.l, taille: 20.8, interligne: 36, gras: true, cle: `e:${n}.0` }).hauteur + 24;
             const liste = s('g', { 'data-champ': `e:${n}.1` });
-            for (const sous of item[1].split(';').map((x) => x.trim()).filter(Boolean)) yc += ecrire(liste, sous, { x: c.x + 16, y: yc, l: c.l - 16, taille: 19.2, interligne: 34.56, couleur: GRIS, cle: `e:${n}.1` }).hauteur + 4;
+            for (const sous of item[1].split(';').map((x) => x.trim()).filter(Boolean)) yc += ecrire(liste, sous, { x: c.x + 16, y: yc, l: c.l - 16, taille: 19.2, interligne: 34.56, couleur: GRIS, cle: `e:${n}.1`, sep: ';' }).hauteur + 4;
             g.append(liste);
         });
     },
@@ -404,7 +419,7 @@ const DESSINS = {
                 rangees.forEach((cellules, r) => {
                     const cleLigne = `b:${debut + r}`;
                     const corps = s('g', { 'data-champ': cleLigne });
-                    const h = 16 + Math.max(24, ...Array.from({ length: nb }, (_, c) => ecrire(corps, cellules[c] || '', { x: X0 + c * lc + 8, y: y + 8, l: lc - 16, taille: 16, interligne: 24, gras: r === 0, cle: cleLigne }).hauteur));
+                    const h = 16 + Math.max(24, ...Array.from({ length: nb }, (_, c) => ecrire(corps, cellules[c] || '', { x: X0 + c * lc + 8, y: y + 8, l: lc - 16, taille: 16, interligne: 24, gras: r === 0, cle: cleLigne, sep: '|' }).hauteur));
                     for (let c = 0; c < nb; c += 1) rect(g, X0 + c * lc, y, lc, h, { fill: r === 0 ? '#f0f0f0' : '#ffffff', stroke: '#cccccc', 'stroke-width': 1, 'data-champ': cleLigne });
                     g.append(corps);
                     y += h;

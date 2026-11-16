@@ -125,10 +125,12 @@ Pour obtenir ces fichiers depuis IMC (menus, colonnes, solutions de repli), voir
 
 ## 3. Diapositives de texte
 
+**Écrire sur la diapositive** — cliquez sur un texte : il s'ouvre à sa place, avec sa police, sa taille et son alignement, et la diapositive se met à jour à chaque lettre. Entrée passe à la ligne, Ctrl+B met en gras, Tab passe au texte suivant, Échap (ou un clic ailleurs) termine ; Ctrl+Z annule toute la saisie. Les sous-parties d'un sommaire en colonnes s'écrivent une par ligne ; une ligne de tableau s'écrit sur toute la rangée, cellules séparées par « | ».
+
 En plus des schémas, une page peut être une **diapositive de texte** : page de titre, sommaire, intercalaire, texte en colonnes, chiffres clés, frise d'étapes, blocs, ou texte libre (titres, paragraphes, puces, tableau). « Ajouter une page » les propose dans la rubrique « Diapositives de texte ».
 
 - Les mises en page et leur style (couleurs, tailles, filets) sont ceux des diapositives libres de VALOR, conformes à la charte graphique de l'État pour les présentations. Vous ne réglez pas le style : vous choisissez une mise en page et vous écrivez les textes.
-- Un clic sur un texte le sélectionne, un double-clic le modifie sur place ; la colonne de droite donne tous les champs. La pastille « + » d'un élément en ajoute un à la suite.
+- Un clic sur un texte l'ouvre en saisie sur place (voir ci-dessus) ; la colonne de droite donne aussi tous les champs. La pastille « + » d'un élément en ajoute un à la suite.
 - Deux astérisques autour d'un passage le mettent en **gras** (`**important**`). Un retour à la ligne dans un champ est repris sur la diapositive.
 - « Mise en page » change de modèle en conservant les textes qui y ont leur place.
 - La diapositive remplit la zone utile de la page : le rendu de référence est l'A3 paysage ; sur un autre format, elle est mise à l'échelle.

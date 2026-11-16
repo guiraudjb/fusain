@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.27.0 — 16 novembre 2026 — saisie directe sur les diapositives
+
+- **Constat** : le texte d'une diapositive se modifiait dans le panneau (appliqué seulement à la sortie du champ) ou par un double-clic qui ouvrait une petite zone d'une ligne, sans la police ni la mise en page, et qui perdait les retours à la ligne.
+- **Saisie sur place** : un clic sur un texte de la diapositive l'ouvre à sa place, dans sa police, sa taille, sa graisse, sa couleur et son alignement, le curseur sous le pointeur. Chaque frappe est reportée dans le code et la diapositive se redessine en direct autour (colonnes, blocs et centrage suivent). Entrée : nouvelle ligne ; Ctrl+B : gras (sauf sur un texte déjà gras) ; Tab / Maj+Tab : texte suivant ou précédent ; Échap ou un clic ailleurs : terminer. Une saisie continue ne fait qu'une étape d'annulation. Le collage n'insère que du texte brut.
+- **Éléments en plusieurs morceaux** : les sous-parties d'un sommaire en colonnes se saisissent une par ligne (« ; » dans le code) ; une ligne de tableau se saisit sur toute la rangée, cellules séparées par « | ».
+- **Zone de clic** : toute la boîte d'un texte est cliquable (entre deux lignes, au bout d'une ligne courte, texte vide).
+- **Interligne** : sur plusieurs lignes, un texte dont l'interligne de VALOR est plus petit que la police (sous-titre de la page de titre) n'a plus ses lignes qui se chevauchent.
+- **Recette** : saisie, gras, retour à la ligne, Tab, collage et annulation pilotés dans Chrome par le protocole DevTools ; chaque texte des 13 diapositives de la démonstration s'ouvre à sa place (78 textes), sans rien modifier si l'on ne tape rien.
+
 ## 0.26.0 — 16 novembre 2026 — tout le document de démonstration s'édite à la souris
 
 - **Mesure** : sur les 61 pages du document de démonstration (0.24.0), 52 s'ouvraient dans leur éditeur visuel. Sept types n'en avaient pas : cadre Cynefin, carte de Wardley, cas d'utilisation, modélisation par événements, flux d'agents, diagramme syntaxique et PlantUML. Trois écritures étaient conservées sans être modifiables : le style des liens (`linkStyle` : couleur, épaisseur, flux animé), la couleur des relations C4 (`UpdateRelStyle`), et l'éditeur d'architecture supprimait la barre oblique des libellés (« A3/A4 » devenait « A3 A4 »).

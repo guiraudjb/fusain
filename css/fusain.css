@@ -96,6 +96,15 @@ body { display: flex; flex-direction: column; overflow: hidden; }
     box-shadow: 0 1px 4px rgba(0, 0, 0, .4); touch-action: none; padding: 0;
 }
 .fusain-saisie { position: absolute; z-index: 5; min-width: 8rem; padding: .25rem .5rem; border: 2px solid #e4794a; background: #fff; color: #161616; font: inherit; text-align: center; }
+/* Saisie directe d'un texte de diapositive : mêmes police, taille, couleur et alignement que le texte dessiné */
+.fusain-feuille .fusain-saisie-diapo { min-width: 0; padding: 0; border: 0; background: transparent; font-family: Marianne, arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; outline: 2px dashed #e4794a; outline-offset: 6px; cursor: text; caret-color: #e4794a; box-sizing: content-box; }
+.fusain-feuille .fusain-saisie-diapo b { font-weight: 700; }
+.fusain-feuille .fusain-saisie-diapo:focus, .fusain-feuille .fusain-saisie-diapo:focus-visible { outline: 2px dashed #e4794a; outline-offset: 6px; }
+.fusain-feuille .fusain-en-saisie { visibility: hidden; }
+.fusain-feuille:has(.fusain-saisie-diapo) .fusain-poignee { display: none; }
+.fusain-feuille .fusain-saisie-diapo--rangee { background: #fff; box-shadow: 0 0 0 6px #fff; }
+.fusain-visuel text[data-saisie][data-fusain] { cursor: text; }
+.fusain-visuel .fusain-touche-texte { fill: transparent; stroke: none; pointer-events: all; cursor: text; }
 
 /* ---------- Mode code ---------- */
 .fusain-code { flex: 0 0 42%; min-width: 16rem; display: flex; flex-direction: column; border-right: 1px solid var(--border-default-grey); background: var(--background-default-grey); }

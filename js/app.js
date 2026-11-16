@@ -110,6 +110,7 @@ function dimensionnerFeuille() {
     scene.classList.toggle('fusain-scene--deplacable', manuel);
     boutons.zoom.textContent = `${Math.round(ui.zoom * 100)} %`;
     placerPoignee();
+    if (saisieDiapo) placerSaisieDiapo();
 }
 
 // Zoom ancré : le point visé (le pointeur, ou le centre de la vue) reste sous les yeux
@@ -371,7 +372,10 @@ function afficherFeuille(page, schema, erreur) {
     if (visuel && interne) vue.editeur.reperer(interne, vue.modele);
     zones.feuille.classList.toggle('fusain-visuel', Boolean(visuel));
     const avaitFocus = zones.feuille.contains(document.activeElement) && document.activeElement.localName === 'svg';
-    zones.feuille.replaceChildren(svg, s('svg', { class: 'fusain-calque', 'aria-hidden': 'true' }));
+    // Une saisie directe en cours sur une diapositive n'est jamais retirée de la page : elle garde le focus et le curseur
+    const garde = saisieDiapo?.zone.parentNode === zones.feuille ? saisieDiapo.zone : null;
+    for (const enfant of [...zones.feuille.children]) if (enfant !== garde) enfant.remove();
+    zones.feuille.prepend(svg, s('svg', { class: 'fusain-calque', 'aria-hidden': 'true' }));
     if (avaitFocus) svg.focus({ preventScroll: true });
 
     // L'alerte est posée au-dessus de la scène : elle en change la hauteur, la feuille est dimensionnée ensuite
@@ -381,6 +385,7 @@ function afficherFeuille(page, schema, erreur) {
     else zoneReparations = null;
     dimensionnerFeuille();
     majSelection();
+    if (saisieDiapo && !(visuel && estDiapo() && pageCourante().id === saisieDiapo.idPage && placerSaisieDiapo())) fermerSaisieDiapo(false);
 }
 
 // ---------- Sélection et manipulation directe ----------
@@ -474,6 +479,7 @@ function appliquer(fonction, suite) {
 }
 
 function renommerSurPlace(cle) {
+    if (ouvrirSaisieDiapo(cle)) return;
     const { editeur, modele } = vue;
     const valeur = modele && editeur.texte(modele, cle);
     const r = rectangleRelatif(cle);
@@ -502,6 +508,226 @@ function renommerSurPlace(cle) {
     zones.feuille.append(saisie);
     saisie.focus();
     saisie.select();
+}
+
+// ---------- Saisie directe sur une diapositive de texte ----------
+// Le texte se tape à sa place, dans sa police, sa taille, sa couleur et son alignement : le texte dessiné est masqué et
+// remplacé par une zone modifiable de mêmes mesures (notées par js/diapo.js sur l'élément). Chaque frappe est reportée
+// dans le code (une saisie continue ne fait qu'une étape d'annulation) et la diapositive est redessinée autour, en direct.
+let saisieDiapo = null; // { cle, idPage, zone, gras, dernier, minuterie }
+
+const estDiapo = () => Boolean(vue.modele && vue.editeur?.type === 'diapo');
+
+// Les textes dessinés d'un élément : un seul en général ; plusieurs pour des sous-parties (« ; ») ou des cellules (« | »)
+function textesSaisissables(cle) {
+    const liste = elementsMarques(cle).filter((el) => el.matches('text[data-saisie]'));
+    const sep = liste[0]?.getAttribute('data-saisie-sep') || '';
+    return liste.length === 1 || (liste.length && sep) ? { liste, sep } : null;
+}
+const texteSaisissable = (cle) => textesSaisissables(cle)?.liste[0] || null;
+
+// Texte du modèle (« ** » pour le gras, retours à la ligne) → contenu de la zone, sans jamais interpréter de HTML
+function remplirSaisie(zone, texte, gras) {
+    zone.replaceChildren();
+    String(texte).split(/\n|<br\s*\/?>/i).forEach((ligne, n) => {
+        if (n) zone.append(document.createElement('br'));
+        ligne.split('**').forEach((morceau, k) => {
+            if (!morceau) return;
+            if (k % 2 && !gras) { const b = document.createElement('b'); b.textContent = morceau; zone.append(b); } else zone.append(document.createTextNode(morceau));
+        });
+    });
+}
+
+// Contenu de la zone → texte du modèle : le gras se lit sur le rendu (balise ou style posés par le navigateur)
+function lireSaisie(zone, gras) {
+    let sortie = '';
+    let fort = false;
+    const fermer = () => { if (fort) { sortie += '**'; fort = false; } };
+    const parcourir = (noeud) => {
+        for (const enfant of noeud.childNodes) {
+            if (enfant.nodeType === Node.TEXT_NODE) {
+                const b = !gras && Number.parseInt(getComputedStyle(enfant.parentElement).fontWeight, 10) >= 600;
+                // Dans une zone qui garde les blancs, le navigateur écrit le retour à la ligne comme un caractère « \n »
+                enfant.data.replace(/\u00a0/g, ' ').split('\n').forEach((morceau, k) => {
+                    if (k) { fermer(); sortie += '<br>'; }
+                    let t = morceau;
+                    if (!t) return;
+                    if (b !== fort) {
+                        // Les espaces restent hors des astérisques : « mot **gras** suite »
+                        if (b) { const espaces = t.match(/^\s*/)[0]; sortie += `${espaces}**`; t = t.slice(espaces.length); } else {
+                            const espaces = sortie.match(/\s*$/)[0];
+                            sortie = `${sortie.slice(0, sortie.length - espaces.length)}**${espaces}`;
+                        }
+                        fort = b;
+                    }
+                    sortie += t;
+                });
+            } else if (enfant.nodeName === 'BR') { fermer(); sortie += '<br>'; } else if (enfant.nodeType === Node.ELEMENT_NODE) {
+                // Un bloc créé par le navigateur (div, p) commence une nouvelle ligne
+                if (/^(DIV|P|LI)$/.test(enfant.nodeName) && sortie && !sortie.endsWith('<br>')) { fermer(); sortie += '<br>'; }
+                parcourir(enfant);
+            }
+        }
+    };
+    parcourir(zone);
+    fermer();
+    return sortie.replace(/(<br>)+$/, '');
+}
+
+// Sous-parties : une par ligne dans la zone, séparées par « ; » dans le code ; une rangée de tableau tient sur une ligne
+function versModeleSaisie(texte, sep) {
+    if (sep === ';') return texte.split('<br>').map((x) => x.trim()).filter(Boolean).join(' ; ');
+    if (sep === '|') return texte.replace(/<br>/g, ' ');
+    return texte;
+}
+
+function placerSaisieDiapo() {
+    const sd = saisieDiapo;
+    const textes = sd && textesSaisissables(sd.cle);
+    const el = textes?.liste[0];
+    const ctm = el?.getScreenCTM();
+    if (!ctm) return false;
+    for (const t of textes.liste) t.classList.add('fusain-en-saisie');
+    // Cellules d'une rangée : la zone couvre la rangée entière
+    const dernier = textes.liste[textes.liste.length - 1];
+    const fin = textes.sep === '|' ? Number(dernier.getAttribute('data-saisie-x')) + Number(dernier.getAttribute('data-saisie-l')) : null;
+    const d = (k) => el.getAttribute(`data-saisie-${k}`);
+    const f = zones.feuille.getBoundingClientRect();
+    const echelle = Math.hypot(ctm.a, ctm.b);
+    const x = Number(d('x'));
+    const y = Number(d('y'));
+    Object.assign(sd.zone.style, {
+        left: `${ctm.a * x + ctm.c * y + ctm.e - f.left}px`,
+        top: `${ctm.b * x + ctm.d * y + ctm.f - f.top}px`,
+        width: `${(fin === null ? Number(d('l')) : fin - Number(d('x'))) * echelle}px`,
+        minHeight: `${Number(d('interligne')) * echelle}px`,
+        fontSize: `${Number(d('taille')) * echelle}px`,
+        lineHeight: `${Number(d('interligne')) * echelle}px`,
+        fontWeight: d('gras') === '1' ? '700' : '400',
+        color: d('couleur') || '#161616',
+        textAlign: { center: 'center', end: 'right', justify: 'justify' }[d('align')] || 'left',
+        textTransform: d('maj') === '1' ? 'uppercase' : 'none',
+    });
+    return true;
+}
+
+function reporterSaisieDiapo() {
+    const sd = saisieDiapo;
+    if (!sd) return;
+    clearTimeout(sd.minuterie);
+    sd.minuterie = null;
+    if (!estDiapo() || pageCourante().id !== sd.idPage) return;
+    const texte = versModeleSaisie(lireSaisie(sd.zone, sd.gras), sd.sep);
+    if (texte === sd.dernier) return;
+    sd.dernier = texte;
+    const { editeur, modele } = vue;
+    editeur.renommer(modele, sd.cle, texte);
+    const code = editeur.ecrire(modele);
+    if (code !== pageCourante().code) modifier((doc) => { doc.pages[etat.index].code = code; }, { fusion: `saisie:${sd.idPage}:${sd.cle}` });
+}
+
+function fermerSaisieDiapo(valider = true) {
+    const sd = saisieDiapo;
+    if (!sd) return;
+    if (valider) reporterSaisieDiapo(); else clearTimeout(sd.minuterie);
+    saisieDiapo = null;
+    const avaitFocus = document.activeElement === sd.zone;
+    sd.zone.remove();
+    for (const el of zones.feuille.querySelectorAll('.fusain-en-saisie')) el.classList.remove('fusain-en-saisie');
+    if (avaitFocus) zones.feuille.querySelector('svg.fusain-page')?.focus({ preventScroll: true });
+}
+
+// Textes saisissables dans l'ordre du plan, pour passer de l'un à l'autre par Tab
+function texteVoisin(cle, sens) {
+    const cles = vue.editeur.elements(vue.modele).map((e) => e.cle).filter((c) => texteSaisissable(c));
+    const i = cles.indexOf(cle);
+    return i < 0 ? null : cles[i + sens] ?? null;
+}
+
+const SAISIES_PERMISES = new Set(['insertText', 'insertReplacementText', 'insertCompositionText', 'insertLineBreak', 'insertTranspose', 'formatBold']);
+
+function ouvrirSaisieDiapo(cle, point = null) {
+    if (!estDiapo() || ui.mode !== 'visuel') return false;
+    const textes = textesSaisissables(cle);
+    const el = textes?.liste[0];
+    const valeur = el && vue.editeur.texte(vue.modele, cle);
+    if (valeur === null || valeur === undefined) return false;
+    if (saisieDiapo?.cle === cle) { saisieDiapo.zone.focus(); return true; }
+    fermerSaisieDiapo(true);
+    const gras = el.getAttribute('data-saisie-gras') === '1';
+    const zone = document.createElement('div');
+    zone.className = 'fusain-saisie fusain-saisie-diapo';
+    zone.setAttribute('contenteditable', 'true');
+    zone.setAttribute('role', 'textbox');
+    zone.setAttribute('aria-multiline', 'true');
+    zone.setAttribute('lang', 'fr');
+    zone.setAttribute('spellcheck', 'true');
+    zone.setAttribute('aria-label', 'Texte de la diapositive. Entrée : nouvelle ligne ; Ctrl+B : gras ; Tab : texte suivant ; Échap : terminer.');
+    zone.title = 'Entrée : nouvelle ligne · Ctrl+B : gras · Tab : texte suivant · Échap : terminer';
+    if (textes.sep === '|') zone.classList.add('fusain-saisie-diapo--rangee');
+    remplirSaisie(zone, textes.sep === ';' ? valeur.split(';').map((x) => x.trim()).filter(Boolean).join('\n') : valeur, gras);
+    saisieDiapo = { cle, idPage: pageCourante().id, zone, gras, sep: textes.sep, dernier: versModeleSaisie(lireSaisie(zone, gras), textes.sep), minuterie: null };
+
+    zone.addEventListener('beforeinput', (e) => {
+        const t = e.inputType;
+        if (t === 'insertParagraph') { e.preventDefault(); document.execCommand('insertLineBreak'); return; }
+        // Seuls le texte, les retours à la ligne et le gras ont un sens sur la diapositive
+        // (un texte déjà gras par sa place, comme un titre, ne prend pas de gras supplémentaire)
+        if (!(SAISIES_PERMISES.has(t) || t.startsWith('delete') || t.startsWith('history')) || (t === 'formatBold' && gras)) e.preventDefault();
+    });
+    zone.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const texte = (e.clipboardData?.getData('text/plain') || '').replace(/\r\n?/g, '\n');
+        if (texte) document.execCommand('insertText', false, texte);
+    });
+    zone.addEventListener('drop', (e) => e.preventDefault());
+    zone.addEventListener('input', () => {
+        if (!saisieDiapo || saisieDiapo.zone !== zone) return;
+        clearTimeout(saisieDiapo.minuterie);
+        saisieDiapo.minuterie = setTimeout(reporterSaisieDiapo, 120);
+    });
+    zone.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Escape') { e.preventDefault(); fermerSaisieDiapo(true); } else if (e.key === 'Tab') {
+            const suivant = texteVoisin(cle, e.shiftKey ? -1 : 1);
+            if (!suivant) return; // en bout de liste, Tab quitte la zone (la saisie est alors validée)
+            e.preventDefault();
+            fermerSaisieDiapo(true);
+            // Le rendu suit la validation : la zone suivante s'ouvre sur le nouveau dessin
+            selectionner(suivant);
+            requestAnimationFrame(() => attendreRendu().then(() => ouvrirSaisieDiapo(suivant)));
+        }
+    });
+    zone.addEventListener('focusout', () => {
+        // Changer de fenêtre ne termine pas la saisie : le focus reviendra dans la zone
+        if (saisieDiapo?.zone === zone && document.hasFocus()) fermerSaisieDiapo(true);
+    });
+
+    zones.feuille.append(zone);
+    if (!placerSaisieDiapo()) { fermerSaisieDiapo(false); return false; }
+    zone.focus({ preventScroll: true });
+    // Le curseur se place là où l'on a cliqué, sinon à la fin du texte
+    const sel = window.getSelection();
+    let plage = null;
+    if (point) {
+        const pos = document.caretPositionFromPoint?.(point.x, point.y);
+        if (pos && zone.contains(pos.offsetNode)) { plage = document.createRange(); plage.setStart(pos.offsetNode, pos.offset); } else {
+            const r = document.caretRangeFromPoint?.(point.x, point.y);
+            if (r && zone.contains(r.startContainer)) plage = r;
+        }
+    }
+    if (!plage) { plage = document.createRange(); plage.selectNodeContents(zone); if (point) plage.collapse(false); }
+    sel.removeAllRanges();
+    sel.addRange(plage);
+    return true;
+}
+
+// Attend la fin du rendu en cours (la scène porte aria-busy pendant le dessin)
+function attendreRendu() {
+    return new Promise((fin) => {
+        const essai = (n) => (zones.scene.getAttribute('aria-busy') === 'true' && n < 100 ? setTimeout(() => essai(n + 1), 30) : fin());
+        essai(0);
+    });
 }
 
 // L'appui vise-t-il un élément que l'éditeur sait déplacer ? (mêmes conditions que brancherDeplacement)
@@ -549,7 +775,9 @@ function brancherDeplacement() {
 function brancherFeuille() {
     zones.feuille.addEventListener('click', (e) => {
         if (ui.mode !== 'visuel' || !vue.modele || e.target.closest('.fusain-poignee, .fusain-saisie')) return;
-        selectionner(e.target.closest('[data-fusain]')?.getAttribute('data-fusain') || null);
+        const cle = e.target.closest('[data-fusain]')?.getAttribute('data-fusain') || null;
+        selectionner(cle);
+        if (cle && estDiapo()) ouvrirSaisieDiapo(cle, { x: e.clientX, y: e.clientY });
     });
     zones.feuille.addEventListener('dblclick', (e) => {
         const cle = e.target.closest('[data-fusain]')?.getAttribute('data-fusain');
@@ -1167,7 +1395,7 @@ function brancherGlobal() {
         }
         if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
         const cle = e.key.toLowerCase();
-        const saisie = e.target.matches?.('input, textarea, select');
+        const saisie = e.target.matches?.('input, textarea, select') || e.target.isContentEditable;
         if (cle === 's') { e.preventDefault(); enregistrer({ choisirEmplacement: e.shiftKey }); }
         else if (cle === 'o') { e.preventDefault(); zones.fichier.click(); }
         else if (saisie) return; // dans un champ, l'annulation native du navigateur s'applique

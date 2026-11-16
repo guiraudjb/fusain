@@ -226,9 +226,18 @@ export function elements(modele) {
     ];
 }
 
-// Le dessin porte déjà la clé de chaque texte
+// Le dessin porte déjà la clé de chaque texte. En édition, chaque texte saisissable reçoit en plus une zone de clic
+// invisible couvrant toute sa boîte : un clic entre deux lignes ou au bout d'une ligne courte ouvre aussi sa saisie.
 export function reperer(svg) {
     for (const el of svg.querySelectorAll('[data-champ]')) marquer(el, el.getAttribute('data-champ'));
+    for (const t of svg.querySelectorAll('text[data-saisie]')) {
+        const d = (k) => Number(t.getAttribute(`data-saisie-${k}`));
+        const lignes = Math.max(1, t.querySelectorAll('tspan[y]').length);
+        const zone = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        Object.entries({ x: d('x'), y: d('y'), width: d('l'), height: lignes * d('interligne'), class: 'fusain-touche fusain-touche-texte' }).forEach(([k, v]) => zone.setAttribute(k, String(v)));
+        marquer(zone, t.getAttribute('data-champ'));
+        t.before(zone);
+    }
 }
 
 function viser(modele, cle) {
@@ -323,7 +332,7 @@ export function panneau(ctx) {
         champSelect('Mise en page', Object.entries(DISPOSITIONS).map(([id, x]) => [id, x.nom]), modele.disposition, (val) => appliquer((m) => changerDisposition(m, val), () => null)),
         (d.champs || []).map(([cle, nom]) => saisie(nom, `c:${cle}`)),
         controlesTypographie(modele, cibleChamp, appliquer, nomCibleChamp),
-        h('p', { class: 'fusain-aide' }, 'Deux astérisques autour d\'un passage le mettent en **gras**. Un retour à la ligne dans le champ est repris sur la diapositive.'))];
+        h('p', { class: 'fusain-aide' }, 'Cliquez sur un texte de la diapositive pour l\'écrire directement à sa place : la mise en forme se voit en direct. Entrée : nouvelle ligne ; Ctrl+B : gras ; Tab : texte suivant ; Échap : terminer. Dans les champs ci-dessous, deux astérisques autour d\'un passage le mettent en **gras**.'))];
 
     if (d.item) {
         const n = selection?.startsWith('e:') && v.existe ? v.n : -1;

@@ -692,7 +692,7 @@ FUSAIN/
 
 ## 14. État de réalisation
 
-État au 16 novembre 2026 (version 0.29.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
+État au 18 novembre 2026 (version 0.30.0) au regard de ce cahier des charges. Le détail de chaque cycle figure dans `JOURNAL_DES_VERSIONS.md`.
 
 ### 14.1 Réalisé
 

@@ -14,7 +14,7 @@ import { exporterVisio } from './visio.js';
 import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
-import { ouvrirImportReseau } from './import-reseau.js';
+import { ouvrirImportReseau, ouvrirImportCommutateurs } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
 import { controlerCode } from './controles.js';
 import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama, estBrouillonParDefaut, chargerDocumentDemonstration } from './diaporama.js';
@@ -1239,6 +1239,9 @@ function ouvrirModeles(action) {
             h('span', { class: `fr-badge fr-badge--sm fr-badge--no-icon fr-badge--${editeurPour(typeDiagramme(m.code)) ? 'success' : 'info'}` }, editeurPour(typeDiagramme(m.code)) ? 'Édition visuelle' : 'Par le code'))),
             id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportReseau(ajouterPages); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Importer un réseau (HPE IMC, LLDP : CSV, Excel)…'),
+                h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages); } },
+                h('span', { class: 'fusain-modele__nom' }, 'Commutateur et périphériques (CSV à 3 colonnes)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null),
         ]));
     const dialogue = modale('fusain-modale-modeles', action === 'ajouter' ? 'Nouvelle page' : 'Modèles de schémas', contenu);
@@ -1395,6 +1398,7 @@ const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
+    ['commutateur-serveurs.csv', 'Commutateur et périphériques', 'trois colonnes (commutateur, lien, périphérique) : un commutateur, cinq serveurs, trois agrégats et deux liens gigabit'],
     ['imc-liens-sites.csv', 'Liens avec sites et locaux techniques', 'un seul fichier : site et local technique de chaque extrémité, cadres imbriqués sans liste des équipements'],
     ['imc-api.csv', 'Liens de l\'API REST d\'IMC', 'un lien vu des deux côtés, compté une fois'],
     ['lldp-voisins.csv', 'Voisins LLDP', 'rapport séparé par des points-virgules : téléphones IP, borne Wi-Fi'],
@@ -1450,6 +1454,7 @@ function ouvrirAPropos() {
             h('li', {}, 'Schéma logique quand l\'export donne les VLAN des ports (access, trunk, VLAN autorisés).'),
             h('li', {}, 'Regroupement par emplacement, préfixe du nom ou sous-réseau ; au-delà de 25 équipements d\'infrastructure, une vue d\'ensemble puis une page par site.'),
             h('li', {}, 'Les pages créées sont des logigrammes ordinaires, entièrement modifiables ; un seul Ctrl+Z retire l\'import. Les fichiers sont lus dans le navigateur, sans envoi.')),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.30.0, « Commutateur et périphériques » dessine un ou plusieurs commutateurs et leurs périphériques à partir d\'un fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés : une page pour l\'ensemble ou une par commutateur, nom du lien sur le trait, agrégats en trait épais. Les noms peuvent contenir les caractères de la syntaxe de Mermaid (guillemets, crochets, chevrons, #, &, |…) : ils sont écrits de façon à s\'afficher tels quels.'),
         h('p', { class: 'fr-text--sm' }, 'Pour obtenir ces fichiers depuis IMC, voir le guide ', document_('./Documentation/GUIDE_IMC.md', 'Obtenir les exports d\'HPE IMC'), '. Exports fictifs pour essayer l\'import (noms de colonnes documentés par HPE, équipements inventés) :'),
         h('ul', {}, EXEMPLES_RESEAU.map(([fichier, nom, detail]) => h('li', {},
             h('a', { class: 'fr-link', href: `./Documentation/exemples-reseau/${fichier}`, download: fichier }, nom), ` — ${detail}`))),

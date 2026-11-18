@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.30.0 — 18 novembre 2026 — commutateur et périphériques, noms affichés tels quels
+
+- **Besoin** : dessiner un commutateur et ses périphériques à partir d'un simple fichier à trois colonnes (commutateur, lien, périphérique), dont les noms peuvent contenir des caractères de la syntaxe de Mermaid.
+- **Import** : « Commutateur et périphériques (CSV à 3 colonnes)… » dans la rubrique Réseaux informatiques (`reseau.js` : `lireCommutateurs`, `produirePagesCommutateurs` ; boîte dans `import-reseau.js`). CSV, texte tabulé ou .xlsx ; ligne d'intitulés reconnue d'elle-même et corrigeable ; aperçu des premières lignes ; doublons et lignes incomplètes écartés. Une page pour l'ensemble (un cadre par commutateur) ou une page par commutateur ; périphériques sous le commutateur ou à sa droite (automatique au-delà de 10) ; nom du lien sur le trait, interfaces abrégées au choix ; agrégats (Bridge-Aggregation, Port-channel…) en trait épais ; icône devinée d'après le nom. Les pages sont des logigrammes ordinaires.
+- **Mesure** : 30 noms piégés (guillemets, accent grave, crochets, barres, `#…;`, `&…;`, chevrons, `<script>`, `-->`, `%%`, `end`, `:::`, `@{`, Markdown…) rendus dans Chrome comme commutateur, lien et périphérique. Avant correction : chevrons et ce qu'ils entourent effacés, `&amp;` affiché `&`, `*gras*` mis en forme.
+- **Défaut général corrigé** : avec les libellés en texte SVG (`htmlLabels: false`), Mermaid 12 n'interprète que `#lt;`, `#gt;` et `#amp;` ; les autres entités restaient affichées en clair. Un guillemet saisi dans n'importe quel libellé (écrit `#quot;`) s'affichait donc `&quot;`, un accent grave `&#96;`, une barre de lien `&#124;`. Le rendu décode désormais les entités restées dans les textes du SVG (`rendu.js`, `decoderEntites`).
+- **Noms importés** : `protegerTexte` écrit `&`, `<`, `>`, `#` devant une entité, `*` et `_` de mise en forme en entités numériques, que Mermaid laisse et que le rendu décode : les 30 noms s'affichent exactement.
+- **Recette** : tests de logique (exemple `Documentation/exemples-reseau/commutateur-serveurs.csv` : 1 commutateur, 5 serveurs, 3 agrégats, 2 liens gigabit ; noms piégés relus à l'identique) ; rendu Chrome des 30 noms piégés en page unique et en 30 pages.
+
 ## 0.29.0 — 16 novembre 2026 — placer les éléments à la souris
 
 - **Constat** : la disposition se réglait par des paramètres abstraits (côtés de chaque liaison dans des listes pour les réseaux ; pour le logigramme, seulement le sens de lecture et le groupe).

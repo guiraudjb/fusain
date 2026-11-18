@@ -422,6 +422,46 @@ const relireToutes = (pages) => {
     }
 };
 
+test('réseau : commutateur et périphériques (trois colonnes), agrégats en trait épais', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/commutateur-serveurs.csv', import.meta.url))))));
+    assert.equal(lu.entete, true);
+    assert.equal(lu.lignes.length, 5);
+    const { pages, commutateurs, equipements } = reseau.produirePagesCommutateurs(lu, { jeu: 'picto' });
+    assert.deepEqual([pages.length, commutateurs, equipements], [1, 1, 6]);
+    assert.equal(pages[0].nom, 'Commutateur SW-SALLE-SERVEURS');
+    const code = pages[0].code;
+    assert.match(code, /icon: "picto:commutateur", label: "SW-SALLE-SERVEURS"/);
+    assert.match(code, /icon: "picto:serveur", label: "SRV-COMPTA-01"/);
+    assert.match(code, /===\|"Bridge-Aggregation100"\| e_SRV_COMPTA_01/, 'agrégat en trait épais');
+    assert.match(code, /---\|"G1\/0\/48"\| e_SRV_MESSAGERIE/, 'lien simple en trait plein');
+    assert.match(reseau.produirePagesCommutateurs(lu, { abreger: true }).pages[0].code, /\|"BAGG101"\|/);
+    assert.doesNotMatch(reseau.produirePagesCommutateurs(lu, { liens: false }).pages[0].code, /\|"/);
+    relireToutes(pages);
+});
+
+test('réseau : trois colonnes sans intitulés, noms avec les caractères de la syntaxe de Mermaid', () => {
+    const noms = ['A "x" `y`', 'B [1] (2) {3}', 'C | D ; E : F', 'G <h> & i', 'J #35; k #l', 'end', 'M --> N', 'O\nP', 'Q %% R', 'S @{ t }'];
+    const lignes = noms.map((n, i) => ['SW <1> & "x"', `${n} lien`, n]).concat([['SW <1> & "x"', 'A "x" `y` lien', 'A "x" `y`'], ['SW-2', '', 'SW <1> & "x"'], ['', 'x', 'y']]);
+    const lu = reseau.lireCommutateurs(lignes);
+    assert.equal(lu.entete, false);
+    assert.deepEqual(lu.bilan, { lignes: 13, ignorees: 1, doublons: 1, colonnesEnTrop: false });
+    const unique = reseau.produirePagesCommutateurs(lu, { presentation: 'unique' });
+    const parPage = reseau.produirePagesCommutateurs(lu, { presentation: 'commutateur' });
+    assert.equal(parPage.pages.length, 2);
+    for (const { code } of [...unique.pages, ...parPage.pages]) {
+        const m = logigramme.analyser(code);
+        assert.equal(logigramme.ecrire(m), code);
+        // Chaque nom se relit tel qu'il a été protégé : aucun n'a cassé l'analyse
+        assert.ok(!/</.test(code.replace(/<br\/>/g, '')) && !/&/.test(code), 'chevrons et esperluettes en entités');
+    }
+    const textes = logigramme.analyser(unique.pages[0].code).noeuds.map((n) => n.texte);
+    assert.ok(textes.includes('SW #60;1#62; #38; "x"'));
+    assert.ok(textes.includes('J #35;35; k #l'));
+    assert.ok(textes.includes('O P'), 'un nom tient sur une ligne');
+    assert.equal(reseau.protegerTexte('&quot; #lt; <b>'), '#38;quot; #35;lt; #60;b#62;');
+    assert.equal(reseau.protegerTexte('*g* _i_ SW_A_B'), '#42;g#42; #95;i#95; SW_A_B');
+});
+
 test('réseau : export « Gestion des liens » d\'IMC avec la liste des équipements', async () => {
     const liens = await exportReseau('imc-liens.csv', reseau.CHAMPS_LIENS);
     assert.equal(liens.association.source, 'Left Node');

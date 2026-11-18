@@ -4,6 +4,7 @@ Fichiers inventés pour essayer l'import d'un réseau (« Importer un réseau »
 Les noms de colonnes reprennent ceux que documente HPE IMC ; les équipements, adresses et ports sont fictifs.
 Ils se téléchargent depuis la fenêtre « À propos » de FUSAIN. Pour obtenir les vrais exports, voir `../GUIDE_IMC.md`.
 
+- `commutateur-serveurs.csv` : fichier à trois colonnes pour « Commutateur et périphériques » (commutateur, lien, périphérique) : un commutateur, cinq serveurs, trois agrégats (`Bridge-Aggregation…`) et deux liens gigabit (`G1/0/…`).
 - `imc-liens.csv` : liste des liens exportée depuis « Gestion des liens » d'IMC (ligne de titre, nœuds « nom(IP) », VLAN).
 - `imc-liens.xlsx` : le même tableau au format Excel.
 - `imc-equipements.csv` : liste des équipements d'IMC (catégorie, emplacement).

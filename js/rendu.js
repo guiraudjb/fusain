@@ -131,6 +131,7 @@ async function rendre(code, idTheme) {
         }
         svg.removeAttribute('style');
         remplacerHtmlIncorpore(svg);
+        decoderEntitesRestantes(svg);
         // ZenUML écrit « [ condition ] » en trois textes placés d'après la largeur d'une autre police : réunis en un seul,
         // ils ne se chevauchent plus quand la police change (Marianne dans le PDF)
         for (const groupe of svg.querySelectorAll('g')) {
@@ -156,6 +157,27 @@ async function rendre(code, idTheme) {
 // que ni la conversion en image ni la conversion en PDF ne savent traiter de façon fiable. Chaque bloc est
 // remplacé par un texte SVG équivalent, centré dans la même boîte et replié à sa largeur.
 let mesure = null;
+// Libellés en texte SVG (htmlLabels: false) : Mermaid 12 ne décode que #lt; #gt; #amp; ; les autres entités
+// (#quot; écrit pour un guillemet, #96; pour un accent grave, #35;, #124;…) resteraient affichées en clair
+// (« &quot; »). Elles sont décodées ici, dans les textes seulement (pas dans les feuilles de style).
+const ENTITES_NOMMEES = { quot: '"', apos: "'", amp: '&', lt: '<', gt: '>', nbsp: '\u00a0', grave: '`', num: '#', vert: '|', verbar: '|',
+    bsol: '\\', lowbar: '_', ast: '*', semi: ';', colon: ':', lbrace: '{', rbrace: '}', lsqb: '[', rsqb: ']', lpar: '(', rpar: ')',
+    percnt: '%', commat: '@', tilde: '~', excl: '!', equals: '=', dollar: '$', laquo: '\u00ab', raquo: '\u00bb', deg: '\u00b0',
+    middot: '\u00b7', hellip: '\u2026', ndash: '\u2013', mdash: '\u2014', euro: '\u20ac', copy: '\u00a9', reg: '\u00ae' };
+export function decoderEntites(texte) {
+    return String(texte).replace(/&(#x[0-9a-f]{1,6}|#\d{1,7}|[a-z]{2,8});/gi, (tout, e) => {
+        if (e[0] !== '#') return ENTITES_NOMMEES[e.toLowerCase()] ?? tout;
+        const n = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1));
+        return n > 31 && n < 0x110000 && !(n >= 0xd800 && n <= 0xdfff) ? String.fromCodePoint(n) : tout;
+    });
+}
+
+function decoderEntitesRestantes(svg) {
+    for (const t of svg.querySelectorAll('text, tspan, title, desc')) {
+        for (const n of t.childNodes) if (n.nodeType === 3 && n.nodeValue.includes('&')) n.nodeValue = decoderEntites(n.nodeValue);
+    }
+}
+
 function remplacerHtmlIncorpore(svg) {
     for (const bloc of [...svg.querySelectorAll('foreignObject')]) {
         const [x, y, l, h] = ['x', 'y', 'width', 'height'].map((n) => parseFloat(bloc.getAttribute(n)) || 0);

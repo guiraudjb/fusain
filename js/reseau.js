@@ -615,3 +615,119 @@ export function produirePages(graphe, options = {}) {
     }
     return { pages, alertes, mode };
 }
+
+// ---------- Commutateur et périphériques : fichier à trois colonnes ----------
+// Colonne 1 : commutateur, colonne 2 : lien (port, agrégat…), colonne 3 : périphérique. Les noms sont des données :
+// ils peuvent contenir n'importe quel caractère, y compris ceux de la syntaxe de Mermaid.
+
+const MOTS_ENTETE = [/commutateur|switch|equipement|source|nom|device|chassis/, /lien|port|interface|link|liaison|connexion|agregat/, /peripherique|device|equipement|voisin|destination|cible|serveur|poste|hote|host|nom|client/];
+
+// Un nom tient sur une ligne : caractères de contrôle et retours à la ligne deviennent des espaces
+export const nettoyerNom = (t) => String(t ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+
+// Texte d'un libellé : Mermaid interprète « <…> » comme du HTML (retiré) et « #…; » ou « &…; » comme des entités.
+// Ces caractères sont écrits en entités numériques, que Mermaid laisse telles quelles et que le rendu décode
+// (rendu.js, decoderEntites) : le nom s'affiche exactement. Guillemets, accents graves et barres sont pris en
+// charge par l'éditeur du logigramme.
+export const protegerTexte = (t) => String(t)
+    .replace(/#(?=\w+;)/g, '#35;').replace(/&/g, '#38;').replace(/</g, '#60;').replace(/>/g, '#62;')
+    // Mise en forme Markdown : « *gras* », « _italique_ » ; un « _ » entre deux lettres (SW_A_B) n'en fait pas
+    .replace(/\*/g, '#42;').replace(/(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, '#95;');
+
+export function lireCommutateurs(enregistrements, { entete = 'auto' } = {}) {
+    const premiere = (enregistrements[0] || []).slice(0, 3).map(normaliser);
+    const avecEntete = entete === 'auto' ? premiere.filter((c, i) => c && MOTS_ENTETE[i].test(c)).length >= 2 : Boolean(entete);
+    const bilan = { lignes: 0, ignorees: 0, doublons: 0, colonnesEnTrop: false };
+    const lignes = [];
+    const vues = new Set();
+    for (const brute of enregistrements.slice(avecEntete ? 1 : 0)) {
+        if (!brute.some((c) => String(c ?? '').trim())) continue;
+        bilan.lignes += 1;
+        if (brute.slice(3).some((c) => String(c ?? '').trim())) bilan.colonnesEnTrop = true;
+        const [commutateur, lien, peripherique] = [0, 1, 2].map((i) => nettoyerNom(brute[i]));
+        if (!commutateur || !peripherique || cleNom(commutateur) === cleNom(peripherique)) { bilan.ignorees += 1; continue; }
+        const cle = JSON.stringify([cleNom(commutateur), lien.toLowerCase(), cleNom(peripherique)]);
+        if (vues.has(cle)) { bilan.doublons += 1; continue; }
+        vues.add(cle);
+        lignes.push({ commutateur, lien, peripherique });
+    }
+    return { lignes, entete: avecEntete, colonnes: avecEntete ? (enregistrements[0] || []).slice(0, 3).map((c) => nettoyerNom(c)) : [], bilan };
+}
+
+const SEUIL_PAGE_UNIQUE = 40; // au-delà de ce nombre d'équipements, une page par commutateur
+const SEUIL_SENS_LR = 10; // au-delà de ce nombre de périphériques sous un commutateur, les périphériques sont en colonne
+
+// Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'), sens ('auto' | 'TD' | 'LR'),
+// liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur)
+export function produirePagesCommutateurs({ lignes }, options = {}) {
+    const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true } = options;
+    const alertes = [];
+    const noms = new Map(); // clé → nom affiché (le premier rencontré)
+    const nomDe = (n) => { const k = cleNom(n); if (!noms.has(k)) noms.set(k, n); return k; };
+    const commutateurs = [];
+    const branches = new Map(); // clé du commutateur → [{ peripherique, lien }]
+    for (const l of lignes) {
+        const c = nomDe(l.commutateur);
+        const p = nomDe(l.peripherique);
+        if (!branches.has(c)) { branches.set(c, []); commutateurs.push(c); }
+        branches.get(c).push({ peripherique: p, lien: l.lien });
+    }
+    const estCommutateur = new Set(commutateurs);
+    const categorie = (k) => {
+        const parNom = categorieDuNom(noms.get(k));
+        if (estCommutateur.has(k)) return ['commutateur-l3', 'routeur', 'pare-feu'].includes(parNom) ? parNom : 'commutateur';
+        return parNom || categorieDe(noms.get(k)) || 'inconnu';
+    };
+    const icone = (k) => `${jeu}:${CATEGORIES_RESEAU[categorie(k)][jeu]}`;
+    const texteLien = (lien) => (avecLiens && lien ? protegerTexte(abreger ? abregerInterface(lien) : lien) : '');
+    const sensPour = (n) => (sens === 'auto' ? (n > SEUIL_SENS_LR ? 'LR' : 'TD') : sens);
+    const nombre = new Set(lignes.flatMap((l) => [cleNom(l.commutateur), cleNom(l.peripherique)])).size;
+    const unique = presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE));
+    const pages = [];
+
+    const page = (cles, liaisons, groupeDe, titre, sensPage) => {
+        const modele = { preambule: [], couloirs: false, sens: sensPage, noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
+        const nouvelId = idsUniques();
+        const ids = new Map();
+        const idGroupe = new Map();
+        for (const k of cles) {
+            const g = groupeDe(k);
+            if (g && !idGroupe.has(g)) { const id = nouvelId(`g_${noms.get(g)}`); idGroupe.set(g, id); modele.groupes.push({ id, titre: protegerTexte(noms.get(g)), parent: null, sens: null }); }
+            const id = nouvelId(noms.get(k));
+            ids.set(k, id);
+            modele.noeuds.push({ id, texte: protegerTexte(noms.get(k)), forme: 'rectangle', groupe: g ? idGroupe.get(g) : null, classe: null, icone: icone(k) });
+        }
+        for (const { de, vers, lien } of liaisons) {
+            modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte: texteLien(lien), trait: estAgregat(lien) ? 'epais' : 'plein', longueur: 1 });
+        }
+        pages.push({ nom: titre, code: ecrirePage(modele, alertes, titre), equipements: cles.length });
+    };
+
+    if (unique) {
+        // Tous les commutateurs sur une page ; un périphérique relié à un seul commutateur va dans le cadre de celui-ci
+        const rattache = new Map();
+        for (const c of commutateurs) for (const { peripherique: p } of branches.get(c)) {
+            if (estCommutateur.has(p)) continue;
+            rattache.set(p, rattache.has(p) && rattache.get(p) !== c ? null : c);
+        }
+        const cles = [];
+        for (const c of commutateurs) {
+            cles.push(c);
+            for (const { peripherique: p } of branches.get(c)) if (!cles.includes(p) && !estCommutateur.has(p)) cles.push(p);
+        }
+        const cadres = encadrer && commutateurs.length > 1;
+        const groupeDe = (k) => (!cadres ? null : estCommutateur.has(k) ? k : rattache.get(k) || null);
+        const liaisons = commutateurs.flatMap((c) => branches.get(c).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })));
+        const plusGrand = Math.max(...commutateurs.map((c) => branches.get(c).length));
+        page(cles, liaisons, groupeDe, commutateurs.length === 1 ? `Commutateur ${noms.get(commutateurs[0])}` : 'Commutateurs et périphériques',
+            sensPour(commutateurs.length === 1 ? plusGrand : 0));
+    } else {
+        // Une page par commutateur : lui, puis ses périphériques (un commutateur voisin y figure comme périphérique)
+        for (const c of commutateurs) {
+            const b = branches.get(c);
+            const cles = [c, ...new Set(b.map((x) => x.peripherique))];
+            page(cles, b.map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null, `Commutateur ${noms.get(c)}`, sensPour(cles.length - 1));
+        }
+    }
+    return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre };
+}

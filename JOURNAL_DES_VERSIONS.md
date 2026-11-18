@@ -2,6 +2,20 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.30.4 — 19 novembre 2026 — commutateur : deux data centers jumeaux (vue d'ensemble par site, cœurs amont)
+
+- **Demande** : représenter deux data centers en haute disponibilité, sur deux sites : un cœur par site, des dizaines de commutateurs et des centaines de serveurs sous chaque cœur.
+- **Exemple** `datacenter.csv` : un cœur par site (`CŒUR-DC-NORD`, `CŒUR-DC-SUD`) relié à l'autre par agrégat, 24 commutateurs de baie par cœur, 1 412 serveurs (hyperviseurs ESX, serveurs, NAS ; agrégats et liens 10 Gbit/s), quatre noms piégés ; 1 461 lignes, 51 pages, aucune alerte.
+- **Vue d'ensemble** (pages par commutateur, plusieurs commutateurs ; case cochée par défaut) : première page avec les commutateurs seuls, leurs liaisons et le nombre de périphériques de chacun.
+  - **Un cadre par site** : un cœur et les commutateurs qui ne dépendent que de lui ; baies en rangées dans chaque cadre (sans cadres, les baies des deux sites se mêlaient).
+  - Deux cœurs reliés entre eux restent côte à côte (un trait les mettait l'un sous l'autre, et les liaisons du premier contournaient le second) : leur liaison est écrite sous le premier (« ↔ CŒUR-DC-SUD : BAGG1 »).
+- **Cœurs amont** (case cochée par défaut) : la page d'un commutateur rappelle au-dessus de lui le ou les commutateurs dont il dépend, avec leur lien.
+- **Page d'un cœur** : ses commutateurs de baie sont rangés comme des périphériques (24 baies sur une seule rangée, sinon) ; l'autre cœur reste à part.
+- **Nom du lien sous l'équipement** : aussi quand tous les liens qui lui arrivent portent le même nom ; sinon sur les traits. Un commutateur encadré garde sous son icône le nom du lien qui le relie (BAGG1), son nom étant le titre du cadre (défaut de la 0.30.3 corrigé avant publication).
+- **Catégories d'après le nom** : « œ » et accents ignorés (« CŒUR-DC-NORD » reconnu comme cœur, commutateur de niveau 3) ; hyperviseurs et nœuds (ESX, Proxmox, KVM, Hyper-V, Nutanix, K8S, BDD, SQL) reconnus comme serveurs ; NAS, SAN comme stockage.
+- **Démonstration** : trois pages ajoutées (72 pages) : vue d'ensemble des deux sites, page du cœur Nord, page d'une baie.
+- **Recette** : test de logique sur `datacenter.csv` (51 pages, 50 commutateurs sur la vue d'ensemble, un cadre par site, liaison entre cœurs écrite, 48 agrégats, rangées, page du cœur, cœur au-dessus de la baie, catégories, sans cadres / sans vue d'ensemble ni cœur, relecture à l'identique) ; test du nom de lien d'un commutateur encadré ; rendu Chrome des pages.
+
 ## 0.30.3 — 18 novembre 2026 — commutateur : découpage dans la liste « Pages », colonnes à droite, nom du lien lisible
 
 - **Constat** : le découpage d'un commutateur trop chargé existait (0.30.2), mais dans une rubrique à part, plus bas : à côté de « Une page par commutateur », on ne le voyait pas.

@@ -11,6 +11,7 @@ const lire = async (nom) => reseau.lireCommutateurs(await reseau.lireEnregistrem
 const petit = await lire('commutateur-serveurs.csv');
 const grand = await lire('commutateur-48-serveurs.csv');
 const plusieurs = await lire('plusieurs-commutateurs.csv');
+const datacenter = await lire('datacenter.csv');
 
 const PIED = 'FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}';
 const AJUSTEMENT = { mode: 'page', echelle: 100, alignement: 'centre' };
@@ -30,7 +31,7 @@ sous-partie: d. Commutateur et périphériques (CSV à 3 colonnes)
 titre: Un schéma de commutateur à partir d'un simple fichier CSV
 texte: Colonne 1 : le commutateur ; colonne 2 : le lien ; colonne 3 : le périphérique. Tous les caractères sont admis dans les noms (guillemets, crochets, chevrons, &, |, #) : FUSAIN les protège pour Mermaid. Les pages suivantes sont produites par l'import, avec ses différents réglages.
 - [illus:commutateur-switch] Disposition | Sous le commutateur, en rangées (automatique au-delà de 12 périphériques) ou sur une seule rangée ; à droite, en plusieurs colonnes ou sur une seule.
-- [illus:livrable] Pages | Tous les commutateurs sur une page, chacun encadré avec ses périphériques ; une page par commutateur ; découpage d'un commutateur chargé (8 à 48 périphériques par page) ; agrégats et liens simples séparés.
+- [illus:livrable] Pages | Tous les commutateurs sur une page, encadrés ; une page par commutateur, précédée d'une vue d'ensemble et rappelant les cœurs amont ; découpage d'un commutateur chargé (8 à 48 par page) ; agrégats et liens simples séparés.
 - [illus:flux-de-donnees] Ordre des périphériques | Ordre du fichier, nom du lien (G1/0/2 avant G1/0/10), agrégats d'abord, ou nom du serveur, en ordre croissant ou décroissant.
 - [illus:organigramme] Nom des liens | Agrégats en trait épais ; nom du lien sous le nom du périphérique, sur le trait ou absent ; interfaces abrégées (GigabitEthernet1/0/1 → GE1/0/1).
 ` });
@@ -57,6 +58,21 @@ decoupe.forEach((x, i) => pages.push({ ...meta(`decoupe${i + 1}`, `48 serveurs d
     `${titres[i] ?? x.nom} — ${x.nom.replace(/^Commutateur /, '')}`,
     sousTitre('commutateur-48-serveurs.csv', 'agrégats et liens simples séparés, 24 périphériques au plus par page, interfaces abrégées'),
     'Découpage d\'un commutateur chargé sur plusieurs pages : le commutateur est repris en haut de chacune.'), code: x.code }));
+
+// Deux data centers jumeaux en haute disponibilité, sur deux sites : un cœur par site, reliés entre eux ; 24 commutateurs
+// de baie par cœur ; 1 412 serveurs. Vue d'ensemble (un cadre par site), page d'un cœur, page d'une baie.
+const dc = produire(datacenter, { jeu: 'illus', abreger: true, placeLien: 'peripherique' });
+const SOURCE = 'datacenter.csv';
+pages.push({ ...meta('dc_ensemble', 'Data centers jumeaux : vue d\'ensemble (CSV 3 colonnes)', 'A3', 'Deux data centers en haute disponibilité : cœurs reliés entre les sites, 48 commutateurs de baie',
+    sousTitre(SOURCE, 'une page par commutateur, vue d\'ensemble en première page, un cadre par site'),
+    `2 sites, 1 cœur par site relié à l'autre, 24 commutateurs de baie par cœur, ${datacenter.lignes.length - 49} serveurs : la vue d'ensemble ne dessine que les commutateurs, avec le nombre de serveurs de chacun.`), code: dc[0].code });
+const coeur = dc.find((x) => x.nom === 'Commutateur CŒUR-DC-NORD');
+pages.push({ ...meta('dc_coeur', 'Data centers jumeaux : un cœur (CSV 3 colonnes)', 'A3', 'Cœur du site Nord : ses 24 commutateurs de baie et sa liaison vers le site Sud',
+    sousTitre(SOURCE, 'page d\'un cœur, commutateurs de baie en rangées'), 'Les commutateurs de baie se rangent comme des périphériques ; l\'autre cœur reste à part.'), code: coeur.code });
+const baie = dc.find((x) => x.nom === 'Commutateur SW-NORD-B15');
+pages.push({ ...meta('dc_baie', 'Data centers jumeaux : une baie (CSV 3 colonnes)', 'A3', 'Baie SW-NORD-B15 : son cœur au-dessus, ses serveurs en rangées',
+    sousTitre(SOURCE, 'page d\'un commutateur, cœur amont rappelé au-dessus, interfaces abrégées'),
+    `Une des ${dc.length - 1} pages par commutateur : hyperviseurs ESX, serveurs et NAS, agrégats en trait épais.`), code: baie.code });
 
 const chemin = new URL('presentation-fusain.fusain.json', racine);
 const doc = JSON.parse(readFileSync(chemin, 'utf8'));

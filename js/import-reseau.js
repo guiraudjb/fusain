@@ -118,7 +118,7 @@ export function ouvrirImportReseau(ajouterPages) {
 
 // Boîte « Commutateur et périphériques » : fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés
 export function ouvrirImportCommutateurs(ajouterPages) {
-    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier', placeLien: 'peripherique' } };
+    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier', placeLien: 'peripherique', ensemble: true, amont: true } };
     const o = etat.options;
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -181,6 +181,8 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                     champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),
                     champCase('Encadrer chaque commutateur avec ses périphériques (page unique)', o.encadrer, (v) => { o.encadrer = v; redessiner(); })),
                 champCase('Séparer les agrégats et les liens simples (une page pour chaque type)', o.parType, (v) => { o.parType = v; redessiner(); }),
+                champCase('Pages par commutateur : vue d\'ensemble des commutateurs en première page', o.ensemble, (v) => { o.ensemble = v; redessiner(); }),
+                champCase('Pages par commutateur : rappeler en haut de chaque page le ou les commutateurs amont (cœur de réseau)', o.amont, (v) => { o.amont = v; redessiner(); }),
                 o.parType || o.parPage ? h('p', { class: 'fr-text--xs' }, `Chaque commutateur a ses propres pages${o.parPage ? `, de ${o.parPage} périphériques au plus` : ''}${o.parType ? ', agrégats et liens simples séparés' : ''} ; le commutateur est repris en haut de chacune.`) : null,
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
             if (!lu.lignes.length) {

@@ -510,6 +510,56 @@ test('réseau : tri des périphériques par nom de lien (ordre naturel) ou par n
     assert.deepEqual(logigramme.analyser(p1.code).liens.filter((x) => x.trait !== 'invisible').map((x) => x.texte), ['Bridge-Aggregation9', 'Bridge-Aggregation10']);
 });
 
+test('réseau : deux data centers jumeaux (2 sites, 48 baies, 1 412 serveurs) → vue d\'ensemble par site, puis une page par commutateur', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/datacenter.csv', import.meta.url))))));
+    assert.equal(lu.lignes.length, 1461);
+    const r = reseau.produirePagesCommutateurs(lu, { placeLien: 'peripherique', abreger: true });
+    assert.equal(r.unique, false);
+    assert.deepEqual(r.alertes, []);
+    assert.equal(r.pages.length, 51, 'vue d\'ensemble + 2 cœurs + 48 baies');
+    const vue = logigramme.analyser(r.pages[0].code);
+    const noeud = (m, debut) => m.noeuds.find((n) => n.texte.startsWith(debut));
+    assert.equal(vue.noeuds.length, 50, 'les commutateurs seuls');
+    // Un cadre par site, titré du nom du cœur ; chaque baie dans le cadre de son cœur
+    assert.deepEqual(vue.groupes.map((g) => g.titre).sort(), ['CŒUR-DC-NORD', 'CŒUR-DC-SUD']);
+    const cadre = (titre) => vue.groupes.find((g) => g.titre === titre).id;
+    assert.equal(noeud(vue, 'SW-NORD-B15').groupe, cadre('CŒUR-DC-NORD'));
+    assert.equal(noeud(vue, 'SW-SUD-B03').groupe, cadre('CŒUR-DC-SUD'));
+    // Les deux cœurs ne sont pas reliés par un trait (ils resteraient l'un sous l'autre) : la liaison est écrite
+    assert.ok(vue.noeuds.some((n) => n.texte === '↔ CŒUR-DC-SUD : BAGG1'));
+    assert.equal(vue.liens.filter((l) => l.trait === 'epais').length, 48);
+    assert.ok(vue.liens.filter((l) => l.trait === 'invisible').length > 0, 'baies en rangées dans chaque cadre');
+    assert.match(noeud(vue, 'SW-NORD-B15').texte, /^SW-NORD-B15\nBAGG115\n\d+ périphériques$/);
+    assert.ok(vue.liens.every((l) => !l.texte));
+    // Page d'un cœur : ses 24 baies en rangées, l'autre cœur à part
+    const coeur = logigramme.analyser(r.pages.find((p) => p.nom === 'Commutateur CŒUR-DC-NORD').code);
+    assert.equal(coeur.noeuds.length, 26);
+    const invisiblesCoeur = coeur.liens.filter((l) => l.trait === 'invisible');
+    assert.ok(invisiblesCoeur.length > 0 && invisiblesCoeur.every((l) => l.de !== noeud(coeur, 'CŒUR-DC-SUD').id && l.vers !== noeud(coeur, 'CŒUR-DC-SUD').id));
+    // Page d'une baie : son cœur au-dessus d'elle, puis ses serveurs en rangées
+    const pageBaie = r.pages.find((p) => p.nom === 'Commutateur SW-NORD-B15');
+    const baie = logigramme.analyser(pageBaie.code);
+    assert.ok(baie.liens.some((l) => l.de === noeud(baie, 'CŒUR-DC-NORD').id && l.vers === noeud(baie, 'SW-NORD-B15').id));
+    assert.match(pageBaie.code, /SRV-WEB #60;DMZ#62; 15/);
+    // Catégories d'après le nom : cœurs (« œ »), hyperviseurs ESX, NAS
+    assert.match(r.pages[0].code, /icon: "illus:commutateur-niveau-3", label: "↔ CŒUR-DC-SUD/);
+    assert.match(pageBaie.code, /icon: "illus:serveur", label: "ESX-N15-01/);
+    assert.match(r.pages.map((p) => p.code).join(''), /icon: "illus:stockage-nas", label: "NAS-/);
+    // Sans cadres, sans vue d'ensemble, sans rappel du cœur
+    assert.equal(logigramme.analyser(reseau.produirePagesCommutateurs(lu, { encadrer: false }).pages[0].code).groupes.length, 0);
+    const nu = reseau.produirePagesCommutateurs(lu, { ensemble: false, amont: false });
+    assert.equal(nu.pages.length, 50);
+    assert.doesNotMatch(nu.pages.find((p) => p.nom === 'Commutateur SW-NORD-B15').code, /CŒUR/);
+    for (const p of [...r.pages, ...nu.pages]) assert.equal(logigramme.ecrire(logigramme.analyser(p.code)), p.code);
+});
+
+test('réseau : commutateur encadré relié par un seul agrégat → le nom du lien reste écrit sous son icône', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/plusieurs-commutateurs.csv', import.meta.url))))));
+    const m = logigramme.analyser(reseau.produirePagesCommutateurs(lu, { presentation: 'unique', abreger: true, placeLien: 'peripherique' }).pages[0].code);
+    assert.ok(m.noeuds.some((n) => n.texte === 'BAGG1') && m.noeuds.some((n) => n.texte === 'BAGG2'));
+    assert.ok(m.groupes.some((g) => g.titre === 'SW-ÉTAGE-1'));
+});
+
 test('réseau : trois colonnes sans intitulés, noms avec les caractères de la syntaxe de Mermaid', () => {
     const noms = ['A "x" `y`', 'B [1] (2) {3}', 'C | D ; E : F', 'G <h> & i', 'J #35; k #l', 'end', 'M --> N', 'O\nP', 'Q %% R', 'S @{ t }'];
     const lignes = noms.map((n, i) => ['SW <1> & "x"', `${n} lien`, n]).concat([['SW <1> & "x"', 'A "x" `y` lien', 'A "x" `y`'], ['SW-2', '', 'SW <1> & "x"'], ['', 'x', 'y']]);
@@ -518,7 +568,8 @@ test('réseau : trois colonnes sans intitulés, noms avec les caractères de la 
     assert.deepEqual(lu.bilan, { lignes: 13, ignorees: 1, doublons: 1, colonnesEnTrop: false });
     const unique = reseau.produirePagesCommutateurs(lu, { presentation: 'unique' });
     const parPage = reseau.produirePagesCommutateurs(lu, { presentation: 'commutateur' });
-    assert.equal(parPage.pages.length, 2);
+    assert.equal(parPage.pages.length, 3, 'vue d\'ensemble + 2 commutateurs');
+    assert.equal(parPage.pages[0].nom, 'Vue d\'ensemble des commutateurs');
     for (const { code } of [...unique.pages, ...parPage.pages]) {
         const m = logigramme.analyser(code);
         assert.equal(logigramme.ecrire(m), code);

@@ -223,7 +223,8 @@ export function categorieDe(...textes) {
 
 // Catégorie devinée d'après le nom, en dernier recours
 function categorieDuNom(nom) {
-    const n = String(nom).toLowerCase();
+    // Accents retirés et « œ » écrit « oe » : « CŒUR-DC-01 » se lit « coeur-dc-01 »
+    const n = String(nom).toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (/^(fw|pf|firewall|parefeu)[-_.\d]/.test(n) || /[-_.](fw|pf)[-_.\d]/.test(n)) return 'pare-feu';
     if (/^(rt|rtr|router|routeur|gw)[-_.\d]/.test(n) || /[-_.](rt|rtr|gw)[-_.\d]/.test(n)) return 'routeur';
     if (/^(core|coeur|csw|cs)[-_.\d]/.test(n) || /[-_.](core|coeur|csw)[-_.\d]/.test(n)) return 'commutateur-l3';
@@ -232,6 +233,9 @@ function categorieDuNom(nom) {
     if (/^(sep|ipphone|tel|phone)[-_.\d]/.test(n)) return 'telephone';
     if (/^(srv|svr|server|serveur)[-_.\d]/.test(n) || /[-_.](srv|svr)[-_.\d]/.test(n)) return 'serveur';
     if (/^(prn|imp|printer)[-_.\d]/.test(n)) return 'imprimante';
+    // Hyperviseurs et nœuds de calcul : des serveurs ; baies de stockage
+    if (/^(esxi?|hyp|hv|kvm|pve|proxmox|xen|vmh|nutanix|k8s|node|bdd|db|sql)[-_.\d]/.test(n)) return 'serveur';
+    if (/^(nas|san|stor|stockage|baie-stockage)[-_.\d]/.test(n)) return 'stockage';
     return null;
 }
 
@@ -662,6 +666,8 @@ export const colonnesRangees = (n) => Math.min(12, Math.max(6, Math.ceil(Math.sq
 // Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'),
 // sens ('auto' | 'rangees' | 'TD' | 'LR' | 'colonnes' (à droite, en plusieurs colonnes) ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
 // liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur),
+// ensemble (pages par commutateur, plusieurs commutateurs : vue d'ensemble des commutateurs en première page, avec le
+// nombre de périphériques de chacun), amont (sur la page d'un commutateur, rappel des commutateurs dont il dépend),
 // placeLien ('trait' : nom du lien sur le trait ; 'peripherique' : sous le nom du périphérique, quand il n'a qu'un lien
 // sur la page, sinon sur le trait), parType (pages séparées pour les agrégats et les liens simples), parPage (au plus N périphériques par page ; 0 = sans limite).
 // Un découpage (parType ou parPage) donne toujours des pages par commutateur.
@@ -689,7 +695,7 @@ export function trierLignes(lignes, tri = 'fichier') {
 }
 export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) {
     const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true,
-        parType = false, parPage = 0, tri = 'fichier', placeLien = 'trait' } = options;
+        parType = false, parPage = 0, tri = 'fichier', placeLien = 'trait', ensemble = true, amont: avecAmont = true } = options;
     const lignes = trierLignes(lignesLues, tri);
     const limite = Math.max(0, Math.floor(Number(parPage) || 0));
     const alertes = [];
@@ -721,25 +727,28 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
     const unique = !decoupe && (presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE)));
     const pages = [];
 
-    const page = (cles, liaisons, groupeDe, titre, sensPage, rangs = []) => {
+    const page = (cles, liaisons, groupeDe, titre, sensPage, rangs = [], complement = null) => {
         const modele = { preambule: [], couloirs: false, sens: sensPage, noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
         const nouvelId = idsUniques();
         const ids = new Map();
         const idGroupe = new Map();
-        // Nom du lien sous le nom du périphérique : seulement s'il n'a qu'un lien sur la page (sinon on ne saurait lequel)
+        // Nom du lien sous le nom de l'équipement : seulement si tous les liens qui lui arrivent sur la page portent le
+        // même nom (un serveur, ou un commutateur de baie relié aux deux cœurs par le même agrégat) ; sinon sur les traits
         const lienSous = new Map();
         if (placeLien === 'peripherique' && avecLiens) {
-            const nb = new Map();
-            for (const { vers } of liaisons) nb.set(vers, (nb.get(vers) || 0) + 1);
-            for (const { vers, lien } of liaisons) if (nb.get(vers) === 1 && lien && !estCommutateur.has(vers)) lienSous.set(vers, lien);
+            const nomsVers = new Map();
+            for (const { vers, lien } of liaisons) nomsVers.set(vers, (nomsVers.get(vers) || new Set()).add(lien || ''));
+            for (const [vers, n] of nomsVers) if (n.size === 1 && [...n][0]) lienSous.set(vers, [...n][0]);
         }
         for (const k of cles) {
             const g = groupeDe(k);
             if (g && !idGroupe.has(g)) { const id = nouvelId(`g_${noms.get(g)}`); idGroupe.set(g, id); modele.groupes.push({ id, titre: protegerTexte(noms.get(g)), parent: null, sens: null }); }
             const id = nouvelId(noms.get(k));
             ids.set(k, id);
-            // Commutateur dans son propre cadre : son nom est déjà le titre du cadre, l'icône n'en porte pas
-            const texte = g === k ? '' : protegerTexte(noms.get(k)) + (lienSous.has(k) ? `\n${texteLien(lienSous.get(k))}` : '');
+            // Commutateur dans son propre cadre : son nom est déjà le titre du cadre ; l'icône ne porte que la suite
+            // (nom du lien, liaison entre cœurs, nombre de périphériques)
+            const suite = [lienSous.has(k) ? texteLien(lienSous.get(k)) : '', complement?.get(k) || ''].filter(Boolean).join('\n');
+            const texte = g === k ? suite : protegerTexte(noms.get(k)) + (suite ? `\n${suite}` : '');
             modele.noeuds.push({ id, texte, forme: 'rectangle', groupe: g ? idGroupe.get(g) : null, classe: null, icone: icone(k) });
         }
         for (const { de, vers, lien } of liaisons) {
@@ -772,6 +781,44 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         page(cles, liaisons, groupeDe, commutateurs.length === 1 ? `Commutateur ${noms.get(commutateurs[0])}` : 'Commutateurs et périphériques',
             sensPour(), commutateurs.map(propres));
     } else {
+        // Commutateurs amont de chacun (ceux qui le citent comme périphérique) : rappelés au-dessus de lui sur ses pages
+        const amont = new Map(commutateurs.map((c) => [c, []]));
+        for (const c of commutateurs) for (const { peripherique, lien } of branches.get(c)) if (estCommutateur.has(peripherique) && peripherique !== c) amont.get(peripherique).push({ de: c, lien });
+        // Vue d'ensemble : les commutateurs seuls, leurs liaisons, et le nombre de périphériques de chacun
+        if (ensemble && commutateurs.length > 1) {
+            const liaisons = commutateurs.flatMap((c) => branches.get(c).filter((x) => estCommutateur.has(x.peripherique) && x.peripherique !== c).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })));
+            // Deux commutateurs qui desservent chacun d'autres commutateurs (deux cœurs reliés entre eux) : un trait les
+            // mettrait l'un sous l'autre et les liaisons du premier contourneraient le second ; ils restent côte à côte
+            // et leur liaison est écrite sous le nom du premier
+            const aval = (c) => new Set(liaisons.filter((l) => l.de === c).map((l) => l.vers));
+            const entrePairs = (l) => [...aval(l.de)].some((v) => v !== l.vers) && [...aval(l.vers)].some((v) => v !== l.de);
+            const pairs = liaisons.filter(entrePairs);
+            const complement = new Map(commutateurs.map((c) => {
+                const n = new Set(branches.get(c).map((x) => x.peripherique).filter((p) => !estCommutateur.has(p))).size;
+                const lignes = pairs.filter((l) => l.de === c).map((l) => `↔ ${protegerTexte(noms.get(l.vers))}${avecLiens && l.lien ? ` : ${texteLien(l.lien)}` : ''}`);
+                if (n) lignes.push(`${n} périphérique${n > 1 ? 's' : ''}`);
+                return [c, lignes.join('\n')];
+            }));
+            const feuilles = commutateurs.filter((c) => !liaisons.some((l) => l.de === c));
+            // Sites : un cœur (relié à un autre cœur, ou sans commutateur amont) et les commutateurs qui ne dépendent que de
+            // lui ; s'il y a plusieurs cœurs et que chaque commutateur relève d'un seul, chaque site a son cadre
+            const coeurs = commutateurs.filter((c) => aval(c).size && (pairs.some((l) => l.de === c || l.vers === c) || !liaisons.some((l) => l.vers === c)));
+            const estCoeur = new Set(coeurs);
+            const siteDe = new Map(coeurs.map((c) => [c, c]));
+            const remonter = (c, vus = new Set()) => {
+                if (estCoeur.has(c)) return new Set([c]);
+                if (vus.has(c)) return new Set();
+                vus.add(c);
+                const r = new Set();
+                for (const l of liaisons) if (l.vers === c && !pairs.includes(l)) for (const x of remonter(l.de, vus)) r.add(x);
+                return r;
+            };
+            for (const c of commutateurs) if (!estCoeur.has(c)) { const r = remonter(c); if (r.size === 1) siteDe.set(c, [...r][0]); }
+            const parSite = encadrer && coeurs.length > 1 && commutateurs.every((c) => siteDe.has(c));
+            const rangsVue = parSite ? coeurs.map((c) => feuilles.filter((f) => siteDe.get(f) === c)) : [feuilles];
+            page(commutateurs, liaisons.filter((l) => !pairs.includes(l)), parSite ? (k) => siteDe.get(k) : () => null,
+                'Vue d\'ensemble des commutateurs', sensPour(), rangsVue, complement);
+        }
         // Une page par commutateur : lui, puis ses périphériques (un commutateur voisin y figure comme périphérique)
         // Découpage : par type de lien (agrégats, puis liens simples), puis par tranches de « limite » périphériques,
         // dans l'ordre du fichier ; un périphérique relié des deux façons figure sur les deux pages
@@ -788,8 +835,13 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
                     const part = peripheriques.slice(t * taille, (t + 1) * taille);
                     const dans = new Set(part);
                     const titre = `Commutateur ${noms.get(c)}${type ? ` — ${type}` : ''}${tranches > 1 ? ` (${t + 1}/${tranches}) : périphériques ${t * taille + 1} à ${t * taille + part.length} sur ${peripheriques.length}` : ''}`;
-                    page([c, ...part], liste.filter((x) => dans.has(x.peripherique)).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null,
-                        titre, sensPour(), [part.filter((p) => !estCommutateur.has(p))]);
+                    const hauts = avecAmont ? amont.get(c).filter((x) => !dans.has(x.de)) : [];
+                    // Rangées : les périphériques et les commutateurs desservis, sauf ceux qui desservent eux-mêmes des
+                    // commutateurs (l'autre cœur d'un data center jumeau)
+                    const desservent = (p) => estCommutateur.has(p) && branches.get(p).some((x) => estCommutateur.has(x.peripherique) && x.peripherique !== c);
+                    page([...new Set(hauts.map((x) => x.de)), c, ...part],
+                        [...hauts.map(({ de, lien }) => ({ de, vers: c, lien })), ...liste.filter((x) => dans.has(x.peripherique)).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien }))],
+                        () => null, titre, sensPour(), [part.filter((p) => !desservent(p))]);
                 }
             }
         }

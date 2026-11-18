@@ -1,7 +1,7 @@
 // Boîte « Importer un réseau » : choix des fichiers, vérification des colonnes reconnues, options, puis création des pages.
 // Toute la logique (lecture, analyse, écriture des schémas) est dans reseau.js ; ici, seulement le formulaire.
 import { h, bouton, champSelect, champCase, champTexte, message, modale, ouvrirModale, fermerModale, idUnique } from './dom.js';
-import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs, TRIS_PERIPHERIQUES } from './reseau.js';
+import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs, TRIS_PERIPHERIQUES, ecrireVlans } from './reseau.js';
 
 const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat', 'siteSource', 'localSource', 'siteCible', 'localCible'];
 const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
@@ -11,7 +11,7 @@ const ACCEPTES = '.csv,.txt,.tsv,.xlsx,.xls,.htm,.html,text/csv,text/plain,appli
 export function ouvrirImportReseau(ajouterPages) {
     const etat = {
         liens: null, nomLiens: '', equipements: null, nomEquipements: '', equipementLocal: '',
-        options: { jeu: 'illus', regroupement: 'auto', resumer: true, abreger: true, logique: true },
+        options: { jeu: 'illus', regroupement: 'auto', resumer: true, abreger: true, logique: true, sens: 'auto', tri: 'fichier', placeLien: 'peripherique', parPage: 60 },
     };
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -64,7 +64,12 @@ export function ouvrirImportReseau(ajouterPages) {
             o.regroupement, (v) => { o.regroupement = v; redessiner(); }),
         champCase('Résumer les terminaux d\'un même commutateur (« 12 téléphones IP »)', o.resumer, (v) => { o.resumer = v; redessiner(); }),
         champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),
-        champCase('Ajouter les schémas logiques (VLAN), si l\'export les contient', o.logique, (v) => { o.logique = v; redessiner(); }));
+        champCase('Ajouter les schémas logiques (VLAN), si l\'export les contient', o.logique, (v) => { o.logique = v; redessiner(); }),
+        champSelect('Disposition des équipements rattachés à un seul autre', [['auto', 'Automatique (en rangées au-delà de 12)'], ['rangees', 'Dessous, en rangées'], ['TD', 'Dessous, sur une seule rangée'],
+            ['LR', 'À droite, sur une seule colonne'], ['colonnes', 'À droite, en plusieurs colonnes']], o.sens, (v) => { o.sens = v; redessiner(); }),
+        champSelect('Ordre de ces équipements', [['fichier', 'Ordre du fichier'], ['lien', 'Interface (G1/0/2 avant G1/0/10)'], ['nom', 'Nom de l\'équipement']], o.tri, (v) => { o.tri = v; redessiner(); }),
+        champSelect('Nom du lien', [['trait', 'Sur le trait'], ['peripherique', 'Sous l\'équipement rattaché (plus lisible)'], ['aucun', 'Ne pas l\'écrire']], o.placeLien, (v) => { o.placeLien = v; redessiner(); }),
+        champSelect('Équipements au plus par page', [['0', 'Sans limite'], ...[30, 40, 60, 80, 100, 150].map((n) => [String(n), `${n} : au-delà, pages de détail`])], String(o.parPage), (v) => { o.parPage = Number(v); redessiner(); }));
 
     const bilan = () => {
         resultat = null;
@@ -82,7 +87,8 @@ export function ouvrirImportReseau(ajouterPages) {
                 `${lignes} lignes lues : ${graphe.noeuds.length} équipements, ${graphe.liaisons.length} liaisons`
                 + `${doublons ? `, ${doublons} doublon${doublons > 1 ? 's' : ''} écarté${doublons > 1 ? 's' : ''}` : ''}${ignorees ? `, ${ignorees} ligne${ignorees > 1 ? 's' : ''} sans équipement ignorée${ignorees > 1 ? 's' : ''}` : ''}.`),
             h('p', { class: 'fr-text--sm fr-mb-1w' }, [...parCategorie].sort((p, q) => q[1] - p[1]).map(([c, n]) => `${n} ${n > 1 ? CATEGORIES_RESEAU[c].pluriel : CATEGORIES_RESEAU[c].nom.toLowerCase()}`).join(' · ')),
-            h('p', { class: 'fr-text--sm fr-mb-1w' }, `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} : ${resultat.pages.map((p) => p.nom).join(', ')}.`),
+            h('p', { class: 'fr-text--sm fr-mb-1w' }, `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} : ${resultat.pages.slice(0, 8).map((p) => p.nom).join(', ')}${resultat.pages.length > 8 ? `, … et ${resultat.pages.length - 8} autres` : ''}.`),
+            o.parPage && resultat.pages.some((p) => / — /.test(p.nom)) ? h('p', { class: 'fr-text--xs fr-mb-1w' }, 'Les équipements des appareils les plus chargés sont sur des pages de détail ; un renvoi « → page « … » » les remplace sur la page d\'origine.') : null,
             o.logique && !graphe.avecVlans ? h('p', { class: 'fr-text--xs fr-mb-0' }, 'Pas de schéma logique : l\'export ne contient pas de VLAN.') : null,
             resultat.alertes.map((t) => h('p', { class: 'fr-text--xs fr-mb-0' }, t)));
     };
@@ -117,8 +123,10 @@ export function ouvrirImportReseau(ajouterPages) {
 }
 
 // Boîte « Commutateur et périphériques » : fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés
-export function ouvrirImportCommutateurs(ajouterPages) {
-    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier', placeLien: 'peripherique', ensemble: true, amont: true } };
+// datacenter : module « Data center » : même fichier (4e colonne VLAN facultative), réglé pour tout le data center :
+// vue d'ensemble sur une ou plusieurs pages, puis les vues de tous les commutateurs, découpées au besoin
+export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = {}) {
+    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: datacenter, vlansChoisis: null, options: { jeu: 'illus', presentation: datacenter ? 'commutateur' : 'auto', sens: 'auto', liens: true, abreger: datacenter, encadrer: true, parType: false, parPage: datacenter ? 40 : 0, tri: datacenter ? 'lien' : 'fichier', placeLien: 'peripherique', ensemble: true, amont: true, vlans: false, parPageVue: datacenter ? 40 : 0 } };
     const o = etat.options;
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -155,12 +163,14 @@ export function ouvrirImportCommutateurs(ajouterPages) {
         if (etat.enregistrements) {
             const lu = lireCommutateurs(etat.enregistrements, { entete: etat.entete });
             const apercu = lu.lignes.slice(0, 5);
+            // VLAN : affichés d'office si le fichier en porte, sauf choix contraire
+            o.vlans = lu.avecVlans && etat.vlansChoisis !== false;
             parties.push(
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, `Contenu de « ${etat.nom} »`),
                 champCase('La première ligne contient les intitulés des colonnes', lu.entete, (v) => { etat.entete = v; redessiner(); }),
                 h('div', { class: 'fr-table fr-table--sm fr-mb-1w' }, h('table', {},
-                    h('thead', {}, h('tr', {}, ['Commutateur (col. 1)', 'Lien (col. 2)', 'Périphérique (col. 3)'].map((t) => h('th', { scope: 'col' }, t)))),
-                    h('tbody', {}, apercu.map((l) => h('tr', {}, [l.commutateur, l.lien, l.peripherique].map((t) => h('td', {}, t))))))),
+                    h('thead', {}, h('tr', {}, ['Commutateur (col. 1)', 'Lien (col. 2)', 'Périphérique (col. 3)', ...(lu.avecVlans ? ['VLAN (col. 4)'] : [])].map((t) => h('th', { scope: 'col' }, t)))),
+                    h('tbody', {}, apercu.map((l) => h('tr', {}, [l.commutateur, l.lien, l.peripherique, ...(lu.avecVlans ? [l.vlans.size ? ecrireVlans(l.vlans) : '—'] : [])].map((t) => h('td', {}, t))))))),
                 lu.lignes.length > apercu.length ? h('p', { class: 'fr-text--xs' }, `… et ${lu.lignes.length - apercu.length} autre${lu.lignes.length - apercu.length > 1 ? 's' : ''} ligne${lu.lignes.length - apercu.length > 1 ? 's' : ''}.`) : null,
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'),
                 h('div', { class: 'fusain-import-reseau__colonnes' },
@@ -183,6 +193,9 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                 champCase('Séparer les agrégats et les liens simples (une page pour chaque type)', o.parType, (v) => { o.parType = v; redessiner(); }),
                 champCase('Pages par commutateur : vue d\'ensemble des commutateurs en première page', o.ensemble, (v) => { o.ensemble = v; redessiner(); }),
                 champCase('Pages par commutateur : rappeler en haut de chaque page le ou les commutateurs amont (cœur de réseau)', o.amont, (v) => { o.amont = v; redessiner(); }),
+                o.ensemble ? champSelect('Vue d\'ensemble : commutateurs au plus par page', [['0', 'Une seule page'], ...[20, 30, 40, 60, 80].map((n) => [String(n), `${n} : au-delà, une page des cœurs puis une page par site`])], String(o.parPageVue), (v) => { o.parPageVue = Number(v); redessiner(); }) : null,
+                champCase(lu.avecVlans ? 'Indiquer sur chaque lien les VLAN propagés (icône VLAN et liste de la colonne 4)' : 'Indiquer les VLAN propagés : le fichier n\'a pas de 4e colonne VLAN',
+                    o.vlans, (v) => { etat.vlansChoisis = v; redessiner(); }, lu.avecVlans ? {} : { disabled: true }),
                 o.parType || o.parPage ? h('p', { class: 'fr-text--xs' }, `Chaque commutateur a ses propres pages${o.parPage ? `, de ${o.parPage} périphériques au plus` : ''}${o.parType ? ', agrégats et liens simples séparés' : ''} ; le commutateur est repris en haut de chacune.`) : null,
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
             if (!lu.lignes.length) {
@@ -195,7 +208,9 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                         + `${doublons ? `, ${doublons} doublon${doublons > 1 ? 's' : ''} écarté${doublons > 1 ? 's' : ''}` : ''}${ignorees ? `, ${ignorees} ligne${ignorees > 1 ? 's' : ''} incomplète${ignorees > 1 ? 's' : ''} ignorée${ignorees > 1 ? 's' : ''}` : ''}.`),
                     h('p', { class: 'fr-text--sm fr-mb-1w' }, `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} : ${resultat.pages.slice(0, 8).map((p) => p.nom).join(', ')}${resultat.pages.length > 8 ? '…' : ''}.`),
                     h('p', { class: 'fr-text--xs fr-mb-0' }, 'Les agrégats de liens (Bridge-Aggregation, Port-channel…) sont tracés en trait épais.'),
-                    colonnesEnTrop ? h('p', { class: 'fr-text--xs fr-mb-0' }, 'Le fichier a plus de trois colonnes : seules les trois premières sont lues.') : null,
+                    resultat.fusions ? h('p', { class: 'fr-text--xs fr-mb-0' }, `${resultat.fusions} lien${resultat.fusions > 1 ? 's' : ''} entre commutateurs décrit${resultat.fusions > 1 ? 's' : ''} des deux côtés : un seul trait, avec les deux ports (côté parent – côté fils).`) : null,
+                    colonnesEnTrop ? h('p', { class: 'fr-text--xs fr-mb-0' }, 'Le fichier a plus de quatre colonnes : seules les quatre premières sont lues (la 4e : VLAN).') : null,
+                    lu.bilan.vlansIllisibles ? h('p', { class: 'fr-text--xs fr-mb-0' }, `${lu.bilan.vlansIllisibles} ligne${lu.bilan.vlansIllisibles > 1 ? 's' : ''} : colonne 4 sans numéro de VLAN lisible (attendu : « 10,20,100-110 »).`) : null,
                     resultat.alertes.map((t) => h('p', { class: 'fr-text--xs fr-mb-0' }, t))));
             }
         }
@@ -203,8 +218,8 @@ export function ouvrirImportCommutateurs(ajouterPages) {
         zone.replaceChildren(...parties.filter(Boolean));
     }
 
-    const dialogue = modale('fusain-modale-import-commutateurs', 'Commutateur et périphériques', h('div', {},
-        h('p', { class: 'fr-text--sm' }, 'Un fichier à trois colonnes, une ligne par périphérique branché : colonne 1, le nom du commutateur ; colonne 2, le nom du lien (port, agrégat…) ; colonne 3, le nom du périphérique. Les noms peuvent contenir n\'importe quel caractère. Le fichier est lu dans le navigateur, sans envoi.'),
+    const dialogue = modale(datacenter ? 'fusain-modale-import-datacenter' : 'fusain-modale-import-commutateurs', datacenter ? 'Data center : vue globale et tous les commutateurs' : 'Commutateur et périphériques', h('div', {},
+        h('p', { class: 'fr-text--sm' }, `Un fichier à trois ou quatre colonnes, une ligne par lien : colonne 1, le nom du commutateur ; colonne 2, le nom du lien (port, agrégat…) ; colonne 3, le nom du périphérique ou du commutateur relié ; colonne 4 (facultative), les VLAN propagés sur le lien (« 10,20,100-110 »). Les noms peuvent contenir n'importe quel caractère. Le fichier est lu dans le navigateur, sans envoi.${datacenter ? ' Le data center est dessiné en entier : une vue d\'ensemble (sur plusieurs pages si besoin, une page des cœurs puis une page par site), puis la vue de chaque commutateur, découpée au-delà de 40 périphériques.' : ''}`),
         h('div', { class: 'fr-upload-group fr-mb-2w' },
             h('label', { class: 'fr-label', for: id }, 'Fichier', h('span', { class: 'fr-hint-text' }, 'CSV (point-virgule, virgule ou tabulation), texte tabulé ou Excel (.xlsx). Première ligne d\'intitulés facultative.')), entree),
         zone), [creer]);

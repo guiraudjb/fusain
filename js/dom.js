@@ -91,9 +91,9 @@ export function champSelect(libelle, options, valeur, surChangement, attrs = {})
     return champ(libelle, controle);
 }
 
-export function champCase(libelle, valeur, surChangement) {
+export function champCase(libelle, valeur, surChangement, attrs = {}) {
     const id = idUnique('case');
-    const controle = h('input', { type: 'checkbox', id, checked: valeur });
+    const controle = h('input', { type: 'checkbox', id, checked: valeur, ...attrs });
     controle.addEventListener('change', () => surChangement(controle.checked));
     return h('div', { class: 'fr-checkbox-group fr-checkbox-group--sm fusain-champ' }, controle, h('label', { class: 'fr-label', for: id }, libelle));
 }

@@ -459,7 +459,9 @@ function libelleLiaison(li, { abreger, logique, inverse }) {
 }
 
 // Une page : nœuds (équipements et résumés), groupes, liaisons, puis écriture par l'éditeur du logigramme
-function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = () => '', titresGroupes, jeu, resumer, abreger, logique, nouvelId, exterieurs = new Set() }) {
+// detaches : Map(clé d'un équipement → { membres, renvoi }) : ses équipements terminaux partent sur des pages de détail ;
+// un nœud de renvoi les remplace (« 32 serveurs → page « SW-01 » »)
+function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = () => '', titresGroupes, jeu, resumer, abreger, logique, nouvelId, exterieurs = new Set(), detaches = new Map() }) {
     const modele = { preambule: [], couloirs: false, sens: 'TD', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
     const idDe = new Map();
     const parCle = new Map(noeuds.map((x) => [x.cle, x]));
@@ -468,8 +470,10 @@ function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = (
     const voisinUnique = new Map();
     for (const li of liaisons) for (const [x, y] of [[li.a, li.b], [li.b, li.a]]) voisinUnique.set(x, voisinUnique.has(x) ? null : y);
     const masques = new Set();
+    for (const d of detaches.values()) for (const x of d.membres) masques.add(x.cle);
     if (resumer) {
         for (const x of noeuds) {
+            if (masques.has(x.cle)) continue;
             const cat = CATEGORIES_RESEAU[x.categorie];
             const v = voisinUnique.get(x.cle);
             if (!cat.terminal || !v || !parCle.has(v) || CATEGORIES_RESEAU[parCle.get(v).categorie].terminal) continue;
@@ -505,6 +509,15 @@ function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = (
         const [de, vers] = CATEGORIES_RESEAU[x.categorie].rang + (x.degre > y.degre ? -0.5 : 0) <= CATEGORIES_RESEAU[y.categorie].rang + (y.degre > x.degre ? -0.5 : 0) ? [li.a, li.b] : [li.b, li.a];
         modele.liens.push({ de: idDe.get(de), vers: idDe.get(vers), debut: '', fin: '', texte: libelleLiaison(li, { abreger, logique, inverse: de !== li.a }), trait: li.panne ? 'pointille' : li.membres.length > 1 ? 'epais' : 'plein', longueur: 1 });
     }
+    for (const [cle, d] of detaches) {
+        if (!idDe.has(cle)) continue;
+        const cats = [...new Set(d.membres.map((x) => x.categorie))];
+        const cat = CATEGORIES_RESEAU[cats.length === 1 ? cats[0] : 'inconnu'];
+        const n = d.membres.length;
+        const id = nouvelId(`${cle}_detail`);
+        modele.noeuds.push({ id, texte: `${n} ${cats.length === 1 ? cat.pluriel : 'équipements'}\n→ ${d.renvoi}`, forme: 'rectangle', groupe: modele.noeuds.find((x) => x.id === idDe.get(cle))?.groupe ?? null, classe: null, icone: `${jeu}:${cat[jeu]}` });
+        modele.liens.push({ de: idDe.get(cle), vers: id, debut: '', fin: '', texte: '', trait: 'pointille', longueur: 1 });
+    }
     if (resumer && !logique) {
         for (const r of resumes.values()) {
             if (r.membres.length < 2 || !idDe.has(r.voisin)) continue;
@@ -532,9 +545,79 @@ function ecrirePage(modele, alertes, nom) {
     return code;
 }
 
-// Options : jeu ('illus' | 'picto'), regroupement ('auto' | 'lieu' | 'prefixe' | 'reseau' | 'aucun'), resumer, abreger, logique
+// Mise en forme d'un modèle déjà construit (import IMC / LLDP) :
+// - feuilles : nœuds reliés par un seul lien, venant de leur parent ; groupées par parent et par cadre ;
+// - nom du lien sous la feuille (placeLien 'peripherique') ou retiré ('aucun') ;
+// - ordre des feuilles (tri : 'fichier' | 'lien' | 'nom') ; rangées ou colonnes au-delà de 12 (sens).
+export function rangerModele(modele, { sens = 'auto', tri = 'fichier', placeLien = 'trait' } = {}) {
+    const visibles = modele.liens.filter((l) => l.trait !== 'invisible');
+    const degre = new Map();
+    for (const l of visibles) for (const k of [l.de, l.vers]) degre.set(k, (degre.get(k) || 0) + 1);
+    const noeud = new Map(modele.noeuds.map((n) => [n.id, n]));
+    const sortants = new Map();
+    for (const l of visibles) (sortants.get(l.de) || sortants.set(l.de, []).get(l.de)).push(l);
+    // Bas d'une petite chaîne (un commutateur et son renvoi, par exemple) : la rangée suivante se pose dessous
+    const bas = new Map();
+    const finDeChaine = (c) => {
+        let x = c;
+        for (let i = 0; i < 4; i += 1) {
+            if (degre.get(x) === 1) return x;
+            const s2 = sortants.get(x) || [];
+            if (degre.get(x) !== 2 || s2.length !== 1) return null;
+            x = s2[0].vers;
+        }
+        return null;
+    };
+    const familles = new Map();
+    for (const l of visibles) {
+        if (degre.get(l.de) === 1) continue;
+        const fin = finDeChaine(l.vers);
+        if (!fin) continue;
+        bas.set(l.vers, fin);
+        const f = noeud.get(l.vers);
+        const k = JSON.stringify([l.de, f.groupe ?? null]);
+        (familles.get(k) || familles.set(k, []).get(k)).push(l);
+    }
+    // Tri d'abord (sur le nom du lien, encore sur le trait), puis placement du nom du lien
+    const comparer = { lien: (a, b) => comparerNoms(a.texte, b.texte), nom: (a, b) => comparerNoms(noeud.get(a.vers).texte, noeud.get(b.vers).texte) }[tri];
+    if (comparer) {
+        for (const liste of familles.values()) {
+            // Les liens d'une famille reprennent leurs places d'origine, dans l'ordre trié : Mermaid range d'après cet ordre
+            const places = liste.map((l) => modele.liens.indexOf(l)).sort((a, b) => a - b);
+            liste.sort(comparer);
+            places.forEach((i, j) => { modele.liens[i] = liste[j]; });
+        }
+    }
+    if (placeLien === 'aucun') for (const l of visibles) l.texte = '';
+    else if (placeLien === 'peripherique') {
+        for (const liste of familles.values()) for (const l of liste) {
+            if (!l.texte) continue;
+            const f = noeud.get(l.vers);
+            f.texte = `${f.texte}\n${l.texte}`;
+            l.texte = '';
+        }
+    }
+    const enColonnes = sens === 'colonnes' || sens === 'LR';
+    modele.sens = enColonnes ? 'LR' : 'TD';
+    for (const liste of familles.values()) {
+        const n = liste.length;
+        const ranger = sens === 'rangees' || sens === 'colonnes' || (sens === 'auto' && n > SEUIL_RANGEES);
+        if (!ranger || n < 2) continue;
+        const k = colonnesRangees(n);
+        for (let i = k; i < n; i += 1) modele.liens.push({ de: bas.get(liste[i - k].vers), vers: liste[i].vers, debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
+    }
+    return modele;
+}
+
+// Options : jeu ('illus' | 'picto'), regroupement ('auto' | 'lieu' | 'prefixe' | 'reseau' | 'aucun'), resumer, abreger, logique,
+// sens, tri, placeLien (voir rangerModele), parPage (au plus N équipements par page ; 0 = sans limite) : au-delà, les
+// équipements terminaux des appareils les plus chargés partent sur des pages de détail (l'appareil, ses voisins amont,
+// ses terminaux par tranches), un nœud de renvoi les remplace sur la page d'origine.
 export function produirePages(graphe, options = {}) {
-    const { jeu = 'illus', regroupement = 'auto', resumer = true, abreger = true, logique = graphe.avecVlans } = options;
+    const { jeu = 'illus', regroupement = 'auto', resumer = true, abreger = true, logique = graphe.avecVlans,
+        sens = 'auto', tri = 'fichier', placeLien = 'trait', parPage = 0 } = options;
+    const limite = Math.max(0, Math.floor(Number(parPage) || 0));
+    const mise = { sens, tri, placeLien };
     const mode = regroupement === 'auto' ? modeAutomatique(graphe.noeuds) : regroupement;
     const alertes = [];
     const pages = [];
@@ -570,13 +653,58 @@ export function produirePages(graphe, options = {}) {
     const infra = graphe.noeuds.filter((x) => !CATEGORIES_RESEAU[x.categorie].terminal);
     const commun = { jeu, resumer, abreger };
     const variantes = logique ? [false, true] : [false];
+    // Une page, et au besoin ses pages de détail
+    const fabriquer = (nom, params) => {
+        const construire = (detaches) => rangerModele(construirePage({ ...params, ...commun, nouvelId: idsUniques(), detaches }), mise);
+        let detaches = new Map();
+        let modele = construire(detaches);
+        const details = [];
+        if (limite > 0 && modele.noeuds.length > limite) {
+            const ext = params.exterieurs || new Set();
+            const degre = new Map();
+            for (const li of params.liaisons) for (const k of [li.a, li.b]) degre.set(k, (degre.get(k) || 0) + 1);
+            const presents = new Set(params.noeuds.map((x) => x.cle));
+            const feuilles = new Map();
+            for (const li of params.liaisons) for (const [x, v] of [[li.a, li.b], [li.b, li.a]]) {
+                if (degre.get(x) !== 1 || degre.get(v) === 1 || ext.has(x) || ext.has(v) || !presents.has(x) || !presents.has(v)) continue;
+                (feuilles.get(v) || feuilles.set(v, []).get(v)).push({ x: parCle.get(x), li });
+            }
+            const candidats = [...feuilles.entries()].filter(([, l]) => l.length >= 2).sort((a, b) => b[1].length - a[1].length);
+            for (const [v, liste] of candidats) {
+                detaches.set(v, { membres: liste.map((f) => f.x), renvoi: `page « ${parCle.get(v).nom} »`, liste });
+                modele = construire(detaches);
+                if (modele.noeuds.length <= limite) break;
+            }
+            if (modele.noeuds.length > limite) alertes.push(`${nom} : ${modele.noeuds.length} équipements après découpage, au-delà des ${limite} demandés (l'infrastructure seule dépasse la limite).`);
+            for (const [v, d] of [...detaches].sort((a, b) => comparerNoms(parCle.get(a[0]).nom, parCle.get(b[0]).nom))) {
+                const appareil = parCle.get(v);
+                // Voisins amont : ceux qui ne sont pas des feuilles détachées ; ils restent en haut de chaque page de détail
+                const dans = new Set(d.membres.map((x) => x.cle));
+                const amont = params.liaisons.filter((li) => (li.a === v || li.b === v) && !dans.has(li.a === v ? li.b : li.a));
+                const ordre = tri === 'nom' ? [...d.liste].sort((a, b) => comparerNoms(a.x.nom, b.x.nom))
+                    : tri === 'lien' ? [...d.liste].sort((a, b) => comparerNoms(libelleLiaison(a.li, { abreger, inverse: a.li.a !== v }), libelleLiaison(b.li, { abreger, inverse: b.li.a !== v })))
+                        : d.liste;
+                const taille = Math.max(1, limite - amont.length - 1);
+                const tranches = Math.ceil(ordre.length / taille);
+                for (let t = 0; t < tranches; t += 1) {
+                    const part = ordre.slice(t * taille, (t + 1) * taille);
+                    const cles = new Set([v, ...amont.map((li) => (li.a === v ? li.b : li.a)), ...part.map((f) => f.x.cle)]);
+                    const nomDetail = `${nom} — ${appareil.nom}${tranches > 1 ? ` (${t + 1}/${tranches}) : ${t * taille + 1} à ${t * taille + part.length} sur ${ordre.length}` : ''}`;
+                    const m = rangerModele(construirePage({ noeuds: params.noeuds.filter((x) => cles.has(x.cle)).concat([...cles].filter((k) => !presents.has(k)).map((k) => parCle.get(k))),
+                        liaisons: [...amont, ...part.map((f) => f.li)], groupeDeNoeud: () => '', titresGroupes: false, logique: params.logique,
+                        jeu, resumer: false, abreger, nouvelId: idsUniques() }), mise);
+                    details.push({ nom: nomDetail, code: ecrirePage(m, alertes, nomDetail), equipements: m.noeuds.length });
+                }
+            }
+        }
+        pages.push({ nom, code: ecrirePage(modele, alertes, nom), equipements: modele.noeuds.length }, ...details);
+    };
 
     if (titres.length < 2 || infra.length <= SEUIL_VUE_ENSEMBLE) {
         // Une seule page (par variante), les groupes en cadres
         for (const lo of variantes) {
-            const modele = construirePage({ noeuds: graphe.noeuds, liaisons: graphe.liaisons, groupeDeNoeud: gDe, sousGroupeDeNoeud: ltDe, titresGroupes: titres.length >= 2, logique: lo, nouvelId: idsUniques(), ...commun });
-            const nom = lo ? 'Réseau logique (VLAN)' : 'Réseau physique';
-            pages.push({ nom, code: ecrirePage(modele, alertes, nom), equipements: modele.noeuds.length });
+            fabriquer(lo ? 'Réseau logique (VLAN)' : 'Réseau physique',
+                { noeuds: graphe.noeuds, liaisons: graphe.liaisons, groupeDeNoeud: gDe, sousGroupeDeNoeud: ltDe, titresGroupes: titres.length >= 2, logique: lo });
         }
     } else {
         // Vue d'ensemble : un nœud par groupe, liaisons entre groupes comptées
@@ -611,9 +739,7 @@ export function produirePages(graphe, options = {}) {
                 const liaisons = graphe.liaisons.filter((li) => dedans.has(li.a) || dedans.has(li.b));
                 const exterieurs = new Set(liaisons.flatMap((li) => [li.a, li.b]).filter((k) => !dedans.has(k)));
                 const noeuds = graphe.noeuds.filter((x) => dedans.has(x.cle) || exterieurs.has(x.cle));
-                const modele = construirePage({ noeuds, liaisons, groupeDeNoeud: () => '', sousGroupeDeNoeud: ltDe, titresGroupes: false, logique: lo, nouvelId: idsUniques(), exterieurs, ...commun });
-                const nom = `${lo ? 'Logique' : 'Réseau'} : ${t}`;
-                pages.push({ nom, code: ecrirePage(modele, alertes, nom), equipements: modele.noeuds.length });
+                fabriquer(`${lo ? 'Logique' : 'Réseau'} : ${t}`, { noeuds, liaisons, groupeDeNoeud: () => '', sousGroupeDeNoeud: ltDe, titresGroupes: false, logique: lo, exterieurs });
             }
         }
     }
@@ -624,7 +750,7 @@ export function produirePages(graphe, options = {}) {
 // Colonne 1 : commutateur, colonne 2 : lien (port, agrégat…), colonne 3 : périphérique. Les noms sont des données :
 // ils peuvent contenir n'importe quel caractère, y compris ceux de la syntaxe de Mermaid.
 
-const MOTS_ENTETE = [/commutateur|switch|equipement|source|nom|device|chassis/, /lien|port|interface|link|liaison|connexion|agregat/, /peripherique|device|equipement|voisin|destination|cible|serveur|poste|hote|host|nom|client/];
+const MOTS_ENTETE = [/commutateur|switch|equipement|source|nom|device|chassis/, /lien|port|interface|link|liaison|connexion|agregat/, /peripherique|device|equipement|voisin|destination|cible|serveur|poste|hote|host|nom|client/, /vlan/];
 
 // Un nom tient sur une ligne : caractères de contrôle et retours à la ligne deviennent des espaces
 export const nettoyerNom = (t) => String(t ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
@@ -639,23 +765,29 @@ export const protegerTexte = (t) => String(t)
     .replace(/\*/g, '#42;').replace(/(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, '#95;');
 
 export function lireCommutateurs(enregistrements, { entete = 'auto' } = {}) {
-    const premiere = (enregistrements[0] || []).slice(0, 3).map(normaliser);
+    const premiere = (enregistrements[0] || []).slice(0, 4).map(normaliser);
     const avecEntete = entete === 'auto' ? premiere.filter((c, i) => c && MOTS_ENTETE[i].test(c)).length >= 2 : Boolean(entete);
-    const bilan = { lignes: 0, ignorees: 0, doublons: 0, colonnesEnTrop: false };
+    const bilan = { lignes: 0, ignorees: 0, doublons: 0, colonnesEnTrop: false, vlansIllisibles: 0 };
+    let avecVlans = false;
     const lignes = [];
     const vues = new Set();
     for (const brute of enregistrements.slice(avecEntete ? 1 : 0)) {
         if (!brute.some((c) => String(c ?? '').trim())) continue;
         bilan.lignes += 1;
-        if (brute.slice(3).some((c) => String(c ?? '').trim())) bilan.colonnesEnTrop = true;
+        if (brute.slice(4).some((c) => String(c ?? '').trim())) bilan.colonnesEnTrop = true;
         const [commutateur, lien, peripherique] = [0, 1, 2].map((i) => nettoyerNom(brute[i]));
         if (!commutateur || !peripherique || cleNom(commutateur) === cleNom(peripherique)) { bilan.ignorees += 1; continue; }
         const cle = JSON.stringify([cleNom(commutateur), lien.toLowerCase(), cleNom(peripherique)]);
         if (vues.has(cle)) { bilan.doublons += 1; continue; }
         vues.add(cle);
-        lignes.push({ commutateur, lien, peripherique });
+        // 4e colonne facultative : VLAN propagés sur le lien (« 10,20,100-110 », « 1 to 4094 »)
+        const brutVlans = String(brute[3] ?? '').trim();
+        const vlans = brutVlans ? lireVlans(brutVlans) : new Set();
+        if (brutVlans && !vlans.size) bilan.vlansIllisibles += 1;
+        if (vlans.size) avecVlans = true;
+        lignes.push({ commutateur, lien, peripherique, vlans });
     }
-    return { lignes, entete: avecEntete, colonnes: avecEntete ? (enregistrements[0] || []).slice(0, 3).map((c) => nettoyerNom(c)) : [], bilan };
+    return { lignes, entete: avecEntete, avecVlans, colonnes: avecEntete ? (enregistrements[0] || []).slice(0, 4).map((c) => nettoyerNom(c)) : [], bilan };
 }
 
 const SEUIL_PAGE_UNIQUE = 40; // au-delà de ce nombre d'équipements, une page par commutateur
@@ -666,6 +798,9 @@ export const colonnesRangees = (n) => Math.min(12, Math.max(6, Math.ceil(Math.sq
 // Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'),
 // sens ('auto' | 'rangees' | 'TD' | 'LR' | 'colonnes' (à droite, en plusieurs colonnes) ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
 // liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur),
+// vlans (sur chaque lien qui en porte : un nœud « VLAN 10, 20, 100-110 » avec l'icône VLAN, au milieu du lien),
+// parPageVue (vue d'ensemble : au plus N commutateurs par page ; au-delà, une page des cœurs puis une page par site,
+// par tranches ; 0 = une seule page),
 // ensemble (pages par commutateur, plusieurs commutateurs : vue d'ensemble des commutateurs en première page, avec le
 // nombre de périphériques de chacun), amont (sur la page d'un commutateur, rappel des commutateurs dont il dépend),
 // placeLien ('trait' : nom du lien sur le trait ; 'peripherique' : sous le nom du périphérique, quand il n'a qu'un lien
@@ -693,10 +828,54 @@ export function trierLignes(lignes, tri = 'fichier') {
     }[tri];
     return cle ? [...lignes].sort(cle) : [...lignes]; // tri stable : à égalité, l'ordre du fichier est gardé
 }
+// Liens entre deux commutateurs décrits des deux côtés (« A;BAGG101;B » et « B;BAGG1;A », comme dans un export où chaque
+// commutateur liste ses voisins) : un seul lien, côté parent, qui porte les deux ports (« BAGG101 – BAGG1 »).
+// Le parent est celui qui a le plus de commutateurs voisins (un cœur) ; à égalité, celui de la première ligne.
+// Plusieurs liens entre les deux mêmes commutateurs sont appariés dans l'ordre du fichier. Rend aussi le nombre de fusions.
+const SEPARATEUR_PORTS = '\u0000';
+export function fusionnerReciproques(lignes) {
+    const cles = new Set(lignes.map((l) => cleNom(l.commutateur)));
+    const voisins = new Map();
+    for (const l of lignes) {
+        const [a, b] = [cleNom(l.commutateur), cleNom(l.peripherique)];
+        if (cles.has(b)) for (const [x, y] of [[a, b], [b, a]]) (voisins.get(x) || voisins.set(x, new Set()).get(x)).add(y);
+    }
+    const parSens = new Map();
+    lignes.forEach((l, i) => {
+        const [a, b] = [cleNom(l.commutateur), cleNom(l.peripherique)];
+        if (!cles.has(b)) return;
+        const k = JSON.stringify([a, b]);
+        (parSens.get(k) || parSens.set(k, []).get(k)).push(i);
+    });
+    const retirees = new Set();
+    const resultat = lignes.map((l) => ({ ...l }));
+    let fusions = 0;
+    for (const [k, aller] of parSens) {
+        const [a, b] = JSON.parse(k);
+        const retour = parSens.get(JSON.stringify([b, a]));
+        if (!retour || a === b) continue;
+        // Chaque paire est traitée une fois, depuis le parent
+        const parent = (voisins.get(a)?.size ?? 0) !== (voisins.get(b)?.size ?? 0) ? ((voisins.get(a)?.size ?? 0) > (voisins.get(b)?.size ?? 0) ? a : b) : (aller[0] < retour[0] ? a : b);
+        if (parent !== a) continue;
+        for (let n = 0; n < Math.min(aller.length, retour.length); n += 1) {
+            const [i, j] = [aller[n], retour[n]];
+            const fils = lignes[j];
+            resultat[i].lien = [lignes[i].lien, fils.lien].filter(Boolean).join(SEPARATEUR_PORTS);
+            resultat[i].vlans = new Set([...(lignes[i].vlans || []), ...(fils.vlans || [])]);
+            retirees.add(j);
+            fusions += 1;
+        }
+    }
+    return { lignes: resultat.filter((_, i) => !retirees.has(i)), fusions };
+}
+
 export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) {
     const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true,
-        parType = false, parPage = 0, tri = 'fichier', placeLien = 'trait', ensemble = true, amont: avecAmont = true } = options;
-    const lignes = trierLignes(lignesLues, tri);
+        parType = false, parPage = 0, tri = 'fichier', placeLien = 'trait', ensemble = true, amont: avecAmont = true,
+        vlans: avecVlans = false, parPageVue = 0 } = options;
+    const limiteVue = Math.max(0, Math.floor(Number(parPageVue) || 0));
+    const { lignes: fusionnees, fusions } = fusionnerReciproques(lignesLues);
+    const lignes = trierLignes(fusionnees, tri);
     const limite = Math.max(0, Math.floor(Number(parPage) || 0));
     const alertes = [];
     const noms = new Map(); // clé → nom affiché (le premier rencontré)
@@ -707,7 +886,7 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         const c = nomDe(l.commutateur);
         const p = nomDe(l.peripherique);
         if (!branches.has(c)) { branches.set(c, []); commutateurs.push(c); }
-        branches.get(c).push({ peripherique: p, lien: l.lien });
+        branches.get(c).push({ peripherique: p, lien: l.lien, vlans: l.vlans });
     }
     const estCommutateur = new Set(commutateurs);
     const categorie = (k) => {
@@ -716,7 +895,8 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         return parNom || categorieDe(noms.get(k)) || 'inconnu';
     };
     const icone = (k) => `${jeu}:${CATEGORIES_RESEAU[categorie(k)][jeu]}`;
-    const texteLien = (lien) => (avecLiens && lien ? protegerTexte(abreger ? abregerInterface(lien) : lien) : '');
+    // Un lien fusionné porte les deux ports : côté parent – côté fils
+    const texteLien = (lien) => (avecLiens && lien ? String(lien).split(SEPARATEUR_PORTS).map((x) => protegerTexte(abreger ? abregerInterface(x) : x)).join(' – ') : '');
     const sensPour = () => (sens === 'LR' || sens === 'colonnes' ? 'LR' : 'TD');
     // Rangées : les périphériques propres à un commutateur (ni commutateurs, ni partagés) sont empilés par des liens
     // invisibles, de la colonne de la rangée du dessus vers celle du dessous ; l'ordre du fichier se lit ligne par ligne
@@ -737,7 +917,7 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         const lienSous = new Map();
         if (placeLien === 'peripherique' && avecLiens) {
             const nomsVers = new Map();
-            for (const { vers, lien } of liaisons) nomsVers.set(vers, (nomsVers.get(vers) || new Set()).add(lien || ''));
+            for (const { vers, lien, entre } of liaisons) if (!entre) nomsVers.set(vers, (nomsVers.get(vers) || new Set()).add(lien || ''));
             for (const [vers, n] of nomsVers) if (n.size === 1 && [...n][0]) lienSous.set(vers, [...n][0]);
         }
         for (const k of cles) {
@@ -751,15 +931,40 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
             const texte = g === k ? suite : protegerTexte(noms.get(k)) + (suite ? `\n${suite}` : '');
             modele.noeuds.push({ id, texte, forme: 'rectangle', groupe: g ? idGroupe.get(g) : null, classe: null, icone: icone(k) });
         }
-        for (const { de, vers, lien } of liaisons) {
-            modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte: lienSous.has(vers) ? '' : texteLien(lien), trait: estAgregat(lien) ? 'epais' : 'plein', longueur: 1 });
+        // VLAN : un nœud au milieu du lien (Mermaid ne pose pas d'icône sur un trait) ; il est le haut du périphérique
+        // pour les rangées
+        const hautDe = new Map();
+        const groupeDuNoeud = new Map(modele.noeuds.map((n) => [n.id, n.groupe]));
+        for (const { de, vers, lien, vlans: vl, entre } of liaisons) {
+            const trait = estAgregat(lien) ? 'epais' : 'plein';
+            // Liaison entre deux cœurs : un nœud sous les deux, relié à chacun ; un trait direct mettrait l'un sous l'autre
+            if (entre) {
+                const id = nouvelId(`liaison_${noms.get(de)}_${noms.get(vers)}`);
+                const lignes = [`Liaison ${protegerTexte(noms.get(de))} ↔ ${protegerTexte(noms.get(vers))}`, avecLiens && lien ? texteLien(lien) : '', avecVlans && vl?.size ? `VLAN ${ecrireVlans(vl)}` : ''];
+                modele.noeuds.push({ id, texte: lignes.filter(Boolean).join('\n'), forme: 'rectangle', groupe: null, classe: null, icone: avecVlans && vl?.size ? `${jeu}:vlan` : null });
+                modele.liens.push({ de: ids.get(de), vers: id, debut: '', fin: '', texte: '', trait, longueur: 1 });
+                modele.liens.push({ de: ids.get(vers), vers: id, debut: '', fin: '', texte: '', trait, longueur: 1 });
+                continue;
+            }
+            const texte = lienSous.has(vers) ? '' : texteLien(lien);
+            if (avecVlans && vl?.size) {
+                const id = nouvelId(`vlan_${noms.get(de)}_${noms.get(vers)}`);
+                const [gA, gB] = [groupeDuNoeud.get(ids.get(de)), groupeDuNoeud.get(ids.get(vers))];
+                modele.noeuds.push({ id, texte: `VLAN ${ecrireVlans(vl)}`, forme: 'rectangle', groupe: gA === gB ? gB : null, classe: null, icone: `${jeu}:vlan` });
+                modele.liens.push({ de: ids.get(de), vers: id, debut: '', fin: '', texte, trait, longueur: 1 });
+                modele.liens.push({ de: id, vers: ids.get(vers), debut: '', fin: '', texte: '', trait, longueur: 1 });
+                hautDe.set(vers, hautDe.has(vers) ? null : id);
+            } else {
+                modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte, trait, longueur: 1 });
+                if (hautDe.has(vers)) hautDe.set(vers, null);
+            }
         }
         for (const liste of rangs) {
             if (!enRangees(liste.length)) continue;
             const k = colonnesRangees(liste.length);
-            for (let i = k; i < liste.length; i += 1) modele.liens.push({ de: ids.get(liste[i - k]), vers: ids.get(liste[i]), debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
+            for (let i = k; i < liste.length; i += 1) modele.liens.push({ de: ids.get(liste[i - k]), vers: hautDe.get(liste[i]) || ids.get(liste[i]), debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
         }
-        pages.push({ nom: titre, code: ecrirePage(modele, alertes, titre), equipements: cles.length });
+        pages.push({ nom: titre, code: ecrirePage(modele, alertes, titre), equipements: modele.noeuds.length }); // nœuds VLAN compris
     };
 
     if (unique) {
@@ -776,29 +981,29 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         }
         const cadres = encadrer && commutateurs.length > 1;
         const groupeDe = (k) => (!cadres ? null : estCommutateur.has(k) ? k : rattache.get(k) || null);
-        const liaisons = commutateurs.flatMap((c) => branches.get(c).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })));
+        const liaisons = commutateurs.flatMap((c) => branches.get(c).map(({ peripherique, lien, vlans }) => ({ de: c, vers: peripherique, lien, vlans })));
         const propres = (c) => [...new Set(branches.get(c).map((x) => x.peripherique))].filter((p) => !estCommutateur.has(p) && rattache.get(p) === c);
         page(cles, liaisons, groupeDe, commutateurs.length === 1 ? `Commutateur ${noms.get(commutateurs[0])}` : 'Commutateurs et périphériques',
             sensPour(), commutateurs.map(propres));
     } else {
         // Commutateurs amont de chacun (ceux qui le citent comme périphérique) : rappelés au-dessus de lui sur ses pages
         const amont = new Map(commutateurs.map((c) => [c, []]));
-        for (const c of commutateurs) for (const { peripherique, lien } of branches.get(c)) if (estCommutateur.has(peripherique) && peripherique !== c) amont.get(peripherique).push({ de: c, lien });
+        for (const c of commutateurs) for (const { peripherique, lien, vlans } of branches.get(c)) if (estCommutateur.has(peripherique) && peripherique !== c) amont.get(peripherique).push({ de: c, lien, vlans });
         // Vue d'ensemble : les commutateurs seuls, leurs liaisons, et le nombre de périphériques de chacun
         if (ensemble && commutateurs.length > 1) {
-            const liaisons = commutateurs.flatMap((c) => branches.get(c).filter((x) => estCommutateur.has(x.peripherique) && x.peripherique !== c).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })));
+            const liaisons = commutateurs.flatMap((c) => branches.get(c).filter((x) => estCommutateur.has(x.peripherique) && x.peripherique !== c).map(({ peripherique, lien, vlans }) => ({ de: c, vers: peripherique, lien, vlans })));
             // Deux commutateurs qui desservent chacun d'autres commutateurs (deux cœurs reliés entre eux) : un trait les
-            // mettrait l'un sous l'autre et les liaisons du premier contourneraient le second ; ils restent côte à côte
-            // et leur liaison est écrite sous le nom du premier
+            // mettrait l'un sous l'autre et les liaisons du premier contourneraient le second ; ils restent côte à côte,
+            // leur liaison devient un nœud placé sous les deux (nom du lien, VLAN). Sur la page d'un site sans l'autre
+            // cœur, elle est écrite sous le cœur (« ↔ CŒUR-DC-SUD : BAGG1 »)
             const aval = (c) => new Set(liaisons.filter((l) => l.de === c).map((l) => l.vers));
             const entrePairs = (l) => [...aval(l.de)].some((v) => v !== l.vers) && [...aval(l.vers)].some((v) => v !== l.de);
             const pairs = liaisons.filter(entrePairs);
-            const complement = new Map(commutateurs.map((c) => {
-                const n = new Set(branches.get(c).map((x) => x.peripherique).filter((p) => !estCommutateur.has(p))).size;
-                const lignes = pairs.filter((l) => l.de === c).map((l) => `↔ ${protegerTexte(noms.get(l.vers))}${avecLiens && l.lien ? ` : ${texteLien(l.lien)}` : ''}`);
-                if (n) lignes.push(`${n} périphérique${n > 1 ? 's' : ''}`);
-                return [c, lignes.join('\n')];
-            }));
+            const nombre = (c) => { const n = new Set(branches.get(c).map((x) => x.peripherique).filter((p) => !estCommutateur.has(p))).size; return n ? `${n} périphérique${n > 1 ? 's' : ''}` : ''; };
+            const complement = new Map(commutateurs.map((c) => [c, nombre(c)]));
+            const versAutreCoeur = (c) => pairs.filter((l) => l.de === c || l.vers === c).map((l) => `↔ ${protegerTexte(noms.get(l.de === c ? l.vers : l.de))}${avecLiens && l.lien ? ` : ${texteLien(l.lien)}` : ''}${avecVlans && l.vlans?.size ? ` · VLAN ${ecrireVlans(l.vlans)}` : ''}`);
+            const complementSite = new Map(commutateurs.map((c) => [c, [...versAutreCoeur(c), nombre(c)].filter(Boolean).join('\n')]));
+            const entreCoeurs = pairs.map((l) => ({ ...l, entre: true }));
             const feuilles = commutateurs.filter((c) => !liaisons.some((l) => l.de === c));
             // Sites : un cœur (relié à un autre cœur, ou sans commutateur amont) et les commutateurs qui ne dépendent que de
             // lui ; s'il y a plusieurs cœurs et que chaque commutateur relève d'un seul, chaque site a son cadre
@@ -816,8 +1021,34 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
             for (const c of commutateurs) if (!estCoeur.has(c)) { const r = remonter(c); if (r.size === 1) siteDe.set(c, [...r][0]); }
             const parSite = encadrer && coeurs.length > 1 && commutateurs.every((c) => siteDe.has(c));
             const rangsVue = parSite ? coeurs.map((c) => feuilles.filter((f) => siteDe.get(f) === c)) : [feuilles];
-            page(commutateurs, liaisons.filter((l) => !pairs.includes(l)), parSite ? (k) => siteDe.get(k) : () => null,
-                'Vue d\'ensemble des commutateurs', sensPour(), rangsVue, complement);
+            const tracees = liaisons.filter((l) => !pairs.includes(l));
+            if (!limiteVue || commutateurs.length <= limiteVue) {
+                page(commutateurs, [...tracees, ...entreCoeurs], parSite ? (k) => siteDe.get(k) : () => null, 'Vue d\'ensemble des commutateurs', sensPour(), rangsVue, complement);
+            } else {
+                // Trop de commutateurs pour une page : une page des cœurs (s'il y a plusieurs sites), puis une page par site,
+                // découpée en tranches ; les cœurs du site sont repris en haut de chaque tranche
+                const sites = parSite
+                    ? coeurs.map((c) => ({ nom: noms.get(c), racines: [c], membres: commutateurs.filter((x) => x !== c && siteDe.get(x) === c) }))
+                    : [{ nom: '', racines: commutateurs.filter((c) => !feuilles.includes(c)), membres: feuilles }];
+                if (parSite) {
+                    const resume = new Map(coeurs.map((c) => {
+                        const membres = commutateurs.filter((x) => x !== c && siteDe.get(x) === c);
+                        const n = new Set(membres.flatMap((x) => branches.get(x).map((b) => b.peripherique)).filter((p) => !estCommutateur.has(p))).size;
+                        return [c, `${membres.length} commutateur${membres.length > 1 ? 's' : ''} · ${n} périphérique${n > 1 ? 's' : ''}`];
+                    }));
+                    page(coeurs, [...tracees.filter((l) => estCoeur.has(l.de) && estCoeur.has(l.vers)), ...entreCoeurs], () => null, 'Vue d\'ensemble : cœurs de réseau', sensPour(), [], resume);
+                }
+                for (const site of sites) {
+                    const taille = Math.max(1, limiteVue - site.racines.length);
+                    const tranches = Math.max(1, Math.ceil(site.membres.length / taille));
+                    for (let t = 0; t < tranches; t += 1) {
+                        const part = site.membres.slice(t * taille, (t + 1) * taille);
+                        const cles = new Set([...site.racines, ...part]);
+                        const titre = `Vue d'ensemble${site.nom ? ` : ${site.nom}` : ' des commutateurs'}${tranches > 1 ? ` (${t + 1}/${tranches}) : commutateurs ${t * taille + 1} à ${t * taille + part.length} sur ${site.membres.length}` : ''}`;
+                        page([...cles], tracees.filter((l) => cles.has(l.de) && cles.has(l.vers)), () => null, titre, sensPour(), [part.filter((x) => feuilles.includes(x))], complementSite);
+                    }
+                }
+            }
         }
         // Une page par commutateur : lui, puis ses périphériques (un commutateur voisin y figure comme périphérique)
         // Découpage : par type de lien (agrégats, puis liens simples), puis par tranches de « limite » périphériques,
@@ -840,11 +1071,11 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
                     // commutateurs (l'autre cœur d'un data center jumeau)
                     const desservent = (p) => estCommutateur.has(p) && branches.get(p).some((x) => estCommutateur.has(x.peripherique) && x.peripherique !== c);
                     page([...new Set(hauts.map((x) => x.de)), c, ...part],
-                        [...hauts.map(({ de, lien }) => ({ de, vers: c, lien })), ...liste.filter((x) => dans.has(x.peripherique)).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien }))],
+                        [...hauts.map(({ de, lien, vlans }) => ({ de, vers: c, lien, vlans })), ...liste.filter((x) => dans.has(x.peripherique)).map(({ peripherique, lien, vlans }) => ({ de: c, vers: peripherique, lien, vlans }))],
                         () => null, titre, sensPour(), [part.filter((p) => !desservent(p))]);
                 }
             }
         }
     }
-    return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre };
+    return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre, fusions };
 }

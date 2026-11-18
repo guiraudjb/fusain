@@ -1242,6 +1242,9 @@ function ouvrirModeles(action) {
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
             id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Commutateur et périphériques (CSV à 3 colonnes)…'),
+                h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages, { datacenter: true }); } },
+                h('span', { class: 'fusain-modele__nom' }, 'Data center : vue globale et tous les commutateurs, VLAN (CSV à 3 ou 4 colonnes)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null),
         ]));
     const dialogue = modale('fusain-modale-modeles', action === 'ajouter' ? 'Nouvelle page' : 'Modèles de schémas', contenu);
@@ -1398,6 +1401,8 @@ const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
+    ['datacenter-vlans.csv', 'Data center avec VLAN', 'quatre colonnes (la 4e : VLAN propagés) : deux sites, 72 commutateurs, 1 457 serveurs ; pour le module Data center (vue globale sur plusieurs pages, VLAN sur chaque lien)'],
+    ['imc-datacenters.csv', 'Deux data centers (liens IMC)', 'export de liens avec sites et locaux techniques : deux sites, 50 commutateurs, 1 395 serveurs et NAS ; découpage intelligent en pages de détail'],
     ['datacenter.csv', 'Deux data centers jumeaux', 'trois colonnes : deux sites en haute disponibilité, un cœur par site relié à l\'autre, 24 commutateurs de baie par cœur, 1 412 serveurs (hyperviseurs ESX, serveurs, NAS) ; une page par commutateur, précédée d\'une vue d\'ensemble par site'],
     ['plusieurs-commutateurs.csv', 'Plusieurs commutateurs', 'trois colonnes : un cœur de réseau et deux commutateurs d\'étage, avec leurs postes, imprimantes et bornes Wi-Fi (interfaces GigabitEthernet à abréger)'],
     ['commutateur-48-serveurs.csv', 'Commutateur et 48 serveurs', 'trois colonnes : 12 agrégats, 36 liens gigabit, quatre noms avec des caractères de la syntaxe de Mermaid ; serveurs répartis en rangées'],

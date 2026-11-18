@@ -12,3 +12,5 @@ SW-ÉTAGE-2;GigabitEthernet1/0/2;PC-RH-02
 SW-ÉTAGE-2;GigabitEthernet1/0/3;"PC-DIRECTION ""bureau 2.14"""
 SW-ÉTAGE-2;GigabitEthernet1/0/10;IMPRIMANTE-ÉTAGE-2
 SW-ÉTAGE-2;GigabitEthernet1/0/24;BORNE-WIFI-ÉTAGE-2
+SW-ÉTAGE-1;Bridge-Aggregation1;CŒUR-SIÈGE
+SW-ÉTAGE-2;Bridge-Aggregation1;CŒUR-SIÈGE

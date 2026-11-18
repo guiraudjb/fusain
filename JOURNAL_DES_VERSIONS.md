@@ -2,6 +2,33 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.31.0 — 19 novembre 2026 — module « Data center » : vue globale, tous les commutateurs, VLAN
+
+- **Demande** : un module qui présente une vue globale du data center sur une ou plusieurs pages, puis produit automatiquement les vues de tous les commutateurs (une ou plusieurs pages chacun) ; en option, les VLAN propagés sur chaque lien, avec l'icône VLAN et la liste de la 4e colonne.
+- **Module** (tuile « Data center : vue globale et tous les commutateurs, VLAN (CSV à 3 ou 4 colonnes)… » des modèles réseau) : même lecture que « Commutateur et périphériques », réglée pour un data center entier : une page par commutateur, vue d'ensemble en tête, cœurs rappelés, 40 périphériques au plus par page, 40 commutateurs au plus par page de vue d'ensemble, interfaces abrégées, tri sur le lien.
+- **4e colonne VLAN** (facultative, aussi dans « Commutateur et périphériques ») : listes et plages (« 10,20,100-110 », « 1 to 4094 »), reconnue avec ou sans intitulé ; aperçu en 4 colonnes ; lignes illisibles signalées. Case « Indiquer sur chaque lien les VLAN propagés » cochée d'office quand le fichier en porte.
+- **Nœud VLAN** : Mermaid ne pose pas d'icône sur un trait ; un nœud « VLAN 1, 10, 20, 100-120 » (icône VLAN du jeu choisi) est placé au milieu de chaque lien qui en porte ; les rangées se posent sous le périphérique, par son nœud VLAN. Liaison entre cœurs : VLAN écrits avec elle (« ↔ CŒUR-DC-SUD : BAGG1 · VLAN … »).
+- **Vue d'ensemble sur plusieurs pages** (« Vue d'ensemble : commutateurs au plus par page ») : au-delà, une page des cœurs (liaison entre sites, total de commutateurs et de périphériques de chaque site), puis une page par site, en tranches si besoin (« (1/2) : commutateurs 1 à 39 sur 60 »), le cœur repris en haut de chacune ; sans site, tranches de commutateurs avec leurs commutateurs amont.
+- **Liaison entre les deux cœurs visible** (retour : son nom n'apparaissait pas sur la vue globale) : elle était seulement écrite sous le premier cœur ; elle devient un nœud « Liaison CŒUR-DC-NORD ↔ CŒUR-DC-SUD », nom du lien, VLAN (icône VLAN si l'option est cochée), placé sous les deux cœurs et relié à chacun par un trait (un trait direct mettait un cœur sous l'autre). Sur la page des cœurs, ceux-ci ne flottent plus seuls (l'aide au débogage les signalait). Sur la page d'un site, sans l'autre cœur, la liaison reste écrite sous le cœur.
+- **Les deux ports d'un lien entre commutateurs** (retour : seul le nom d'un agrégat apparaissait, celui du parent, écrit sous le fils) : quand un lien entre deux commutateurs est décrit des deux côtés (« CŒUR;BAGG101;SW-B01 » et « SW-B01;BAGG1;CŒUR », comme dans un export où chaque commutateur liste ses voisins), les deux lignes ne forment plus qu'un trait, côté parent (le commutateur qui a le plus de commutateurs voisins), avec les deux ports : « BAGG101 – BAGG1 » (parent – fils), VLAN réunis. Auparavant, la ligne côté fils créait un second trait en sens inverse. Plusieurs liens entre les deux mêmes commutateurs sont appariés dans l'ordre du fichier ; une ligne sans retour garde son seul port. Le bilan de la fenêtre indique le nombre de liens fusionnés. Exemples `datacenter.csv`, `datacenter-vlans.csv` et `plusieurs-commutateurs.csv` complétés des lignes côté fils (49, 73 et 2).
+- **Format des pages** : les nœuds VLAN comptent dans le choix A4 / A3.
+- **Exemple** `datacenter-vlans.csv` : deux sites, 72 commutateurs de baie, 1 457 serveurs, VLAN sur chaque lien → 77 pages, aucune alerte.
+- **Démonstration** : trois pages ajoutées (77 pages) : les cœurs, la vue globale d'un site, un commutateur et ses VLAN.
+- **Recette** : test de logique (4e colonne, 77 pages, page des cœurs, 36 nœuds VLAN sur la vue d'un site, trunk ESX et VLAN d'accès, sans l'option, fichier à 3 colonnes, vue d'ensemble d'une seule page, colonne 4 illisible, relecture à l'identique) ; fenêtre du module pilotée dans Chrome (aperçu 4 colonnes, case VLAN cochée, 77 pages, A4 / A3) ; rendu Chrome des pages.
+
+## 0.30.5 — 19 novembre 2026 — import IMC / LLDP : disposition, ordre, nom du lien, découpage intelligent
+
+- **Demande** : reprendre dans l'import de liens IMC / LLDP les principes de disposition et de découpage sur plusieurs pages de l'import « Commutateur et périphériques ».
+- **Constat** : un export de deux data centers (1 444 liens) donnait une page par site de plus de 700 équipements ; Mermaid n'en dessine que 500 liaisons, les textes des liens étaient retirés.
+- **Ajouts** (fenêtre d'import réseau ; sans ces réglages, le résultat d'avant est inchangé) :
+  - **Disposition** des équipements rattachés à un seul autre (serveurs, bornes, commutateurs d'accès…) : automatique (en rangées au-delà de 12), dessous en rangées ou sur une seule rangée, à droite sur une seule colonne ou en plusieurs colonnes ; une petite chaîne (un commutateur et son renvoi) se range comme un seul équipement.
+  - **Ordre** de ces équipements : ordre du fichier, interface (ordre naturel), nom.
+  - **Nom du lien** : sur le trait, sous l'équipement rattaché (par défaut), ou pas écrit.
+  - **Équipements au plus par page** (60 par défaut ; sans limite, 30 à 150) : au-delà, découpage intelligent : les équipements rattachés aux appareils les plus chargés partent sur des pages de détail (« Réseau : DC Nord — SW-NORD-B01 » : l'appareil, ses voisins amont, ses équipements, par tranches si besoin) ; sur la page d'origine, un renvoi en pointillé les remplace (« 29 équipements → page « SW-NORD-B01 » »). La structure (cœurs, commutateurs, salles) reste sur la page du site.
+- **Exemple** `imc-datacenters.csv` : deux sites, salles 1 et 2, 50 commutateurs, 1 395 serveurs et NAS, quelques liens en panne → 51 pages, aucune alerte, 60 équipements au plus par page.
+- **Démonstration** : deux pages ajoutées (74 pages) : page du site DC Nord, page de détail d'un commutateur.
+- **Recette** : test de logique sur `imc-datacenters.csv` (sans limite : alerte des 500 liaisons ; avec : 51 pages ≤ 60 équipements, renvois, lien sous le commutateur, cœur au-dessus du commutateur, rangées, ordre naturel des interfaces, tranches à 20, relecture à l'identique) ; petits exports inchangés ; rangerModele (colonnes, tri, sans nom de lien) ; fenêtre d'import pilotée dans Chrome (51 pages, A4 / A3) ; rendu Chrome des pages.
+
 ## 0.30.4 — 19 novembre 2026 — commutateur : deux data centers jumeaux (vue d'ensemble par site, cœurs amont)
 
 - **Demande** : représenter deux data centers en haute disponibilité, sur deux sites : un cœur par site, des dizaines de commutateurs et des centaines de serveurs sous chaque cœur.

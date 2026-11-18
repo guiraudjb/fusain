@@ -12,6 +12,8 @@ const petit = await lire('commutateur-serveurs.csv');
 const grand = await lire('commutateur-48-serveurs.csv');
 const plusieurs = await lire('plusieurs-commutateurs.csv');
 const datacenter = await lire('datacenter.csv');
+const datacenterVlans = await lire('datacenter-vlans.csv');
+const imc = reseau.analyserReseau(reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(readFileSync(new URL('Documentation/exemples-reseau/imc-datacenters.csv', racine)))), reseau.CHAMPS_LIENS));
 
 const PIED = 'FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}';
 const AJUSTEMENT = { mode: 'page', echelle: 100, alignement: 'centre' };
@@ -33,7 +35,7 @@ texte: Colonne 1 : le commutateur ; colonne 2 : le lien ; colonne 3 : le périph
 - [illus:commutateur-switch] Disposition | Sous le commutateur, en rangées (automatique au-delà de 12 périphériques) ou sur une seule rangée ; à droite, en plusieurs colonnes ou sur une seule.
 - [illus:livrable] Pages | Tous les commutateurs sur une page, encadrés ; une page par commutateur, précédée d'une vue d'ensemble et rappelant les cœurs amont ; découpage d'un commutateur chargé (8 à 48 par page) ; agrégats et liens simples séparés.
 - [illus:flux-de-donnees] Ordre des périphériques | Ordre du fichier, nom du lien (G1/0/2 avant G1/0/10), agrégats d'abord, ou nom du serveur, en ordre croissant ou décroissant.
-- [illus:organigramme] Nom des liens | Agrégats en trait épais ; nom du lien sous le nom du périphérique, sur le trait ou absent ; interfaces abrégées (GigabitEthernet1/0/1 → GE1/0/1).
+- [illus:organigramme] Liens et VLAN | Agrégats en trait épais ; nom du lien sous le périphérique ou sur le trait ; interfaces abrégées ; 4e colonne facultative : VLAN propagés, nœud VLAN sur chaque lien.
 ` });
 
 let [p] = produire(petit, { jeu: 'illus', placeLien: 'trait' });
@@ -73,6 +75,31 @@ const baie = dc.find((x) => x.nom === 'Commutateur SW-NORD-B15');
 pages.push({ ...meta('dc_baie', 'Data centers jumeaux : une baie (CSV 3 colonnes)', 'A3', 'Baie SW-NORD-B15 : son cœur au-dessus, ses serveurs en rangées',
     sousTitre(SOURCE, 'page d\'un commutateur, cœur amont rappelé au-dessus, interfaces abrégées'),
     `Une des ${dc.length - 1} pages par commutateur : hyperviseurs ESX, serveurs et NAS, agrégats en trait épais.`), code: baie.code });
+
+// Module « Data center » : 4 colonnes (VLAN), vue d'ensemble sur plusieurs pages (cœurs, puis un site par page)
+const dcv = produire(datacenterVlans, { jeu: 'illus', presentation: 'commutateur', parPage: 40, parPageVue: 40, abreger: true, tri: 'lien', placeLien: 'peripherique', vlans: true });
+const sousTitreDc = (reglages) => `Module « Data center : vue globale et tous les commutateurs, VLAN » — datacenter-vlans.csv — ${reglages}`;
+pages.push({ ...meta('dcv_coeurs', 'Data center : vue globale, les cœurs (VLAN)', 'A4', 'Vue globale du data center : les deux cœurs, leur liaison et ses VLAN',
+    sousTitreDc('vue d\'ensemble sur plusieurs pages : d\'abord les cœurs, avec le total de chaque site'),
+    `${datacenterVlans.lignes.length} liens, ${dcv.length} pages : cœurs, un site par page, puis la vue de chaque commutateur.`), code: dcv[0].code });
+pages.push({ ...meta('dcv_site', 'Data center : vue globale d\'un site (VLAN)', 'A3', 'Vue globale du site Nord : le cœur, ses 36 commutateurs et les VLAN de chaque lien',
+    sousTitreDc('une page par site, commutateurs en rangées, nœud VLAN au milieu de chaque lien'), 'Chaque lien passe par un nœud VLAN (icône VLAN, liste des VLAN propagés de la 4e colonne, en plages).'), code: dcv[1].code });
+pages.push({ ...meta('dcv_commutateur', 'Data center : un commutateur et ses VLAN', 'A3', 'Commutateur SW-NORD-B01 : son cœur, ses serveurs et les VLAN de chaque lien',
+    sousTitreDc('vue d\'un commutateur, cœur amont rappelé au-dessus, trunks des ESX et VLAN d\'accès des serveurs'), 'Une des vues produites automatiquement pour chaque commutateur du data center.'),
+    code: dcv.find((x) => x.nom === 'Commutateur SW-NORD-B01').code });
+
+// Import IMC (liens avec sites et locaux) des mêmes data centers : découpage intelligent à 60 équipements par page
+const pagesImc = reseau.produirePages(imc, { jeu: 'illus', parPage: 60, placeLien: 'peripherique', tri: 'lien' });
+if (pagesImc.alertes.length) throw new Error(pagesImc.alertes.join(' ; '));
+const sousTitreImc = (reglages) => `Import « Réseau (HPE IMC, LLDP) » — imc-datacenters.csv — ${reglages}`;
+const siteImc = pagesImc.pages.find((x) => x.nom === 'Réseau : DC Nord');
+pages.push({ ...meta('imc_site', 'Import IMC : un site découpé (liens IMC)', 'A3', 'Import IMC : site DC Nord, un cadre par salle, un renvoi par commutateur',
+    sousTitreImc('60 équipements au plus par page : les serveurs de chaque commutateur partent sur sa page de détail'),
+    `${imc.noeuds.length} équipements et ${imc.liaisons.length} liaisons : ${pagesImc.pages.length} pages (vue d'ensemble, une page par site, une page de détail par commutateur).`), code: siteImc.code });
+const detailImc = pagesImc.pages.find((x) => x.nom === 'Réseau : DC Nord — SW-NORD-B01');
+pages.push({ ...meta('imc_detail', 'Import IMC : page de détail (liens IMC)', 'A3', 'Import IMC : page de détail du commutateur SW-NORD-B01',
+    sousTitreImc('le cœur au-dessus, les serveurs en rangées triés par interface, port et débit sous chaque serveur'),
+    'Page de détail produite par le découpage : l\'appareil, son voisin amont et ses équipements rattachés.'), code: detailImc.code });
 
 const chemin = new URL('presentation-fusain.fusain.json', racine);
 const doc = JSON.parse(readFileSync(chemin, 'utf8'));

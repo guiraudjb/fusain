@@ -66,6 +66,8 @@ function configurer(idTheme) {
         mindmap: { useMaxWidth: false },
         theme: 'base',
         themeVariables: variables,
+        // Fond des noms de lien opaque (Mermaid : 0,5) : les traits qui passent dessous ne barrent plus le texte
+        themeCSS: '.edgeLabel rect { opacity: 1; } .labelBkg { background-color: #ffffff; }',
         fontFamily: POLICE,
     });
 }

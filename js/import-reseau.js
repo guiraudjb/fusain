@@ -118,7 +118,7 @@ export function ouvrirImportReseau(ajouterPages) {
 
 // Boîte « Commutateur et périphériques » : fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés
 export function ouvrirImportCommutateurs(ajouterPages) {
-    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier' } };
+    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier', placeLien: 'peripherique' } };
     const o = etat.options;
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -165,18 +165,23 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'),
                 h('div', { class: 'fusain-import-reseau__colonnes' },
                     champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
-                    champSelect('Pages', [['auto', 'Automatique'], ['unique', 'Tous les commutateurs sur une page'], ['commutateur', 'Une page par commutateur']], o.presentation, (v) => { o.presentation = v; redessiner(); }),
+                    champSelect('Pages', [['auto', 'Automatique'], ['unique', 'Tous les commutateurs sur une page'], ['commutateur', 'Une page par commutateur'],
+                        ['commutateur-pages', 'Une page par commutateur, sur plusieurs pages s\'il a trop de périphériques']],
+                    o.parPage ? 'commutateur-pages' : o.presentation, (v) => {
+                        etat.limiter = v === 'commutateur-pages';
+                        o.presentation = etat.limiter ? 'commutateur' : v;
+                        o.parPage = etat.limiter ? (o.parPage || 24) : 0;
+                        redessiner();
+                    }),
+                    etat.limiter ? champSelect('Périphériques au plus par page', [8, 12, 16, 20, 24, 32, 40, 48].map((n) => [String(n), String(n)]), String(o.parPage || 24), (v) => { o.parPage = Number(v); redessiner(); }) : null,
                     champSelect('Ordre des périphériques', TRIS_PERIPHERIQUES, o.tri, (v) => { o.tri = v; redessiner(); }),
-                    champSelect('Disposition', [['auto', 'Automatique (en rangées au-delà de 12)'], ['rangees', 'Sous le commutateur, en rangées'], ['TD', 'Sous le commutateur, sur une seule rangée'], ['LR', 'À droite du commutateur, en colonne']], o.sens, (v) => { o.sens = v; redessiner(); }),
-                    champCase('Écrire le nom du lien sur le trait', o.liens, (v) => { o.liens = v; redessiner(); }),
+                    champSelect('Disposition', [['auto', 'Automatique (en rangées au-delà de 12)'], ['rangees', 'Sous le commutateur, en rangées'], ['TD', 'Sous le commutateur, sur une seule rangée'], ['LR', 'À droite du commutateur, sur une seule colonne'], ['colonnes', 'À droite du commutateur, en plusieurs colonnes']], o.sens, (v) => { o.sens = v; redessiner(); }),
+                    champSelect('Nom du lien', [['trait', 'Sur le trait'], ['peripherique', 'Sous le nom du périphérique (plus lisible)'], ['aucun', 'Ne pas l\'écrire']],
+                        o.liens ? o.placeLien : 'aucun', (v) => { o.liens = v !== 'aucun'; if (o.liens) o.placeLien = v; redessiner(); }),
                     champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),
                     champCase('Encadrer chaque commutateur avec ses périphériques (page unique)', o.encadrer, (v) => { o.encadrer = v; redessiner(); })),
-                h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Répartir sur plusieurs pages'),
-                h('div', { class: 'fusain-import-reseau__colonnes' },
-                    champCase('Séparer les agrégats et les liens simples (une page pour chaque type)', o.parType, (v) => { o.parType = v; redessiner(); }),
-                    champCase('Limiter le nombre de périphériques par page', etat.limiter, (v) => { etat.limiter = v; o.parPage = v ? (o.parPage || 24) : 0; redessiner(); }),
-                    etat.limiter ? champSelect('Périphériques par page', [8, 12, 16, 20, 24, 32, 40, 48].map((n) => [String(n), String(n)]), String(o.parPage || 24), (v) => { o.parPage = Number(v); redessiner(); }) : null),
-                o.parType || o.parPage ? h('p', { class: 'fr-text--xs' }, 'Avec un découpage, chaque commutateur a ses propres pages ; le commutateur est repris en haut de chacune.') : null,
+                champCase('Séparer les agrégats et les liens simples (une page pour chaque type)', o.parType, (v) => { o.parType = v; redessiner(); }),
+                o.parType || o.parPage ? h('p', { class: 'fr-text--xs' }, `Chaque commutateur a ses propres pages${o.parPage ? `, de ${o.parPage} périphériques au plus` : ''}${o.parType ? ', agrégats et liens simples séparés' : ''} ; le commutateur est repris en haut de chacune.`) : null,
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
             if (!lu.lignes.length) {
                 parties.push(h('p', { class: 'fr-error-text' }, 'Aucune ligne utilisable : il faut un commutateur en colonne 1 et un périphérique en colonne 3.'));

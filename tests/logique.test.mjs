@@ -457,6 +457,16 @@ test('réseau : 48 serveurs sous un commutateur → répartis en rangées de 7',
     // Sur une seule rangée ou en colonne : aucun lien invisible
     for (const sens of ['TD', 'LR']) assert.doesNotMatch(reseau.produirePagesCommutateurs(lu, { sens }).pages[0].code, /~~~/);
     assert.match(reseau.produirePagesCommutateurs(lu, { sens: 'LR' }).pages[0].code, /^flowchart LR/);
+    // À droite en plusieurs colonnes : LR et les mêmes liens invisibles (7 serveurs par colonne)
+    const col = logigramme.analyser(reseau.produirePagesCommutateurs(lu, { sens: 'colonnes' }).pages[0].code);
+    assert.equal(col.sens, 'LR');
+    assert.equal(col.liens.filter((l) => l.trait === 'invisible').length, 41);
+    // Nom du lien sous le nom du serveur : plus de texte sur les traits
+    const sous = logigramme.analyser(reseau.produirePagesCommutateurs(lu, { placeLien: 'peripherique' }).pages[0].code);
+    assert.equal(sous.noeuds.find((n) => n.texte.startsWith('SRV-WEB-01')).texte, 'SRV-WEB-01\nBridge-Aggregation101');
+    assert.equal(sous.noeuds.find((n) => n.texte.startsWith('SRV-WEB-02')).texte, 'SRV-WEB-02\nG1/0/2');
+    assert.ok(sous.liens.every((l) => !l.texte), 'aucun nom sur les traits');
+    assert.equal(logigramme.ecrire(sous), reseau.produirePagesCommutateurs(lu, { placeLien: 'peripherique' }).pages[0].code);
     // Peu de périphériques : pas de rangées
     assert.doesNotMatch(reseau.produirePagesCommutateurs({ lignes: lu.lignes.slice(0, 12) }).pages[0].code, /~~~/);
 });
@@ -515,8 +525,12 @@ test('réseau : trois colonnes sans intitulés, noms avec les caractères de la 
         // Chaque nom se relit tel qu'il a été protégé : aucun n'a cassé l'analyse
         assert.ok(!/</.test(code.replace(/<br\/>/g, '')) && !/&/.test(code), 'chevrons et esperluettes en entités');
     }
-    const textes = logigramme.analyser(unique.pages[0].code).noeuds.map((n) => n.texte);
-    assert.ok(textes.includes('SW #60;1#62; #38; "x"'));
+    const mu = logigramme.analyser(unique.pages[0].code);
+    const textes = mu.noeuds.map((n) => n.texte);
+    // Un commutateur encadré : son nom est le titre du cadre, pas répété sous son icône
+    assert.ok(mu.groupes.some((g) => g.titre === 'SW #60;1#62; #38; "x"'));
+    assert.ok(!textes.includes('SW #60;1#62; #38; "x"'));
+    assert.ok(parPage.pages.some((p) => logigramme.analyser(p.code).noeuds.some((n) => n.texte === 'SW #60;1#62; #38; "x"')), 'sans cadre, le nom reste sous l\'icône');
     assert.ok(textes.includes('J #35;35; k #l'));
     assert.ok(textes.includes('O P'), 'un nom tient sur une ligne');
     assert.equal(reseau.protegerTexte('&quot; #lt; <b>'), '#38;quot; #35;lt; #60;b#62;');

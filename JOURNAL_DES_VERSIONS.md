@@ -2,6 +2,17 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.30.3 — 18 novembre 2026 — commutateur : découpage dans la liste « Pages », colonnes à droite, nom du lien lisible
+
+- **Constat** : le découpage d'un commutateur trop chargé existait (0.30.2), mais dans une rubrique à part, plus bas : à côté de « Une page par commutateur », on ne le voyait pas.
+- **Correction** : la liste « Pages » propose « Une page par commutateur, sur plusieurs pages s'il a trop de périphériques » ; la liste « Périphériques au plus par page » (8 à 48, 24 par défaut) apparaît juste à côté. La case « Séparer les agrégats et les liens simples » reste dessous ; une phrase résume le découpage choisi.
+- **Disposition** « À droite du commutateur, en plusieurs colonnes » : même empilement par liens invisibles que les rangées, en LR (48 serveurs → 7 colonnes de 7) ; l'ancienne devient « À droite du commutateur, sur une seule colonne ».
+- **Nom du lien** (liste « Nom du lien ») : sur le trait, **sous le nom du périphérique** (par défaut dans la fenêtre d'import : plus aucun texte sur les traits), ou pas écrit. Un périphérique relié plusieurs fois sur la même page garde ses noms de lien sur les traits.
+- **Lisibilité des noms de lien sur les traits** (tous les schémas) : le fond blanc des étiquettes est opaque (Mermaid : opacité 0,5, les traits passant dessous barraient le texte).
+- **Doublon retiré** : un commutateur encadré avec ses périphériques (page unique) n'a plus son nom répété sous son icône ; le titre du cadre suffit.
+- **Démonstration** : 8 pages ajoutées dans la partie Réseaux, après « Interconnexion de sites » (69 pages), produites par le code de l'import (`bun outils/demo-commutateurs.mjs`, à relancer après une évolution du module) : diapositive de présentation du module ; commutateur et 5 serveurs (nom du lien sur le trait) ; plusieurs commutateurs sur une page, encadrés, interfaces abrégées ; 48 serveurs en rangées triés sur le lien ; 48 serveurs à droite en colonnes, pictogrammes, triés sur le nom ; découpage agrégats / liens simples à 24 par page (3 pages). Sommaire, panorama et diapositive « Partie 5 — Réseaux » citent le module. Nouvel exemple `plusieurs-commutateurs.csv`.
+- **Recette** : fenêtre d'import pilotée dans Chrome (choix, nombre par page, 3 pages reçues) ; pages de démonstration rendues dans Chrome ; test de logique (nom du lien sous le serveur, aucun texte sur les traits, relecture à l'identique) ; test de logique (LR, 41 liens invisibles) et rendu Chrome des colonnes.
+
 ## 0.30.2 — 18 novembre 2026 — commutateur : répartition sur plusieurs pages et tri
 
 - **Demande** : pouvoir répartir un commutateur très chargé sur plusieurs pages, par nombre de périphériques et par type de lien ; trier les périphériques sur le nom des liens ou des serveurs (un fichier exporté arrive souvent trié alphabétiquement sur le lien : G1/0/10 avant G1/0/2).

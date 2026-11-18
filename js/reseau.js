@@ -660,9 +660,10 @@ const SEUIL_RANGEES = 12; // au-delà de ce nombre de périphériques sous un co
 export const colonnesRangees = (n) => Math.min(12, Math.max(6, Math.ceil(Math.sqrt(n))));
 
 // Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'),
-// sens ('auto' | 'rangees' | 'TD' | 'LR' ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
+// sens ('auto' | 'rangees' | 'TD' | 'LR' | 'colonnes' (à droite, en plusieurs colonnes) ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
 // liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur),
-// parType (pages séparées pour les agrégats et les liens simples), parPage (au plus N périphériques par page ; 0 = sans limite).
+// placeLien ('trait' : nom du lien sur le trait ; 'peripherique' : sous le nom du périphérique, quand il n'a qu'un lien
+// sur la page, sinon sur le trait), parType (pages séparées pour les agrégats et les liens simples), parPage (au plus N périphériques par page ; 0 = sans limite).
 // Un découpage (parType ou parPage) donne toujours des pages par commutateur.
 // tri : ordre des périphériques ('fichier' | 'lien' | 'lien-inverse' | 'type' | 'peripherique' | 'peripherique-inverse') ; les liens sont triés
 // dans l'ordre naturel (G1/0/2 avant G1/0/10, Bridge-Aggregation9 avant Bridge-Aggregation10) ; à égalité, ordre du fichier.
@@ -688,7 +689,7 @@ export function trierLignes(lignes, tri = 'fichier') {
 }
 export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) {
     const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true,
-        parType = false, parPage = 0, tri = 'fichier' } = options;
+        parType = false, parPage = 0, tri = 'fichier', placeLien = 'trait' } = options;
     const lignes = trierLignes(lignesLues, tri);
     const limite = Math.max(0, Math.floor(Number(parPage) || 0));
     const alertes = [];
@@ -710,10 +711,11 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
     };
     const icone = (k) => `${jeu}:${CATEGORIES_RESEAU[categorie(k)][jeu]}`;
     const texteLien = (lien) => (avecLiens && lien ? protegerTexte(abreger ? abregerInterface(lien) : lien) : '');
-    const sensPour = () => (sens === 'LR' ? 'LR' : 'TD');
+    const sensPour = () => (sens === 'LR' || sens === 'colonnes' ? 'LR' : 'TD');
     // Rangées : les périphériques propres à un commutateur (ni commutateurs, ni partagés) sont empilés par des liens
     // invisibles, de la colonne de la rangée du dessus vers celle du dessous ; l'ordre du fichier se lit ligne par ligne
-    const enRangees = (n) => sens === 'rangees' || (sens === 'auto' && n > SEUIL_RANGEES);
+    // En LR (« colonnes »), le même empilement donne des colonnes à droite du commutateur
+    const enRangees = (n) => sens === 'rangees' || sens === 'colonnes' || (sens === 'auto' && n > SEUIL_RANGEES);
     const nombre = new Set(lignes.flatMap((l) => [cleNom(l.commutateur), cleNom(l.peripherique)])).size;
     const decoupe = parType || limite > 0;
     const unique = !decoupe && (presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE)));
@@ -724,15 +726,24 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         const nouvelId = idsUniques();
         const ids = new Map();
         const idGroupe = new Map();
+        // Nom du lien sous le nom du périphérique : seulement s'il n'a qu'un lien sur la page (sinon on ne saurait lequel)
+        const lienSous = new Map();
+        if (placeLien === 'peripherique' && avecLiens) {
+            const nb = new Map();
+            for (const { vers } of liaisons) nb.set(vers, (nb.get(vers) || 0) + 1);
+            for (const { vers, lien } of liaisons) if (nb.get(vers) === 1 && lien && !estCommutateur.has(vers)) lienSous.set(vers, lien);
+        }
         for (const k of cles) {
             const g = groupeDe(k);
             if (g && !idGroupe.has(g)) { const id = nouvelId(`g_${noms.get(g)}`); idGroupe.set(g, id); modele.groupes.push({ id, titre: protegerTexte(noms.get(g)), parent: null, sens: null }); }
             const id = nouvelId(noms.get(k));
             ids.set(k, id);
-            modele.noeuds.push({ id, texte: protegerTexte(noms.get(k)), forme: 'rectangle', groupe: g ? idGroupe.get(g) : null, classe: null, icone: icone(k) });
+            // Commutateur dans son propre cadre : son nom est déjà le titre du cadre, l'icône n'en porte pas
+            const texte = g === k ? '' : protegerTexte(noms.get(k)) + (lienSous.has(k) ? `\n${texteLien(lienSous.get(k))}` : '');
+            modele.noeuds.push({ id, texte, forme: 'rectangle', groupe: g ? idGroupe.get(g) : null, classe: null, icone: icone(k) });
         }
         for (const { de, vers, lien } of liaisons) {
-            modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte: texteLien(lien), trait: estAgregat(lien) ? 'epais' : 'plein', longueur: 1 });
+            modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte: lienSous.has(vers) ? '' : texteLien(lien), trait: estAgregat(lien) ? 'epais' : 'plein', longueur: 1 });
         }
         for (const liste of rangs) {
             if (!enRangees(liste.length)) continue;

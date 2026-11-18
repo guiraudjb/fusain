@@ -1398,6 +1398,7 @@ const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
+    ['plusieurs-commutateurs.csv', 'Plusieurs commutateurs', 'trois colonnes : un cœur de réseau et deux commutateurs d\'étage, avec leurs postes, imprimantes et bornes Wi-Fi (interfaces GigabitEthernet à abréger)'],
     ['commutateur-48-serveurs.csv', 'Commutateur et 48 serveurs', 'trois colonnes : 12 agrégats, 36 liens gigabit, quatre noms avec des caractères de la syntaxe de Mermaid ; serveurs répartis en rangées'],
     ['commutateur-serveurs.csv', 'Commutateur et périphériques', 'trois colonnes (commutateur, lien, périphérique) : un commutateur, cinq serveurs, trois agrégats et deux liens gigabit'],
     ['imc-liens-sites.csv', 'Liens avec sites et locaux techniques', 'un seul fichier : site et local technique de chaque extrémité, cadres imbriqués sans liste des équipements'],

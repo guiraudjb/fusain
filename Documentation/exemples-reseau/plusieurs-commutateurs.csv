@@ -1,0 +1,14 @@
+Commutateur;Lien;Périphérique
+CŒUR-SIÈGE;Bridge-Aggregation1;SW-ÉTAGE-1
+CŒUR-SIÈGE;Bridge-Aggregation2;SW-ÉTAGE-2
+CŒUR-SIÈGE;Ten-GigabitEthernet1/0/49;PARE-FEU-01
+CŒUR-SIÈGE;Ten-GigabitEthernet1/0/50;SRV-FICHIERS
+SW-ÉTAGE-1;GigabitEthernet1/0/1;PC-ACCUEIL-01
+SW-ÉTAGE-1;GigabitEthernet1/0/2;PC-ACCUEIL-02
+SW-ÉTAGE-1;GigabitEthernet1/0/10;IMPRIMANTE-RDC
+SW-ÉTAGE-1;GigabitEthernet1/0/24;BORNE-WIFI-RDC
+SW-ÉTAGE-2;GigabitEthernet1/0/1;PC-RH-01
+SW-ÉTAGE-2;GigabitEthernet1/0/2;PC-RH-02
+SW-ÉTAGE-2;GigabitEthernet1/0/3;"PC-DIRECTION ""bureau 2.14"""
+SW-ÉTAGE-2;GigabitEthernet1/0/10;IMPRIMANTE-ÉTAGE-2
+SW-ÉTAGE-2;GigabitEthernet1/0/24;BORNE-WIFI-ÉTAGE-2

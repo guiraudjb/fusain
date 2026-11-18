@@ -1,7 +1,7 @@
 // Boîte « Importer un réseau » : choix des fichiers, vérification des colonnes reconnues, options, puis création des pages.
 // Toute la logique (lecture, analyse, écriture des schémas) est dans reseau.js ; ici, seulement le formulaire.
 import { h, bouton, champSelect, champCase, champTexte, message, modale, ouvrirModale, fermerModale, idUnique } from './dom.js';
-import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs } from './reseau.js';
+import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs, TRIS_PERIPHERIQUES } from './reseau.js';
 
 const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat', 'siteSource', 'localSource', 'siteCible', 'localCible'];
 const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
@@ -118,7 +118,7 @@ export function ouvrirImportReseau(ajouterPages) {
 
 // Boîte « Commutateur et périphériques » : fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés
 export function ouvrirImportCommutateurs(ajouterPages) {
-    const etat = { enregistrements: null, nom: '', entete: 'auto', options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true } };
+    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: false, options: { jeu: 'illus', presentation: 'auto', sens: 'auto', liens: true, abreger: false, encadrer: true, parType: false, parPage: 0, tri: 'fichier' } };
     const o = etat.options;
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -166,10 +166,17 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                 h('div', { class: 'fusain-import-reseau__colonnes' },
                     champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
                     champSelect('Pages', [['auto', 'Automatique'], ['unique', 'Tous les commutateurs sur une page'], ['commutateur', 'Une page par commutateur']], o.presentation, (v) => { o.presentation = v; redessiner(); }),
+                    champSelect('Ordre des périphériques', TRIS_PERIPHERIQUES, o.tri, (v) => { o.tri = v; redessiner(); }),
                     champSelect('Disposition', [['auto', 'Automatique (en rangées au-delà de 12)'], ['rangees', 'Sous le commutateur, en rangées'], ['TD', 'Sous le commutateur, sur une seule rangée'], ['LR', 'À droite du commutateur, en colonne']], o.sens, (v) => { o.sens = v; redessiner(); }),
                     champCase('Écrire le nom du lien sur le trait', o.liens, (v) => { o.liens = v; redessiner(); }),
                     champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),
                     champCase('Encadrer chaque commutateur avec ses périphériques (page unique)', o.encadrer, (v) => { o.encadrer = v; redessiner(); })),
+                h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Répartir sur plusieurs pages'),
+                h('div', { class: 'fusain-import-reseau__colonnes' },
+                    champCase('Séparer les agrégats et les liens simples (une page pour chaque type)', o.parType, (v) => { o.parType = v; redessiner(); }),
+                    champCase('Limiter le nombre de périphériques par page', etat.limiter, (v) => { etat.limiter = v; o.parPage = v ? (o.parPage || 24) : 0; redessiner(); }),
+                    etat.limiter ? champSelect('Périphériques par page', [8, 12, 16, 20, 24, 32, 40, 48].map((n) => [String(n), String(n)]), String(o.parPage || 24), (v) => { o.parPage = Number(v); redessiner(); }) : null),
+                o.parType || o.parPage ? h('p', { class: 'fr-text--xs' }, 'Avec un découpage, chaque commutateur a ses propres pages ; le commutateur est repris en haut de chacune.') : null,
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
             if (!lu.lignes.length) {
                 parties.push(h('p', { class: 'fr-error-text' }, 'Aucune ligne utilisable : il faut un commutateur en colonne 1 et un périphérique en colonne 3.'));

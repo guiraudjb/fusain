@@ -661,9 +661,36 @@ export const colonnesRangees = (n) => Math.min(12, Math.max(6, Math.ceil(Math.sq
 
 // Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'),
 // sens ('auto' | 'rangees' | 'TD' | 'LR' ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
-// liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur)
-export function produirePagesCommutateurs({ lignes }, options = {}) {
-    const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true } = options;
+// liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur),
+// parType (pages séparées pour les agrégats et les liens simples), parPage (au plus N périphériques par page ; 0 = sans limite).
+// Un découpage (parType ou parPage) donne toujours des pages par commutateur.
+// tri : ordre des périphériques ('fichier' | 'lien' | 'lien-inverse' | 'type' | 'peripherique' | 'peripherique-inverse') ; les liens sont triés
+// dans l'ordre naturel (G1/0/2 avant G1/0/10, Bridge-Aggregation9 avant Bridge-Aggregation10) ; à égalité, ordre du fichier.
+const COLLATEUR = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
+export const comparerNoms = (a, b) => COLLATEUR.compare(String(a ?? ''), String(b ?? ''));
+export const TRIS_PERIPHERIQUES = [
+    ['fichier', 'Ordre du fichier'],
+    ['lien', 'Nom du lien, croissant (G1/0/2 avant G1/0/10)'],
+    ['lien-inverse', 'Nom du lien, décroissant'],
+    ['type', 'Agrégats d\'abord, puis nom du lien'],
+    ['peripherique', 'Nom du serveur ou périphérique, croissant'],
+    ['peripherique-inverse', 'Nom du serveur ou périphérique, décroissant'],
+];
+export function trierLignes(lignes, tri = 'fichier') {
+    const cle = {
+        lien: (a, b) => comparerNoms(a.lien, b.lien),
+        'lien-inverse': (a, b) => comparerNoms(b.lien, a.lien),
+        type: (a, b) => (estAgregat(b.lien) - estAgregat(a.lien)) || comparerNoms(a.lien, b.lien),
+        peripherique: (a, b) => comparerNoms(a.peripherique, b.peripherique),
+        'peripherique-inverse': (a, b) => comparerNoms(b.peripherique, a.peripherique),
+    }[tri];
+    return cle ? [...lignes].sort(cle) : [...lignes]; // tri stable : à égalité, l'ordre du fichier est gardé
+}
+export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) {
+    const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true,
+        parType = false, parPage = 0, tri = 'fichier' } = options;
+    const lignes = trierLignes(lignesLues, tri);
+    const limite = Math.max(0, Math.floor(Number(parPage) || 0));
     const alertes = [];
     const noms = new Map(); // clé → nom affiché (le premier rencontré)
     const nomDe = (n) => { const k = cleNom(n); if (!noms.has(k)) noms.set(k, n); return k; };
@@ -688,7 +715,8 @@ export function produirePagesCommutateurs({ lignes }, options = {}) {
     // invisibles, de la colonne de la rangée du dessus vers celle du dessous ; l'ordre du fichier se lit ligne par ligne
     const enRangees = (n) => sens === 'rangees' || (sens === 'auto' && n > SEUIL_RANGEES);
     const nombre = new Set(lignes.flatMap((l) => [cleNom(l.commutateur), cleNom(l.peripherique)])).size;
-    const unique = presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE));
+    const decoupe = parType || limite > 0;
+    const unique = !decoupe && (presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE)));
     const pages = [];
 
     const page = (cles, liaisons, groupeDe, titre, sensPage, rangs = []) => {
@@ -734,11 +762,25 @@ export function produirePagesCommutateurs({ lignes }, options = {}) {
             sensPour(), commutateurs.map(propres));
     } else {
         // Une page par commutateur : lui, puis ses périphériques (un commutateur voisin y figure comme périphérique)
+        // Découpage : par type de lien (agrégats, puis liens simples), puis par tranches de « limite » périphériques,
+        // dans l'ordre du fichier ; un périphérique relié des deux façons figure sur les deux pages
         for (const c of commutateurs) {
             const b = branches.get(c);
-            const cles = [c, ...new Set(b.map((x) => x.peripherique))];
-            page(cles, b.map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null, `Commutateur ${noms.get(c)}`, sensPour(),
-                [cles.slice(1).filter((p) => !estCommutateur.has(p))]);
+            const types = parType
+                ? [['agrégats', b.filter((x) => estAgregat(x.lien))], ['liens simples', b.filter((x) => !estAgregat(x.lien))]].filter(([, l]) => l.length)
+                : [['', b]];
+            for (const [type, liste] of types) {
+                const peripheriques = [...new Set(liste.map((x) => x.peripherique))];
+                const taille = limite > 0 ? limite : peripheriques.length;
+                const tranches = Math.ceil(peripheriques.length / taille);
+                for (let t = 0; t < tranches; t += 1) {
+                    const part = peripheriques.slice(t * taille, (t + 1) * taille);
+                    const dans = new Set(part);
+                    const titre = `Commutateur ${noms.get(c)}${type ? ` — ${type}` : ''}${tranches > 1 ? ` (${t + 1}/${tranches}) : périphériques ${t * taille + 1} à ${t * taille + part.length} sur ${peripheriques.length}` : ''}`;
+                    page([c, ...part], liste.filter((x) => dans.has(x.peripherique)).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null,
+                        titre, sensPour(), [part.filter((p) => !estCommutateur.has(p))]);
+                }
+            }
         }
     }
     return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre };

@@ -461,6 +461,45 @@ test('réseau : 48 serveurs sous un commutateur → répartis en rangées de 7',
     assert.doesNotMatch(reseau.produirePagesCommutateurs({ lignes: lu.lignes.slice(0, 12) }).pages[0].code, /~~~/);
 });
 
+test('réseau : 48 serveurs répartis sur plusieurs pages, par nombre et par type de lien', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/commutateur-48-serveurs.csv', import.meta.url))))));
+    const compte = (p) => logigramme.analyser(p.code).noeuds.length - 1;
+    const parNombre = reseau.produirePagesCommutateurs(lu, { parPage: 24 }).pages;
+    assert.deepEqual(parNombre.map((p) => p.nom), ['Commutateur SW-SALLE-SERVEURS-01 (1/2) : périphériques 1 à 24 sur 48', 'Commutateur SW-SALLE-SERVEURS-01 (2/2) : périphériques 25 à 48 sur 48']);
+    assert.deepEqual(parNombre.map(compte), [24, 24]);
+    assert.match(parNombre[0].code, /label: "SRV-WEB-01"/);
+    assert.match(parNombre[1].code, /label: "SRV-NTP-01"/);
+    assert.match(parNombre[0].code, /~~~/, 'rangées dans chaque page');
+    const parType = reseau.produirePagesCommutateurs(lu, { parType: true }).pages;
+    assert.deepEqual(parType.map((p) => p.nom), ['Commutateur SW-SALLE-SERVEURS-01 — agrégats', 'Commutateur SW-SALLE-SERVEURS-01 — liens simples']);
+    assert.deepEqual(parType.map(compte), [12, 36]);
+    assert.doesNotMatch(parType[0].code, /---\|/, 'seulement des traits épais');
+    assert.doesNotMatch(parType[1].code, /===\|/, 'seulement des traits pleins');
+    const lesDeux = reseau.produirePagesCommutateurs(lu, { parType: true, parPage: 16 }).pages;
+    assert.deepEqual(lesDeux.map(compte), [12, 16, 16, 4]);
+    assert.equal(lesDeux[3].nom, 'Commutateur SW-SALLE-SERVEURS-01 — liens simples (3/3) : périphériques 33 à 36 sur 36');
+    for (const p of [...parNombre, ...parType, ...lesDeux]) assert.equal(logigramme.ecrire(logigramme.analyser(p.code)), p.code);
+    // Sans découpage : une seule page
+    assert.equal(reseau.produirePagesCommutateurs(lu, { parPage: 0 }).pages.length, 1);
+});
+
+test('réseau : tri des périphériques par nom de lien (ordre naturel) ou par nom de serveur', () => {
+    const l = (lien, peripherique) => ({ commutateur: 'SW1', lien, peripherique });
+    // Fichier trié alphabétiquement sur le lien (G1/0/10 avant G1/0/2), comme un export d'équipement
+    const lignes = [l('Bridge-Aggregation10', 'SRV-D'), l('Bridge-Aggregation9', 'SRV-A'), l('G1/0/10', 'srv-b'), l('G1/0/2', 'SRV-E'), l('G1/0/9', 'SRV-C')];
+    const ordre = (tri, cle) => reseau.trierLignes(lignes, tri).map((x) => x[cle]);
+    assert.deepEqual(ordre('fichier', 'lien'), lignes.map((x) => x.lien));
+    assert.deepEqual(ordre('lien', 'lien'), ['Bridge-Aggregation9', 'Bridge-Aggregation10', 'G1/0/2', 'G1/0/9', 'G1/0/10']);
+    assert.deepEqual(ordre('lien-inverse', 'lien'), ['G1/0/10', 'G1/0/9', 'G1/0/2', 'Bridge-Aggregation10', 'Bridge-Aggregation9']);
+    assert.deepEqual(ordre('type', 'lien'), ['Bridge-Aggregation9', 'Bridge-Aggregation10', 'G1/0/2', 'G1/0/9', 'G1/0/10']);
+    assert.deepEqual(ordre('peripherique', 'peripherique'), ['SRV-A', 'srv-b', 'SRV-C', 'SRV-D', 'SRV-E'], 'sans tenir compte de la casse');
+    assert.deepEqual(ordre('peripherique-inverse', 'peripherique'), ['SRV-E', 'SRV-D', 'SRV-C', 'srv-b', 'SRV-A']);
+    assert.deepEqual(lignes[0].lien, 'Bridge-Aggregation10', 'le fichier lu n\'est pas modifié');
+    // Le tri s'applique aux pages : découpage par 2 → les deux premiers liens dans l'ordre naturel
+    const [p1] = reseau.produirePagesCommutateurs({ lignes }, { tri: 'lien', parPage: 2 }).pages;
+    assert.deepEqual(logigramme.analyser(p1.code).liens.filter((x) => x.trait !== 'invisible').map((x) => x.texte), ['Bridge-Aggregation9', 'Bridge-Aggregation10']);
+});
+
 test('réseau : trois colonnes sans intitulés, noms avec les caractères de la syntaxe de Mermaid', () => {
     const noms = ['A "x" `y`', 'B [1] (2) {3}', 'C | D ; E : F', 'G <h> & i', 'J #35; k #l', 'end', 'M --> N', 'O\nP', 'Q %% R', 'S @{ t }'];
     const lignes = noms.map((n, i) => ['SW <1> & "x"', `${n} lien`, n]).concat([['SW <1> & "x"', 'A "x" `y` lien', 'A "x" `y`'], ['SW-2', '', 'SW <1> & "x"'], ['', 'x', 'y']]);

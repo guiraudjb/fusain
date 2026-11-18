@@ -2,6 +2,16 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.30.2 — 18 novembre 2026 — commutateur : répartition sur plusieurs pages et tri
+
+- **Demande** : pouvoir répartir un commutateur très chargé sur plusieurs pages, par nombre de périphériques et par type de lien ; trier les périphériques sur le nom des liens ou des serveurs (un fichier exporté arrive souvent trié alphabétiquement sur le lien : G1/0/10 avant G1/0/2).
+- **Ajout** (fenêtre d'import, rubrique « Répartir sur plusieurs pages », deux cases cumulables) :
+  - « Séparer les agrégats et les liens simples » : une page pour les agrégats (traits épais), une pour les liens simples ;
+  - « Limiter le nombre de périphériques par page » (8 à 48, 24 par défaut) : tranches dans l'ordre du fichier, titre « (1/2) : périphériques 1 à 24 sur 48 ».
+  - Le commutateur est repris en haut de chaque page ; les rangées s'appliquent dans chaque page ; format A3 seulement pour les pages chargées. Un découpage donne toujours des pages par commutateur.
+- **Tri des périphériques** (liste « Ordre des périphériques ») : ordre du fichier, nom du lien croissant ou décroissant, agrégats d'abord, nom du serveur croissant ou décroissant. Tri naturel (G1/0/2 avant G1/0/10, Bridge-Aggregation9 avant Bridge-Aggregation10), sans tenir compte de la casse ; à égalité, ordre du fichier. Rangées et découpage en pages suivent l'ordre choisi.
+- **Recette** : test de tri (six ordres, fichier non modifié, effet sur le découpage) ; test de logique sur le fichier à 48 serveurs (24 + 24 ; 12 agrégats + 36 liens simples ; les deux : 12 + 16 + 16 + 4 ; relecture à l'identique) ; fenêtre d'import pilotée dans Chrome (3 pages reçues, A4 / A3 / A4).
+
 ## 0.30.1 — 18 novembre 2026 — commutateur : périphériques en rangées
 
 - **Constat** : avec le fichier d'essai `commutateur-48-serveurs.csv` (48 serveurs, 12 agrégats, 36 liens gigabit, quatre noms piégés), les 48 serveurs formaient une seule rangée ou une seule colonne : schéma illisible, même en A3.

@@ -651,6 +651,73 @@ test('module Data center : 4e colonne VLAN, vue d\'ensemble sur plusieurs pages,
     for (const p of r.pages) assert.equal(logigramme.ecrire(logigramme.analyser(p.code)), p.code);
 });
 
+test('data center à trois niveaux (cœur → distribution → accès) : sites, ordre des pages, ports des deux côtés', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/datacenter-cascade.csv', import.meta.url))))));
+    const { niveau } = reseau.niveauxCommutateurs(lu.lignes);
+    // Niveaux (clés : noms en minuscules) : 0 les cœurs, 1 la distribution, 2 l'accès
+    assert.deepEqual(['CŒUR-DC-NORD', 'CŒUR-DC-SUD', 'SW-DIST-NORD-1', 'SW-ACC-N1-01'].map((n) => niveau.get(n.toLowerCase())), [0, 0, 1, 2]);
+    assert.equal(reseau.fusionnerReciproques(lu.lignes).fusions, 57, 'chaque lien entre commutateurs, côté parent');
+    const r = reseau.produirePagesCommutateurs(lu, { presentation: 'commutateur', parPage: 40, parPageVue: 40, placeLien: 'peripherique', abreger: true, tri: 'lien', vlans: true });
+    assert.deepEqual(r.alertes, []);
+    const noms = r.pages.map((p) => p.nom.replace(/^Commutateur /, ''));
+    assert.deepEqual(noms.slice(0, 7), ['Vue d\'ensemble : cœurs de réseau', 'Vue d\'ensemble : CŒUR-DC-NORD', 'Vue d\'ensemble : CŒUR-DC-SUD', 'CŒUR-DC-NORD', 'SW-DIST-NORD-1', 'SW-ACC-N1-01', 'SW-ACC-N1-02'], 'pages dans l\'ordre de l\'arbre');
+    assert.equal(noms.indexOf('SW-DIST-NORD-2'), 11);
+    assert.ok(noms.indexOf('CŒUR-DC-SUD') > noms.indexOf('SW-ACC-N4-06'));
+    // Les commutateurs de distribution ne sont pas pris pour des cœurs : une seule liaison entre pairs
+    const coeurs = logigramme.analyser(r.pages[0].code);
+    assert.equal(coeurs.noeuds.length, 3);
+    assert.match(coeurs.noeuds[0].texte, /^CŒUR-DC-NORD\n28 commutateurs · \d+ périphériques$/);
+    // Vue d'un site : le cœur, 4 distributions, 24 accès (et un nœud VLAN par lien) ; rangées par commutateur de distribution
+    const site = logigramme.analyser(r.pages[1].code);
+    assert.equal(site.noeuds.filter((n) => n.icone !== 'illus:vlan').length, 29);
+    const n101 = site.noeuds.find((n) => n.texte.startsWith('SW-ACC-N1-01'));
+    assert.match(n101.texte, /^SW-ACC-N1-01\nBAGG101 – BAGG1\n18 périphériques$/);
+    const invisibles = site.liens.filter((l) => l.trait === 'invisible');
+    assert.equal(invisibles.length, 12, '4 groupes de 6 sur 3 colonnes : 3 liens chacun');
+    // Page d'un commutateur de distribution : le cœur au-dessus, ses 6 commutateurs d'accès
+    const d = logigramme.analyser(r.pages[4].code);
+    assert.ok(d.noeuds.some((n) => n.texte === 'CŒUR-DC-NORD'));
+    assert.equal(d.noeuds.filter((n) => n.texte.startsWith('SW-ACC-N1-')).length, 6);
+    for (const p of r.pages) assert.equal(logigramme.ecrire(logigramme.analyser(p.code)), p.code);
+});
+
+test('liaison de bout en bout : réseau relu sur les pages, chemin le plus court, traits animés de couleur', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/datacenter-cascade.csv', import.meta.url))))));
+    const pages = reseau.produirePagesCommutateurs(lu, { presentation: 'commutateur', parPage: 40, parPageVue: 40, placeLien: 'peripherique', abreger: true, tri: 'lien', vlans: true }).pages;
+    const g = reseau.grapheReseau(pages);
+    assert.equal(g.equipements.size, 1278, '58 commutateurs et 1 220 serveurs');
+    assert.equal(g.aretes.size, 1277, 'un arbre : deux sites reliés par leurs cœurs');
+    assert.deepEqual(g.aretes.get('cœur-dc-nord|cœur-dc-sud'), { de: 'cœur-dc-nord', vers: 'cœur-dc-sud', ports: 'BAGG1 – BAGG1', vlans: '1, 10, 20, 30, 40, 50, 100-120, 200-210' });
+    assert.equal(g.equipements.get('sw-dist-nord-1').passage, true);
+    assert.equal(g.equipements.get('esx-n101-01').passage, false);
+    const chemin = reseau.cheminReseau(g, 'esx-n101-01', 'ESX-S401-03');
+    assert.deepEqual(chemin, ['esx-n101-01', 'sw-acc-n1-01', 'sw-dist-nord-1', 'cœur-dc-nord', 'cœur-dc-sud', 'sw-dist-sud-4', 'sw-acc-s4-01', 'esx-s401-03']);
+    assert.equal(reseau.cheminReseau(g, 'ESX-N101-01', 'INCONNU'), null);
+    assert.equal(reseau.cheminReseau(g, 'ESX-N101-01', 'esx-n101-01'), null);
+    const r = reseau.pageBoutEnBout(g, [{ a: 'ESX-N101-01', b: 'ESX-S401-03', couleur: '#e1000f' }, { a: 'ESX-N101-02', b: 'ESX-N203-01', couleur: '#18753c', animation: 'rapide' }]);
+    assert.deepEqual(r.alertes, []);
+    assert.equal(r.nom, 'Bout en bout : ESX-N101-01 ↔ ESX-S401-03 ; ESX-N101-02 ↔ ESX-N203-01');
+    const m = logigramme.analyser(r.code);
+    assert.equal(m.sens, 'LR');
+    assert.equal(m.noeuds.length, 12);
+    assert.equal(m.liens.length, 13, '7 + 6 tronçons, le tronçon commun doublé');
+    assert.equal(m.liens.filter((l) => /stroke:#e1000f/.test(l.style) && /animation:dash 20s/.test(l.style)).length, 7);
+    assert.equal(m.liens.filter((l) => /stroke:#18753c/.test(l.style) && /animation:dash 8s/.test(l.style)).length, 6);
+    // Ports dans le sens du chemin (côté accès – côté distribution), VLAN du tronçon
+    const acces = m.liens.find((l) => l.de === 'e_SW_ACC_N1_01' && l.vers === 'e_SW_DIST_NORD_1' && l.texte);
+    assert.equal(acces.texte, 'BAGG1 – BAGG101\nVLAN 10, 20, 30, 40, 50, 100');
+    assert.equal(m.liens.filter((l) => l.de === 'e_SW_ACC_N1_01' && l.vers === 'e_SW_DIST_NORD_1').length, 2);
+    assert.equal(logigramme.ecrire(m), r.code);
+    // Sans VLAN ; une page de bout en bout n'est pas relue comme page réseau
+    assert.doesNotMatch(reseau.pageBoutEnBout(g, [{ a: 'ESX-N101-01', b: 'ESX-N101-02' }], { vlans: false }).code, /VLAN/);
+    assert.equal(reseau.grapheReseau([...pages, r]).aretes.size, 1277);
+    // Un serveur relié à deux commutateurs n'est pas un passage
+    const l = (commutateur, lien, peripherique) => ({ commutateur, lien, peripherique, vlans: new Set() });
+    const petit = reseau.produirePagesCommutateurs({ lignes: [l('SW-A', 'G1', 'SRV-DOUBLE'), l('SW-B', 'G1', 'SRV-DOUBLE'), l('SW-A', 'G2', 'R-1'), l('R-1', 'G3', 'ROUTEUR-2'), l('ROUTEUR-2', 'G4', 'SW-B'), l('SW-A', 'G5', 'PC-1'), l('SW-B', 'G6', 'PC-2')] }, { presentation: 'commutateur' }).pages;
+    const gp = reseau.grapheReseau(petit);
+    assert.deepEqual(reseau.cheminReseau(gp, 'PC-1', 'PC-2'), ['pc-1', 'sw-a', 'r-1', 'routeur-2', 'sw-b', 'pc-2']);
+});
+
 test('réseau : lien entre commutateurs décrit des deux côtés → un seul trait, port du parent – port du fils', () => {
     const l = (commutateur, lien, peripherique) => ({ commutateur, lien, peripherique, vlans: new Set() });
     const lignes = [

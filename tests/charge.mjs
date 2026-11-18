@@ -24,10 +24,10 @@ const resultats = await p.evaluate(async () => {
     }
     await chrono('rendu 600 liens (plafond 500)', async () => { await rendu.rendreSchema(graphe(601), 'bleu-france'); });
 
-    // Document de 30 pages dans l'application
+    // Document de 365 pages (le maximum) dans l'application
     const doc = etat.nouveauDocument(graphe(40));
-    for (let i = 1; i < 100; i += 1) doc.pages.push({ ...etat.nouvellePage(graphe(20 + i), `Page ${i + 1}`), format: i % 2 ? 'A3' : 'A4' });
-    await chrono('ouverture d\'un document de 100 pages (page et vignettes visibles prêtes)', async () => { etat.charger(doc); await new Promise((r) => setTimeout(r, 50)); while (document.querySelectorAll('.fusain-vignette').length < 100 || !document.querySelector('.fusain-vignette__image svg') || !document.querySelector('#fusain-feuille [data-fusain="n:n39"]')) await new Promise((r) => setTimeout(r, 30)); return document.querySelectorAll('.fusain-vignette__image svg').length + ' vignettes rendues sur 100'; });
+    for (let i = 1; i < 365; i += 1) doc.pages.push({ ...etat.nouvellePage(graphe(20 + i), `Page ${i + 1}`), format: i % 2 ? 'A3' : 'A4' });
+    await chrono('ouverture d\'un document de 365 pages (page et vignettes visibles prêtes)', async () => { etat.charger(doc); await new Promise((r) => setTimeout(r, 50)); while (document.querySelectorAll('.fusain-vignette').length < 365 || !document.querySelector('.fusain-vignette__image svg') || !document.querySelector('#fusain-feuille [data-fusain="n:n39"]')) await new Promise((r) => setTimeout(r, 30)); return document.querySelectorAll('.fusain-vignette__image svg').length + ' vignettes rendues sur 365'; });
     await chrono('modification d\'une page de ce document', async () => {
         etat.modifier((d) => { d.pages[0].code = graphe(41); });
         const debut = performance.now();

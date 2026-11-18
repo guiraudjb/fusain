@@ -5,7 +5,7 @@ import { TAILLE_MAX_CODE, TAILLE_MAX_CARTE, typeDiagramme, nomFichierSur } from 
 import { THEMES } from './rendu.js';
 
 export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
-export const PAGES_MAX = 100;
+export const PAGES_MAX = 365;
 
 const CLES_HOSTILES = new Set(['__proto__', 'constructor', 'prototype']);
 

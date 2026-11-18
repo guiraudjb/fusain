@@ -13,6 +13,7 @@ const grand = await lire('commutateur-48-serveurs.csv');
 const plusieurs = await lire('plusieurs-commutateurs.csv');
 const datacenter = await lire('datacenter.csv');
 const datacenterVlans = await lire('datacenter-vlans.csv');
+const datacenterCascade = await lire('datacenter-cascade.csv');
 const imc = reseau.analyserReseau(reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(readFileSync(new URL('Documentation/exemples-reseau/imc-datacenters.csv', racine)))), reseau.CHAMPS_LIENS));
 
 const PIED = 'FUSAIN 0.23.0 — Présentation complète des 60 modèles — page {n}/{total} — {date}';
@@ -87,6 +88,19 @@ pages.push({ ...meta('dcv_site', 'Data center : vue globale d\'un site (VLAN)', 
 pages.push({ ...meta('dcv_commutateur', 'Data center : un commutateur et ses VLAN', 'A3', 'Commutateur SW-NORD-B01 : son cœur, ses serveurs et les VLAN de chaque lien',
     sousTitreDc('vue d\'un commutateur, cœur amont rappelé au-dessus, trunks des ESX et VLAN d\'accès des serveurs'), 'Une des vues produites automatiquement pour chaque commutateur du data center.'),
     code: dcv.find((x) => x.nom === 'Commutateur SW-NORD-B01').code });
+
+// Trois niveaux en cascade (cœur → distribution → accès) : vue d'un site
+const dcc = produire(datacenterCascade, { jeu: 'illus', presentation: 'commutateur', parPage: 40, parPageVue: 40, abreger: true, tri: 'lien', placeLien: 'peripherique', vlans: true });
+pages.push({ ...meta('dcc_site', 'Data center : trois niveaux de commutateurs', 'A3', 'Site Nord à trois niveaux : cœur, 4 commutateurs de distribution, 24 commutateurs d\'accès',
+    'Module « Data center » — datacenter-cascade.csv — commutateurs en cascade, rangées par commutateur de distribution, les deux ports de chaque lien',
+    `${dcc.length} pages, dans l'ordre de l'arbre : cœurs, sites, puis cœur, distribution, ses accès, distribution suivante…`), code: dcc[1].code });
+
+// Liaison de bout en bout, relue sur les pages du data center à trois niveaux
+const grapheDcc = reseau.grapheReseau(dcc);
+const bout = reseau.pageBoutEnBout(grapheDcc, [{ a: 'ESX-N101-01', b: 'ESX-S401-03', couleur: '#e1000f' }, { a: 'ESX-N101-02', b: 'ESX-N203-01', couleur: '#000091', animation: 'rapide' }]);
+pages.push({ ...meta('bout_en_bout', 'Bout en bout : deux liaisons à travers le data center', 'A3', 'Deux liaisons de bout en bout entre serveurs : chemins à travers les commutateurs d\'accès, de distribution et les cœurs',
+    'Bouton « Bout en bout » de la barre d\'outils — deux équipements, une couleur et un trait animé par liaison ; tronçon commun doublé',
+    'Rouge : ESX-N101-01 (site Nord) vers ESX-S401-03 (site Sud), par les deux cœurs. Bleu : ESX-N101-02 vers ESX-N203-01, sur le site Nord.'), code: bout.code });
 
 // Import IMC (liens avec sites et locaux) des mêmes data centers : découpage intelligent à 60 équipements par page
 const pagesImc = reseau.produirePages(imc, { jeu: 'illus', parPage: 60, placeLien: 'peripherique', tri: 'lien' });

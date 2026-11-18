@@ -2,7 +2,7 @@
 // rapports de voisins LLDP ou CDP) et, en option, liste des équipements. Le résultat est une suite de logigrammes à
 // icônes, écrits par l'éditeur du logigramme : ils restent modifiables visuellement. Tout est calculé dans le navigateur.
 import { lignesCsv } from './diagrammes/carte.js';
-import logigramme from './diagrammes/logigramme.js';
+import logigramme, { reglerStyleLien } from './diagrammes/logigramme.js';
 import { LIENS_MAX, TAILLE_MAX_CODE } from './securite.js';
 import { lireZip } from './zip.js';
 
@@ -830,16 +830,40 @@ export function trierLignes(lignes, tri = 'fichier') {
 }
 // Liens entre deux commutateurs décrits des deux côtés (« A;BAGG101;B » et « B;BAGG1;A », comme dans un export où chaque
 // commutateur liste ses voisins) : un seul lien, côté parent, qui porte les deux ports (« BAGG101 – BAGG1 »).
-// Le parent est celui qui a le plus de commutateurs voisins (un cœur) ; à égalité, celui de la première ligne.
+// Le parent est le plus proche du centre du réseau de commutateurs (les cœurs : ceux dont le commutateur le plus
+// éloigné est le plus proche), ce qui vaut pour plusieurs niveaux en cascade (cœur → distribution → accès) ; à égalité
+// (deux cœurs, deux commutateurs de même niveau), celui qui a le plus de commutateurs voisins, puis celui de la première ligne.
 // Plusieurs liens entre les deux mêmes commutateurs sont appariés dans l'ordre du fichier. Rend aussi le nombre de fusions.
 const SEPARATEUR_PORTS = '\u0000';
-export function fusionnerReciproques(lignes) {
+// Niveau de chaque commutateur relié à un autre : sa distance au centre de son réseau de commutateurs (0 : les cœurs,
+// 1 : distribution, 2 : accès…). Le centre : les commutateurs dont le commutateur le plus éloigné est le plus proche.
+export function niveauxCommutateurs(lignes) {
     const cles = new Set(lignes.map((l) => cleNom(l.commutateur)));
     const voisins = new Map();
     for (const l of lignes) {
         const [a, b] = [cleNom(l.commutateur), cleNom(l.peripherique)];
-        if (cles.has(b)) for (const [x, y] of [[a, b], [b, a]]) (voisins.get(x) || voisins.set(x, new Set()).get(x)).add(y);
+        if (cles.has(b) && a !== b) for (const [x, y] of [[a, b], [b, a]]) (voisins.get(x) || voisins.set(x, new Set()).get(x)).add(y);
     }
+    const parcours = (depart) => {
+        const d = new Map([[depart, 0]]);
+        for (let i = 0, file = [depart]; i < file.length; i += 1) {
+            const x = file[i];
+            for (const y of voisins.get(x)) if (!d.has(y)) { d.set(y, d.get(x) + 1); file.push(y); }
+        }
+        return d;
+    };
+    const distances = new Map([...voisins.keys()].map((x) => [x, parcours(x)]));
+    const ecart = new Map([...distances].map(([x, d]) => [x, Math.max(...d.values())]));
+    const niveau = new Map();
+    for (const [x, d] of distances) {
+        const centre = Math.min(...[...d.keys()].map((y) => ecart.get(y)));
+        niveau.set(x, Math.min(...[...d.keys()].filter((y) => ecart.get(y) === centre).map((y) => d.get(y))));
+    }
+    return { niveau, voisins, cles };
+}
+
+export function fusionnerReciproques(lignes) {
+    const { niveau, voisins, cles } = niveauxCommutateurs(lignes);
     const parSens = new Map();
     lignes.forEach((l, i) => {
         const [a, b] = [cleNom(l.commutateur), cleNom(l.peripherique)];
@@ -855,7 +879,9 @@ export function fusionnerReciproques(lignes) {
         const retour = parSens.get(JSON.stringify([b, a]));
         if (!retour || a === b) continue;
         // Chaque paire est traitée une fois, depuis le parent
-        const parent = (voisins.get(a)?.size ?? 0) !== (voisins.get(b)?.size ?? 0) ? ((voisins.get(a)?.size ?? 0) > (voisins.get(b)?.size ?? 0) ? a : b) : (aller[0] < retour[0] ? a : b);
+        const parent = niveau.get(a) !== niveau.get(b) ? (niveau.get(a) < niveau.get(b) ? a : b)
+            : voisins.get(a).size !== voisins.get(b).size ? (voisins.get(a).size > voisins.get(b).size ? a : b)
+                : (aller[0] < retour[0] ? a : b);
         if (parent !== a) continue;
         for (let n = 0; n < Math.min(aller.length, retour.length); n += 1) {
             const [i, j] = [aller[n], retour[n]];
@@ -889,6 +915,22 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
         branches.get(c).push({ peripherique: p, lien: l.lien, vlans: l.vlans });
     }
     const estCommutateur = new Set(commutateurs);
+    // Ordre des commutateurs (et de leurs pages) : l'arbre, de haut en bas : un cœur, son premier commutateur de
+    // distribution, les commutateurs d'accès de celui-ci, le suivant… puis le cœur suivant ; les autres à la suite
+    {
+        const { niveau } = niveauxCommutateurs(fusionnees);
+        const nv = (c) => niveau.get(c) ?? 0;
+        const rang = new Map(commutateurs.map((c, i) => [c, i]));
+        const ordre = [];
+        const vus = new Set();
+        const visiter = (c) => {
+            if (vus.has(c)) return;
+            vus.add(c); ordre.push(c);
+            for (const { peripherique: p } of branches.get(c)) if (estCommutateur.has(p) && nv(p) > nv(c)) visiter(p);
+        };
+        for (const c of [...commutateurs].sort((x, y) => nv(x) - nv(y) || rang.get(x) - rang.get(y))) visiter(c);
+        commutateurs.splice(0, commutateurs.length, ...ordre);
+    }
     const categorie = (k) => {
         const parNom = categorieDuNom(noms.get(k));
         if (estCommutateur.has(k)) return ['commutateur-l3', 'routeur', 'pare-feu'].includes(parNom) ? parNom : 'commutateur';
@@ -959,9 +1001,11 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
                 if (hautDe.has(vers)) hautDe.set(vers, null);
             }
         }
-        for (const liste of rangs) {
-            if (!enRangees(liste.length)) continue;
-            const k = colonnesRangees(liste.length);
+        // Un rang : une liste (rangées si elle est longue) ou { liste, k } (k colonnes imposées)
+        for (const rang of rangs) {
+            const liste = Array.isArray(rang) ? rang : rang.liste;
+            if (Array.isArray(rang) && !enRangees(liste.length)) continue;
+            const k = Array.isArray(rang) ? colonnesRangees(liste.length) : rang.k;
             for (let i = k; i < liste.length; i += 1) modele.liens.push({ de: ids.get(liste[i - k]), vers: hautDe.get(liste[i]) || ids.get(liste[i]), debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
         }
         pages.push({ nom: titre, code: ecrirePage(modele, alertes, titre), equipements: modele.noeuds.length }); // nœuds VLAN compris
@@ -997,7 +1041,9 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
             // leur liaison devient un nœud placé sous les deux (nom du lien, VLAN). Sur la page d'un site sans l'autre
             // cœur, elle est écrite sous le cœur (« ↔ CŒUR-DC-SUD : BAGG1 »)
             const aval = (c) => new Set(liaisons.filter((l) => l.de === c).map((l) => l.vers));
-            const entrePairs = (l) => [...aval(l.de)].some((v) => v !== l.vers) && [...aval(l.vers)].some((v) => v !== l.de);
+            // Pairs : deux commutateurs de même niveau (deux cœurs), pas un cœur et un commutateur de distribution
+            const { niveau } = niveauxCommutateurs(fusionnees);
+            const entrePairs = (l) => niveau.get(l.de) === niveau.get(l.vers) && [...aval(l.de)].some((v) => v !== l.vers) && [...aval(l.vers)].some((v) => v !== l.de);
             const pairs = liaisons.filter(entrePairs);
             const nombre = (c) => { const n = new Set(branches.get(c).map((x) => x.peripherique).filter((p) => !estCommutateur.has(p))).size; return n ? `${n} périphérique${n > 1 ? 's' : ''}` : ''; };
             const complement = new Map(commutateurs.map((c) => [c, nombre(c)]));
@@ -1020,8 +1066,19 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
             };
             for (const c of commutateurs) if (!estCoeur.has(c)) { const r = remonter(c); if (r.size === 1) siteDe.set(c, [...r][0]); }
             const parSite = encadrer && coeurs.length > 1 && commutateurs.every((c) => siteDe.has(c));
-            const rangsVue = parSite ? coeurs.map((c) => feuilles.filter((f) => siteDe.get(f) === c)) : [feuilles];
+            // Rangées par commutateur amont : avec plusieurs niveaux (cœur → distribution → accès), chaque commutateur de
+            // distribution range les siens ; enchaîner tous ceux d'un site décalerait les commutateurs de distribution
+            const parAmont = (liste) => {
+                const groupes = new Map();
+                for (const f of liste) { const a = tracees.find((l) => l.vers === f)?.de ?? ''; (groupes.get(a) || groupes.set(a, []).get(a)).push(f); }
+                const listes = [...groupes.values()];
+                // Plusieurs groupes et plus de 12 commutateurs en tout : chaque groupe en rangées, environ 12 colonnes en tout
+                const total = liste.length;
+                if (listes.length < 2 || !enRangees(total)) return listes;
+                return listes.map((l) => ({ liste: l, k: Math.max(1, Math.round(l.length * SEUIL_RANGEES / total)) }));
+            };
             const tracees = liaisons.filter((l) => !pairs.includes(l));
+            const rangsVue = parAmont(feuilles);
             if (!limiteVue || commutateurs.length <= limiteVue) {
                 page(commutateurs, [...tracees, ...entreCoeurs], parSite ? (k) => siteDe.get(k) : () => null, 'Vue d\'ensemble des commutateurs', sensPour(), rangsVue, complement);
             } else {
@@ -1045,7 +1102,7 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
                         const part = site.membres.slice(t * taille, (t + 1) * taille);
                         const cles = new Set([...site.racines, ...part]);
                         const titre = `Vue d'ensemble${site.nom ? ` : ${site.nom}` : ' des commutateurs'}${tranches > 1 ? ` (${t + 1}/${tranches}) : commutateurs ${t * taille + 1} à ${t * taille + part.length} sur ${site.membres.length}` : ''}`;
-                        page([...cles], tracees.filter((l) => cles.has(l.de) && cles.has(l.vers)), () => null, titre, sensPour(), [part.filter((x) => feuilles.includes(x))], complementSite);
+                        page([...cles], tracees.filter((l) => cles.has(l.de) && cles.has(l.vers)), () => null, titre, sensPour(), parAmont(part.filter((x) => feuilles.includes(x))), complementSite);
                     }
                 }
             }
@@ -1079,3 +1136,150 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
     }
     return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre, fusions };
 }
+
+// ---------- Liaison de bout en bout : chemin entre deux équipements, relu sur les pages réseau du document ----------
+// Les pages produites par les modèles réseau sont relues : un équipement par nom (première ligne du texte, ou titre du
+// cadre d'un commutateur encadré), une liaison par trait ; les nœuds VLAN et les nœuds « Liaison A ↔ B » entre cœurs sont
+// repliés sur la liaison qu'ils portent ; les renvois « → page » et les traits invisibles sont ignorés. Le nom du lien
+// est le texte du trait, ou la 2e ligne du texte du nœud aval (nom du lien écrit sous le périphérique).
+
+export const PREFIXE_BOUT_EN_BOUT = 'Bout en bout';
+// Équipements que traverse un chemin : routeurs, pare-feu, commutateurs (un serveur relié à deux commutateurs n'est pas un passage)
+const ICONES_PASSAGE = new Set(Object.values(CATEGORIES_RESEAU).filter((c) => c.rang <= 2).flatMap((c) => [`illus:${c.illus}`, `picto:${c.picto}`]));
+const decoderTexte = (t) => String(t ?? '').replace(/#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/<br\s*\/?>/gi, '\n');
+const LIGNE_COMPTE = /^(\d[\d\s]*\s+(périphériques?|commutateurs?|équipements?|serveurs?)\b|↔|→ page)/;
+
+export function grapheReseau(pages) {
+    const equipements = new Map(); // clé → { nom, icone, passage }
+    const aretes = new Map(); // « a|b » (clés triées) → { de, vers, ports, vlans }
+    let lues = 0;
+    for (const page of pages) {
+        if (String(page.nom || '').startsWith(PREFIXE_BOUT_EN_BOUT)) continue;
+        let m;
+        try { m = logigramme.analyser(page.code || ''); } catch { continue; }
+        if (!m?.noeuds?.some((n) => n.icone)) continue;
+        const groupes = new Map((m.groupes || []).map((g) => [g.id, g]));
+        const parId = new Map(m.noeuds.map((n) => [n.id, n]));
+        const lignes = (n) => decoderTexte(n.texte).split('\n').map((x) => x.trim());
+        const nomDe = (n) => {
+            const cadre = n.groupe && groupes.get(n.groupe);
+            if (cadre && cadre.id === `e_g_${n.id.replace(/^e_/, '')}`) return decoderTexte(cadre.titre).trim();
+            return lignes(n)[0];
+        };
+        const estLiaison = (n) => /^Liaison .+ ↔ /.test(lignes(n)[0]);
+        const estVlan = (n) => /:vlan$/.test(n.icone || '') && !estLiaison(n);
+        const estRenvoi = (n) => lignes(n).some((l) => l.startsWith('→ page'));
+        const ignore = (n) => !n || estRenvoi(n) || (!n.icone && !estLiaison(n));
+        const sousNom = (n) => {
+            const cadre = n.groupe && groupes.get(n.groupe);
+            const l = lignes(n);
+            const suite = cadre && cadre.id === `e_g_${n.id.replace(/^e_/, '')}` ? l : l.slice(1);
+            return suite.find((x) => x && !LIGNE_COMPTE.test(x) && !/^VLAN /.test(x)) || '';
+        };
+        let utile = false;
+        const ajouter = (a, b, ports, vlans) => {
+            const [na, nb] = [nomDe(a), nomDe(b)];
+            if (!na || !nb || na === nb) return;
+            for (const n of [a, b]) {
+                const cle = cleNom(nomDe(n));
+                if (!equipements.has(cle)) equipements.set(cle, { nom: nomDe(n), icone: n.icone, passage: ICONES_PASSAGE.has(n.icone) });
+            }
+            const [ca, cb] = [cleNom(na), cleNom(nb)];
+            const cle = [ca, cb].sort().join('|');
+            const avant = aretes.get(cle);
+            if (!avant) aretes.set(cle, { de: ca, vers: cb, ports, vlans });
+            else { if (!avant.ports && ports) Object.assign(avant, { de: ca, vers: cb, ports }); if (!avant.vlans && vlans) avant.vlans = vlans; }
+            utile = true;
+        };
+        const traits = m.liens.filter((l) => l.trait !== 'invisible');
+        for (const l of traits) {
+            const [a, b] = [parId.get(l.de), parId.get(l.vers)];
+            if (ignore(a) || ignore(b) || estVlan(a) || estLiaison(a)) continue;
+            if (estVlan(b)) {
+                // a → VLAN → c : une liaison, VLAN compris
+                for (const suite of traits.filter((x) => x.de === b.id)) {
+                    const c = parId.get(suite.vers);
+                    if (ignore(c) || estVlan(c)) continue;
+                    ajouter(a, c, decoderTexte(l.texte).trim() || decoderTexte(suite.texte).trim() || sousNom(c), lignes(b)[0].replace(/^VLAN\s+/, ''));
+                }
+            } else if (estLiaison(b)) {
+                // Deux cœurs reliés par un nœud « Liaison A ↔ B » : une liaison entre eux
+                const autre = traits.filter((x) => x.vers === b.id && x.de !== a.id).map((x) => parId.get(x.de)).find((x) => x && !ignore(x));
+                const lb = lignes(b);
+                if (autre && a.id < autre.id) ajouter(a, autre, lb[1] && !/^VLAN /.test(lb[1]) ? lb[1] : '', (lb.find((x) => /^VLAN /.test(x)) || '').replace(/^VLAN\s+/, ''));
+            } else {
+                ajouter(a, b, decoderTexte(l.texte).trim() || sousNom(b), '');
+            }
+        }
+        if (utile) lues += 1;
+    }
+    const voisins = new Map();
+    for (const [, x] of aretes) for (const [p, q] of [[x.de, x.vers], [x.vers, x.de]]) (voisins.get(p) || voisins.set(p, []).get(p)).push(q);
+    return { equipements, aretes, voisins, pages: lues };
+}
+
+// Chemin le plus court (en nombre de liaisons) ; il ne traverse que des routeurs, pare-feu et commutateurs, sauf s'il
+// n'y a pas d'autre passage. Rend la liste des clés, ou null.
+export function cheminReseau(graphe, a, b) {
+    const [ca, cb] = [cleNom(a), cleNom(b)];
+    if (!graphe.equipements.has(ca) || !graphe.equipements.has(cb) || ca === cb) return null;
+    const chercher = (restreint) => {
+        const avant = new Map([[ca, null]]);
+        for (let i = 0, file = [ca]; i < file.length; i += 1) {
+            const x = file[i];
+            if (x === cb) break;
+            if (restreint && x !== ca && !graphe.equipements.get(x).passage) continue;
+            for (const y of graphe.voisins.get(x) || []) if (!avant.has(y)) { avant.set(y, x); file.push(y); }
+        }
+        if (!avant.has(cb)) return null;
+        const chemin = [];
+        for (let x = cb; x !== null; x = avant.get(x)) chemin.unshift(x);
+        return chemin;
+    };
+    return chercher(true) || chercher(false);
+}
+
+export const COULEURS_BOUT_EN_BOUT = [['#e1000f', 'Rouge'], ['#000091', 'Bleu France'], ['#18753c', 'Vert'], ['#ce614a', 'Orange'], ['#6e445a', 'Violet'], ['#009099', 'Turquoise'], ['#c3992a', 'Jaune doré'], ['#3a3a3a', 'Gris anthracite']];
+
+// Page de bout en bout : les équipements des chemins, de gauche à droite, chaque liaison en trait animé de sa couleur,
+// avec le nom du lien (côté amont – côté aval, dans le sens du chemin) et les VLAN. liaisons : [{ a, b, couleur, animation }]
+export function pageBoutEnBout(graphe, liaisons, { vlans = true } = {}) {
+    const modele = { preambule: [], couloirs: false, sens: 'LR', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
+    const nouvelId = idsUniques();
+    const ids = new Map();
+    const deja = new Set(); // arêtes déjà tracées
+    const alertes = [];
+    const chemins = [];
+    const noeud = (k) => {
+        if (ids.has(k)) return ids.get(k);
+        const e = graphe.equipements.get(k);
+        const id = nouvelId(e.nom);
+        ids.set(k, id);
+        modele.noeuds.push({ id, texte: protegerTexte(e.nom), forme: 'rectangle', groupe: null, classe: null, icone: e.icone || null });
+        return id;
+    };
+    for (const { a, b, couleur = COULEURS_BOUT_EN_BOUT[0][0], animation = 'lente' } of liaisons) {
+        const chemin = cheminReseau(graphe, a, b);
+        if (!chemin) { alertes.push(`${a} ↔ ${b} : aucun chemin entre ces deux équipements sur les pages réseau du document.`); chemins.push(null); continue; }
+        chemins.push(chemin);
+        if (chemin.slice(1, -1).some((k) => !graphe.equipements.get(k).passage)) alertes.push(`${a} ↔ ${b} : le chemin passe par un équipement qui n'est ni un commutateur, ni un routeur, ni un pare-feu.`);
+        let style = reglerStyle(`stroke:${couleur},stroke-width:3.5px,color:${couleur}`, animation);
+        for (let i = 1; i < chemin.length; i += 1) {
+            const [x, y] = [chemin[i - 1], chemin[i]];
+            const cle = [x, y].sort().join('|');
+            // Tronçon commun à plusieurs liaisons : un trait par liaison, côte à côte, chacun de sa couleur ; le nom du
+            // lien n'est écrit que sur le premier
+            const commun = deja.has(cle);
+            const arete = graphe.aretes.get(cle);
+            let ports = arete?.ports || '';
+            if (ports && arete.de !== x) ports = ports.split(' – ').reverse().join(' – '); // dans le sens du chemin
+            const texte = commun ? '' : [ports && protegerTexte(ports), vlans && arete?.vlans ? `VLAN ${protegerTexte(arete.vlans)}` : ''].filter(Boolean).join('<br/>');
+            deja.add(cle);
+            modele.liens.push({ de: noeud(x), vers: noeud(y), debut: '', fin: '', texte, trait: estAgregat(arete?.ports || '') ? 'epais' : 'plein', longueur: 1, style });
+        }
+    }
+    const titre = `${PREFIXE_BOUT_EN_BOUT} : ${liaisons.map(({ a, b }) => `${a} ↔ ${b}`).join(' ; ')}`.slice(0, 100);
+    if (!modele.noeuds.length) return { nom: titre, code: null, chemins, alertes, equipements: 0 };
+    return { nom: titre, code: ecrirePage(modele, alertes, titre), chemins, alertes, equipements: modele.noeuds.length };
+}
+const reglerStyle = (style, animation) => (animation ? reglerStyleLien(style, 'animation', animation) : style);

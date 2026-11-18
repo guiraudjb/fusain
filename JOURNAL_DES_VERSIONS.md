@@ -2,6 +2,30 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.32.0 — 19 novembre 2026 — liaison de bout en bout
+
+- **Demande** : depuis la barre principale, mettre en évidence une liaison de bout en bout entre deux équipements choisis des pages issues des modèles réseau : la chaîne de liaisons en traits animés, couleur au choix, sur une nouvelle page ; une ou plusieurs liaisons.
+- **Bouton « Bout en bout »** dans la barre d'outils (après « Modèles ») : fenêtre « Liaison de bout en bout ». Pour chaque liaison : deux équipements (saisie semi-automatique sur la liste des équipements des pages réseau), une couleur (rouge, Bleu France, vert, orange, violet, turquoise, jaune doré, gris anthracite), un trait (animé lent, animé rapide, fixe). Le chemin s'affiche aussitôt sous la liaison (« 7 tronçons : A → … → B »), ou ce qui manque (équipement inconnu, aucun chemin). « Ajouter une liaison » en place plusieurs sur la même page ; case « Écrire les VLAN propagés sur chaque tronçon » si les pages en portent.
+- **Relecture du réseau** (`grapheReseau`) : les pages du document qui portent des icônes sont relues : un équipement par nom (première ligne, ou titre du cadre d'un commutateur encadré), une liaison par trait ; nœuds VLAN et nœuds « Liaison A ↔ B » repliés sur la liaison qu'ils portent ; renvois « → page » et traits invisibles ignorés ; nom du lien pris sur le trait ou sous le périphérique. Les pages « Bout en bout » ne sont pas relues. 1 278 équipements et 61 pages relus en 30 ms.
+- **Chemin** (`cheminReseau`) : le plus court en nombre de liens ; il ne traverse que des commutateurs, routeurs et pare-feu (un serveur relié à deux commutateurs n'est pas un passage), sauf s'il n'y a pas d'autre chemin (signalé).
+- **Page** (`pageBoutEnBout`) « Bout en bout : A ↔ B ; C ↔ D », après la page courante : équipements de gauche à droite avec leurs icônes, chaque tronçon en trait de la couleur de sa liaison (épaisseur 3,5 px, pointillé qui défile), nom du lien dans le sens du chemin (« BAGG1 – BAGG101 »), VLAN ; un tronçon commun à deux liaisons est doublé (un trait par liaison, le nom écrit une fois). Logigramme ordinaire : tout reste modifiable (couleur, animation dans le panneau du lien).
+- **Démonstration** : une page « Bout en bout : deux liaisons à travers le data center » (79 pages).
+- **Guide utilisateur** : modules « Commutateur et périphériques » et « Data center », liaison de bout en bout.
+- **Recette** : test de logique (relecture du data center à trois niveaux, liaison entre cœurs, chemin, page à deux liaisons, couleurs et animations, tronçon commun doublé, ports dans le sens du chemin, sans VLAN, page de bout en bout non relue, serveur à deux attaches non traversé, relecture à l'identique) ; fenêtre pilotée dans l'application avec Playwright (61 pages chargées, deux liaisons, page créée en 2e position, A3).
+
+## 0.31.1 — 19 novembre 2026 — 365 pages par document, data center à trois niveaux
+
+- **Limite de pages** : 365 pages par document au lieu de 100 (ajout, import, ouverture d'un fichier) : un data center entier tient dans un document. Mesure dans Chrome : un document de 365 pages s'ouvre en 2,2 s et se relit en 20 ms (941 Kio), autant qu'un document de 100 pages ; une 366e page est refusée. Le test de charge (`tests/charge.mjs`) mesure désormais 365 pages.
+- **Trois niveaux de commutateurs en cascade** (cœur → distribution → accès) dans le module Data center :
+  - **niveaux** : chaque commutateur reçoit sa distance au centre du réseau de commutateurs (0 les cœurs, 1 la distribution, 2 l'accès) ;
+  - **parent d'un lien décrit des deux côtés** : le commutateur le plus proche du centre (auparavant : celui qui a le plus de commutateurs voisins ; un commutateur de distribution, avec 6 commutateurs d'accès, passait devant son cœur) ;
+  - **cœurs** : une liaison entre pairs ne relie que deux commutateurs de même niveau ; un commutateur de distribution n'est plus pris pour un cœur (il donnait une « vue d'ensemble » par commutateur de distribution) ;
+  - **rangées par commutateur amont** sur les vues d'ensemble : chaque commutateur de distribution range ses commutateurs d'accès (auparavant, tous ceux du site s'enchaînaient et décalaient les commutateurs de distribution en escalier) ; au-delà de 12 en tout, environ 12 colonnes sur la page ;
+  - **ordre des pages** : celui de l'arbre (un cœur, son premier commutateur de distribution, les commutateurs d'accès de celui-ci, le suivant…, puis l'autre cœur), au lieu de l'ordre d'apparition dans le fichier.
+- **Exemple** `datacenter-cascade.csv` : deux sites, 2 cœurs, 8 commutateurs de distribution, 48 commutateurs d'accès, 1 220 serveurs, VLAN, liens décrits des deux côtés → 61 pages, aucune alerte.
+- **Démonstration** : une page « Data center : trois niveaux de commutateurs » (78 pages).
+- **Recette** : test de logique (niveaux, 57 fusions, ordre des pages, page des cœurs, vue d'un site : 29 commutateurs et rangées par groupe, page d'un commutateur de distribution, relecture à l'identique) ; rendu Chrome (cœurs, site, distribution, accès).
+
 ## 0.31.0 — 19 novembre 2026 — module « Data center » : vue globale, tous les commutateurs, VLAN
 
 - **Demande** : un module qui présente une vue globale du data center sur une ou plusieurs pages, puis produit automatiquement les vues de tous les commutateurs (une ou plusieurs pages chacun) ; en option, les VLAN propagés sur chaque lien, avec l'icône VLAN et la liste de la 4e colonne.

@@ -7,6 +7,7 @@ import { typeDiagramme, TAILLE_MAX_CODE, TAILLE_MAX_CARTE } from './securite.js'
 import { THEMES, rendreSchema, composerPage, decrireErreur, verifierPropositions } from './rendu.js';
 import { diagnostiquer } from './diagnostic.js';
 import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
+import { ouvrirBoutEnBout } from './bout-en-bout.js';
 import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX } from './fichier.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
@@ -66,7 +67,8 @@ function construireBarre() {
             bouton('Zoom avant', { icone: 'zoom-in-line', seulIcone: true, titre: 'Zoom avant (Ctrl++, molette)', onclick: () => zoomer(ui.zoom * 1.25) }),
             bouton('Ajuster à la fenêtre', { icone: 'fullscreen-line', seulIcone: true, titre: 'Ajuster à la fenêtre (Ctrl+1)', onclick: ajuster })),
         groupe(h('div', { class: 'fusain-bascule', role: 'group', 'aria-label': 'Mode d\'édition' }, boutons.visuel, boutons.code)),
-        groupe(bouton('Modèles', { icone: 'layout-grid-line', onclick: () => ouvrirModeles('remplacer') })));
+        groupe(bouton('Modèles', { icone: 'layout-grid-line', onclick: () => ouvrirModeles('remplacer') }),
+            bouton('Bout en bout', { icone: 'arrow-left-right-line', titre: 'Liaison de bout en bout : tracer sur une nouvelle page le chemin entre deux équipements des pages réseau', onclick: () => { validerCodeEnAttente(); ouvrirBoutEnBout(etat.doc.pages, ajouterPages); } })));
 }
 
 function majBarre() {
@@ -1174,7 +1176,7 @@ function ajouterPages(liste) {
     });
 }
 
-// Les vignettes ne sont rendues que lorsqu'elles deviennent visibles : un document de 100 pages s'ouvre
+// Les vignettes ne sont rendues que lorsqu'elles deviennent visibles : un document de 365 pages s'ouvre
 // aussi vite qu'un document d'une page.
 let observateurVignettes = null;
 
@@ -1401,6 +1403,7 @@ const EXEMPLES_RESEAU = [
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
+    ['datacenter-cascade.csv', 'Data center à trois niveaux', 'quatre colonnes : deux sites, commutateurs en cascade cœur → distribution → accès (2 + 8 + 48), 1 220 serveurs, VLAN sur chaque lien ; pour le module Data center'],
     ['datacenter-vlans.csv', 'Data center avec VLAN', 'quatre colonnes (la 4e : VLAN propagés) : deux sites, 72 commutateurs, 1 457 serveurs ; pour le module Data center (vue globale sur plusieurs pages, VLAN sur chaque lien)'],
     ['imc-datacenters.csv', 'Deux data centers (liens IMC)', 'export de liens avec sites et locaux techniques : deux sites, 50 commutateurs, 1 395 serveurs et NAS ; découpage intelligent en pages de détail'],
     ['datacenter.csv', 'Deux data centers jumeaux', 'trois colonnes : deux sites en haute disponibilité, un cœur par site relié à l\'autre, 24 commutateurs de baie par cœur, 1 412 serveurs (hyperviseurs ESX, serveurs, NAS) ; une page par commutateur, précédée d\'une vue d\'ensemble par site'],

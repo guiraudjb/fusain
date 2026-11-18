@@ -439,6 +439,28 @@ test('réseau : commutateur et périphériques (trois colonnes), agrégats en tr
     relireToutes(pages);
 });
 
+test('réseau : 48 serveurs sous un commutateur → répartis en rangées de 7', async () => {
+    const lu = reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/commutateur-48-serveurs.csv', import.meta.url))))));
+    assert.equal(lu.lignes.length, 48);
+    assert.ok(lu.lignes.some((l) => l.peripherique === 'SRV "PROD" #1'), 'champ CSV entre guillemets');
+    const [page] = reseau.produirePagesCommutateurs(lu).pages;
+    const m = logigramme.analyser(page.code);
+    assert.equal(m.sens, 'TD');
+    assert.equal(reseau.colonnesRangees(48), 7);
+    const invisibles = m.liens.filter((l) => l.trait === 'invisible');
+    assert.equal(invisibles.length, 41, 'chaque serveur sous celui de la rangée du dessus');
+    const id = (nom) => m.noeuds.find((n) => n.texte === nom).id;
+    assert.ok(invisibles.some((l) => l.de === id('SRV-WEB-01') && l.vers === id('SRV-AD-02')), '1er au-dessus du 8e');
+    assert.equal(m.liens.filter((l) => l.trait === 'epais').length, 12);
+    assert.equal(m.liens.filter((l) => l.trait === 'plein').length, 36);
+    assert.equal(logigramme.ecrire(m), page.code);
+    // Sur une seule rangée ou en colonne : aucun lien invisible
+    for (const sens of ['TD', 'LR']) assert.doesNotMatch(reseau.produirePagesCommutateurs(lu, { sens }).pages[0].code, /~~~/);
+    assert.match(reseau.produirePagesCommutateurs(lu, { sens: 'LR' }).pages[0].code, /^flowchart LR/);
+    // Peu de périphériques : pas de rangées
+    assert.doesNotMatch(reseau.produirePagesCommutateurs({ lignes: lu.lignes.slice(0, 12) }).pages[0].code, /~~~/);
+});
+
 test('réseau : trois colonnes sans intitulés, noms avec les caractères de la syntaxe de Mermaid', () => {
     const noms = ['A "x" `y`', 'B [1] (2) {3}', 'C | D ; E : F', 'G <h> & i', 'J #35; k #l', 'end', 'M --> N', 'O\nP', 'Q %% R', 'S @{ t }'];
     const lignes = noms.map((n, i) => ['SW <1> & "x"', `${n} lien`, n]).concat([['SW <1> & "x"', 'A "x" `y` lien', 'A "x" `y`'], ['SW-2', '', 'SW <1> & "x"'], ['', 'x', 'y']]);

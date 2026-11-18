@@ -2,6 +2,13 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.30.1 — 18 novembre 2026 — commutateur : périphériques en rangées
+
+- **Constat** : avec le fichier d'essai `commutateur-48-serveurs.csv` (48 serveurs, 12 agrégats, 36 liens gigabit, quatre noms piégés), les 48 serveurs formaient une seule rangée ou une seule colonne : schéma illisible, même en A3.
+- **Essais** (rendu Chrome) : liens plus longs par rangée (sans effet, Mermaid aligne tout), cadres par rangée (posés côte à côte), liens invisibles d'un périphérique vers celui de la rangée du dessous (retenu).
+- **Correction** : au-delà de 12 périphériques propres à un commutateur, ils sont répartis en rangées sous lui, environ √n colonnes (48 → 7 colonnes, 7 rangées) ; chaque rangée garde l'ordre du fichier, Mermaid ajustant l'ordre de gauche à droite pour limiter les croisements. Disposition au choix : automatique, en rangées, sur une seule rangée, ou à droite en colonne.
+- **Recette** : test de logique sur le fichier à 48 serveurs (7 colonnes, 41 liens invisibles, 12 traits épais, 36 pleins, relecture à l'identique) ; rendu Chrome.
+
 ## 0.30.0 — 18 novembre 2026 — commutateur et périphériques, noms affichés tels quels
 
 - **Besoin** : dessiner un commutateur et ses périphériques à partir d'un simple fichier à trois colonnes (commutateur, lien, périphérique), dont les noms peuvent contenir des caractères de la syntaxe de Mermaid.

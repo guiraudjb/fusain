@@ -655,9 +655,12 @@ export function lireCommutateurs(enregistrements, { entete = 'auto' } = {}) {
 }
 
 const SEUIL_PAGE_UNIQUE = 40; // au-delà de ce nombre d'équipements, une page par commutateur
-const SEUIL_SENS_LR = 10; // au-delà de ce nombre de périphériques sous un commutateur, les périphériques sont en colonne
+const SEUIL_RANGEES = 12; // au-delà de ce nombre de périphériques sous un commutateur, ils sont répartis en rangées
+// Colonnes d'une répartition en rangées : à peu près les proportions d'une page paysage (48 → 7 colonnes, 7 rangées)
+export const colonnesRangees = (n) => Math.min(12, Math.max(6, Math.ceil(Math.sqrt(n))));
 
-// Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'), sens ('auto' | 'TD' | 'LR'),
+// Options : jeu ('illus' | 'picto'), presentation ('auto' | 'unique' | 'commutateur'),
+// sens ('auto' | 'rangees' | 'TD' | 'LR' ; automatique : une rangée sous le commutateur, plusieurs au-delà de 12),
 // liens (nom du lien sur le trait), abreger (GigabitEthernet1/0/1 → GE1/0/1), encadrer (un cadre par commutateur)
 export function produirePagesCommutateurs({ lignes }, options = {}) {
     const { jeu = 'illus', presentation = 'auto', sens = 'auto', liens: avecLiens = true, abreger = false, encadrer = true } = options;
@@ -680,12 +683,15 @@ export function produirePagesCommutateurs({ lignes }, options = {}) {
     };
     const icone = (k) => `${jeu}:${CATEGORIES_RESEAU[categorie(k)][jeu]}`;
     const texteLien = (lien) => (avecLiens && lien ? protegerTexte(abreger ? abregerInterface(lien) : lien) : '');
-    const sensPour = (n) => (sens === 'auto' ? (n > SEUIL_SENS_LR ? 'LR' : 'TD') : sens);
+    const sensPour = () => (sens === 'LR' ? 'LR' : 'TD');
+    // Rangées : les périphériques propres à un commutateur (ni commutateurs, ni partagés) sont empilés par des liens
+    // invisibles, de la colonne de la rangée du dessus vers celle du dessous ; l'ordre du fichier se lit ligne par ligne
+    const enRangees = (n) => sens === 'rangees' || (sens === 'auto' && n > SEUIL_RANGEES);
     const nombre = new Set(lignes.flatMap((l) => [cleNom(l.commutateur), cleNom(l.peripherique)])).size;
     const unique = presentation === 'unique' || (presentation === 'auto' && (commutateurs.length === 1 || nombre <= SEUIL_PAGE_UNIQUE));
     const pages = [];
 
-    const page = (cles, liaisons, groupeDe, titre, sensPage) => {
+    const page = (cles, liaisons, groupeDe, titre, sensPage, rangs = []) => {
         const modele = { preambule: [], couloirs: false, sens: sensPage, noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
         const nouvelId = idsUniques();
         const ids = new Map();
@@ -699,6 +705,11 @@ export function produirePagesCommutateurs({ lignes }, options = {}) {
         }
         for (const { de, vers, lien } of liaisons) {
             modele.liens.push({ de: ids.get(de), vers: ids.get(vers), debut: '', fin: '', texte: texteLien(lien), trait: estAgregat(lien) ? 'epais' : 'plein', longueur: 1 });
+        }
+        for (const liste of rangs) {
+            if (!enRangees(liste.length)) continue;
+            const k = colonnesRangees(liste.length);
+            for (let i = k; i < liste.length; i += 1) modele.liens.push({ de: ids.get(liste[i - k]), vers: ids.get(liste[i]), debut: '', fin: '', texte: '', trait: 'invisible', longueur: 1 });
         }
         pages.push({ nom: titre, code: ecrirePage(modele, alertes, titre), equipements: cles.length });
     };
@@ -718,15 +729,16 @@ export function produirePagesCommutateurs({ lignes }, options = {}) {
         const cadres = encadrer && commutateurs.length > 1;
         const groupeDe = (k) => (!cadres ? null : estCommutateur.has(k) ? k : rattache.get(k) || null);
         const liaisons = commutateurs.flatMap((c) => branches.get(c).map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })));
-        const plusGrand = Math.max(...commutateurs.map((c) => branches.get(c).length));
+        const propres = (c) => [...new Set(branches.get(c).map((x) => x.peripherique))].filter((p) => !estCommutateur.has(p) && rattache.get(p) === c);
         page(cles, liaisons, groupeDe, commutateurs.length === 1 ? `Commutateur ${noms.get(commutateurs[0])}` : 'Commutateurs et périphériques',
-            sensPour(commutateurs.length === 1 ? plusGrand : 0));
+            sensPour(), commutateurs.map(propres));
     } else {
         // Une page par commutateur : lui, puis ses périphériques (un commutateur voisin y figure comme périphérique)
         for (const c of commutateurs) {
             const b = branches.get(c);
             const cles = [c, ...new Set(b.map((x) => x.peripherique))];
-            page(cles, b.map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null, `Commutateur ${noms.get(c)}`, sensPour(cles.length - 1));
+            page(cles, b.map(({ peripherique, lien }) => ({ de: c, vers: peripherique, lien })), () => null, `Commutateur ${noms.get(c)}`, sensPour(),
+                [cles.slice(1).filter((p) => !estCommutateur.has(p))]);
         }
     }
     return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre };

@@ -166,7 +166,7 @@ export function ouvrirImportCommutateurs(ajouterPages) {
                 h('div', { class: 'fusain-import-reseau__colonnes' },
                     champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
                     champSelect('Pages', [['auto', 'Automatique'], ['unique', 'Tous les commutateurs sur une page'], ['commutateur', 'Une page par commutateur']], o.presentation, (v) => { o.presentation = v; redessiner(); }),
-                    champSelect('Disposition', [['auto', 'Automatique'], ['TD', 'Périphériques sous le commutateur'], ['LR', 'Périphériques à droite du commutateur']], o.sens, (v) => { o.sens = v; redessiner(); }),
+                    champSelect('Disposition', [['auto', 'Automatique (en rangées au-delà de 12)'], ['rangees', 'Sous le commutateur, en rangées'], ['TD', 'Sous le commutateur, sur une seule rangée'], ['LR', 'À droite du commutateur, en colonne']], o.sens, (v) => { o.sens = v; redessiner(); }),
                     champCase('Écrire le nom du lien sur le trait', o.liens, (v) => { o.liens = v; redessiner(); }),
                     champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); }),
                     champCase('Encadrer chaque commutateur avec ses périphériques (page unique)', o.encadrer, (v) => { o.encadrer = v; redessiner(); })),

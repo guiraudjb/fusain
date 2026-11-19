@@ -3,11 +3,11 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.32.1-e480d87286';
+const VERSION_CACHE = 'fusain-0.32.1-b4dfe43ba8';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
-    ['./Documentation/GUIDE_IMC.md', '13014e9b7e64958181886944fcfd491322fa4483cfb21492de4721005c2d31cf'],
+    ['./Documentation/GUIDE_IMC.md', 'c9ff6e02d8cd880cfe703e71a24b2a2d8b9f26da0023a0a85ddecca99fc4189e'],
     ['./Documentation/GUIDE_UTILISATEUR.md', 'f0d68d1dc9ef8e402b8984a68e23019d6c50c969fa70cd530a29ad3b886c9367'],
     ['./Documentation/exemples-reseau/LISEZ-MOI.md', '8dc0574185fbdfd502f71424d46723b1f05486627f8cb1356a3cbf7b84628c1d'],
     ['./Documentation/exemples-reseau/commutateur-48-serveurs.csv', '5ca16bfb278a70842b6e09ff11fb266c7ab8913051fd820767f01bd2b437b176'],
@@ -58,9 +58,9 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '036013203675b46a2832fb31b4c643333b6aa98edd27ef52685ac33111bea7df'],
-    ['./index.html', '036013203675b46a2832fb31b4c643333b6aa98edd27ef52685ac33111bea7df'],
-    ['./js/app.js', '9d4364aa224d27b9e9feb504539c776f4f0eb86afabb2ea0a7a9a0487a3cde33'],
+    ['./', 'fca5f46a6b25fbbdf6dc275bd2e964382e5e20279f3c19bb565739c8b53d02eb'],
+    ['./index.html', 'fca5f46a6b25fbbdf6dc275bd2e964382e5e20279f3c19bb565739c8b53d02eb'],
+    ['./js/app.js', '91f5f5b19570b5af356ea0a68d9829ca744454d4bf405a5e0c9cf1d731e4161f'],
     ['./js/bout-en-bout.js', '205f638943caf4e7c316d2ed289faaa63289662aa29d69f5a48f69b03a715820'],
     ['./js/brouillon.js', '8eaefb98fc4dda95f498e795466c2058c89544b2eb6fc86602388185efb6c95e'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],

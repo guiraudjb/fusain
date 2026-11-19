@@ -99,7 +99,7 @@ test('fichier : aller-retour et refus des entrées hostiles', () => {
     delete ancien.pages[0].sousTitre;
     delete ancien.pages[0].description;
     const relu = lireJson(JSON.stringify(ancien));
-    assert.equal(relu.formatVersion, 2);
+    assert.equal(relu.formatVersion, 3);
     assert.equal(relu.pages[0].sousTitre, '');
     assert.equal(relu.pages[0].description, '');
 });
@@ -716,6 +716,51 @@ test('liaison de bout en bout : réseau relu sur les pages, chemin le plus court
     const petit = reseau.produirePagesCommutateurs({ lignes: [l('SW-A', 'G1', 'SRV-DOUBLE'), l('SW-B', 'G1', 'SRV-DOUBLE'), l('SW-A', 'G2', 'R-1'), l('R-1', 'G3', 'ROUTEUR-2'), l('ROUTEUR-2', 'G4', 'SW-B'), l('SW-A', 'G5', 'PC-1'), l('SW-B', 'G6', 'PC-2')] }, { presentation: 'commutateur' }).pages;
     const gp = reseau.grapheReseau(petit);
     assert.deepEqual(reseau.cheminReseau(gp, 'PC-1', 'PC-2'), ['pc-1', 'sw-a', 'r-1', 'routeur-2', 'sw-b', 'pc-2']);
+});
+
+test('liaison de bout en bout : tout le réseau déclaré à l\'import, avec ou sans page ; réseaux sans lien expliqués', async () => {
+    const lire = async (f) => reseau.lireCommutateurs(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL(`../Documentation/exemples-reseau/${f}`, import.meta.url))))));
+    const dc = reseau.produirePagesCommutateurs(await lire('datacenter.csv'), { presentation: 'commutateur', abreger: true });
+    const salle = reseau.produirePagesCommutateurs(await lire('commutateur-48-serveurs.csv'), { presentation: 'commutateur' });
+    assert.equal(dc.topologie.equipements.length, 1462, '50 commutateurs et 1 412 serveurs');
+    assert.equal(dc.topologie.liaisons.length, 1461);
+    assert.deepEqual(dc.topologie.equipements[0], ['CŒUR-DC-NORD', 'illus:commutateur-niveau-3', 1]);
+    const reseaux = [{ nom: 'datacenter.csv', ...dc.topologie }, { nom: 'commutateur-48-serveurs.csv', ...salle.topologie }];
+    // Une seule page gardée (vue d'ensemble) : tous les équipements restent joignables
+    const g = reseau.grapheReseau([dc.pages[0]], reseaux);
+    assert.equal(g.reseaux, 2);
+    assert.equal(g.equipements.size, 1462 + 49);
+    const chemin = reseau.cheminReseau(g, 'SRV-MAIL-N15-06', 'ESX-S01-01');
+    assert.deepEqual(chemin?.[0], 'srv-mail-n15-06');
+    assert.ok(chemin.includes('cœur-dc-nord') && chemin.includes('cœur-dc-sud'));
+    assert.equal(g.aretes.get('sw-nord-b15|srv-mail-n15-06'.split('|').sort().join('|')).ports, 'XGE1/0/6');
+    // Deux réseaux importés sans lien entre eux : la raison est donnée
+    assert.equal(reseau.cheminReseau(g, 'SRV-MAIL-N15-06', 'SRV-PAIE-01'), null);
+    assert.equal(reseau.raisonSansChemin(g, 'srv-mail-n15-06', 'srv-paie-01'), 'SRV-MAIL-N15-06 (datacenter.csv) et SRV-PAIE-01 (commutateur-48-serveurs.csv) sont dans deux réseaux qu\'aucun lien ne relie.');
+    // Un même nom dans deux fichiers les relie : seul chemin, par un serveur, signalé
+    const homonyme = { nom: 'homonyme.csv', ...reseau.topologie([{ cle: 'sw-x', nom: 'SW-X', icone: 'illus:commutateur-switch', passage: true }, { cle: 'srv-paie-01', nom: 'SRV-PAIE-01', icone: 'illus:serveur', passage: false }, { cle: 'esx-s01-01', nom: 'ESX-S01-01', icone: 'illus:serveur', passage: false }],
+        [{ a: 'sw-x', b: 'srv-paie-01' }, { a: 'sw-x', b: 'esx-s01-01' }]) };
+    const g3 = reseau.grapheReseau([], [...reseaux, homonyme]);
+    assert.deepEqual(reseau.cheminReseau(g3, 'SRV-MAIL-N15-06', 'SRV-AD-01').slice(-5), ['esx-s01-01', 'sw-x', 'srv-paie-01', 'sw-salle-serveurs-01', 'srv-ad-01']);
+    assert.match(reseau.pageBoutEnBout(g3, [{ a: 'SRV-MAIL-N15-06', b: 'SRV-AD-01' }]).alertes[0], /ni un commutateur/);
+    // Sans aucune page : le réseau déclaré suffit
+    assert.ok(reseau.pageBoutEnBout(reseau.grapheReseau([], reseaux), [{ a: 'SRV-PAIE-01', b: 'SRV-AD-01' }]).code.includes('SW-SALLE-SERVEURS-01'));
+    // Import IMC : les terminaux résumés (« 12 serveurs ») sont dans la topologie
+    const imc = reseau.analyserReseau(reseau.tableau(await reseau.lireEnregistrements(new Uint8Array(lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/imc-datacenters.csv', import.meta.url))))), reseau.CHAMPS_LIENS));
+    const ri = reseau.produirePages(imc, { parPage: 60 });
+    assert.equal(ri.topologie.equipements.length, imc.noeuds.length);
+    assert.ok(reseau.cheminReseau(reseau.grapheReseau([], [{ nom: 'imc', ...ri.topologie }]), 'SRV-MAIL-N15-06', 'CORE-SUD'));
+    // Enregistré avec le document (format 3), relu à l'identique ; contrôles du fichier
+    const doc = { format: 'fusain', formatVersion: 3, application: 'x', document: { titre: 't', creeLe: '2026-11-19T00:00:00.000Z', modifieLe: '2026-11-19T00:00:00.000Z', theme: 'bleu-france' },
+        pages: [{ id: 'p1', nom: 'P', format: 'A4', orientation: 'paysage', margesMm: 10, titre: '', sousTitre: '', piedDePage: '', description: '', ajustement: { mode: 'page', echelle: 100, alignement: 'centre' }, code: 'flowchart TD\n    A --> B\n' }], reseaux };
+    const relu = lireJson(serialiser(doc));
+    assert.deepEqual(relu.reseaux, reseaux);
+    assert.equal(lireJson(serialiser({ ...doc, reseaux: [] })).reseaux, undefined);
+    const casse = (modif) => assert.throws(() => lireJson(JSON.stringify(modif(structuredClone(doc)))));
+    casse((d) => { d.reseaux[0].equipements[0][1] = 'javascript:alert(1)'; return d; });
+    casse((d) => { d.reseaux[0].liaisons[0][1] = 99999; return d; });
+    casse((d) => { d.reseaux[0].autre = 1; return d; });
+    casse((d) => { d.reseaux[0].equipements[0][2] = 2; return d; });
 });
 
 test('réseau : lien entre commutateurs décrit des deux côtés → un seul trait, port du parent – port du fils', () => {

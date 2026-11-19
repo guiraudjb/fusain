@@ -90,7 +90,8 @@ pages.push({ ...meta('dcv_commutateur', 'Data center : un commutateur et ses VLA
     code: dcv.find((x) => x.nom === 'Commutateur SW-NORD-B01').code });
 
 // Trois niveaux en cascade (cœur → distribution → accès) : vue d'un site
-const dcc = produire(datacenterCascade, { jeu: 'illus', presentation: 'commutateur', parPage: 40, parPageVue: 40, abreger: true, tri: 'lien', placeLien: 'peripherique', vlans: true });
+const dccR = reseau.produirePagesCommutateurs(datacenterCascade, { jeu: 'illus', presentation: 'commutateur', parPage: 40, parPageVue: 40, abreger: true, tri: 'lien', placeLien: 'peripherique', vlans: true });
+const dcc = dccR.pages;
 pages.push({ ...meta('dcc_site', 'Data center : trois niveaux de commutateurs', 'A3', 'Site Nord à trois niveaux : cœur, 4 commutateurs de distribution, 24 commutateurs d\'accès',
     'Module « Data center » — datacenter-cascade.csv — commutateurs en cascade, rangées par commutateur de distribution, les deux ports de chaque lien',
     `${dcc.length} pages, dans l'ordre de l'arbre : cœurs, sites, puis cœur, distribution, ses accès, distribution suivante…`), code: dcc[1].code });
@@ -121,5 +122,11 @@ doc.pages = doc.pages.filter((x) => !String(x.id).startsWith('p52c_'));
 const apres = doc.pages.findIndex((x) => x.id === 'p52_reseau_sites');
 if (apres < 0) throw new Error('page « p52_reseau_sites » introuvable');
 doc.pages.splice(apres + 1, 0, ...pages);
-writeFileSync(chemin, JSON.stringify(doc, null, 2) + '\n');
+// Topologie complète du data center à trois niveaux : la liaison de bout en bout de la démonstration atteint tous ses
+// équipements, y compris ceux qui n'ont pas de page dans la démonstration
+doc.formatVersion = 3;
+doc.reseaux = [{ nom: 'datacenter-cascade.csv', ...dccR.topologie }];
+// Topologie sur une ligne (des milliers de petits tableaux) : le reste du document garde son indentation
+const { reseaux, ...sansReseaux } = doc;
+writeFileSync(chemin, JSON.stringify(sansReseaux, null, 2).replace(/\n}$/, `,\n  "reseaux": ${JSON.stringify(reseaux)}\n}`) + '\n');
 console.log(`${pages.length} pages de démonstration du module commutateur ; document : ${doc.pages.length} pages.`);

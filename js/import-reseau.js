@@ -96,7 +96,8 @@ export function ouvrirImportReseau(ajouterPages) {
     const creer = bouton('Créer les pages', { icone: 'add-line', variante: 'primary', taille: 'md', onclick: () => {
         if (!resultat) return;
         fermerModale(dialogue);
-        ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 30 ? 'A3' : 'A4', orientation: 'paysage' })));
+        ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 30 ? 'A3' : 'A4', orientation: 'paysage' })),
+            { reseau: { nom: (etat.nomLiens || 'Réseau importé').slice(0, 100), ...resultat.topologie } });
         message('Réseau importé', `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} ajoutée${resultat.pages.length > 1 ? 's' : ''} à partir de ${etat.nomLiens}. Chaque schéma reste modifiable.`, 'success', 6000);
     } });
 
@@ -153,7 +154,8 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = 
     const creer = bouton('Créer les pages', { icone: 'add-line', variante: 'primary', taille: 'md', onclick: () => {
         if (!resultat) return;
         fermerModale(dialogue);
-        ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 20 ? 'A3' : 'A4', orientation: 'paysage' })));
+        ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 20 ? 'A3' : 'A4', orientation: 'paysage' })),
+            { reseau: { nom: (etat.nom || 'Réseau importé').slice(0, 100), ...resultat.topologie } });
         message('Commutateurs importés', `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} ajoutée${resultat.pages.length > 1 ? 's' : ''} à partir de ${etat.nom}. Chaque schéma reste modifiable.`, 'success', 6000);
     } });
 

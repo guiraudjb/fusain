@@ -322,7 +322,7 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
 ```json
 {
   "format": "fusain",
-  "formatVersion": 2,
+  "formatVersion": 3,
   "application": "1.0.0",
   "document": {
     "titre": "Circuit de traitement des demandes",
@@ -345,6 +345,13 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
       "type": "flowchart",
       "code": "flowchart LR\n    A[Réception] --> B{Dossier complet ?}\n    B -- Oui --> C[Instruction]\n    B -- Non --> D[Demande de pièces]"
     }
+  ],
+  "reseaux": [
+    {
+      "nom": "datacenter.csv",
+      "equipements": [["CŒUR-DC-NORD", "illus:commutateur-niveau-3", 1], ["SW-NORD-B01", "illus:commutateur-switch", 1], ["ESX-N01-01", "illus:serveur", 0]],
+      "liaisons": [[0, 1, "BAGG101 – BAGG1", "1, 10, 20"], [1, 2, "BAGG10", "10, 20"]]
+    }
   ]
 }
 ```
@@ -357,11 +364,12 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
 | Contenu exécutable | Aucun : le fichier ne contient que des chaînes, des nombres et des booléens. Ni HTML, ni SVG, ni script, ni URL de ressource. |
 | Images incorporées | Non admises en V1 |
 | Taille maximale acceptée | 5 Mo |
-| Nombre maximal de pages | 100 |
+| Nombre maximal de pages | 365 |
+| Réseaux enregistrés (`reseaux`, facultatif) | Topologie lue à l'import d'un réseau (modèles réseau), pour la liaison de bout en bout : 50 réseaux, 60 000 équipements et 120 000 liaisons au plus ; équipement = [nom, icône `jeu:nom` ou vide, passage 0 ou 1] ; liaison = [rang, rang, ports, VLAN] |
 | Taille maximale d'un code | 50 000 caractères par page |
 | Valeurs énumérées | `format` (`A4`, `A3`), `orientation` (`portrait`, `paysage`), `ajustement.mode`, `theme`, `type` : listes fermées, toute autre valeur entraîne le refus |
 | Champs inconnus | Refusés (pas de champ libre) |
-| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version. Version 2 depuis FUSAIN 0.3.0 (ajout de `sousTitre` et `description`) : un fichier de version 1 reste lisible, ces champs y sont vides |
+| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version. Version 2 depuis FUSAIN 0.3.0 (ajout de `sousTitre` et `description`) : un fichier de version 1 reste lisible, ces champs y sont vides. Version 3 depuis FUSAIN 0.32.1 (ajout de `reseaux`) : un fichier de version 1 ou 2 reste lisible, sans réseau enregistré |
 
 Le schéma JSON formel (JSON Schema) est livré avec l'application et sert à la fois de documentation et de référence pour la validation à la restauration.
 

@@ -2,6 +2,19 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.32.1 — 19 novembre 2026 — bout en bout sur tout le réseau importé
+
+- **Retour** : la recherche de liaison ne portait que sur les équipements dessinés sur les pages, pas sur l'ensemble des équipements déclarés ; pénalisant quand les vues sont éclatées sur plusieurs pages (ou qu'une partie n'a pas de page). Liaison introuvable entre SRV-MAIL-N15-06 et SRV-PAIE-01.
+- **Réseau enregistré avec le document** : chaque import réseau (« Importer un réseau » IMC / LLDP, « Commutateur et périphériques », « Data center ») enregistre la topologie lue dans le fichier : tous les équipements (y compris les terminaux résumés « 12 serveurs » ou renvoyés à une page de détail) et toutes les liaisons, avec ports et VLAN. Un nouvel import du même fichier remplace la précédente. Annulable comme l'import.
+- **Bout en bout** : la recherche porte sur les réseaux enregistrés et sur les pages réseau (une page ajoutée ou modifiée à la main compte aussi). La fenêtre indique la provenance (« 2 fichiers importés, tous leurs équipements, avec ou sans page ; 71 pages réseau »).
+- **Pas de chemin** : la raison est donnée : « SRV-MAIL-N15-06 (datacenter.csv) et SRV-PAIE-01 (commutateur-48-serveurs.csv) sont dans deux réseaux qu'aucun lien ne relie ». C'était le cas signalé : SRV-PAIE-01 est dans l'exemple de la salle serveurs, sans lien avec le data center.
+- **Chemin par un équipement terminal** (seul chemin possible, par exemple un même nom dans deux fichiers) : accepté, mais signalé dans la fenêtre (« Attention : … passe par SRV R&D | essais, qui n'est ni un commutateur, ni un routeur, ni un pare-feu (même nom dans deux réseaux ?) »).
+- **Pas de filtrage VLAN** : le chemin suit tous les liens, quels que soient leurs VLAN (les VLAN sont seulement écrits sur chaque tronçon).
+- **Format de fichier 3** : champ facultatif `reseaux` ([{ nom, equipements: [[nom, icône, passage]], liaisons: [[rang, rang, ports, VLAN]] }]), validé élément par élément (icône `jeu:nom`, rangs dans les bornes, 50 réseaux, 60 000 équipements, 120 000 liaisons au plus). Un fichier de format 1 ou 2 reste lisible. Cahier des charges et schéma JSON à jour (le schéma limitait encore à 100 pages).
+- **Exemple** `datacenter.csv` : « SRV R&D | essais » devient « SRV R&D | essais DC-SUD » : ce nom figurait aussi dans `commutateur-48-serveurs.csv` et reliait artificiellement les deux réseaux.
+- **Démonstration** : topologie complète du data center à trois niveaux enregistrée dans le document (1 278 équipements), page du format de fichier en version 3.
+- **Recette** : test de logique (topologie du module commutateur et de l'import IMC, une seule page gardée et tout le réseau joignable, raison sans chemin, homonyme signalé, aucune page, fichier format 3 relu à l'identique, refus des icônes, rangs, champs et passages invalides) ; scénario rejoué dans l'application (import Data center de datacenter.csv puis Commutateur de commutateur-48-serveurs.csv, Bout en bout).
+
 ## 0.32.0 — 19 novembre 2026 — liaison de bout en bout
 
 - **Demande** : depuis la barre principale, mettre en évidence une liaison de bout en bout entre deux équipements choisis des pages issues des modèles réseau : la chaîne de liaisons en traits animés, couleur au choix, sur une nouvelle page ; une ou plusieurs liaisons.

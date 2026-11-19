@@ -1,16 +1,17 @@
-// Liaison de bout en bout : depuis la barre principale, choisir deux équipements des pages réseau du document ; le chemin
+// Liaison de bout en bout : depuis la barre principale, choisir deux équipements du réseau du document (tous ceux des
+// fichiers importés par les modèles réseau, enregistrés avec le document, et ceux des pages réseau) ; le chemin
 // qui les relie (commutateurs, routeurs, pare-feu traversés) est dessiné sur une nouvelle page, en traits animés de la
 // couleur choisie, avec le nom du lien et les VLAN de chaque tronçon. Plusieurs liaisons peuvent figurer sur la même page.
 import { h, bouton, champSelect, champCase, message, modale, ouvrirModale, fermerModale, idUnique } from './dom.js';
-import { grapheReseau, cheminReseau, pageBoutEnBout, COULEURS_BOUT_EN_BOUT } from './reseau.js';
+import { grapheReseau, cheminReseau, pageBoutEnBout, raisonSansChemin, COULEURS_BOUT_EN_BOUT } from './reseau.js';
 
 const COLLATEUR = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
 const ANIMATIONS = [['lente', 'Animé lent'], ['rapide', 'Animé rapide'], ['', 'Sans animation']];
 
-export function ouvrirBoutEnBout(pages, ajouterPages) {
-    const graphe = grapheReseau(pages);
+export function ouvrirBoutEnBout(doc, ajouterPages) {
+    const graphe = grapheReseau(doc.pages, doc.reseaux || []);
     if (!graphe.equipements.size) {
-        message('Aucune page réseau', 'Les liaisons de bout en bout se tracent sur les pages produites par les modèles réseau (import IMC, commutateurs et périphériques, data center).', 'info', 9000);
+        message('Aucun réseau', 'Les liaisons de bout en bout se tracent sur un réseau importé par les modèles réseau (import IMC, commutateurs et périphériques, data center).', 'info', 9000);
         return;
     }
     const noms = [...graphe.equipements.values()].map((e) => e.nom).sort(COLLATEUR.compare);
@@ -36,11 +37,15 @@ export function ouvrirBoutEnBout(pages, ajouterPages) {
     const bilan = (l) => {
         if (!l.a || !l.b) return ['Choisissez les deux équipements.', ''];
         const inconnu = [l.a, l.b].filter((n) => !parNom.has(n.toLowerCase()));
-        if (inconnu.length) return [`Équipement inconnu sur les pages réseau : ${inconnu.join(', ')}.`, 'error'];
+        if (inconnu.length) return [`Équipement inconnu dans le réseau du document : ${inconnu.join(', ')}.`, 'error'];
         const chemin = cheminReseau(graphe, l.a, l.b);
-        if (!chemin) return [l.a.toLowerCase() === l.b.toLowerCase() ? 'Choisissez deux équipements différents.' : 'Aucun chemin entre ces deux équipements sur les pages réseau.', 'error'];
+        if (!chemin) return [l.a.toLowerCase() === l.b.toLowerCase() ? 'Choisissez deux équipements différents.' : `Aucun chemin : ${raisonSansChemin(graphe, l.a, l.b)}`, 'error'];
         const nomsChemin = chemin.map((k) => graphe.equipements.get(k).nom);
-        return [`${chemin.length - 1} tronçon${chemin.length > 2 ? 's' : ''} : ${nomsChemin.join(' → ')}`, 'valid'];
+        const texte = `${chemin.length - 1} tronçon${chemin.length > 2 ? 's' : ''} : ${nomsChemin.join(' → ')}`;
+        // Faute de mieux, le chemin traverse un serveur ou un poste (un même nom dans deux réseaux, par exemple) : signalé
+        const terminaux = chemin.slice(1, -1).filter((k) => !graphe.equipements.get(k).passage).map((k) => graphe.equipements.get(k).nom);
+        if (terminaux.length) return [`${texte}. Attention : seul chemin possible, il passe par ${terminaux.join(', ')}, qui n'est ni un commutateur, ni un routeur, ni un pare-feu (même nom dans deux réseaux ?).`, 'valid attention'];
+        return [texte, 'valid'];
     };
 
     function redessiner() {
@@ -61,9 +66,9 @@ export function ouvrirBoutEnBout(pages, ajouterPages) {
                     h('div', { class: 'fr-col-12 fr-col-md-5' }, champSelect('Trait', ANIMATIONS, l.animation, (v) => { l.animation = v; redessiner(); })),
                     etat.liaisons.length > 1 ? h('div', { class: 'fr-col-12 fr-col-md-2 fusain-bout-en-bout__retirer' },
                         bouton('Retirer', { icone: 'delete-bin-line', seulIcone: true, titre: `Retirer la liaison ${i + 1}`, onclick: () => { etat.liaisons.splice(i, 1); redessiner(); } })) : null),
-                h('p', { class: `fr-message fr-message--${statut || 'info'} fr-text--sm fr-mb-0` }, texte));
+                h('p', { class: `fr-message fr-message--${statut === 'valid attention' ? 'info fusain-bout-en-bout__attention' : statut || 'info'} fr-text--sm fr-mb-0` }, texte));
         });
-        const pretes = etat.liaisons.filter((l) => bilan(l)[1] === 'valid').length;
+        const pretes = etat.liaisons.filter((l) => bilan(l)[1].startsWith('valid')).length;
         creer.disabled = !pretes;
         creer.textContent = pretes > 1 ? `Créer la page (${pretes} liaisons)` : 'Créer la page';
         zone.replaceChildren(...lignes,
@@ -72,7 +77,7 @@ export function ouvrirBoutEnBout(pages, ajouterPages) {
     }
 
     const dialogue = modale('fusain-modale-bout-en-bout', 'Liaison de bout en bout', h('div', {},
-        h('p', { class: 'fr-text--sm' }, `Choisissez deux équipements parmi les ${noms.length} des pages réseau du document (${graphe.pages} page${graphe.pages > 1 ? 's' : ''}) : le chemin qui les relie est dessiné sur une nouvelle page, après la page courante, en trait animé de la couleur choisie, avec le nom des liens et les VLAN. Plusieurs liaisons peuvent figurer sur la même page ; un tronçon commun est doublé, un trait par liaison.`),
+        h('p', { class: 'fr-text--sm' }, `Choisissez deux équipements parmi les ${noms.length} du réseau du document (${[graphe.reseaux ? `${graphe.reseaux} fichier${graphe.reseaux > 1 ? 's' : ''} importé${graphe.reseaux > 1 ? 's' : ''}, tous leurs équipements, avec ou sans page` : '', graphe.pages ? `${graphe.pages} page${graphe.pages > 1 ? 's' : ''} réseau` : ''].filter(Boolean).join(' ; ')}) : le chemin qui les relie est dessiné sur une nouvelle page, après la page courante, en trait animé de la couleur choisie, avec le nom des liens et les VLAN. Plusieurs liaisons peuvent figurer sur la même page ; un tronçon commun est doublé, un trait par liaison.`),
         liste, zone), [creer]);
     redessiner();
     ouvrirModale(dialogue);

@@ -6,6 +6,10 @@ import { THEMES } from './rendu.js';
 
 export const TAILLE_MAX_FICHIER = 5 * 1024 * 1024;
 export const PAGES_MAX = 365;
+// Topologies réseau enregistrées à l'import (liaison de bout en bout) : limites du champ « reseaux »
+export const RESEAUX_MAX = 50;
+const EQUIPEMENTS_RESEAU_MAX = 60000;
+const LIAISONS_RESEAU_MAX = 120000;
 
 const CLES_HOSTILES = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -47,7 +51,7 @@ function date(valeur, nom) {
 // Reconstruit un document neuf, champ par champ, à partir d'un objet non fiable.
 // L'objet d'entrée n'est jamais réutilisé tel quel.
 export function valider(brut) {
-    objet(brut, 'fichier', ['format', 'formatVersion', 'application', 'document', 'pages']);
+    objet(brut, 'fichier', ['format', 'formatVersion', 'application', 'document', 'pages', 'reseaux']);
     if (brut.format !== 'fusain') refuser('Ce fichier n\'est pas un document FUSAIN.');
     if (!Number.isInteger(brut.formatVersion) || brut.formatVersion < 1) refuser('Version de format invalide.');
     if (brut.formatVersion > VERSION_FORMAT) refuser('Ce fichier a été créé avec une version plus récente de FUSAIN. Mettez l\'application à jour pour l\'ouvrir.');
@@ -95,7 +99,37 @@ export function valider(brut) {
         };
     });
 
-    return { format: 'fusain', formatVersion: VERSION_FORMAT, application: VERSION, document, pages };
+    const reseaux = brut.reseaux === undefined ? undefined : validerReseaux(brut.reseaux);
+    return { format: 'fusain', formatVersion: VERSION_FORMAT, application: VERSION, document, pages, ...(reseaux?.length ? { reseaux } : {}) };
+}
+
+// Champ « reseaux » (format 3) : [{ nom, equipements: [[nom, icône, 0|1]], liaisons: [[i, j, ports, vlans]] }]
+function validerReseaux(brut) {
+    if (!Array.isArray(brut) || brut.length > RESEAUX_MAX) refuser('Le champ « reseaux » est mal formé.');
+    let equipements = 0;
+    let liaisons = 0;
+    return brut.map((r, n) => {
+        const nom = `réseau ${n + 1}`;
+        objet(r, nom, ['nom', 'equipements', 'liaisons']);
+        if (!Array.isArray(r.equipements) || !Array.isArray(r.liaisons)) refuser(`Le champ « ${nom} » est mal formé.`);
+        equipements += r.equipements.length;
+        liaisons += r.liaisons.length;
+        if (equipements > EQUIPEMENTS_RESEAU_MAX || liaisons > LIAISONS_RESEAU_MAX) refuser('Les réseaux enregistrés sont trop volumineux.');
+        const total = r.equipements.length;
+        return {
+            nom: chaine(r.nom, `${nom} / nom`, 100),
+            equipements: r.equipements.map((e) => {
+                if (!Array.isArray(e) || e.length !== 3) refuser(`Équipement mal formé (${nom}).`);
+                const icone = chaine(e[1], `${nom} / icône`, 80);
+                if (icone && !/^[a-z]+:[a-z0-9-]+$/.test(icone)) refuser(`Icône invalide (${nom}).`);
+                return [chaine(e[0], `${nom} / équipement`, 200, { vide: false }), icone, parmi(e[2], [0, 1], `${nom} / passage`)];
+            }),
+            liaisons: r.liaisons.map((l) => {
+                if (!Array.isArray(l) || l.length !== 4 || !Number.isInteger(l[0]) || !Number.isInteger(l[1]) || l[0] < 0 || l[1] < 0 || l[0] >= total || l[1] >= total) refuser(`Liaison mal formée (${nom}).`);
+                return [l[0], l[1], chaine(l[2], `${nom} / ports`, 200), chaine(l[3], `${nom} / VLAN`, 500)];
+            }),
+        };
+    });
 }
 
 export function lireJson(texte) {
@@ -121,6 +155,7 @@ export function serialiser(doc) {
             titre: p.titre, sousTitre: p.sousTitre, piedDePage: p.piedDePage, description: p.description, ajustement: { ...p.ajustement },
             type: typeDiagramme(p.code), code: p.code,
         })),
+        ...(doc.reseaux?.length ? { reseaux: doc.reseaux } : {}),
     };
     return JSON.stringify(sortie, null, 2);
 }

@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://guiraudjb.github.io/fusain/schema/fusain.schema.json",
   "title": "Document FUSAIN",
-  "description": "Format de sauvegarde de FUSAIN, version 2. Le fichier ne contient que du texte, des nombres et des listes fermées : ni HTML, ni SVG, ni script. La validation appliquée par l'application (js/fichier.js) est la référence.",
+  "description": "Format de sauvegarde de FUSAIN, version 3. Le fichier ne contient que du texte, des nombres et des listes fermées : ni HTML, ni SVG, ni script. La validation appliquée par l'application (js/fichier.js) est la référence.",
   "type": "object",
   "additionalProperties": false,
   "required": ["format", "formatVersion", "application", "document", "pages"],
   "properties": {
     "format": { "const": "fusain" },
-    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 2, "description": "2 depuis FUSAIN 0.3.0 (ajout de sousTitre et description). Un fichier de version 1 reste lisible." },
+    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 3, "description": "2 depuis FUSAIN 0.3.0 (ajout de sousTitre et description) ; 3 depuis FUSAIN 0.32.1 (ajout de reseaux). Un fichier de version 1 ou 2 reste lisible." },
     "application": { "type": "string", "maxLength": 20 },
     "document": {
       "type": "object",
@@ -22,7 +22,7 @@
       }
     },
     "pages": {
-      "type": "array", "minItems": 1, "maxItems": 100,
+      "type": "array", "minItems": 1, "maxItems": 365,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -49,6 +49,24 @@
           },
           "type": { "type": "string", "pattern": "^[A-Za-z0-9-]{0,40}$", "description": "Indicatif : recalculé à partir du code à chaque ouverture" },
           "code": { "type": "string", "maxLength": 50000, "description": "Code Mermaid de la page, seule représentation enregistrée du schéma" }
+        }
+      }
+    },
+    "reseaux": {
+      "type": "array", "maxItems": 50,
+      "description": "Facultatif. Topologies lues à l'import d'un réseau (modèles réseau), pour la liaison de bout en bout ; 60 000 équipements et 120 000 liaisons au plus en tout.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["nom", "equipements", "liaisons"],
+        "properties": {
+          "nom": { "type": "string", "maxLength": 100, "description": "Nom du fichier importé" },
+          "equipements": {
+            "type": "array", "description": "[nom, icône « jeu:nom » ou vide, 1 pour un passage (commutateur, routeur, pare-feu) sinon 0]",
+            "items": { "type": "array", "minItems": 3, "items": false, "prefixItems": [{ "type": "string", "minLength": 1, "maxLength": 200 }, { "type": "string", "maxLength": 80, "pattern": "^([a-z]+:[a-z0-9-]+)?$" }, { "enum": [0, 1] }] }
+          },
+          "liaisons": {
+            "type": "array", "description": "[rang du premier équipement, rang du second, ports, VLAN]",
+            "items": { "type": "array", "minItems": 4, "items": false, "prefixItems": [{ "type": "integer", "minimum": 0 }, { "type": "integer", "minimum": 0 }, { "type": "string", "maxLength": 200 }, { "type": "string", "maxLength": 500 }] }
+          }
         }
       }
     }

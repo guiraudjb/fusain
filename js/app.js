@@ -8,7 +8,7 @@ import { THEMES, rendreSchema, composerPage, decrireErreur, verifierPropositions
 import { diagnostiquer } from './diagnostic.js';
 import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
 import { ouvrirBoutEnBout } from './bout-en-bout.js';
-import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX } from './fichier.js';
+import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX, RESEAUX_MAX } from './fichier.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
 import { exporterVisio } from './visio.js';
@@ -68,7 +68,7 @@ function construireBarre() {
             bouton('Ajuster à la fenêtre', { icone: 'fullscreen-line', seulIcone: true, titre: 'Ajuster à la fenêtre (Ctrl+1)', onclick: ajuster })),
         groupe(h('div', { class: 'fusain-bascule', role: 'group', 'aria-label': 'Mode d\'édition' }, boutons.visuel, boutons.code)),
         groupe(bouton('Modèles', { icone: 'layout-grid-line', onclick: () => ouvrirModeles('remplacer') }),
-            bouton('Bout en bout', { icone: 'arrow-left-right-line', titre: 'Liaison de bout en bout : tracer sur une nouvelle page le chemin entre deux équipements des pages réseau', onclick: () => { validerCodeEnAttente(); ouvrirBoutEnBout(etat.doc.pages, ajouterPages); } })));
+            bouton('Bout en bout', { icone: 'arrow-left-right-line', titre: 'Liaison de bout en bout : tracer sur une nouvelle page le chemin entre deux équipements du réseau importé', onclick: () => { validerCodeEnAttente(); ouvrirBoutEnBout(etat.doc, ajouterPages); } })));
 }
 
 function majBarre() {
@@ -1156,13 +1156,18 @@ function ajouterPage(code, nom) {
     });
 }
 
-// Plusieurs pages d'un coup (import d'un réseau), après la page courante : une seule étape d'annulation
-function ajouterPages(liste) {
+// Plusieurs pages d'un coup (import d'un réseau), après la page courante : une seule étape d'annulation.
+// reseau : topologie lue dans le fichier importé, enregistrée avec le document (liaison de bout en bout) ; un nouvel
+// import du même fichier remplace la précédente
+function ajouterPages(liste, { reseau = null } = {}) {
     const place = PAGES_MAX - etat.doc.pages.length;
     if (place <= 0) return message('Nombre maximal de pages atteint', '', 'warning');
     if (liste.length > place) message('Pages en trop', `Seules les ${place} premières pages ont été ajoutées (${PAGES_MAX} pages au plus par document).`, 'warning');
     ui.selection = null;
     modifier((doc) => {
+        if (reseau?.equipements?.length) {
+            doc.reseaux = [...(doc.reseaux || []).filter((r) => r.nom !== reseau.nom), reseau].slice(-RESEAUX_MAX);
+        }
         const modele = pageCourante();
         const pages = liste.slice(0, place).map(({ code, nom, format, orientation }) => {
             const page = nouvellePage(code, nom || `Page ${doc.pages.length + 1}`);

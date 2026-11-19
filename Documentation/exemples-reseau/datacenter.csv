@@ -790,7 +790,7 @@ SW-SUD-B02;Ten-GigabitEthernet1/0/23;SRV-MAIL-S02-23
 SW-SUD-B03;Bridge-Aggregation10;ESX-S03-01
 SW-SUD-B03;Bridge-Aggregation11;ESX-S03-02
 SW-SUD-B03;Ten-GigabitEthernet1/0/3;ESX-S03-03
-SW-SUD-B03;Bridge-Aggregation12;SRV R&D | essais
+SW-SUD-B03;Bridge-Aggregation12;SRV R&D | essais DC-SUD
 SW-SUD-B03;Bridge-Aggregation13;NAS-S03-05
 SW-SUD-B03;Ten-GigabitEthernet1/0/6;SRV-MAIL-S03-06
 SW-SUD-B03;Ten-GigabitEthernet1/0/7;SRV-APP-S03-07

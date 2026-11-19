@@ -743,7 +743,10 @@ export function produirePages(graphe, options = {}) {
             }
         }
     }
-    return { pages, alertes, mode };
+    // Topologie déclarée (tous les équipements, y compris les terminaux résumés ou renvoyés à une page de détail)
+    const topo = topologie(graphe.noeuds.map((x) => ({ cle: x.cle, nom: x.nom, icone: `${jeu}:${CATEGORIES_RESEAU[x.categorie]?.[jeu] || CATEGORIES_RESEAU.inconnu[jeu]}`, passage: (CATEGORIES_RESEAU[x.categorie]?.rang ?? 4) <= 2 })),
+        graphe.liaisons.map((li) => ({ a: li.a, b: li.b, ports: libelleLiaison(li, { abreger, logique: false }), vlans: li.vlans.size ? ecrireVlans(li.vlans) : '' })));
+    return { pages, alertes, mode, topologie: topo };
 }
 
 // ---------- Commutateur et périphériques : fichier à trois colonnes ----------
@@ -1134,7 +1137,12 @@ export function produirePagesCommutateurs({ lignes: lignesLues }, options = {}) 
             }
         }
     }
-    return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre, fusions };
+    // Topologie déclarée, enregistrée avec le document : la liaison de bout en bout la parcourt en entier, même
+    // pour les équipements sans page (ou dont la page a été retirée)
+    const cles = [...new Set(fusionnees.flatMap((l) => [cleNom(l.commutateur), cleNom(l.peripherique)]))];
+    const topo = topologie(cles.map((k) => ({ cle: k, nom: noms.get(k), icone: icone(k), passage: CATEGORIES_RESEAU[categorie(k)].rang <= 2 })),
+        fusionnees.map((l) => ({ a: cleNom(l.commutateur), b: cleNom(l.peripherique), ports: String(l.lien || '').split(SEPARATEUR_PORTS).map((x) => (abreger ? abregerInterface(x) : x)).join(' – '), vlans: l.vlans?.size ? ecrireVlans(l.vlans) : '' })));
+    return { pages, alertes, unique, commutateurs: commutateurs.length, equipements: nombre, fusions, topologie: topo };
 }
 
 // ---------- Liaison de bout en bout : chemin entre deux équipements, relu sur les pages réseau du document ----------
@@ -1149,10 +1157,40 @@ const ICONES_PASSAGE = new Set(Object.values(CATEGORIES_RESEAU).filter((c) => c.
 const decoderTexte = (t) => String(t ?? '').replace(/#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/<br\s*\/?>/gi, '\n');
 const LIGNE_COMPTE = /^(\d[\d\s]*\s+(périphériques?|commutateurs?|équipements?|serveurs?)\b|↔|→ page)/;
 
-export function grapheReseau(pages) {
-    const equipements = new Map(); // clé → { nom, icone, passage }
+// Topologie compacte, telle qu'elle est enregistrée dans le document (champ « reseaux ») :
+// { equipements: [[nom, icône, passage 0|1]], liaisons: [[i, j, ports, vlans]] } (i, j : rangs dans equipements)
+export function topologie(equipements, liaisons) {
+    const rang = new Map(equipements.map((e, i) => [e.cle, i]));
+    return {
+        equipements: equipements.map((e) => [String(e.nom).slice(0, 200), e.icone || '', e.passage ? 1 : 0]),
+        liaisons: liaisons.filter((l) => rang.has(l.a) && rang.has(l.b) && l.a !== l.b).map((l) => [rang.get(l.a), rang.get(l.b), String(l.ports || '').slice(0, 200), String(l.vlans || '').slice(0, 500)]),
+    };
+}
+
+// pages : celles du document ; reseaux : les topologies déclarées à l'import ({ nom, equipements, liaisons })
+export function grapheReseau(pages, reseaux = []) {
+    const equipements = new Map(); // clé → { nom, icone, passage, sources: Set }
     const aretes = new Map(); // « a|b » (clés triées) → { de, vers, ports, vlans }
     let lues = 0;
+    const noter = (nom, icone, passage, source) => {
+        const cle = cleNom(nom);
+        const e = equipements.get(cle) || equipements.set(cle, { nom, icone: icone || null, passage: false, sources: new Set() }).get(cle);
+        if (passage) e.passage = true;
+        if (!e.icone && icone) e.icone = icone;
+        if (source) e.sources.add(source);
+        return cle;
+    };
+    const relier = (ca, cb, ports, vlans) => {
+        if (ca === cb) return;
+        const cle = [ca, cb].sort().join('|');
+        const avant = aretes.get(cle);
+        if (!avant) aretes.set(cle, { de: ca, vers: cb, ports, vlans });
+        else { if (!avant.ports && ports) Object.assign(avant, { de: ca, vers: cb, ports }); if (!avant.vlans && vlans) avant.vlans = vlans; }
+    };
+    for (const r of reseaux || []) {
+        const cles = r.equipements.map(([nom, icone, passage]) => noter(nom, icone, passage, r.nom));
+        for (const [i, j, ports, vlans] of r.liaisons) if (cles[i] && cles[j]) relier(cles[i], cles[j], ports, vlans);
+    }
     for (const page of pages) {
         if (String(page.nom || '').startsWith(PREFIXE_BOUT_EN_BOUT)) continue;
         let m;
@@ -1180,15 +1218,7 @@ export function grapheReseau(pages) {
         const ajouter = (a, b, ports, vlans) => {
             const [na, nb] = [nomDe(a), nomDe(b)];
             if (!na || !nb || na === nb) return;
-            for (const n of [a, b]) {
-                const cle = cleNom(nomDe(n));
-                if (!equipements.has(cle)) equipements.set(cle, { nom: nomDe(n), icone: n.icone, passage: ICONES_PASSAGE.has(n.icone) });
-            }
-            const [ca, cb] = [cleNom(na), cleNom(nb)];
-            const cle = [ca, cb].sort().join('|');
-            const avant = aretes.get(cle);
-            if (!avant) aretes.set(cle, { de: ca, vers: cb, ports, vlans });
-            else { if (!avant.ports && ports) Object.assign(avant, { de: ca, vers: cb, ports }); if (!avant.vlans && vlans) avant.vlans = vlans; }
+            relier(noter(na, a.icone, ICONES_PASSAGE.has(a.icone), `page « ${page.nom} »`), noter(nb, b.icone, ICONES_PASSAGE.has(b.icone), `page « ${page.nom} »`), ports, vlans);
             utile = true;
         };
         const traits = m.liens.filter((l) => l.trait !== 'invisible');
@@ -1215,7 +1245,16 @@ export function grapheReseau(pages) {
     }
     const voisins = new Map();
     for (const [, x] of aretes) for (const [p, q] of [[x.de, x.vers], [x.vers, x.de]]) (voisins.get(p) || voisins.set(p, []).get(p)).push(q);
-    return { equipements, aretes, voisins, pages: lues };
+    return { equipements, aretes, voisins, pages: lues, reseaux: (reseaux || []).length };
+}
+
+// Pourquoi deux équipements connus ne sont pas reliés : ils sont dans deux réseaux sans lien entre eux
+export function raisonSansChemin(graphe, a, b) {
+    const [ca, cb] = [cleNom(a), cleNom(b)];
+    const [ea, eb] = [graphe.equipements.get(ca), graphe.equipements.get(cb)];
+    if (!ea || !eb) return null;
+    const origine = (e) => { const s = [...e.sources]; return s.length ? `${s.slice(0, 2).join(', ')}${s.length > 2 ? '…' : ''}` : ''; };
+    return `${ea.nom} (${origine(ea)}) et ${eb.nom} (${origine(eb)}) sont dans deux réseaux qu'aucun lien ne relie.`;
 }
 
 // Chemin le plus court (en nombre de liaisons) ; il ne traverse que des routeurs, pare-feu et commutateurs, sauf s'il
@@ -1260,7 +1299,7 @@ export function pageBoutEnBout(graphe, liaisons, { vlans = true } = {}) {
     };
     for (const { a, b, couleur = COULEURS_BOUT_EN_BOUT[0][0], animation = 'lente' } of liaisons) {
         const chemin = cheminReseau(graphe, a, b);
-        if (!chemin) { alertes.push(`${a} ↔ ${b} : aucun chemin entre ces deux équipements sur les pages réseau du document.`); chemins.push(null); continue; }
+        if (!chemin) { alertes.push(`${a} ↔ ${b} : aucun chemin. ${raisonSansChemin(graphe, a, b) || 'Équipement inconnu dans le réseau du document.'}`); chemins.push(null); continue; }
         chemins.push(chemin);
         if (chemin.slice(1, -1).some((k) => !graphe.equipements.get(k).passage)) alertes.push(`${a} ↔ ${b} : le chemin passe par un équipement qui n'est ni un commutateur, ni un routeur, ni un pare-feu.`);
         let style = reglerStyle(`stroke:${couleur},stroke-width:3.5px,color:${couleur}`, animation);

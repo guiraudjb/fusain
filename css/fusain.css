@@ -262,3 +262,4 @@ body.fusain-mode-diaporama { background: #0f111a; color: #f6f6f6; }
 /* Liaison de bout en bout */
 .fusain-bout-en-bout__pastille { display: inline-block; width: 1.5rem; height: .35rem; margin-left: .75rem; vertical-align: middle; border-radius: 2px; }
 .fusain-bout-en-bout__retirer { display: flex; align-items: flex-end; }
+.fusain-bout-en-bout__attention { color: var(--text-default-warning, #b34000); }

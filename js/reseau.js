@@ -1280,8 +1280,28 @@ export function cheminReseau(graphe, a, b) {
 
 export const COULEURS_BOUT_EN_BOUT = [['#e1000f', 'Rouge'], ['#000091', 'Bleu France'], ['#18753c', 'Vert'], ['#ce614a', 'Orange'], ['#6e445a', 'Violet'], ['#009099', 'Turquoise'], ['#c3992a', 'Jaune doré'], ['#3a3a3a', 'Gris anthracite']];
 
+// Liaisons qui passent par un même équipement : regroupées (de proche en proche) pour être dessinées sur un même schéma.
+// Rend des listes de rangs dans liaisons, dans l'ordre de la première liaison de chaque groupe ; une liaison sans chemin
+// reste seule.
+export function groupesBoutEnBout(graphe, liaisons) {
+    const parent = liaisons.map((_, i) => i);
+    const racine = (i) => (parent[i] === i ? i : (parent[i] = racine(parent[i])));
+    const proprietaire = new Map(); // équipement → première liaison qui le traverse
+    liaisons.forEach(({ a, b }, i) => {
+        for (const k of cheminReseau(graphe, a, b) || []) {
+            if (!proprietaire.has(k)) proprietaire.set(k, i);
+            else { const [r, q] = [racine(proprietaire.get(k)), racine(i)]; if (r !== q) parent[Math.max(r, q)] = Math.min(r, q); }
+        }
+    });
+    const groupes = new Map();
+    liaisons.forEach((_, i) => { const r = racine(i); (groupes.get(r) || groupes.set(r, []).get(r)).push(i); });
+    return [...groupes.values()];
+}
+
 // Page de bout en bout : les équipements des chemins, de gauche à droite, chaque liaison en trait animé de sa couleur,
 // avec le nom du lien (côté amont – côté aval, dans le sens du chemin) et les VLAN. liaisons : [{ a, b, couleur, animation }]
+// Les liaisons qui passent par un même équipement sont fusionnées : chaque équipement et chaque tronçon n'y figurent
+// qu'une fois (un tronçon commun garde la couleur de la première liaison qui l'emprunte).
 export function pageBoutEnBout(graphe, liaisons, { vlans = true } = {}) {
     const modele = { preambule: [], couloirs: false, sens: 'LR', noeuds: [], liens: [], groupes: [], styles: {}, brut: [] };
     const nouvelId = idsUniques();
@@ -1306,14 +1326,13 @@ export function pageBoutEnBout(graphe, liaisons, { vlans = true } = {}) {
         for (let i = 1; i < chemin.length; i += 1) {
             const [x, y] = [chemin[i - 1], chemin[i]];
             const cle = [x, y].sort().join('|');
-            // Tronçon commun à plusieurs liaisons : un trait par liaison, côte à côte, chacun de sa couleur ; le nom du
-            // lien n'est écrit que sur le premier
-            const commun = deja.has(cle);
+            // Tronçon commun à plusieurs liaisons : fusionné, un seul trait
+            if (deja.has(cle)) continue;
+            deja.add(cle);
             const arete = graphe.aretes.get(cle);
             let ports = arete?.ports || '';
             if (ports && arete.de !== x) ports = ports.split(' – ').reverse().join(' – '); // dans le sens du chemin
-            const texte = commun ? '' : [ports && protegerTexte(ports), vlans && arete?.vlans ? `VLAN ${protegerTexte(arete.vlans)}` : ''].filter(Boolean).join('<br/>');
-            deja.add(cle);
+            const texte = [ports && protegerTexte(ports), vlans && arete?.vlans ? `VLAN ${protegerTexte(arete.vlans)}` : ''].filter(Boolean).join('<br/>');
             modele.liens.push({ de: noeud(x), vers: noeud(y), debut: '', fin: '', texte, trait: estAgregat(arete?.ports || '') ? 'epais' : 'plein', longueur: 1, style });
         }
     }

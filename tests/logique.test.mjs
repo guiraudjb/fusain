@@ -700,13 +700,21 @@ test('liaison de bout en bout : réseau relu sur les pages, chemin le plus court
     const m = logigramme.analyser(r.code);
     assert.equal(m.sens, 'LR');
     assert.equal(m.noeuds.length, 12);
-    assert.equal(m.liens.length, 13, '7 + 6 tronçons, le tronçon commun doublé');
+    assert.equal(m.liens.length, 11, '7 + 6 tronçons, les 2 tronçons communs fusionnés');
     assert.equal(m.liens.filter((l) => /stroke:#e1000f/.test(l.style) && /animation:dash 20s/.test(l.style)).length, 7);
-    assert.equal(m.liens.filter((l) => /stroke:#18753c/.test(l.style) && /animation:dash 8s/.test(l.style)).length, 6);
+    assert.equal(m.liens.filter((l) => /stroke:#18753c/.test(l.style) && /animation:dash 8s/.test(l.style)).length, 4, 'tronçons communs de la couleur de la 1re liaison');
     // Ports dans le sens du chemin (côté accès – côté distribution), VLAN du tronçon
     const acces = m.liens.find((l) => l.de === 'e_SW_ACC_N1_01' && l.vers === 'e_SW_DIST_NORD_1' && l.texte);
     assert.equal(acces.texte, 'BAGG1 – BAGG101\nVLAN 10, 20, 30, 40, 50, 100');
-    assert.equal(m.liens.filter((l) => l.de === 'e_SW_ACC_N1_01' && l.vers === 'e_SW_DIST_NORD_1').length, 2);
+    assert.equal(m.liens.filter((l) => l.de === 'e_SW_ACC_N1_01' && l.vers === 'e_SW_DIST_NORD_1').length, 1);
+    // Liaisons fusionnées si elles passent par un même équipement (de proche en proche), sinon un schéma chacune
+    const liaisons = [{ a: 'ESX-N101-01', b: 'ESX-N101-02' }, { a: 'ESX-S401-01', b: 'ESX-S401-02' }, { a: 'INCONNU', b: 'ESX-N101-01' }, { a: 'ESX-S401-03', b: 'ESX-N203-01' }];
+    assert.deepEqual(reseau.groupesBoutEnBout(g, liaisons), [[0], [1, 3], [2]], 'SW-ACC-S4-01 commun aux liaisons 2 et 4 ; liaison sans chemin seule');
+    assert.deepEqual(reseau.groupesBoutEnBout(g, [...liaisons, { a: 'ESX-N101-01', b: 'ESX-S401-01' }]), [[0, 1, 3, 4], [2]], 'une liaison qui rejoint les deux groupes les fusionne');
+    const fusion = logigramme.analyser(reseau.pageBoutEnBout(g, [liaisons[1], liaisons[3]]).code);
+    assert.equal(fusion.noeuds.filter((n) => n.texte === 'SW-ACC-S4-01').length, 1);
+    assert.equal(fusion.liens.length, 2 + 7, 'un équipement commun, aucun tronçon commun : rien de doublé');
+    assert.equal(fusion.noeuds.length, 3 + 8 - 1);
     assert.equal(logigramme.ecrire(m), r.code);
     // Sans VLAN ; une page de bout en bout n'est pas relue comme page réseau
     assert.doesNotMatch(reseau.pageBoutEnBout(g, [{ a: 'ESX-N101-01', b: 'ESX-N101-02' }], { vlans: false }).code, /VLAN/);

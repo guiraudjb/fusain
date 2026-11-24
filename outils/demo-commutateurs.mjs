@@ -100,8 +100,8 @@ pages.push({ ...meta('dcc_site', 'Data center : trois niveaux de commutateurs', 
 const grapheDcc = reseau.grapheReseau(dcc);
 const bout = reseau.pageBoutEnBout(grapheDcc, [{ a: 'ESX-N101-01', b: 'ESX-S401-03', couleur: '#e1000f' }, { a: 'ESX-N101-02', b: 'ESX-N203-01', couleur: '#000091', animation: 'rapide' }]);
 pages.push({ ...meta('bout_en_bout', 'Bout en bout : deux liaisons à travers le data center', 'A3', 'Deux liaisons de bout en bout entre serveurs : chemins à travers les commutateurs d\'accès, de distribution et les cœurs',
-    'Bouton « Bout en bout » de la barre d\'outils — deux équipements, une couleur et un trait animé par liaison ; tronçon commun doublé',
-    'Rouge : ESX-N101-01 (site Nord) vers ESX-S401-03 (site Sud), par les deux cœurs. Bleu : ESX-N101-02 vers ESX-N203-01, sur le site Nord.'), code: bout.code });
+    'Bouton « Bout en bout » de la barre d\'outils — deux équipements, une couleur et un trait animé par liaison ; liaisons fusionnées (passent par des équipements communs), tronçons communs tracés une fois',
+    'Rouge : ESX-N101-01 (site Nord) vers ESX-S401-03 (site Sud), par les deux cœurs. Bleu : ESX-N101-02 vers ESX-N203-01, sur le site Nord. Les tronçons communs (accès, distribution, cœur Nord) restent en rouge.'), code: bout.code });
 
 // Import IMC (liens avec sites et locaux) des mêmes data centers : découpage intelligent à 60 équipements par page
 const pagesImc = reseau.produirePages(imc, { jeu: 'illus', parPage: 60, placeLien: 'peripherique', tri: 'lien' });

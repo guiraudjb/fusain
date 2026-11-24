@@ -7,10 +7,24 @@ const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit',
 const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
 const ACCEPTES = '.csv,.txt,.tsv,.xlsx,.xls,.htm,.html,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
+// Ce que l'import crée : les schémas (et le réseau, enregistré avec le document), ou le réseau seul, sans aucune page :
+// l'utilisateur choisit ensuite, par « Bout en bout », les liaisons à dessiner
+const CREATIONS = [['pages', 'Les schémas (pages) et le réseau'], ['reseau', 'Le réseau seulement : équipements et liaisons, sans schéma']];
+const AIDE_RESEAU_SEUL = 'Aucune page n\'est créée : les équipements et les liaisons sont enregistrés avec le document. La fenêtre « Bout en bout » s\'ouvre ensuite pour choisir les liaisons à dessiner ; les liaisons qui passent par un même équipement sont fusionnées sur un même schéma.';
+const pluriel = (n, mot) => `${n.toLocaleString('fr-FR')} ${mot}${n > 1 ? 's' : ''}`;
+
+// Réseau seul : enregistré sans page, puis fenêtre « Bout en bout »
+function importerReseauSeul(ajouterPages, nom, topo, boutEnBout) {
+    ajouterPages([], { reseau: { nom: (nom || 'Réseau importé').slice(0, 100), ...topo } });
+    message('Réseau importé, sans schéma', `${pluriel(topo.equipements.length, 'équipement')} et ${pluriel(topo.liaisons.length, 'liaison')} enregistrés avec le document à partir de ${nom}. Choisissez les liaisons de bout en bout à dessiner (bouton « Bout en bout »).`, 'success', 8000);
+    boutEnBout?.();
+}
+
 // ajouterPages(liste de { nom, code, format, orientation }) : fournie par l'application, une seule étape d'annulation
-export function ouvrirImportReseau(ajouterPages) {
+// boutEnBout() : ouvre la fenêtre « Bout en bout », après un import du réseau seul
+export function ouvrirImportReseau(ajouterPages, { boutEnBout = null } = {}) {
     const etat = {
-        liens: null, nomLiens: '', equipements: null, nomEquipements: '', equipementLocal: '',
+        creation: 'pages', liens: null, nomLiens: '', equipements: null, nomEquipements: '', equipementLocal: '',
         options: { jeu: 'illus', regroupement: 'auto', resumer: true, abreger: true, logique: true, sens: 'auto', tri: 'fichier', placeLien: 'peripherique', parPage: 60 },
     };
     const zone = h('div', { class: 'fusain-import-reseau' });
@@ -79,6 +93,11 @@ export function ouvrirImportReseau(ajouterPages) {
         const graphe = analyserReseau(etat.liens, etat.equipements, { equipementLocal: etat.equipementLocal.trim() });
         if (!graphe.liaisons.length) return h('p', { class: 'fr-error-text' }, 'Aucune liaison n\'a pu être lue avec ces colonnes.');
         resultat = produirePages(graphe, { ...o, logique: o.logique && graphe.avecVlans });
+        if (etat.creation === 'reseau') {
+            return h('div', { class: 'fr-callout fr-py-2w fr-px-3w' },
+                h('p', { class: 'fr-callout__text fr-text--sm' }, `${graphe.bilan.lignes} lignes lues : ${pluriel(resultat.topologie.equipements.length, 'équipement')} et ${pluriel(resultat.topologie.liaisons.length, 'liaison')} à enregistrer, sans page.`),
+                h('p', { class: 'fr-text--xs fr-mb-0' }, AIDE_RESEAU_SEUL));
+        }
         const parCategorie = new Map();
         for (const x of graphe.noeuds) parCategorie.set(x.categorie, (parCategorie.get(x.categorie) || 0) + 1);
         const { lignes, doublons, ignorees } = graphe.bilan;
@@ -96,6 +115,7 @@ export function ouvrirImportReseau(ajouterPages) {
     const creer = bouton('Créer les pages', { icone: 'add-line', variante: 'primary', taille: 'md', onclick: () => {
         if (!resultat) return;
         fermerModale(dialogue);
+        if (etat.creation === 'reseau') return importerReseauSeul(ajouterPages, etat.nomLiens, resultat.topologie, boutEnBout);
         ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 30 ? 'A3' : 'A4', orientation: 'paysage' })),
             { reseau: { nom: (etat.nomLiens || 'Réseau importé').slice(0, 100), ...resultat.topologie } });
         message('Réseau importé', `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} ajoutée${resultat.pages.length > 1 ? 's' : ''} à partir de ${etat.nomLiens}. Chaque schéma reste modifiable.`, 'success', 6000);
@@ -110,9 +130,17 @@ export function ouvrirImportReseau(ajouterPages) {
             }
         }
         if (etat.equipements) parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, `Colonnes de « ${etat.nomEquipements} »`), colonnes(etat.equipements, CHAMPS_EQUIPEMENTS, ESSENTIELS_EQUIPEMENTS));
-        if (etat.liens) parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'), choix(), h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'), bilan());
-        else resultat = null;
+        if (etat.liens) {
+            parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'À créer'),
+                champSelect('Créer', CREATIONS, etat.creation, (v) => { etat.creation = v; redessiner(); }));
+            if (etat.creation === 'pages') parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'), choix());
+            else parties.push(h('div', { class: 'fusain-import-reseau__colonnes' },
+                champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
+                champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); })));
+            parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'), bilan());
+        } else resultat = null;
         creer.disabled = !resultat;
+        creer.textContent = etat.creation === 'reseau' ? 'Importer le réseau' : 'Créer les pages';
         zone.replaceChildren(...parties);
     }
 
@@ -126,8 +154,8 @@ export function ouvrirImportReseau(ajouterPages) {
 // Boîte « Commutateur et périphériques » : fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés
 // datacenter : module « Data center » : même fichier (4e colonne VLAN facultative), réglé pour tout le data center :
 // vue d'ensemble sur une ou plusieurs pages, puis les vues de tous les commutateurs, découpées au besoin
-export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = {}) {
-    const etat = { enregistrements: null, nom: '', entete: 'auto', limiter: datacenter, vlansChoisis: null, options: { jeu: 'illus', presentation: datacenter ? 'commutateur' : 'auto', sens: 'auto', liens: true, abreger: datacenter, encadrer: true, parType: false, parPage: datacenter ? 40 : 0, tri: datacenter ? 'lien' : 'fichier', placeLien: 'peripherique', ensemble: true, amont: true, vlans: false, parPageVue: datacenter ? 40 : 0 } };
+export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false, boutEnBout = null } = {}) {
+    const etat = { creation: 'pages', enregistrements: null, nom: '', entete: 'auto', limiter: datacenter, vlansChoisis: null, options: { jeu: 'illus', presentation: datacenter ? 'commutateur' : 'auto', sens: 'auto', liens: true, abreger: datacenter, encadrer: true, parType: false, parPage: datacenter ? 40 : 0, tri: datacenter ? 'lien' : 'fichier', placeLien: 'peripherique', ensemble: true, amont: true, vlans: false, parPageVue: datacenter ? 40 : 0 } };
     const o = etat.options;
     const zone = h('div', { class: 'fusain-import-reseau' });
     let resultat = null;
@@ -154,6 +182,7 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = 
     const creer = bouton('Créer les pages', { icone: 'add-line', variante: 'primary', taille: 'md', onclick: () => {
         if (!resultat) return;
         fermerModale(dialogue);
+        if (etat.creation === 'reseau') return importerReseauSeul(ajouterPages, etat.nom, resultat.topologie, boutEnBout);
         ajouterPages(resultat.pages.map((p) => ({ nom: p.nom.slice(0, 100), code: p.code, format: p.equipements > 20 ? 'A3' : 'A4', orientation: 'paysage' })),
             { reseau: { nom: (etat.nom || 'Réseau importé').slice(0, 100), ...resultat.topologie } });
         message('Commutateurs importés', `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} ajoutée${resultat.pages.length > 1 ? 's' : ''} à partir de ${etat.nom}. Chaque schéma reste modifiable.`, 'success', 6000);
@@ -174,6 +203,14 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = 
                     h('thead', {}, h('tr', {}, ['Commutateur (col. 1)', 'Lien (col. 2)', 'Périphérique (col. 3)', ...(lu.avecVlans ? ['VLAN (col. 4)'] : [])].map((t) => h('th', { scope: 'col' }, t)))),
                     h('tbody', {}, apercu.map((l) => h('tr', {}, [l.commutateur, l.lien, l.peripherique, ...(lu.avecVlans ? [l.vlans.size ? ecrireVlans(l.vlans) : '—'] : [])].map((t) => h('td', {}, t))))))),
                 lu.lignes.length > apercu.length ? h('p', { class: 'fr-text--xs' }, `… et ${lu.lignes.length - apercu.length} autre${lu.lignes.length - apercu.length > 1 ? 's' : ''} ligne${lu.lignes.length - apercu.length > 1 ? 's' : ''}.`) : null,
+                h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'À créer'),
+                champSelect('Créer', CREATIONS, etat.creation, (v) => { etat.creation = v; redessiner(); }));
+            if (etat.creation === 'reseau') {
+                parties.push(h('div', { class: 'fusain-import-reseau__colonnes' },
+                    champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
+                    champCase('Abréger les interfaces (GigabitEthernet1/0/1 → GE1/0/1)', o.abreger, (v) => { o.abreger = v; redessiner(); })),
+                h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
+            } else parties.push(
                 h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'),
                 h('div', { class: 'fusain-import-reseau__colonnes' },
                     champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
@@ -205,7 +242,12 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = 
             } else {
                 resultat = produirePagesCommutateurs(lu, o);
                 const { ignorees, doublons, colonnesEnTrop } = lu.bilan;
-                parties.push(h('div', { class: 'fr-callout fr-py-2w fr-px-3w' },
+                if (etat.creation === 'reseau') {
+                    parties.push(h('div', { class: 'fr-callout fr-py-2w fr-px-3w' },
+                        h('p', { class: 'fr-callout__text fr-text--sm' }, `${pluriel(lu.lignes.length, 'ligne')} : ${pluriel(resultat.topologie.equipements.length, 'équipement')} (dont ${pluriel(resultat.commutateurs, 'commutateur')}) et ${pluriel(resultat.topologie.liaisons.length, 'liaison')} à enregistrer, sans page`
+                            + `${doublons ? `, ${doublons} doublon${doublons > 1 ? 's' : ''} écarté${doublons > 1 ? 's' : ''}` : ''}${ignorees ? `, ${ignorees} ligne${ignorees > 1 ? 's' : ''} incomplète${ignorees > 1 ? 's' : ''} ignorée${ignorees > 1 ? 's' : ''}` : ''}.`),
+                        h('p', { class: 'fr-text--xs fr-mb-0' }, AIDE_RESEAU_SEUL)));
+                } else parties.push(h('div', { class: 'fr-callout fr-py-2w fr-px-3w' },
                     h('p', { class: 'fr-callout__text fr-text--sm' }, `${lu.lignes.length} liaison${lu.lignes.length > 1 ? 's' : ''} : ${resultat.commutateurs} commutateur${resultat.commutateurs > 1 ? 's' : ''}, ${resultat.equipements} équipements en tout`
                         + `${doublons ? `, ${doublons} doublon${doublons > 1 ? 's' : ''} écarté${doublons > 1 ? 's' : ''}` : ''}${ignorees ? `, ${ignorees} ligne${ignorees > 1 ? 's' : ''} incomplète${ignorees > 1 ? 's' : ''} ignorée${ignorees > 1 ? 's' : ''}` : ''}.`),
                     h('p', { class: 'fr-text--sm fr-mb-1w' }, `${resultat.pages.length} page${resultat.pages.length > 1 ? 's' : ''} : ${resultat.pages.slice(0, 8).map((p) => p.nom).join(', ')}${resultat.pages.length > 8 ? '…' : ''}.`),
@@ -217,6 +259,7 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false } = 
             }
         }
         creer.disabled = !resultat;
+        creer.textContent = etat.creation === 'reseau' ? 'Importer le réseau' : 'Créer les pages';
         zone.replaceChildren(...parties.filter(Boolean));
     }
 

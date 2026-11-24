@@ -68,7 +68,7 @@ function construireBarre() {
             bouton('Ajuster à la fenêtre', { icone: 'fullscreen-line', seulIcone: true, titre: 'Ajuster à la fenêtre (Ctrl+1)', onclick: ajuster })),
         groupe(h('div', { class: 'fusain-bascule', role: 'group', 'aria-label': 'Mode d\'édition' }, boutons.visuel, boutons.code)),
         groupe(bouton('Modèles', { icone: 'layout-grid-line', onclick: () => ouvrirModeles('remplacer') }),
-            bouton('Bout en bout', { icone: 'arrow-left-right-line', titre: 'Liaison de bout en bout : tracer sur une nouvelle page le chemin entre deux équipements du réseau importé', onclick: () => { validerCodeEnAttente(); ouvrirBoutEnBout(etat.doc, ajouterPages); } })));
+            bouton('Bout en bout', { icone: 'arrow-left-right-line', titre: 'Liaison de bout en bout : tracer sur une nouvelle page le chemin entre deux équipements du réseau importé', onclick: () => { validerCodeEnAttente(); boutEnBout(); } })));
 }
 
 function majBarre() {
@@ -1156,11 +1156,18 @@ function ajouterPage(code, nom) {
     });
 }
 
+// Fenêtre « Bout en bout » sur le réseau du document (barre principale, ou après un import du réseau seul)
+function boutEnBout() { ouvrirBoutEnBout(etat.doc, ajouterPages); }
+
 // Plusieurs pages d'un coup (import d'un réseau), après la page courante : une seule étape d'annulation.
 // reseau : topologie lue dans le fichier importé, enregistrée avec le document (liaison de bout en bout) ; un nouvel
-// import du même fichier remplace la précédente
+// import du même fichier remplace la précédente. Liste vide : le réseau seul est enregistré, sans page.
 function ajouterPages(liste, { reseau = null } = {}) {
     const place = PAGES_MAX - etat.doc.pages.length;
+    if (!liste.length) {
+        if (reseau?.equipements?.length) modifier((doc) => { doc.reseaux = [...(doc.reseaux || []).filter((r) => r.nom !== reseau.nom), reseau].slice(-RESEAUX_MAX); });
+        return;
+    }
     if (place <= 0) return message('Nombre maximal de pages atteint', '', 'warning');
     if (liste.length > place) message('Pages en trop', `Seules les ${place} premières pages ont été ajoutées (${PAGES_MAX} pages au plus par document).`, 'warning');
     ui.selection = null;
@@ -1244,13 +1251,13 @@ function ouvrirModeles(action) {
             } },
             h('span', { class: 'fusain-modele__nom' }, m.nom),
             h('span', { class: `fr-badge fr-badge--sm fr-badge--no-icon fr-badge--${editeurPour(typeDiagramme(m.code)) ? 'success' : 'info'}` }, editeurPour(typeDiagramme(m.code)) ? 'Édition visuelle' : 'Par le code'))),
-            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportReseau(ajouterPages); } },
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportReseau(ajouterPages, { boutEnBout }); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Importer un réseau (HPE IMC, LLDP : CSV, Excel)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
-            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages); } },
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages, { boutEnBout }); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Commutateur et périphériques (CSV à 3 colonnes)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
-            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages, { datacenter: true }); } },
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages, { datacenter: true, boutEnBout }); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Data center : vue globale et tous les commutateurs, VLAN (CSV à 3 ou 4 colonnes)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null),
         ]));

@@ -3,12 +3,12 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.32.1-b4dfe43ba8';
+const VERSION_CACHE = 'fusain-0.33.0-980eccf869';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
     ['./Documentation/GUIDE_IMC.md', 'c9ff6e02d8cd880cfe703e71a24b2a2d8b9f26da0023a0a85ddecca99fc4189e'],
-    ['./Documentation/GUIDE_UTILISATEUR.md', 'f0d68d1dc9ef8e402b8984a68e23019d6c50c969fa70cd530a29ad3b886c9367'],
+    ['./Documentation/GUIDE_UTILISATEUR.md', '5a5d814c3bde8b519aad79b3c806177c1d4159adc7aeef8e6633e358a08099c0'],
     ['./Documentation/exemples-reseau/LISEZ-MOI.md', '8dc0574185fbdfd502f71424d46723b1f05486627f8cb1356a3cbf7b84628c1d'],
     ['./Documentation/exemples-reseau/commutateur-48-serveurs.csv', '5ca16bfb278a70842b6e09ff11fb266c7ab8913051fd820767f01bd2b437b176'],
     ['./Documentation/exemples-reseau/commutateur-serveurs.csv', '94b56d185fb5d24578aa9aaa3fb089098360b18c15706bfce88dcd6692162a26'],
@@ -25,7 +25,7 @@ const FICHIERS = [
     ['./Documentation/exemples-reseau/plusieurs-commutateurs.csv', 'f63e4fb9078da0b31f7dc8e4697afb0aa86af1f7a69e5eb0d230f702f43a3cde'],
     ['./Documentation/outils/Exporter-ReseauIMC.ps1', '713c7428241de802477a0c2a86c0d03a88dbc7f6def715d10d781c1ad9e5c7ae'],
     ['./FUSAIN_cahier_des_charges.md', 'dc6c2474d905e613c9576abec5dd1714a4fdbe74c9eade47512e65418dbfdeec'],
-    ['./JOURNAL_DES_VERSIONS.md', '810f41a927adc171d756bd13b8c2488d3ef2c32905dece53d25d493cce0191ff'],
+    ['./JOURNAL_DES_VERSIONS.md', '742c7b2192f9176c16f38b167387a22d175b58f15f77dbb669b511cf77f291fa'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '0a785f200f1128af45f64c705d1c9839ab575caf7645283f1fd3f457935d00d9'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -58,10 +58,10 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', 'fca5f46a6b25fbbdf6dc275bd2e964382e5e20279f3c19bb565739c8b53d02eb'],
-    ['./index.html', 'fca5f46a6b25fbbdf6dc275bd2e964382e5e20279f3c19bb565739c8b53d02eb'],
-    ['./js/app.js', '91f5f5b19570b5af356ea0a68d9829ca744454d4bf405a5e0c9cf1d731e4161f'],
-    ['./js/bout-en-bout.js', '205f638943caf4e7c316d2ed289faaa63289662aa29d69f5a48f69b03a715820'],
+    ['./', '8d20636852d4f8cb8cb6c39d397ab443d74ff3fa5c248416e126d57234ddda89'],
+    ['./index.html', '8d20636852d4f8cb8cb6c39d397ab443d74ff3fa5c248416e126d57234ddda89'],
+    ['./js/app.js', '0e649936a9e6f37c0fe2f46ec647482ddf837462ffe2177232215ee6b3013cdd'],
+    ['./js/bout-en-bout.js', '0901c447fabac022b195050f2044b54a5bcf1515745bc32b8a796d283bba2dfb'],
     ['./js/brouillon.js', '8eaefb98fc4dda95f498e795466c2058c89544b2eb6fc86602388185efb6c95e'],
     ['./js/carte.js', '80a7f9b134e40a5ffb09e8aecb64b4fd8a55b302d571165a8fe49004ab95e626'],
     ['./js/confiance.js', 'a91d39f62cbd5c1a01327929997e11db9368a94074c86f7bf36d10ace4ae22f6'],
@@ -112,17 +112,17 @@ const FICHIERS = [
     ['./js/geo.js', '2410705abae5ad8ac66487d8f395b0f42f41d4e70f523bb969698d07f09d9c93'],
     ['./js/icones.js', '52fc78631d4b68dbf29e438de14f775eeb3df496291ce330ac66623dde1f6a7f'],
     ['./js/illustrations.js', '9fc9af6eb7298523b72ab66ee843eb6ef35c758ce27c230d7d5a043a9d133eec'],
-    ['./js/import-reseau.js', '9cdb62f965fcbb3f43e8fe554c1d610363bc6ab957108a6df12e564cd10182d8'],
+    ['./js/import-reseau.js', '0fc7b2549a72ef002dc07fb38a76e859e5eca93e0e0e87805ede932c8f973b95'],
     ['./js/markdown.js', '460de07eb055b1f3615b63649418f17c5ccc424fcaa9d37cf65b6f9033f0f601'],
     ['./js/modeles.js', '0e2f762d9f02396c339a3b084eaffd825b6b4f80fac02066798ec9ae07d7c74f'],
     ['./js/navigation.js', 'f9ea93b59322b834a47ef466d63d80905565ed057a37f2ac2f6923a9f51d28f6'],
     ['./js/pictogrammes.js', '731dda68be9f6259cfb0ae23b65eb63019fd67b018030ddb431457bc11625414'],
     ['./js/plantuml.js', '690749085f196522afe49f2018a4f22e160bcd52224fb38be9faa0088c40f203'],
     ['./js/rendu.js', 'a233ceef64fb106aa833479b5ce35f76f05e109c4d7f106aedd25718bf3dc9d7'],
-    ['./js/reseau.js', '3430ba058ebdabb8ee8cc5a7a9f61bb4fec62e5b58fc1a4f90def820d736ca63'],
+    ['./js/reseau.js', '66b43ef133b2c81a6e359df457444c53597f5c0faac2930ab7ed6d11be0473ba'],
     ['./js/securite.js', '24d12921f9eb87f22ea86852136e691b0a78be158f3182253ac2fea72b5bb6de'],
     ['./js/syntaxes.js', 'ee591f692cb94b728cae886cd639d45546420577c84a18a1ea3193e5bf3ac211'],
-    ['./js/version.js', '05c3ad7d14c53a43204377dd6e20411401b2769f99f47376e55da6f873788f55'],
+    ['./js/version.js', 'd5fd5815e2aa4666c543871736070ac0b1085ae4f7859f45f576707fa8c5176a'],
     ['./js/visio-format.js', 'f9f176b214a19dcf4969626d00d99b03938dd9524ff25e1cfab9d37c239f3474'],
     ['./js/visio.js', 'e5fed842ba2aade4f0197d7f191e4fe583a3d1e2d6a4894756fca620f331b56b'],
     ['./js/zip.js', 'e0603f036ac1851bc817842ef083091fb31ea5f9182904044846e828be9c3796'],
@@ -244,8 +244,8 @@ const FICHIERS = [
     ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
     ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./presentation-fusain.fusain.json', '6bb81345dbffafd770f9d7293fb2fa9219d8acd834ed3a1b87aa927fb4ba3cc3'],
-    ['./sbom/fusain-sbom-cyclonedx.json', '98f422a4e6ffac1be08883621d0a49e9d1b2f5e1b5d4bb794bec96f6cbf5728f'],
+    ['./presentation-fusain.fusain.json', 'f9888e8541bb29643a28a8bf272e36103e2149609dccd9ce48c45e641ca7463f'],
+    ['./sbom/fusain-sbom-cyclonedx.json', '5d436cef350b95389be0bb3604fa90ee29da97c202c550645dae134d17e0db20'],
     ['./schema/fusain.schema.json', '78704aef42e9a7f201768922846df91f9a46e5e9c7ae94358e81a86ede7f2dd6'],
 ];
 // Fichiers lus seulement quand une page en a besoin : même contrôle, à leur premier téléchargement

@@ -2,6 +2,15 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.33.0 — 24 novembre 2026 — réseau importé sans schéma, liaisons de bout en bout fusionnées
+
+- **Demande** : dans les imports CSV de représentation réseau, pouvoir importer les liaisons et les équipements sans dessiner l'ensemble des schémas, puis choisir soi-même les liaisons de bout en bout à afficher ; les liaisons qui passent par un même nœud doivent être fusionnées.
+- **Réseau seulement** : les trois boîtes d'import (« Importer un réseau » IMC / LLDP, « Commutateur et périphériques », « Data center ») ont un choix « À créer » : « Les schémas (pages) et le réseau » (comme avant) ou « Le réseau seulement : équipements et liaisons, sans schéma ». Dans ce cas, seuls les réglages qui comptent pour le réseau enregistré restent (icônes, abréviation des interfaces), le bilan donne le nombre d'équipements et de liaisons, et le bouton devient « Importer le réseau » : aucune page n'est créée, la topologie est enregistrée avec le document (annulable), puis la fenêtre « Bout en bout » s'ouvre aussitôt. `ajouterPages` accepte une liste vide (réseau seul, la page courante ne change pas).
+- **Fusion des liaisons** (`groupesBoutEnBout`) : les liaisons qui passent par un même équipement (de proche en proche : une liaison qui en rejoint deux les réunit) sont dessinées sur un même schéma ; chaque équipement et chaque tronçon commun n'y figurent qu'une fois (le tronçon commun garde la couleur de la première liaison qui l'emprunte, son nom et ses VLAN sont écrits). Les liaisons sans équipement commun vont chacune sur sa page. Avant, toutes les liaisons allaient sur une seule page et un tronçon commun était doublé (un trait par liaison).
+- **Fenêtre « Bout en bout »** : annonce la fusion (« 2 schémas, une page chacun : liaisons 1, 3 et 4 fusionnées ; liaison 2 ») ; bouton « Créer la page (3 liaisons fusionnées) » ou « Créer 2 pages (4 liaisons) ».
+- **Démonstration** : la page « Bout en bout : deux liaisons à travers le data center » est refaite (11 tronçons au lieu de 13).
+- **Recette** : test de logique (tronçons communs fusionnés, groupes de liaisons, liaison sans chemin seule, fusion de proche en proche, équipement commun sans tronçon commun) ; 86/86.
+
 ## 0.32.1 — 19 novembre 2026 — bout en bout sur tout le réseau importé
 
 - **Retour** : la recherche de liaison ne portait que sur les équipements dessinés sur les pages, pas sur l'ensemble des équipements déclarés ; pénalisant quand les vues sont éclatées sur plusieurs pages (ou qu'une partie n'a pas de page). Liaison introuvable entre SRV-MAIL-N15-06 et SRV-PAIE-01.

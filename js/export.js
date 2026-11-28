@@ -138,7 +138,8 @@ function figerStyles(svg) {
         attrs['font-size'] = String(parseFloat(attrs['font-size']) || 16);
         attrs['stroke-width'] = String(parseFloat(attrs['stroke-width']) || 0);
         attrs['font-family'] = 'Marianne';
-        attrs['font-style'] = 'normal'; // seules les graisses normale et grasse de Marianne sont incorporées
+        // Marianne est incorporée en normal, gras, italique et gras italique
+        attrs['font-style'] = /italic|oblique/.test(cs.fontStyle) ? 'italic' : 'normal';
         attrs['font-weight'] = Number(attrs['font-weight']) >= 600 ? 'bold' : 'normal';
         // Un motif sans plein ou sans vide (« 0 », « 1, 0 ») désigne un trait continu
         const motif = attrs['stroke-dasharray'].replace(/px/g, '');
@@ -223,7 +224,7 @@ export function preparerPourPdf(svg) {
 let policesPdf = null;
 async function chargerPolicesPdf() {
     if (!policesPdf) {
-        policesPdf = await Promise.all(['Regular', 'Bold'].map((n) => binaireEnBase64(`${DOSSIER_DSFR}/fonts-ttf/Marianne-${n}.ttf`)));
+        policesPdf = await Promise.all(['Regular', 'Bold', 'Regular_Italic', 'Bold_Italic'].map((n) => binaireEnBase64(`${DOSSIER_DSFR}/fonts-ttf/Marianne-${n}.ttf`)));
     }
     return policesPdf;
 }
@@ -231,7 +232,7 @@ async function chargerPolicesPdf() {
 export async function exporterPDF(doc, indices) {
     const { jsPDF } = window.jspdf;
     const composees = await pagesComposees(doc, indices);
-    const [regulier, gras] = await chargerPolicesPdf();
+    const [regulier, gras, italique, grasItalique] = await chargerPolicesPdf();
     const orientation = (c) => (c.l > c.h ? 'landscape' : 'portrait');
     const premiere = composees[0];
     const pdf = new jsPDF({ unit: 'mm', format: [premiere.l, premiere.h], orientation: orientation(premiere), compress: true });
@@ -239,6 +240,10 @@ export async function exporterPDF(doc, indices) {
     pdf.addFont('Marianne-Regular.ttf', 'Marianne', 'normal');
     pdf.addFileToVFS('Marianne-Bold.ttf', gras);
     pdf.addFont('Marianne-Bold.ttf', 'Marianne', 'bold');
+    pdf.addFileToVFS('Marianne-Regular_Italic.ttf', italique);
+    pdf.addFont('Marianne-Regular_Italic.ttf', 'Marianne', 'italic');
+    pdf.addFileToVFS('Marianne-Bold_Italic.ttf', grasItalique);
+    pdf.addFont('Marianne-Bold_Italic.ttf', 'Marianne', 'bolditalic');
     pdf.setProperties({ title: doc.document.titre, creator: 'FUSAIN' });
 
     const atelier = h('div', { class: 'fusain-hors-ecran', 'aria-hidden': 'true' });

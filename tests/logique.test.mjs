@@ -1749,3 +1749,49 @@ test('routage : noms piégés protégés, alias gardés avec le document (format
     casse([['1.1.1.1', 'a', 'c']]);
     casse({ '1.1.1.1': 'a' });
 });
+
+// ---------- Texte riche des diapositives : gras, italique, barré, couleur, stabilo ----------
+import * as riche from '../js/texte-riche.js';
+
+test('texte riche : marques lues (gras, italique, barré, stabilo, couleur), imbriquées, sur plusieurs lignes', () => {
+    const lire = (t) => riche.analyserTexteRiche(t).map((m) => [m.t, ['gras', 'italique', 'barre'].filter((k) => m[k]).join('+'), m.couleur, m.stabilo]);
+    assert.deepEqual(lire('a **b** *c* ~~d~~ ==e=='), [['a ', '', '', ''], ['b', 'gras', '', ''], [' ', '', '', ''], ['c', 'italique', '', ''], [' ', '', '', ''], ['d', 'barre', '', ''], [' ', '', '', ''], ['e', '', '', '#fff200']]);
+    assert.deepEqual(lire('[rouge]{rouge} [x]{#00F stabilo-vert gras italique barre}'), [['rouge', '', '#e1000f', ''], [' ', '', '', ''], ['x', 'gras+italique+barre', '#0000ff', '#8cf58c']]);
+    assert.deepEqual(lire('**gras [et rouge]{rouge} *ital***'), [['gras ', 'gras', '', ''], ['et rouge', 'gras', '#e1000f', ''], [' ', 'gras', '', ''], ['ital', 'gras+italique', '', '']]);
+    assert.deepEqual(lire('[ligne 1<br>ligne 2]{bleu}'), [['ligne 1<br>ligne 2', '', '#000091', '']]);
+    // Restent du texte : marques entourées d'espaces, non fermées, réglage inconnu, échappements
+    for (const t of ['5 * 3 = 15', 'a == b', '~~ seul', '*pas fermé', '[crochets] {accolades}', '[x]{fuchsia}', '[x]{stabilo-noir}', 'a*b c']) assert.deepEqual(lire(t), [[t, '', '', '']], t);
+    assert.deepEqual(lire('\\*pas italique\\* \\[x\\]{rouge} \\=\\=x\\=\\='), [['*pas italique* [x]{rouge} ==x==', '', '', '']]);
+    // « ** » non fermé : gras jusqu'au bout, comme avant cette syntaxe
+    assert.deepEqual(lire('a **b'), [['a ', '', '', ''], ['b', 'gras', '', '']]);
+    assert.equal(riche.texteSansMarques('Un **gros** [mot]{rouge} ==ici=='), 'Un gros mot ici');
+    assert.equal(riche.aDesMarques('rien à voir'), false);
+});
+
+test('texte riche : écriture des morceaux, relue à l\'identique', () => {
+    const V = riche.STYLE_VIDE;
+    const m = (t, st = {}) => ({ ...V, t, ...st });
+    const ecrit = riche.ecrireTexteRiche([m('Un '), m('mot gras ', { gras: true }), m('puis '), m('rouge', { couleur: '#e1000f' }), m(', '), m('surligné', { stabilo: '#fff200' }), m(', '), m('vert', { stabilo: '#8cf58c' }), m(', '), m('tout', { gras: true, italique: true, barre: true, couleur: '#123456', stabilo: '#fff200' })]);
+    assert.equal(ecrit, 'Un **mot gras** puis [rouge]{rouge}, ==surligné==, [vert]{stabilo-vert}, [tout]{gras italique barre #123456 stabilo}');
+    const relu = riche.analyserTexteRiche(ecrit);
+    assert.equal(riche.ecrireTexteRiche(relu), ecrit);
+    assert.equal(riche.ecrireTexteRiche([m('a*b [c]', { italique: true })], { echapper: true }), '*a\\*b \\[c\\]*');
+    assert.deepEqual(riche.analyserTexteRiche('*a\\*b \\[c\\]*').map((x) => [x.t, x.italique]), [['a*b [c]', true]]);
+    // Aller-retour sur un corpus de textes marqués
+    for (const t of ['**a** *b* ~~c~~ ==d==', '[x]{vert} et [y]{stabilo-rose}', '**[gras rouge]{rouge}**', 'a<br>**b<br>c**']) {
+        const une = riche.ecrireTexteRiche(riche.analyserTexteRiche(t));
+        assert.equal(riche.ecrireTexteRiche(riche.analyserTexteRiche(une)), une, t);
+        assert.equal(riche.texteSansMarques(une), riche.texteSansMarques(t), t);
+    }
+});
+
+test('texte riche : couleurs reconnues, refus de tout ce qui n\'est pas une couleur', () => {
+    assert.equal(riche.couleurTexte('ROUGE'), '#e1000f');
+    assert.equal(riche.couleurTexte('#ABC'), '#aabbcc');
+    for (const t of ['url(x)', 'red;fill:url(#a)', '#12345', 'javascript:', 'expression(1)']) assert.equal(riche.couleurTexte(t), '', t);
+    assert.equal(riche.couleurStabilo('rose'), '#ff99dd');
+    // Le code d'une diapositive garde les marques telles quelles : pas d'effet sur la structure
+    const editeur = editeurPour('diapo');
+    const code = 'diapo libre\n# Titre *en italique*\nUn [paragraphe]{rouge} avec ==stabilo== et ~~barré~~\n- [puce]{stabilo-bleu}\n';
+    assert.equal(editeur.ecrire(editeur.analyser(code)), code);
+});

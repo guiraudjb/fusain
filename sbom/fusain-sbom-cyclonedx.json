@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
   "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
-  "serialNumber": "urn:uuid:a5b08764-163c-5d7e-8e81-8fa594bd6552",
+  "serialNumber": "urn:uuid:126d5395-a11e-59e3-969c-2b0f6972052b",
   "version": 1,
   "metadata": {
     "timestamp": "2026-11-28T00:00:00Z",
@@ -16,13 +16,13 @@
         {
           "type": "application",
           "name": "outils/generer.py",
-          "version": "0.34.0"
+          "version": "0.35.0"
         }
       ]
     },
     "component": {
       "type": "application",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.34.0",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.35.0",
       "supplier": {
         "name": "guiraudjb",
         "url": [
@@ -30,9 +30,9 @@
         ]
       },
       "name": "FUSAIN",
-      "version": "0.34.0",
+      "version": "0.35.0",
       "description": "Éditeur visuel de diagrammes Mermaid, exécuté entièrement dans le navigateur",
-      "purl": "pkg:github/guiraudjb/fusain@0.34.0",
+      "purl": "pkg:github/guiraudjb/fusain@0.35.0",
       "externalReferences": [
         {
           "type": "vcs",
@@ -107,7 +107,7 @@
         },
         {
           "name": "fusain:note",
-          "value": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
+          "value": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular, Bold, Regular_Italic et Bold_Italic convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine."
         }
       ],
       "components": [
@@ -223,12 +223,34 @@
         },
         {
           "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts-ttf/Marianne-Bold_Italic.ttf",
+          "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Bold_Italic.ttf",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e4f891014f0caaa584ffaa6dc0650c0d6dc8a8ee56ef911e9633aaab8df719dd"
+            }
+          ]
+        },
+        {
+          "type": "file",
           "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular.ttf",
           "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular.ttf",
           "hashes": [
             {
               "alg": "SHA-256",
               "content": "e21f2ef744eb05a33d1414970c07c0849e8af592df86130ae3b83917e7067f70"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "bom-ref": "pkg:npm/%40gouvfr/dsfr@1.15.4#libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular_Italic.ttf",
+          "name": "libs/dsfr-v1.15.4/fonts-ttf/Marianne-Regular_Italic.ttf",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "091171c672c3b65e3229b06a497333d24fa482d5edc6d7e3f30fd6460ebde991"
             }
           ]
         },
@@ -1911,7 +1933,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.34.0#donnees/fonds-de-carte",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.35.0#donnees/fonds-de-carte",
       "supplier": {
         "name": "IGN, INSEE, Natural Earth, Base Adresse Nationale (via SimpleCarto)"
       },
@@ -1954,7 +1976,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.34.0#donnees/icones-illustrees",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.35.0#donnees/icones-illustrees",
       "supplier": {
         "name": "FUSAIN"
       },
@@ -1989,7 +2011,7 @@
     },
     {
       "type": "data",
-      "bom-ref": "pkg:github/guiraudjb/fusain@0.34.0#donnees/pictogrammes",
+      "bom-ref": "pkg:github/guiraudjb/fusain@0.35.0#donnees/pictogrammes",
       "supplier": {
         "name": "FUSAIN"
       },
@@ -2025,7 +2047,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:github/guiraudjb/fusain@0.34.0",
+      "ref": "pkg:github/guiraudjb/fusain@0.35.0",
       "dependsOn": [
         "pkg:npm/%40gouvfr/dsfr@1.15.4",
         "pkg:npm/mermaid@12.3.0",

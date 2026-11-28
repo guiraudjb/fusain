@@ -2,6 +2,7 @@
 // relevées dans un navigateur : zone de 1474 px de large, fond gris, filet bleu à gauche, police Marianne.
 import { s } from './dom.js';
 import { analyser, lireStyle } from './diagrammes/diapo.js';
+import { analyserTexteRiche, memeStyle } from './texte-riche.js';
 import { chargerIcones } from './icones.js';
 import { adresseImage } from './illustrations.js';
 import { PREFIXE_PICTO, pictogramme, dessinerPictogramme } from './pictogrammes.js';
@@ -20,59 +21,80 @@ const LI = LARGEUR - 2 * 32 - 4;
 
 let toile = null;
 let modeleActif = null;
-function regler(taille, gras) {
+function regler(taille, gras, italique = false) {
     toile ||= document.createElement('canvas').getContext('2d');
-    toile.font = `${gras ? 700 : 400} ${taille}px ${POLICE}`;
+    toile.font = `${italique ? 'italic ' : ''}${gras ? 700 : 400} ${taille}px ${POLICE}`;
     return toile;
 }
-const largeurDe = (texte, taille, gras) => regler(taille, gras).measureText(texte).width;
+const largeurDe = (texte, taille, gras, italique = false) => regler(taille, gras, italique).measureText(texte).width;
+const largeurMorceau = (m, taille) => largeurDe(m.t, taille, m.gras, m.italique);
 
-function decouperMotTropLong(mot, taille, gras, limite) {
-    const morceaux = [];
-    let courant = '';
-    for (const ch of Array.from(mot)) {
-        const essai = courant + ch;
-        if (courant && largeurDe(essai, taille, gras) > limite) {
-            morceaux.push(courant);
-            courant = ch;
-        } else {
-            courant = essai;
+// Un mot plus large que la colonne est scindé, caractère par caractère, en gardant la mise en forme de chaque morceau
+function decouperMotTropLong(mot, taille, limite) {
+    const parties = [];
+    let courant = [];
+    let largeur = 0;
+    for (const m of mot) {
+        for (const ch of Array.from(m.t)) {
+            const l = largeurDe(ch, taille, m.gras, m.italique);
+            if (courant.length && largeur + l > limite) { parties.push(courant); courant = []; largeur = 0; }
+            const d = courant[courant.length - 1];
+            if (d && memeStyle(d, m)) d.t += ch; else courant.push({ ...m, t: ch });
+            largeur += l;
         }
     }
-    if (courant) morceaux.push(courant);
-    return morceaux.length ? morceaux : [mot];
+    if (courant.length) parties.push(courant);
+    return parties;
 }
 
-// Découpe un texte en lignes de mots ; « ** » bascule le gras, <br> force le retour à la ligne.
-// Une marge de sécurité de 8 % absorbe les écarts d'approche entre Canvas 2D et le rendu SVG de Marianne,
-// et les mots plus larges qu'une colonne sont scindés pour ne jamais déborder de la colonne.
-function couper(texte, taille, gras, max) {
+// Découpe un texte en lignes. Le texte est marqué (js/texte-riche.js : gras, italique, barré, couleur, stabilo) ;
+// <br> force le retour à la ligne. Une ligne est une suite de morceaux (mots et espaces), chacun avec sa mise en forme
+// et sa largeur. Une marge de sécurité de 8 % absorbe les écarts d'approche entre Canvas 2D et le rendu SVG de
+// Marianne, et les mots plus larges qu'une colonne sont scindés pour ne jamais déborder de la colonne.
+function couper(texte, taille, gras, max, majuscules = false) {
     const lignes = [];
     const limite = Math.max(20, max * 0.92);
-    for (const paragraphe of String(texte).split(/<br\s*\/?>/i)) {
-        let fort = false;
+    // Paragraphes de jetons : mots (suite de morceaux collés) et espaces
+    const paragraphes = [[]];
+    for (const m of analyserTexteRiche(texte, { gras })) {
+        String(m.t).split(/(<br\s*\/?>)/i).forEach((partie, k) => {
+            if (k % 2) { paragraphes.push([]); return; }
+            const jetons = paragraphes[paragraphes.length - 1];
+            for (const bout of partie.split(/(\s+)/)) {
+                if (!bout) continue;
+                const dernier = jetons[jetons.length - 1];
+                if (/^\s+$/.test(bout)) { if (dernier && !dernier.espace) jetons.push({ espace: { ...m, t: ' ' } }); continue; }
+                const t = majuscules ? bout.toLocaleUpperCase('fr') : bout;
+                if (dernier && !dernier.espace) dernier.mot.push({ ...m, t }); else jetons.push({ mot: [{ ...m, t }] });
+            }
+        });
+    }
+    for (const jetons of paragraphes) {
         let ligne = [];
         let largeur = 0;
-        for (const morceau of paragraphe.split(/(\*\*)/)) {
-            if (morceau === '**') { fort = !fort; continue; }
-            const g = gras || fort;
-            const espace = largeurDe(' ', taille, g);
-            for (const motBrut of morceau.split(/\s+/).filter(Boolean)) {
-                const lBrut = largeurDe(motBrut, taille, g);
-                const sousMots = lBrut > limite ? decouperMotTropLong(motBrut, taille, g, limite) : [motBrut];
-                for (const mot of sousMots) {
-                    const l = largeurDe(mot, taille, g);
-                    if (ligne.length && largeur + espace + l > limite) {
-                        lignes.push({ mots: ligne, largeur, finParagraphe: false });
-                        ligne = [];
-                        largeur = 0;
-                    }
-                    largeur += (ligne.length ? espace : 0) + l;
-                    ligne.push({ t: mot, gras: g });
+        let espace = null;
+        const fermer = (fin) => { lignes.push({ morceaux: ligne, largeur, mots: ligne.filter((x) => !x.espace).length, finParagraphe: fin }); ligne = []; largeur = 0; };
+        for (const j of jetons) {
+            if (j.espace) { espace = j.espace; continue; }
+            const lMot = j.mot.reduce((n, m) => n + largeurMorceau(m, taille), 0);
+            for (const mot of lMot > limite ? decouperMotTropLong(j.mot, taille, limite) : [j.mot]) {
+                const l = mot.reduce((n, m) => n + largeurMorceau(m, taille), 0);
+                const lEspace = espace ? largeurMorceau(espace, taille) : 0;
+                if (ligne.length && largeur + lEspace + l > limite) { fermer(false); espace = null; }
+                if (ligne.length && espace) { ligne.push({ ...espace, espace: true, l: largeurMorceau(espace, taille) }); largeur += largeurMorceau(espace, taille); }
+                for (const m of mot) {
+                    const lm = largeurMorceau(m, taille);
+                    const d = ligne[ligne.length - 1];
+                    // Un mot est un seul morceau tant que sa mise en forme ne change pas
+                    if (d && !d.espace && d.finMot === false && memeStyle(d, m)) { d.t += m.t; d.l += lm; } else ligne.push({ ...m, l: lm, finMot: false });
+                    largeur += lm;
                 }
+                ligne[ligne.length - 1].finMot = true;
+                espace = null;
             }
+            espace = null;
         }
-        lignes.push({ mots: ligne, largeur, finParagraphe: true });
+        fermer(true);
     }
     return lignes;
 }
@@ -107,12 +129,23 @@ function resoudreStyleTexte(cle, taille, interligne, align, fige = false) {
     };
 }
 
+// Stabilo : bande de couleur fluo posée derrière les mots, aux bords légèrement irréguliers, comme un trait de surligneur
+function bandeStabilo(x0, x1, base, taille, couleur) {
+    const haut = base - taille * 0.78;
+    const bas = base + taille * 0.24;
+    const e = taille * 0.06;
+    const r = (v) => Math.round(v * 10) / 10;
+    const d = `M${r(x0 - e)} ${r(haut + e * 0.6)} L${r(x1 + e * 0.4)} ${r(haut)} L${r(x1 + e * 1.2)} ${r(bas - e * 0.3)} L${r(x0 - e * 0.2)} ${r(bas)} Z`;
+    return s('path', { d, fill: couleur, 'fill-opacity': 0.85, stroke: 'none' });
+}
+
 // Écrit un texte replié dans une largeur et rend sa hauteur. La ligne de base est placée comme le ferait le navigateur
-// pour une boîte de ligne de la hauteur donnée.
+// pour une boîte de ligne de la hauteur donnée. Chaque ligne est faite de fragments (tspan) de même mise en forme ;
+// le stabilo (derrière) et le trait du barré (devant) sont des formes, placées d'après la largeur mesurée des morceaux :
+// ils restent identiques à l'écran, en PDF, en PNG et en SVG.
 function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneBase, gras = false, couleur = NOIR, align: alignBase = 'start', majuscules = false, cle = null, fige = false, sep = '' }) {
     const { taille, interligne: interligneVoulu, align } = resoudreStyleTexte(cle, tailleBase, interligneBase, alignBase, fige);
-    const contenu = majuscules ? String(texte).toLocaleUpperCase('fr') : String(texte);
-    const lignes = couper(contenu, taille, gras, l);
+    const lignes = couper(String(texte), taille, gras, l, majuscules);
     // Certaines boîtes de VALOR ont un interligne plus petit que la police (prévu pour une seule ligne) : sur plusieurs
     // lignes, l'interligne est porté à 1,2 fois la police pour que les lignes ne se chevauchent pas
     const interligne = lignes.length > 1 && interligneVoulu < taille * 1.15 ? Math.round(taille * 1.2 * 100) / 100 : interligneVoulu;
@@ -123,6 +156,8 @@ function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneB
     const ancre = align === 'center' ? x + l / 2 : align === 'end' ? x + l : x;
     const anchorSvg = align === 'center' ? 'middle' : align === 'end' ? 'end' : 'start';
     const el = s('text', { 'font-family': POLICE, 'font-size': taille, 'font-weight': gras ? 700 : 400, fill: couleur, 'text-anchor': anchorSvg, 'data-champ': cle });
+    const dessous = s('g', { 'aria-hidden': 'true', 'data-decor': cle || '' }); // stabilo
+    const dessus = s('g', { 'aria-hidden': 'true', 'data-decor': cle || '' }); // barré
     // Saisie directe sur la diapositive : la boîte du texte (position, largeur de coupe, police) est notée sur l'élément
     const saisissable = cle && !fige;
     if (saisissable) {
@@ -136,35 +171,84 @@ function ecrire(g, texte, { x, y, l, taille: tailleBase, interligne: interligneB
     }
     const cibleJustifie = Math.max(20, Math.round(l * 0.95));
     lignes.forEach((ligne, n) => {
-        // Les mots de même graisse qui se suivent forment un seul fragment
+        // Les morceaux de même mise en forme qui se suivent (espaces compris) forment un seul fragment
         const fragments = [];
-        for (const mot of ligne.mots) {
-            const dernier = fragments[fragments.length - 1];
-            if (dernier && dernier.gras === mot.gras) dernier.t += ` ${mot.t}`; else fragments.push({ t: mot.t, gras: mot.gras });
+        for (const mc of ligne.morceaux) {
+            const d = fragments[fragments.length - 1];
+            if (d && memeStyle(d, mc)) d.t += mc.t; else fragments.push({ ...mc });
         }
-        const justifierLigne = align === 'justify' && !ligne.finParagraphe && ligne.mots.length > 1;
-        const ecartMots = justifierLigne && ligne.largeur < cibleJustifie
-            ? Math.max(0, Math.round(((cibleJustifie - ligne.largeur) / (ligne.mots.length - 1)) * 100) / 100)
+        const justifierLigne = align === 'justify' && !ligne.finParagraphe && ligne.mots > 1;
+        const espaces = ligne.morceaux.filter((mc) => mc.espace).length;
+        const ecartMots = justifierLigne && ligne.largeur < cibleJustifie && espaces
+            ? Math.max(0, Math.round(((cibleJustifie - ligne.largeur) / espaces) * 100) / 100)
             : 0;
+        const yBase = y + n * interligne + base;
+        // Largeur dessinée : sert à placer stabilo et barré sous les mots. textLength étire toute la ligne ;
+        // word-spacing n'élargit que les espaces
+        let dessinee = ligne.largeur;
+        let etire = false;
+        let ecart = 0;
         fragments.forEach((f, k) => {
             const attrs = {
-                ...(k ? {} : { x: ancre, y: y + n * interligne + base }),
+                ...(k ? {} : { x: ancre, y: yBase }),
                 'font-weight': f.gras ? 700 : 400,
+                ...(f.italique ? { 'font-style': 'italic' } : {}),
+                ...(f.couleur ? { fill: f.couleur } : {}),
             };
             if (justifierLigne && fragments.length === 1) {
                 attrs.textLength = cibleJustifie;
                 attrs.lengthAdjust = 'spacing';
+                dessinee = cibleJustifie;
+                etire = true;
             } else if (justifierLigne && ecartMots > 0) {
                 attrs['word-spacing'] = `${ecartMots}px`;
+                ecart = ecartMots;
+                dessinee = ligne.largeur + ecartMots * espaces;
             } else if (fragments.length === 1 && ligne.largeur > l * 0.96 && l >= 24) {
                 attrs.textLength = Math.round(l * 0.96);
                 attrs.lengthAdjust = 'spacingAndGlyphs';
+                dessinee = attrs.textLength;
+                etire = true;
             }
-            el.append(s('tspan', attrs, `${k ? ' ' : ''}${f.t}`));
+            el.append(s('tspan', attrs, f.t));
         });
+        if (!ligne.morceaux.some((mc) => mc.stabilo || mc.barre)) return;
+        // Position de chaque morceau sur la ligne
+        let xc = align === 'center' ? ancre - dessinee / 2 : align === 'end' ? ancre - dessinee : ancre;
+        const echelle = etire && ligne.largeur ? dessinee / ligne.largeur : 1;
+        const places = ligne.morceaux.map((mc) => {
+            const lp = mc.l * echelle + (mc.espace ? ecart : 0);
+            const p = { mc, x0: xc, x1: xc + lp };
+            xc += lp;
+            return p;
+        });
+        // Suites de morceaux de même stabilo (ou barrés), sans espace en bord
+        const suites = (cleSuite) => {
+            const res = [];
+            let cour = null;
+            for (const p of places) {
+                const v = p.mc[cleSuite];
+                if (v && cour && cour.v === v) cour.p.push(p);
+                else { if (cour) res.push(cour); cour = v ? { v, p: [p] } : null; }
+            }
+            if (cour) res.push(cour);
+            return res.map((r) => { while (r.p.length && r.p[r.p.length - 1].mc.espace) r.p.pop(); while (r.p.length && r.p[0].mc.espace) r.p.shift(); return r; }).filter((r) => r.p.length);
+        };
+        for (const r of suites('stabilo')) dessous.append(bandeStabilo(r.p[0].x0, r.p[r.p.length - 1].x1, yBase, taille, r.v));
+        for (const r of suites('barre')) {
+            // Le trait suit la couleur de chaque morceau barré
+            for (const p of r.p) {
+                const yt = Math.round((yBase - taille * 0.3) * 10) / 10;
+                dessus.append(s('rect', { x: Math.round(p.x0 * 10) / 10, y: yt, width: Math.max(0.5, Math.round((p.x1 - p.x0) * 10) / 10), height: Math.max(1, Math.round(taille * 0.07 * 10) / 10), fill: p.mc.couleur || couleur }));
+            }
+        }
     });
     // Un texte vide reste posé (sans rien dessiner) pour pouvoir être saisi sur place
-    if (saisissable || lignes.some((ligne) => ligne.mots.length)) g.append(el);
+    if (saisissable || lignes.some((ligne) => ligne.mots)) {
+        if (dessous.childNodes.length) g.append(dessous);
+        g.append(el);
+        if (dessus.childNodes.length) g.append(dessus);
+    }
     return {
         hauteur: lignes.length * interligne,
         largeur: Math.min(l, Math.max(0, ...lignes.map((ligne) => ligne.largeur))),
@@ -434,7 +518,8 @@ const DESSINS = {
 // Rend le schéma d'une diapositive : même forme de résultat qu'un schéma Mermaid ({ svg, l, h }).
 // « rapport » est le rapport hauteur / largeur de la zone à remplir sur la page.
 export async function rendreDiapo(code, rapport = HAUTEUR / LARGEUR) {
-    await Promise.all([document.fonts.load('400 16px Marianne'), document.fonts.load('700 16px Marianne')]).catch(() => {});
+    // L'italique est mesuré à part (sa chasse diffère) : ses polices sont chargées avant la coupe des lignes
+    await Promise.all(['400', '700', 'italic 400', 'italic 700'].map((p) => document.fonts.load(`${p} 16px Marianne`))).catch(() => {});
     const modele = analyser(code);
     const h = Math.round(LARGEUR * Math.max(0.3, Math.min(3, rapport)));
     const svg = s('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${LARGEUR} ${h}`, class: 'fusain-diapo' },

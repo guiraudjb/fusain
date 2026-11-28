@@ -10,7 +10,7 @@
       "archive": "https://registry.npmjs.org/@gouvfr/dsfr/-/dsfr-1.15.4.tgz",
       "archiveSha256": "e40bfe360002f7e8c3b62b11d9433fdf2d0ecc670b4fd48453b8b7beb603a8eb",
       "dossier": "libs/dsfr-v1.15.4",
-      "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular et Bold convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine.",
+      "note": "Sous-ensemble du dossier dist : feuille de style, script, polices WOFF2, favicon et icônes référencées. Le dossier fonts-ttf contient Marianne Regular, Bold, Regular_Italic et Bold_Italic convertis de WOFF2 en TrueType (fontTools) pour l'incorporation dans les PDF : fichiers dérivés, absents de l'archive d'origine.",
       "fournisseur": "Service d'information du Gouvernement (SIG)",
       "depot": "https://github.com/GouvernementFR/dsfr",
       "chargement": "demarrage"

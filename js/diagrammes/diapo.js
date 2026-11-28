@@ -3,6 +3,7 @@
 import { h, bouton, champTexte, champSelect, message } from '../dom.js';
 import { deplacer, actionsListe, plan, marquer } from './commun.js';
 import { choisirIcone } from '../icones.js';
+import { COULEURS_TEXTE, COULEURS_STABILO, texteSansMarques } from '../texte-riche.js';
 
 // Mises en page reprises des diapositives libres de VALOR. Pour chacune : champs simples (clé, libellé, valeur de départ),
 // champs d'un élément répété, éléments de départ.
@@ -218,7 +219,7 @@ export function codeInitial(disposition) {
 
 export function elements(modele) {
     const d = DISPOSITIONS[modele.disposition];
-    const court = (t) => enLignes(t).replace(/\n/g, ' ').slice(0, 60);
+    const court = (t) => texteSansMarques(enLignes(t)).replace(/\n/g, ' ').slice(0, 60);
     return [
         ...(d.champs || []).map(([cle, nom]) => ({ cle: `c:${cle}`, nom: `${nom} : ${court(modele.champs[cle] ?? '')}` })),
         ...(d.item ? modele.items : []).flatMap((item, n) => d.item.map((nom, k) => ({ cle: `e:${n}.${k}`, nom: `${k ? '— ' : `${n + 1}. `}${court(item[k] ?? '')}` }))),
@@ -287,6 +288,36 @@ function changerDisposition(modele, disposition) {
     modele.blocs = d.blocs ? (modele.blocs.length ? modele.blocs : d.blocs.map(([t, texte]) => ({ t, texte }))) : [];
 }
 
+// Mise en forme depuis le panneau : la sélection du dernier champ de texte utilisé (ou tout le champ, sans sélection)
+// est entourée de ses marques (js/texte-riche.js) ; le champ est validé comme une saisie.
+let champActif = null;
+function entourer(avant, apres) {
+    const zone = champActif?.isConnected ? champActif : document.getElementById('fusain-champ-texte') || document.querySelector('#fusain-proprietes textarea');
+    if (!zone) { message('Aucun texte choisi', 'Cliquez d\'abord dans un champ de texte du panneau, ou sélectionnez-y un passage.', 'info', 4000); return; }
+    const v = zone.value;
+    let [a, b] = [zone.selectionStart, zone.selectionEnd];
+    if (a === b) [a, b] = [0, v.length];
+    // Les espaces en bord de sélection restent hors des marques
+    while (a < b && /\s/.test(v[a])) a += 1;
+    while (b > a && /\s/.test(v[b - 1])) b -= 1;
+    if (a === b) return;
+    zone.value = v.slice(0, a) + avant + v.slice(a, b) + apres + v.slice(b);
+    zone.dispatchEvent(new Event('change'));
+}
+function barreMiseEnForme() {
+    const garder = (e) => e.preventDefault(); // le champ garde sa sélection
+    const outil = (libelle, titre, avant, apres) => bouton(libelle, { titre, onmousedown: garder, onclick: () => entourer(avant, apres) });
+    return h('div', { class: 'fusain-mise-en-forme', role: 'group', 'aria-label': 'Mise en forme du texte' },
+        h('span', { class: 'fr-label' }, 'Mise en forme', h('span', { class: 'fr-hint-text' }, 'Du passage sélectionné dans un champ, ou de tout le champ.')),
+        h('div', { class: 'fusain-actions' },
+            outil('Gras', 'Gras : **texte**', '**', '**'),
+            outil('Italique', 'Italique : *texte*', '*', '*'),
+            outil('Barré', 'Barré : ~~texte~~', '~~', '~~')),
+        h('div', { class: 'fusain-ligne' },
+            champSelect('Couleur du texte', [['', 'Choisir…'], ...COULEURS_TEXTE.map(([n, , nom]) => [n, nom])], '', (v) => { if (v) entourer('[', `]{${v}}`); }),
+            champSelect('Stabilo', [['', 'Choisir…'], ...COULEURS_STABILO.map(([n, , nom]) => [n, nom])], '', (v) => { if (v === 'jaune') entourer('==', '=='); else if (v) entourer('[', `]{stabilo-${v}}`); })));
+}
+
 function controlesTypographie(modele, cible, appliquer, intitule = 'Taille et alignement') {
     const st = lireStyle(modele, cible);
     const valeurTaille = st.taille ? String(st.taille) : '';
@@ -317,6 +348,8 @@ function controlesTypographie(modele, cible, appliquer, intitule = 'Taille et al
                 btnAlign('justifie', 'Justifier', 'Justifier le texte sur toute la largeur de la colonne'))));
 }
 
+const suivreChamp = (e) => { if (e.target.localName === 'textarea') champActif = e.target; };
+
 export function panneau(ctx) {
     const { modele, selection, appliquer, selectionner } = ctx;
     const d = DISPOSITIONS[modele.disposition];
@@ -327,12 +360,14 @@ export function panneau(ctx) {
         ? 'Police par défaut des textes'
         : `Police de « ${(d.champs || []).find(([c]) => `c:${c}` === cibleChamp)?.[1] || cibleChamp} »`;
 
-    const blocs = [h('div', { class: 'fusain-bloc' },
+    const blocs = [h('div', { class: 'fusain-bloc', onfocusin: suivreChamp },
         h('h2', {}, 'Diapositive de texte'),
         champSelect('Mise en page', Object.entries(DISPOSITIONS).map(([id, x]) => [id, x.nom]), modele.disposition, (val) => appliquer((m) => changerDisposition(m, val), () => null)),
         (d.champs || []).map(([cle, nom]) => saisie(nom, `c:${cle}`)),
         controlesTypographie(modele, cibleChamp, appliquer, nomCibleChamp),
-        h('p', { class: 'fusain-aide' }, 'Cliquez sur un texte de la diapositive pour l\'écrire directement à sa place : la mise en forme se voit en direct. Entrée : nouvelle ligne ; Ctrl+B : gras ; Tab : texte suivant ; Échap : terminer. Dans les champs ci-dessous, deux astérisques autour d\'un passage le mettent en **gras**.'))];
+        barreMiseEnForme(),
+        h('p', { class: 'fusain-aide' }, 'Cliquez sur un texte de la diapositive pour l\'écrire directement à sa place : la mise en forme se voit en direct. Entrée : nouvelle ligne ; Ctrl+B : gras ; Ctrl+I : italique ; Ctrl+Maj+X : barré ; Ctrl+Maj+H : stabilo ; Tab : texte suivant ; Échap : terminer. La barre au-dessus du texte change aussi sa couleur et son stabilo.'),
+        h('p', { class: 'fusain-aide' }, 'Dans les champs du panneau : **gras**, *italique*, ~~barré~~, ==stabilo jaune==, [texte]{rouge} pour une couleur, [texte]{stabilo-vert} pour un autre stabilo, [texte]{bleu stabilo-rose gras} pour plusieurs réglages. Une barre oblique inverse écrit le caractère tel quel : \\*.'))];
 
     if (d.item) {
         const n = selection?.startsWith('e:') && v.existe ? v.n : -1;
@@ -341,7 +376,7 @@ export function panneau(ctx) {
             nouvel.styles = [];
             m.items.splice(n < 0 ? m.items.length : n + 1, 0, nouvel);
         }, (m) => `e:${n < 0 ? m.items.length - 1 : n + 1}.0`);
-        blocs.push(h('div', { class: 'fusain-bloc' },
+        blocs.push(h('div', { class: 'fusain-bloc', onfocusin: suivreChamp },
             h('h2', {}, n >= 0 ? `Élément ${n + 1} sur ${modele.items.length}` : `Éléments (${modele.items.length})`),
             n >= 0 ? [
                 d.item.flatMap((nom, k) => [
@@ -363,7 +398,7 @@ export function panneau(ctx) {
     if (d.blocs) {
         const n = selection?.startsWith('b:') && v.existe ? v.n : -1;
         const ajout = (t, defaut) => bouton(BLOCS.find(([g]) => g === t)[1], { icone: 'add-line', onclick: () => appliquer((m) => { m.blocs.splice(n < 0 ? m.blocs.length : n + 1, 0, { t, texte: defaut }); }, (m) => `b:${n < 0 ? m.blocs.length - 1 : n + 1}`) });
-        blocs.push(h('div', { class: 'fusain-bloc' },
+        blocs.push(h('div', { class: 'fusain-bloc', onfocusin: suivreChamp },
             h('h2', {}, n >= 0 ? 'Bloc de texte sélectionné' : 'Blocs de texte'),
             n >= 0 ? [
                 champSelect('Nature', BLOCS.map(([g, nom]) => [g, nom]), modele.blocs[n].t, (val) => appliquer((m) => { if (val === 'icone') m.blocs[n].texte = ICONE_DEPART; else if (m.blocs[n].t === 'icone') m.blocs[n].texte = 'Nouveau texte'; m.blocs[n].t = val; })),

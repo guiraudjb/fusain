@@ -207,6 +207,14 @@ for (const [nom, sel, titre, agir, attendu] of [
   ['Sommaire', '[data-fusain^="e:"]', 'Diapositive de texte', async () => { await p.locator('#fusain-feuille text[data-fusain="e:1.1"]').first().click({ force: true }); await p.waitForTimeout(300); await p.fill('.fusain-saisie-diapo', 'Budget **2027** | suite'); await p.keyboard.press('Escape'); }, /diapo sommaire\ntitre: SOMMAIRE\n- ÉLÉMENT 1 \| .*\n- ÉLÉMENT 2 \| Budget \*\*2027\*\* \/ suite\n/],
   ['Logigramme illustré', '[data-fusain^="n:"]', 'Logigramme', async () => { await p.locator('#fusain-feuille [data-fusain="n:portail"]').first().click({ force: true }); await p.waitForTimeout(400); await p.click('#fusain-proprietes button:has-text("Changer d\'icône")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone'); await p.fill('#fusain-icones-recherche', 'mail line'); await p.waitForTimeout(300); await p.locator('#fusain-modale-icones .fusain-icone[title="mail-line"]').click(); await p.waitForTimeout(800); }, /portail@\{ icon: "dsfr:mail-line", label: "Portail", pos: "b" \}/],
   ['Chiffres clés', '[data-fusain^="e:"]', 'Diapositive de texte', async () => { await p.locator('#fusain-feuille text[data-fusain="e:0.1"]').first().click({ force: true }); await p.waitForTimeout(400); await p.click('#fusain-proprietes button:has-text("Ajouter une icône")'); await p.waitForSelector('#fusain-modale-icones .fusain-icone'); await p.selectOption('#fusain-icones-jeu', 'illus'); await p.waitForTimeout(500); await p.fill('#fusain-icones-recherche', 'equipe'); await p.waitForTimeout(700); await p.locator('#fusain-modale-icones .fusain-icone[title="Équipe"]').click(); await p.waitForTimeout(800); }, /diapo chiffres\n- \[illus:equipe\] XX \| Zone de texte explicative\n/],
+  ['Texte libre', '[data-fusain^="b:"]', 'Diapositive de texte', async () => {
+    // Saisie directe : italique par la barre de mise en forme, stabilo rose par son menu
+    const choisir = (mot) => p.evaluate((m) => { const z = document.querySelector('.fusain-saisie-diapo'); const w = document.createTreeWalker(z, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const i = n.data.indexOf(m); if (i >= 0) { const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + m.length); const s = getSelection(); s.removeAllRanges(); s.addRange(r); return; } } }, mot);
+    await p.locator('#fusain-feuille text[data-fusain="b:1"]').first().click({ force: true }); await p.waitForTimeout(300);
+    await p.fill('.fusain-saisie-diapo', 'Alpha beta gamma');
+    await choisir('beta'); await p.click('.fusain-saisie-outils__italique');
+    await choisir('gamma'); await p.click('.fusain-saisie-outils__stabilo'); await p.locator('.fusain-saisie-outils__menu button[title="Stabilo rose fluo"]').click();
+    await p.keyboard.press('Escape'); }, /\nAlpha \*beta\* \[gamma\]\{stabilo-rose\}\n/],
 ]) {
   await ajouterModele(nom);
   await p.waitForFunction((titreAttendu) => document.querySelector('#fusain-proprietes')?.textContent.includes(titreAttendu), titre, { timeout: 15000 }).catch(() => {});
@@ -247,11 +255,11 @@ for (const [nom, sel, titre, agir, attendu] of [
 { await p.click('button:has-text("Ajouter une page")'); await p.waitForTimeout(500);
   await p.click('.fusain-modele:has(.fusain-modele__nom:text-is("Page vierge"))'); await p.waitForTimeout(1000);
   const pages = await p.evaluate(async () => (await import('./js/etat.js')).etat.doc.pages.map((x) => x.code));
-  ok('page vierge ajoutée', pages.length === 27 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
+  ok('page vierge ajoutée', pages.length === 28 && pages[pages.length - 1] === '' && (await p.textContent('#fusain-proprietes')).includes('Page vierge')
     && await p.locator('#fusain-feuille .fusain-schema').count() === 0 && await p.locator('#fusain-erreur .fr-alert').count() === 0);
   await champPanneau('Titre affiché sur la page').fill('Annexes'); await champPanneau('Titre affiché sur la page').press('Tab'); await p.waitForTimeout(700);
   ok('page vierge : titre affiché', (await p.textContent('#fusain-feuille svg.fusain-page')).includes('Annexes')); }
-let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 27, f.split('/').pop());
+let f = await dl(() => p.click('button:has-text("Enregistrer")')); const json = fs.readFileSync(f, 'utf8'); ok('enregistrement JSON', JSON.parse(json).pages.length === 28, f.split('/').pop());
 await p.click('.fusain-barre button:has-text("Exporter")'); await p.waitForTimeout(600);
 f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); ok('export PDF', fs.statSync(f).size > 5000, `${f.split('/').pop()} ${fs.statSync(f).size} o`);
 await p.waitForTimeout(1500); console.log('   messages:', (await p.textContent('#fusain-messages')).slice(-200));
@@ -270,7 +278,7 @@ f = await dl(() => p.click('#fusain-modale-export .fr-modal__footer button')); a
   execFileSync('unzip', ['-tq', f]);
   await p.waitForFunction(() => document.querySelector('#fusain-messages')?.textContent.includes('Export Visio'), null, { timeout: 10000 }).catch(() => {});
   const messageVisio = (await p.textContent('#fusain-messages')).includes('Export Visio terminé');
-  ok('export Visio', f.endsWith('.vsdx') && pages === 27 && entrees.includes('[Content_Types].xml') && connecteurs > 0 && messageVisio,
+  ok('export Visio', f.endsWith('.vsdx') && pages === 28 && entrees.includes('[Content_Types].xml') && connecteurs > 0 && messageVisio,
     `${pages} pages, ${connecteurs} connexions, message ${messageVisio}, ${fs.statSync(f).size} o`); }
 // 12. restauration : fichier hostile puis fichier valide
 const hostile = JSON.parse(json); hostile.pages[0].inconnu = 1; fs.writeFileSync(OUT + '/hostile.json', JSON.stringify(hostile));

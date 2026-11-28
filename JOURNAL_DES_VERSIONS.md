@@ -2,6 +2,17 @@
 
 Chaque version suit le même cycle : mesure ou essai → correction → recette (logique, Chrome, Firefox) → publication.
 
+## 0.35.0 — 28 novembre 2026 — mise en forme du texte des diapositives
+
+- **Demande** : dans les diapositives, mettre du texte en gras, en italique, le barrer, changer la couleur d'un mot, d'une ligne ou d'un paragraphe, et surligner avec un effet stabilo.
+- **Syntaxe** (`js/texte-riche.js`, logique pure) : `**gras**` (comme avant), `*italique*`, `~~barré~~`, `==stabilo jaune==`, `[texte]{rouge}`, `[texte]{stabilo-vert}`, `[texte]{bleu stabilo-rose gras italique barre}` ; marques imbriquées, sur plusieurs lignes ; `\*` pour un caractère tel quel. Palette fermée (9 couleurs du texte, 5 stabilos) ou `#rrggbb` validé. Compatibilité : un `**` non fermé met toujours en gras jusqu'au bout ; `*`, `~~`, `==` entourés d'espaces ou non fermés (`5 * 3`, `a == b`) restent du texte.
+- **Dessin** (`js/diapo.js`) : la coupe en lignes travaille sur des morceaux stylés (largeur mesurée avec la bonne graisse et l'italique) ; un `tspan` par mise en forme ; stabilo = bande fluo aux bords irréguliers posée derrière les mots (elle suit les mots en texte centré, justifié, sur plusieurs lignes) ; barré = trait de la couleur du mot. Ce sont des formes SVG : même rendu à l'écran, en PDF, PNG et SVG.
+- **Saisie directe** : barre de mise en forme au-dessus du texte (gras, italique, barré, couleur, stabilo, effacer), sur la sélection ou, sans sélection, sur tout le texte ; raccourcis Ctrl+B, Ctrl+I, Ctrl+Maj+X, Ctrl+Maj+H. La zone montre la mise en forme ; elle est relue sur le rendu (styles posés par le navigateur) et réécrite en marques. La barre survit au redessin de la diapositive à chaque frappe ; le stabilo et le barré dessinés sont masqués pendant la saisie.
+- **Panneau** : zone « Mise en forme » (gras, italique, barré, couleur, stabilo) qui entoure de ses marques le passage sélectionné du dernier champ utilisé (ou tout le champ) ; aide de la syntaxe ; le plan montre les textes sans marques.
+- **Exports** : Marianne italique et gras italique converties de WOFF2 en TrueType (fontTools, `libs/dsfr-v1.15.4/fonts-ttf/`) et incorporées dans le PDF ; polices italiques ajoutées aux exports SVG et PNG. Contrôlé : les quatre polices Marianne présentes dans le PDF, rendu fidèle.
+- **Essais** : défaut trouvé au premier essai : la barre disparaissait au premier redessin (seule la zone de saisie était gardée) ; le raccourci du stabilo visait l'ancienne sélection mémorisée au lieu de la sélection en cours.
+- **Recette** : 3 tests de logique (lecture, imbrication, cas laissés en texte, échappements, écriture et aller-retour, couleurs refusées, code de diapositive inchangé) ; scénario « Texte libre » ajouté à `tests/recette.mjs` (italique par la barre, stabilo rose par le menu) ; décomptes de pages de la recette passés de 27 à 28. Essai Playwright dans Chrome : saisie directe, réouverture sans modification du code, panneau sur une partie du titre, export PDF.
+
 ## 0.34.0 — 28 novembre 2026 — schéma de routage d'un commutateur Comware, alias des sous-réseaux
 
 - **Demande** : générer un schéma de routage réseau d'après les informations brutes d'un commutateur Comware (`ip route-static vpn-instance … description via …`), et pouvoir donner un alias aux sous-réseaux routés.

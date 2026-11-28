@@ -10,6 +10,7 @@ import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
 import { ouvrirBoutEnBout } from './bout-en-bout.js';
 import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX, RESEAUX_MAX } from './fichier.js';
 import { ALIAS_MAX } from './adresses.js';
+import { analyserTexteRiche, ecrireTexteRiche, memeStyle, STYLE_VIDE, COULEURS_TEXTE, COULEURS_STABILO } from './texte-riche.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
 import { exporterVisio } from './visio.js';
@@ -377,8 +378,9 @@ function afficherFeuille(page, schema, erreur) {
     zones.feuille.classList.toggle('fusain-visuel', Boolean(visuel));
     const avaitFocus = zones.feuille.contains(document.activeElement) && document.activeElement.localName === 'svg';
     // Une saisie directe en cours sur une diapositive n'est jamais retirée de la page : elle garde le focus et le curseur
-    const garde = saisieDiapo?.zone.parentNode === zones.feuille ? saisieDiapo.zone : null;
-    for (const enfant of [...zones.feuille.children]) if (enfant !== garde) enfant.remove();
+    // (ni sa barre de mise en forme)
+    const garde = saisieDiapo?.zone.parentNode === zones.feuille ? [saisieDiapo.zone, saisieDiapo.outils] : [];
+    for (const enfant of [...zones.feuille.children]) if (!garde.includes(enfant)) enfant.remove();
     zones.feuille.prepend(svg, s('svg', { class: 'fusain-calque', 'aria-hidden': 'true' }));
     if (visuel && interne && vue.editeur.apresAffichage) vue.editeur.apresAffichage(interne);
     if (avaitFocus) svg.focus({ preventScroll: true });
@@ -534,52 +536,78 @@ function textesSaisissables(cle) {
 }
 const texteSaisissable = (cle) => textesSaisissables(cle)?.liste[0] || null;
 
-// Texte du modèle (« ** » pour le gras, retours à la ligne) → contenu de la zone, sans jamais interpréter de HTML
+// Texte du modèle (marques de js/texte-riche.js, retours à la ligne) → contenu de la zone, mis en forme par des styles
+// posés en CSSOM (jamais de HTML interprété). gras : le texte est déjà gras par sa place (titre)
 function remplirSaisie(zone, texte, gras) {
     zone.replaceChildren();
-    String(texte).split(/\n|<br\s*\/?>/i).forEach((ligne, n) => {
-        if (n) zone.append(document.createElement('br'));
-        ligne.split('**').forEach((morceau, k) => {
-            if (!morceau) return;
-            if (k % 2 && !gras) { const b = document.createElement('b'); b.textContent = morceau; zone.append(b); } else zone.append(document.createTextNode(morceau));
+    for (const m of analyserTexteRiche(texte)) {
+        String(m.t).split(/\n|<br\s*\/?>/i).forEach((ligne, n) => {
+            if (n) zone.append(document.createElement('br'));
+            if (!ligne) return;
+            if (memeStyle(m, STYLE_VIDE) || (gras && memeStyle({ ...m, gras: false }, STYLE_VIDE))) { zone.append(document.createTextNode(ligne)); return; }
+            const span = document.createElement('span');
+            span.textContent = ligne;
+            if (m.gras && !gras) span.style.fontWeight = '700';
+            if (m.italique) span.style.fontStyle = 'italic';
+            if (m.barre) span.style.textDecorationLine = 'line-through';
+            if (m.couleur) span.style.color = m.couleur;
+            if (m.stabilo) span.style.backgroundColor = m.stabilo;
+            zone.append(span);
         });
-    });
+    }
 }
 
-// Contenu de la zone → texte du modèle : le gras se lit sur le rendu (balise ou style posés par le navigateur)
+// « rgb(225, 0, 15) » → « #e1000f » ; '' pour une couleur transparente
+function hexCalcule(valeur) {
+    const v = String(valeur).match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)/);
+    if (!v || (v[4] !== undefined && Number.parseFloat(v[4]) === 0)) return '';
+    return `#${[v[1], v[2], v[3]].map((x) => Number(x).toString(16).padStart(2, '0')).join('')}`;
+}
+
+// Contenu de la zone → texte du modèle : la mise en forme se lit sur le rendu (balises ou styles posés par le navigateur,
+// commandes de la barre d'outils) ; seul l'écart avec le texte d'origine (gras de place, couleur de place) est noté
 function lireSaisie(zone, gras) {
-    let sortie = '';
-    let fort = false;
-    const fermer = () => { if (fort) { sortie += '**'; fort = false; } };
+    const morceaux = [];
+    const couleurBase = hexCalcule(getComputedStyle(zone).color);
+    const ancetres = function* (el) { for (let a = el; a && a !== zone; a = a.parentElement) yield a; };
+    const styleDe = (el) => {
+        const cs = getComputedStyle(el);
+        let barre = false;
+        let stabilo = '';
+        for (const a of ancetres(el)) {
+            if (/^(S|STRIKE|DEL)$/.test(a.nodeName) || getComputedStyle(a).textDecorationLine.includes('line-through')) barre = true;
+            if (!stabilo) stabilo = hexCalcule(getComputedStyle(a).backgroundColor);
+        }
+        const couleur = hexCalcule(cs.color);
+        return {
+            gras: !gras && Number.parseInt(cs.fontWeight, 10) >= 600,
+            italique: cs.fontStyle !== 'normal',
+            barre,
+            couleur: couleur && couleur !== couleurBase ? couleur : '',
+            stabilo,
+        };
+    };
+    const ligne = () => morceaux.push({ ...STYLE_VIDE, t: '<br>' });
     const parcourir = (noeud) => {
         for (const enfant of noeud.childNodes) {
             if (enfant.nodeType === Node.TEXT_NODE) {
-                const b = !gras && Number.parseInt(getComputedStyle(enfant.parentElement).fontWeight, 10) >= 600;
+                const st = styleDe(enfant.parentElement);
                 // Dans une zone qui garde les blancs, le navigateur écrit le retour à la ligne comme un caractère « \n »
-                enfant.data.replace(/\u00a0/g, ' ').split('\n').forEach((morceau, k) => {
-                    if (k) { fermer(); sortie += '<br>'; }
-                    let t = morceau;
-                    if (!t) return;
-                    if (b !== fort) {
-                        // Les espaces restent hors des astérisques : « mot **gras** suite »
-                        if (b) { const espaces = t.match(/^\s*/)[0]; sortie += `${espaces}**`; t = t.slice(espaces.length); } else {
-                            const espaces = sortie.match(/\s*$/)[0];
-                            sortie = `${sortie.slice(0, sortie.length - espaces.length)}**${espaces}`;
-                        }
-                        fort = b;
-                    }
-                    sortie += t;
+                enfant.data.replace(/ /g, ' ').split('\n').forEach((morceau, k) => {
+                    if (k) ligne();
+                    if (morceau) morceaux.push({ ...st, t: morceau });
                 });
-            } else if (enfant.nodeName === 'BR') { fermer(); sortie += '<br>'; } else if (enfant.nodeType === Node.ELEMENT_NODE) {
+            } else if (enfant.nodeName === 'BR') ligne(); else if (enfant.nodeType === Node.ELEMENT_NODE) {
                 // Un bloc créé par le navigateur (div, p) commence une nouvelle ligne
-                if (/^(DIV|P|LI)$/.test(enfant.nodeName) && sortie && !sortie.endsWith('<br>')) { fermer(); sortie += '<br>'; }
+                if (/^(DIV|P|LI)$/.test(enfant.nodeName) && morceaux.length && morceaux[morceaux.length - 1].t !== '<br>') ligne();
                 parcourir(enfant);
             }
         }
     };
     parcourir(zone);
-    fermer();
-    return sortie.replace(/(<br>)+$/, '');
+    while (morceaux.length && morceaux[morceaux.length - 1].t === '<br>') morceaux.pop();
+    // « <br> » reste hors des marques : chaque ligne porte les siennes
+    return ecrireTexteRiche(morceaux);
 }
 
 // Sous-parties : une par ligne dans la zone, séparées par « ; » dans le code ; une rangée de tableau tient sur une ligne
@@ -596,6 +624,8 @@ function placerSaisieDiapo() {
     const ctm = el?.getScreenCTM();
     if (!ctm) return false;
     for (const t of textes.liste) t.classList.add('fusain-en-saisie');
+    // Stabilo et barré sont dessinés à part : masqués aussi, la zone de saisie les montre à leur place
+    for (const d of zones.feuille.querySelectorAll('g[data-decor]')) if (d.getAttribute('data-decor') === sd.cle) d.classList.add('fusain-en-saisie');
     // Cellules d'une rangée : la zone couvre la rangée entière
     const dernier = textes.liste[textes.liste.length - 1];
     const fin = textes.sep === '|' ? Number(dernier.getAttribute('data-saisie-x')) + Number(dernier.getAttribute('data-saisie-l')) : null;
@@ -616,6 +646,8 @@ function placerSaisieDiapo() {
         textAlign: { center: 'center', end: 'right', justify: 'justify' }[d('align')] || 'left',
         textTransform: d('maj') === '1' ? 'uppercase' : 'none',
     });
+    // Barre de mise en forme : juste au-dessus de la zone, au bord gauche
+    if (sd.outils) Object.assign(sd.outils.style, { left: sd.zone.style.left, top: `calc(${sd.zone.style.top} - 2.75rem)` });
     return true;
 }
 
@@ -641,6 +673,7 @@ function fermerSaisieDiapo(valider = true) {
     saisieDiapo = null;
     const avaitFocus = document.activeElement === sd.zone;
     sd.zone.remove();
+    sd.outils?.remove();
     for (const el of zones.feuille.querySelectorAll('.fusain-en-saisie')) el.classList.remove('fusain-en-saisie');
     if (avaitFocus) zones.feuille.querySelector('svg.fusain-page')?.focus({ preventScroll: true });
 }
@@ -652,7 +685,68 @@ function texteVoisin(cle, sens) {
     return i < 0 ? null : cles[i + sens] ?? null;
 }
 
-const SAISIES_PERMISES = new Set(['insertText', 'insertReplacementText', 'insertCompositionText', 'insertLineBreak', 'insertTranspose', 'formatBold']);
+const SAISIES_PERMISES = new Set(['insertText', 'insertReplacementText', 'insertCompositionText', 'insertLineBreak', 'insertTranspose', 'formatBold',
+    'formatItalic', 'formatStrikeThrough', 'formatFontColor', 'formatBackColor', 'formatRemove']);
+
+// Mise en forme dans la zone de saisie : la commande vise la sélection, ou tout le texte s'il n'y en a pas
+// (un clic dans un paragraphe puis « Rouge » colore tout le paragraphe)
+function commandeSaisie(commande, valeur = null) {
+    const sd = saisieDiapo;
+    if (!sd) return;
+    sd.zone.focus({ preventScroll: true });
+    const sel = window.getSelection();
+    // La sélection en cours prime ; celle notée plus tôt ne sert que si le curseur a quitté la zone
+    if (!sd.zone.contains(sel.anchorNode) && sd.plage && sd.zone.contains(sd.plage.startContainer)) { sel.removeAllRanges(); sel.addRange(sd.plage); }
+    if (sel.isCollapsed || !sd.zone.contains(sel.anchorNode)) {
+        const r = document.createRange();
+        r.selectNodeContents(sd.zone);
+        sel.removeAllRanges();
+        sel.addRange(r);
+    }
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand(commande, false, valeur);
+}
+document.addEventListener('selectionchange', () => {
+    const sd = saisieDiapo;
+    const sel = window.getSelection();
+    if (sd && sel.rangeCount && sd.zone.contains(sel.anchorNode)) sd.plage = sel.getRangeAt(0).cloneRange();
+});
+
+// Barre d'outils au-dessus de la zone : gras, italique, barré, couleur du texte, stabilo, effacer la mise en forme.
+// Les boutons ne prennent pas le focus (la saisie reste ouverte) ; les raccourcis clavier font la même chose.
+function barreSaisie(gras) {
+    const garder = (e) => e.preventDefault();
+    const outil = (libelle, titre, action, classe = '') => h('button', { type: 'button', class: `fusain-saisie-outils__bouton ${classe}`, title: titre, 'aria-label': titre, tabindex: '-1', onmousedown: garder, onclick: action }, libelle);
+    let ouvert = null;
+    const fermerMenu = () => { ouvert?.remove(); ouvert = null; };
+    const pastille = (couleur, titre, action) => {
+        const b = outil('', titre, () => { fermerMenu(); action(); }, 'fusain-saisie-outils__pastille');
+        if (couleur) b.style.backgroundColor = couleur; else b.classList.add('fusain-saisie-outils__pastille--aucune');
+        return b;
+    };
+    const menu = (bouton, contenu) => {
+        const deja = ouvert && ouvert.previousSibling === bouton;
+        fermerMenu();
+        if (deja) return;
+        ouvert = h('div', { class: 'fusain-saisie-outils__menu', role: 'group', 'aria-label': bouton.title }, contenu);
+        bouton.after(ouvert);
+    };
+    const couleurBase = () => saisieDiapo?.zone ? getComputedStyle(saisieDiapo.zone).color : '#161616';
+    const bCouleur = outil('A', 'Couleur du texte (la sélection, ou tout le texte)', () => menu(bCouleur, [
+        pastille(couleurBase(), 'Couleur d\'origine', () => commandeSaisie('foreColor', couleurBase())),
+        COULEURS_TEXTE.map(([, c, nom]) => pastille(c, nom, () => commandeSaisie('foreColor', c))),
+    ]), 'fusain-saisie-outils__couleur');
+    const bStabilo = outil('S', 'Stabilo : surligner (la sélection, ou tout le texte)', () => menu(bStabilo, [
+        pastille('', 'Sans stabilo', () => commandeSaisie('hiliteColor', 'transparent')),
+        COULEURS_STABILO.map(([, c, nom]) => pastille(c, `Stabilo ${nom.toLowerCase()}`, () => commandeSaisie('hiliteColor', c))),
+    ]), 'fusain-saisie-outils__stabilo');
+    return h('div', { class: 'fusain-saisie-outils', role: 'toolbar', 'aria-label': 'Mise en forme du texte' },
+        gras ? null : outil('G', 'Gras (Ctrl+B)', () => commandeSaisie('bold'), 'fusain-saisie-outils__gras'),
+        outil('I', 'Italique (Ctrl+I)', () => commandeSaisie('italic'), 'fusain-saisie-outils__italique'),
+        outil('B', 'Barré (Ctrl+Maj+X)', () => commandeSaisie('strikeThrough'), 'fusain-saisie-outils__barre'),
+        bCouleur, bStabilo,
+        outil('✕', 'Effacer la mise en forme (la sélection, ou tout le texte)', () => { fermerMenu(); commandeSaisie('removeFormat'); }));
+}
 
 function ouvrirSaisieDiapo(cle, point = null) {
     if (!estDiapo() || ui.mode !== 'visuel') return false;
@@ -670,11 +764,12 @@ function ouvrirSaisieDiapo(cle, point = null) {
     zone.setAttribute('aria-multiline', 'true');
     zone.setAttribute('lang', 'fr');
     zone.setAttribute('spellcheck', 'true');
-    zone.setAttribute('aria-label', 'Texte de la diapositive. Entrée : nouvelle ligne ; Ctrl+B : gras ; Tab : texte suivant ; Échap : terminer.');
-    zone.title = 'Entrée : nouvelle ligne · Ctrl+B : gras · Tab : texte suivant · Échap : terminer';
+    zone.setAttribute('aria-label', 'Texte de la diapositive. Entrée : nouvelle ligne ; Ctrl+B : gras ; Ctrl+I : italique ; Ctrl+Maj+X : barré ; Ctrl+Maj+H : stabilo ; Tab : texte suivant ; Échap : terminer.');
+    zone.title = 'Entrée : nouvelle ligne · Ctrl+B : gras · Ctrl+I : italique · Ctrl+Maj+X : barré · Ctrl+Maj+H : stabilo · Tab : texte suivant · Échap : terminer';
     if (textes.sep === '|') zone.classList.add('fusain-saisie-diapo--rangee');
     remplirSaisie(zone, textes.sep === ';' ? valeur.split(';').map((x) => x.trim()).filter(Boolean).join('\n') : valeur, gras);
-    saisieDiapo = { cle, idPage: pageCourante().id, zone, gras, sep: textes.sep, dernier: versModeleSaisie(lireSaisie(zone, gras), textes.sep), minuterie: null };
+    const outils = barreSaisie(gras);
+    saisieDiapo = { cle, idPage: pageCourante().id, zone, outils, gras, sep: textes.sep, dernier: null, minuterie: null, plage: null };
 
     zone.addEventListener('beforeinput', (e) => {
         const t = e.inputType;
@@ -696,6 +791,18 @@ function ouvrirSaisieDiapo(cle, point = null) {
     });
     zone.addEventListener('keydown', (e) => {
         e.stopPropagation();
+        const touche = e.key.toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (touche === 'x' || touche === 'h')) {
+            e.preventDefault();
+            if (touche === 'x') commandeSaisie('strikeThrough'); else {
+                // Ctrl+Maj+H : stabilo jaune, ou retrait s'il y en a déjà un
+                const sel = window.getSelection();
+                const el = sel.anchorNode?.nodeType === Node.TEXT_NODE ? sel.anchorNode.parentElement : sel.anchorNode;
+                const deja = el && zone.contains(el) && el !== zone && getComputedStyle(el).backgroundColor.match(/rgba?\(\s*\d+[,\s]+\d+[,\s]+\d+\s*\)/);
+                commandeSaisie('hiliteColor', deja ? 'transparent' : COULEURS_STABILO[0][1]);
+            }
+            return;
+        }
         if (e.key === 'Escape') { e.preventDefault(); fermerSaisieDiapo(true); } else if (e.key === 'Tab') {
             const suivant = texteVoisin(cle, e.shiftKey ? -1 : 1);
             if (!suivant) return; // en bout de liste, Tab quitte la zone (la saisie est alors validée)
@@ -708,11 +815,13 @@ function ouvrirSaisieDiapo(cle, point = null) {
     });
     zone.addEventListener('focusout', () => {
         // Changer de fenêtre ne termine pas la saisie : le focus reviendra dans la zone
-        if (saisieDiapo?.zone === zone && document.hasFocus()) fermerSaisieDiapo(true);
+        if (saisieDiapo?.zone === zone && document.hasFocus() && !saisieDiapo.outils.contains(document.activeElement)) fermerSaisieDiapo(true);
     });
 
-    zones.feuille.append(zone);
+    zones.feuille.append(zone, outils);
     if (!placerSaisieDiapo()) { fermerSaisieDiapo(false); return false; }
+    // Texte de départ lu sur la zone placée (sa couleur et sa graisse de place sont alors connues)
+    saisieDiapo.dernier = versModeleSaisie(lireSaisie(zone, gras), textes.sep);
     zone.focus({ preventScroll: true });
     // Le curseur se place là où l'on a cliqué, sinon à la fin du texte
     const sel = window.getSelection();
@@ -1475,6 +1584,8 @@ function ouvrirAPropos() {
             h('li', {}, document_('./AUDIT_SECURITE_FUSAIN.md', 'Audit de sécurité et revue de code'))),
         h('h2', { class: 'fr-h6' }, 'Erreurs de syntaxe et index des syntaxes'),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.21.0, une faute dans le code est expliquée : ligne réelle, objet que la ligne essaie d\'écrire, cause, syntaxe attendue et exemple. Des réparations sont proposées après avoir été essayées ; « Appliquer » s\'annule par Ctrl+Z. Le bouton « Syntaxes » du mode code ouvre l\'index des écritures de chaque type de schéma.'),
+        h('h2', { class: 'fr-h6' }, 'Mise en forme des diapositives'),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.35.0, le texte d\'une diapositive se met en gras, en italique, se barre, change de couleur (un mot, une ligne, un paragraphe) ou se surligne au stabilo (jaune, vert, rose, bleu, orange) : barre de mise en forme au-dessus du texte en saisie directe (Ctrl+B, Ctrl+I, Ctrl+Maj+X, Ctrl+Maj+H), ou marques dans les champs du panneau (**gras**, *italique*, ~~barré~~, ==stabilo==, [texte]{rouge}, [texte]{stabilo-vert}). Le rendu est le même en PDF, PNG et SVG.'),
         h('h2', { class: 'fr-h6' }, 'Export vers Microsoft Visio'),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.20.0, « Exporter » propose le format Visio (.vsdx) : un fichier, une page Visio par page, lisible par Visio 2013 et suivants et par LibreOffice Draw. Formes et textes y sont modifiables ; les étapes et équipements forment des groupes ; sur les logigrammes, réseaux importés, diagrammes d\'états, de classes, entités-relations et d\'architecture, les liaisons sont des connecteurs collés qui suivent les formes déplacées. Police Marianne, remplacée par une police voisine si elle n\'est pas installée.'),
         h('h2', { class: 'fr-h6' }, 'Schémas de réseau importés'),

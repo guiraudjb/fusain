@@ -386,8 +386,10 @@ export function composerPage(page, schema, { index = 0, total = 1, guides = fals
 
 // ---------- Polices incorporées pour les exports en image ----------
 
+// [graisse, fichier, style] ; l'italique sert aux diapositives de texte (js/texte-riche.js)
 const FICHIERS_POLICE = [
-    ['400', 'Marianne-Regular'], ['500', 'Marianne-Medium'], ['700', 'Marianne-Bold'],
+    ['400', 'Marianne-Regular', 'normal'], ['500', 'Marianne-Medium', 'normal'], ['700', 'Marianne-Bold', 'normal'],
+    ['400', 'Marianne-Regular_Italic', 'italic'], ['700', 'Marianne-Bold_Italic', 'italic'],
 ];
 export const DOSSIER_DSFR = './libs/dsfr-v1.15.4';
 let reglePolices = null;
@@ -403,9 +405,9 @@ export async function binaireEnBase64(url) {
 
 export async function reglesPolices() {
     if (reglePolices === null) {
-        const regles = await Promise.all(FICHIERS_POLICE.map(async ([graisse, nom]) => {
+        const regles = await Promise.all(FICHIERS_POLICE.map(async ([graisse, nom, style]) => {
             const b64 = await binaireEnBase64(`${DOSSIER_DSFR}/fonts/${nom}.woff2`);
-            return `@font-face{font-family:Marianne;font-weight:${graisse};font-style:normal;src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
+            return `@font-face{font-family:Marianne;font-weight:${graisse};font-style:${style};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
         }));
         reglePolices = regles.join('\n');
     }

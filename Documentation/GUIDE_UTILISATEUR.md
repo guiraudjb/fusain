@@ -132,13 +132,21 @@ Pour obtenir ces fichiers depuis IMC (menus, colonnes, solutions de repli), voir
 
 ## 3. Diapositives de texte
 
-**Écrire sur la diapositive** — cliquez sur un texte : il s'ouvre à sa place, avec sa police, sa taille et son alignement, et la diapositive se met à jour à chaque lettre. Entrée passe à la ligne, Ctrl+B met en gras, Tab passe au texte suivant, Échap (ou un clic ailleurs) termine ; Ctrl+Z annule toute la saisie. Les sous-parties d'un sommaire en colonnes s'écrivent une par ligne ; une ligne de tableau s'écrit sur toute la rangée, cellules séparées par « | ».
+**Écrire sur la diapositive** — cliquez sur un texte : il s'ouvre à sa place, avec sa police, sa taille et son alignement, et la diapositive se met à jour à chaque lettre. Entrée passe à la ligne, Tab passe au texte suivant, Échap (ou un clic ailleurs) termine ; Ctrl+Z annule toute la saisie.
+
+**Mettre en forme** — pendant la saisie, une barre s'affiche au-dessus du texte : **G** gras, *I* italique, ~~B~~ barré, **A** couleur du texte (Bleu France, Rouge Marianne, vert, orange, violet, turquoise, gris, noir, blanc ou couleur d'origine), **S** stabilo (surligneur jaune, vert, rose, bleu ou orange, ou sans stabilo), ✕ efface la mise en forme. Elle s'applique au passage sélectionné ; sans sélection, à tout le texte (un mot, une ligne, un paragraphe : sélectionnez-le, ou cliquez dedans pour tout le texte). Raccourcis : Ctrl+B gras, Ctrl+I italique, Ctrl+Maj+X barré, Ctrl+Maj+H stabilo jaune (ou retrait). Les sous-parties d'un sommaire en colonnes s'écrivent une par ligne ; une ligne de tableau s'écrit sur toute la rangée, cellules séparées par « | ».
 
 En plus des schémas, une page peut être une **diapositive de texte** : page de titre, sommaire, intercalaire, texte en colonnes, chiffres clés, frise d'étapes, blocs, ou texte libre (titres, paragraphes, puces, tableau). « Ajouter une page » les propose dans la rubrique « Diapositives de texte ».
 
 - Les mises en page et leur style (couleurs, tailles, filets) sont ceux des diapositives libres de VALOR, conformes à la charte graphique de l'État pour les présentations. Vous ne réglez pas le style : vous choisissez une mise en page et vous écrivez les textes.
 - Un clic sur un texte l'ouvre en saisie sur place (voir ci-dessus) ; la colonne de droite donne aussi tous les champs. La pastille « + » d'un élément en ajoute un à la suite.
-- Deux astérisques autour d'un passage le mettent en **gras** (`**important**`). Un retour à la ligne dans un champ est repris sur la diapositive.
+- Dans les champs du panneau, la mise en forme s'écrit par des marques, comme en Markdown ; la zone « Mise en forme » du panneau les pose sur le passage sélectionné (ou sur tout le champ) :
+  - `**gras**`, `*italique*`, `~~barré~~`, `==stabilo jaune==` ;
+  - `[texte]{rouge}` pour une couleur (`bleu`, `rouge`, `vert`, `orange`, `violet`, `turquoise`, `gris`, `noir`, `blanc` ou `#rrggbb`) ;
+  - `[texte]{stabilo-vert}` pour un autre stabilo (`jaune`, `vert`, `rose`, `bleu`, `orange`) ;
+  - `[texte]{bleu stabilo-rose gras italique barre}` pour plusieurs réglages à la fois ;
+  - une barre oblique inverse écrit le caractère tel quel (`\*`). Un astérisque ou « == » entouré d'espaces (`5 * 3`, `a == b`) reste du texte.
+- Un retour à la ligne dans un champ est repris sur la diapositive ; une marque peut couvrir plusieurs lignes. La mise en forme est la même à l'écran, en PDF (Marianne italique incorporée), en PNG et en SVG ; l'export Visio garde le texte, mais pas la mise en forme de chaque mot.
 - « Mise en page » change de modèle en conservant les textes qui y ont leur place.
 - La diapositive remplit la zone utile de la page : le rendu de référence est l'A3 paysage ; sur un autre format, elle est mise à l'échelle.
 - Icônes : dans le sommaire, les colonnes, les chiffres clés, la frise et les blocs, chaque élément peut recevoir une icône (« Ajouter une icône… ») ; dans le texte libre, « Icône » ajoute un bloc icône. Ce sont les mêmes jeux que pour les schémas : icônes du DSFR, pictogrammes (dessinés à la couleur de la diapositive) et icônes illustrées.

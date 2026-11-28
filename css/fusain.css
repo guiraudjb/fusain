@@ -109,6 +109,19 @@ body.fusain-en-placement, body.fusain-en-placement * { cursor: grabbing !importa
 /* Saisie directe d'un texte de diapositive : mêmes police, taille, couleur et alignement que le texte dessiné */
 .fusain-feuille .fusain-saisie-diapo { min-width: 0; padding: 0; border: 0; background: transparent; font-family: Marianne, arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; outline: 2px dashed #e4794a; outline-offset: 6px; cursor: text; caret-color: #e4794a; box-sizing: content-box; }
 .fusain-feuille .fusain-saisie-diapo b { font-weight: 700; }
+.fusain-feuille .fusain-saisie-diapo span[style*="background"] { border-radius: .12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.fusain-saisie-outils { position: absolute; z-index: 6; display: flex; gap: .125rem; align-items: center; padding: .125rem; background: #fff; border: 1px solid #ddd; border-radius: .25rem; box-shadow: 0 2px 6px rgba(0, 0, 0, .15); font-family: Marianne, arial, sans-serif; }
+.fusain-saisie-outils__bouton { min-width: 2rem; height: 2rem; padding: 0 .375rem; border: 0; border-radius: .2rem; background: transparent; color: #161616; font-size: 1rem; line-height: 2rem; cursor: pointer; }
+.fusain-saisie-outils__bouton:hover { background: #eee; }
+.fusain-saisie-outils__gras { font-weight: 700; }
+.fusain-saisie-outils__italique { font-style: italic; font-family: Georgia, serif; }
+.fusain-saisie-outils__barre { text-decoration: line-through; }
+.fusain-saisie-outils__couleur { color: #e1000f; font-weight: 700; text-decoration: underline 3px; }
+.fusain-saisie-outils__stabilo { background: linear-gradient(transparent 35%, #fff200 35%, #fff200 85%, transparent 85%); font-weight: 700; }
+.fusain-saisie-outils__menu { display: flex; flex-wrap: wrap; gap: .25rem; max-width: 12rem; padding: .25rem; border-left: 1px solid #ddd; }
+.fusain-saisie-outils__pastille { min-width: 1.5rem; width: 1.5rem; height: 1.5rem; padding: 0; border: 1px solid #929292; border-radius: 50%; }
+.fusain-saisie-outils__pastille:hover { outline: 2px solid #000091; outline-offset: 1px; }
+.fusain-saisie-outils__pastille--aucune { background: linear-gradient(135deg, #fff 45%, #e1000f 45%, #e1000f 55%, #fff 55%); }
 .fusain-feuille .fusain-saisie-diapo:focus, .fusain-feuille .fusain-saisie-diapo:focus-visible { outline: 2px dashed #e4794a; outline-offset: 6px; }
 .fusain-feuille .fusain-en-saisie { visibility: hidden; }
 .fusain-feuille:has(.fusain-saisie-diapo) .fusain-poignee { display: none; }

@@ -1,0 +1,20 @@
+# Alias des prochains sauts et des sous-réseaux routés (exemple fictif)
+# Une ligne par alias : adresse = nom ; un sous-réseau s'écrit 10.10.10.0/24 ou 10.10.10.0 255.255.255.0
+
+192.168.254.1 = FW-PROD-ACTIF
+192.168.254.2 = FW-PARTENAIRES
+192.168.254.3 = FW-PROD-SECOURS
+192.168.254.10 = FW-DMZ-FRONT
+192.168.254.11 = FW-WAF
+192.168.254.50 = FW-BASTION
+192.168.254.51 = FW-SEC
+192.168.254.80 = SBC-TELEPHONIE
+192.168.254.81 = FW-TOIP
+192.168.254.90 = FW-GTB
+192.168.254.254 = FW-INTERNET
+
+10.10.10.0/24 = Applications métier
+10.10.20.0 255.255.254.0 = Bases Oracle
+10.10.40.0/24 = Recette
+10.45.0.0/16 = Trunk SIP opérateurs
+0.0.0.0/0 = Internet

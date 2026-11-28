@@ -16,5 +16,7 @@ Ils se téléchargent depuis la fenêtre « À propos » de FUSAIN. Pour obtenir
 - `imc-equipements.csv` : liste des équipements d'IMC (catégorie, emplacement).
 - `imc-api.csv` : liens tels que les rend l'API REST d'IMC (`/imcrs/plat/res/link`), avec un doublon vu des deux côtés.
 - `lldp-voisins.csv` : rapport de voisins LLDP, séparé par des points-virgules (téléphones, borne Wi-Fi).
+- `comware-routes.cfg` : configuration d'un commutateur HPE Comware pour « Routage d'un commutateur Comware » : `sysname`, lignes de configuration sans rapport (ignorées), routes statiques dans cinq VRF (`vpn-instance`) et la table globale (route par défaut, trou noir vers `NULL0`), un masque écrit en longueur, une route de secours (`preference 70`), un doublon et une route IPv6 (ignorée).
+- `comware-alias.txt` : alias des prochains sauts (pare-feu, SBC) et de quelques sous-réseaux routés (`adresse = nom`), à coller dans la même fenêtre.
 
 Les liens entre commutateurs de `datacenter.csv`, `datacenter-vlans.csv` et `plusieurs-commutateurs.csv` sont décrits des deux côtés (une ligne par commutateur, chacun avec son port) : FUSAIN les réunit en un seul trait qui porte les deux ports, côté parent – côté fils (« BAGG101 – BAGG1 »).

@@ -322,7 +322,7 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
 ```json
 {
   "format": "fusain",
-  "formatVersion": 3,
+  "formatVersion": 4,
   "application": "1.0.0",
   "document": {
     "titre": "Circuit de traitement des demandes",
@@ -352,7 +352,8 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
       "equipements": [["CŒUR-DC-NORD", "illus:commutateur-niveau-3", 1], ["SW-NORD-B01", "illus:commutateur-switch", 1], ["ESX-N01-01", "illus:serveur", 0]],
       "liaisons": [[0, 1, "BAGG101 – BAGG1", "1, 10, 20"], [1, 2, "BAGG10", "10, 20"]]
     }
-  ]
+  ],
+  "alias": [["192.168.254.1", "FW-PROD-ACTIF"], ["10.10.20.0/23", "Bases Oracle"]]
 }
 ```
 
@@ -366,10 +367,11 @@ Les documents joints en Markdown (guide utilisateur, cahier des charges, nomencl
 | Taille maximale acceptée | 5 Mo |
 | Nombre maximal de pages | 365 |
 | Réseaux enregistrés (`reseaux`, facultatif) | Topologie lue à l'import d'un réseau (modèles réseau), pour la liaison de bout en bout : 50 réseaux, 60 000 équipements et 120 000 liaisons au plus ; équipement = [nom, icône `jeu:nom` ou vide, passage 0 ou 1] ; liaison = [rang, rang, ports, VLAN] |
+| Alias du routage (`alias`, facultatif) | Saisis dans « Routage d'un commutateur Comware » et proposés au prochain import : 20 000 au plus ; alias = [adresse, nom] ; adresse = IPv4 (prochain saut) ou sous-réseau en CIDR normalisé (adresse de réseau, sans bit d'hôte : `10.10.20.0/23`), une seule fois ; nom d'une ligne, 120 caractères au plus |
 | Taille maximale d'un code | 50 000 caractères par page |
 | Valeurs énumérées | `format` (`A4`, `A3`), `orientation` (`portrait`, `paysage`), `ajustement.mode`, `theme`, `type` : listes fermées, toute autre valeur entraîne le refus |
 | Champs inconnus | Refusés (pas de champ libre) |
-| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version. Version 2 depuis FUSAIN 0.3.0 (ajout de `sousTitre` et `description`) : un fichier de version 1 reste lisible, ces champs y sont vides. Version 3 depuis FUSAIN 0.32.1 (ajout de `reseaux`) : un fichier de version 1 ou 2 reste lisible, sans réseau enregistré |
+| Compatibilité | `formatVersion` incrémenté à tout changement non rétrocompatible ; une fonction de conversion par saut de version. Version 2 depuis FUSAIN 0.3.0 (ajout de `sousTitre` et `description`) : un fichier de version 1 reste lisible, ces champs y sont vides. Version 3 depuis FUSAIN 0.32.1 (ajout de `reseaux`) : un fichier de version 1 ou 2 reste lisible, sans réseau enregistré Version 4 depuis FUSAIN 0.34.0 (ajout de `alias`) : un fichier de version 1 à 3 reste lisible, sans alias |
 
 Le schéma JSON formel (JSON Schema) est livré avec l'application et sert à la fois de documentation et de référence pour la validation à la restauration.
 
@@ -715,6 +717,7 @@ FUSAIN/
 | Mode code | Aperçu en direct, message d'erreur, dernier rendu valide conservé, bascule en « code seul » avec motif ; depuis la 0.21.0, diagnostic des erreurs (ligne réelle, objet visé, cause en français, syntaxe attendue, réparations vérifiées par le rendu, annulables) et index des syntaxes ; depuis la 0.23.0, six types arrivés avec Mermaid 12.3 (cas d'utilisation, modélisation par événements, flux d'agents, diagramme syntaxique, cadre Cynefin, carte de Wardley), proposés avec un modèle et leur aide à la syntaxe (éditables visuellement depuis la 0.26.0) ; depuis la 0.21.1, la ligne précédente est contrôlée aussi et le message reste visible à tout zoom |
 | Icônes | Depuis la 0.12.0, le même menu d'icônes sert aux étapes du logigramme et aux diapositives de texte. Schémas d'architecture : les six icônes de Mermaid et les 1 038 icônes du DSFR, embarquées dans un fichier dérivé chargé à la demande, et, depuis la 0.11.0, des icônes illustrées en couleur (celles de SimpleCarto et celles générées pour FUSAIN avec Krea 2), avec fenêtre de choix commune. Depuis la 0.17.0, un troisième jeu : 54 pictogrammes au trait, en noir et blanc, dessinés pour FUSAIN (réseau, serveurs, postes, sécurité, services), décrits par des formes simples et des nombres vérifiés avant tout dessin, recolorés dans les diapositives et les cartes. Les icônes illustrées sont des images : FUSAIN les pose lui-même dans le schéma après l'assainissement, à partir de ses seuls fichiers embarqués |
 | Cartes | Depuis la 0.14.0, cartes thématiques au moteur de SimpleCarto : huit échelles du monde à la commune, import CSV avec calculs, palettes, étiquettes, légende, fonds IGN, épingles (dont géocodage hors ligne par la Base Adresse Nationale), pictogrammes et annotations glissés à la souris ; fonds communaux lus à la demande et conservés hors ligne ; depuis la 0.21.2, le fichier importé est relu au changement de zone ou d'échelle (bouton « Actualiser les données ») |
+| Routage | Depuis la 0.34.0 : « Routage d'un commutateur Comware » (rubrique Réseaux informatiques) lit la configuration collée ou chargée (`ip route-static`, VRF par `vpn-instance`, masque pointé ou en longueur, interface, prochain saut dans une autre VRF, préférence, description ; `sysname`) et dessine le commutateur, ses prochains sauts et les sous-réseaux routés, un cadre par VRF : vue d'ensemble puis une page par VRF (coupée par prochain saut au-delà de 60 sous-réseaux) ; route de secours en pointillé. Alias « adresse = nom » des prochains sauts et des sous-réseaux, enregistrés avec le document (format 4) |
 | Modèles | 60 modèles de départ (42 modèles de schémas dont quatre modèles de réseaux informatiques et un modèle PlantUML, 13 de diapositives et 5 de cartes), répartis en sept rubriques ; page vierge. Depuis la 0.18.0, import d'un réseau à partir des exports d'HPE IMC (gestion des liens, liste des équipements, API REST) ou d'un rapport LLDP / CDP, en CSV ou Excel : schémas physique et logique (VLAN), une page par site et local technique pour les grands réseaux |
 | Export | PDF vectoriel avec police Marianne incorporée (repli en image à 300 ppp pour les schémas à contenu HTML), PNG (150 / 300 / 600 ppp, fond transparent, schéma seul), SVG |
 | Fichiers | Sauvegarde et restauration JSON avec validation stricte, enregistrement direct dans le fichier d'origine sur les navigateurs qui le permettent (`Ctrl+Maj+S` ou `Maj+Clic` sur « Enregistrer », ou après dépôt du fichier), import de code Mermaid (`.mmd`, `.txt`) et PlantUML (`.puml`, `.plantuml`, `.iuml`), brouillon local, annuler / rétablir |
@@ -727,6 +730,7 @@ FUSAIN/
 
 | Domaine | Contenu |
 |---|---|
+| Routage | Mettre à jour les pages déjà créées quand un alias change (aujourd'hui : refaire l'import, les alias sont proposés) ; routes IPv6 (`ipv6 route-static`, comptées et ignorées) ; autres constructeurs (Cisco `ip route`, Aruba) ; table de routage effective (`display ip routing-table`) |
 | Édition visuelle | Sélection multiple, copier / coller ; ajustement à la souris des tâches du Gantt et des messages de séquence ; présentation hiérarchique d'une carte mentale (un modèle « organigramme » en logigramme en tient lieu) ; conservation des commentaires à la réécriture ; édition visuelle des familles PlantUML autres que la séquence sans conversion vers Mermaid |
 | Sécurité | Audit externe |
 | Accessibilité | Audit RGAA manuel et déclaration d'accessibilité (le contrôle automatique axe-core et le parcours au clavier sont en place et sans défaut) |

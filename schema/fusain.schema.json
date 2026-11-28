@@ -8,7 +8,7 @@
   "required": ["format", "formatVersion", "application", "document", "pages"],
   "properties": {
     "format": { "const": "fusain" },
-    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 3, "description": "2 depuis FUSAIN 0.3.0 (ajout de sousTitre et description) ; 3 depuis FUSAIN 0.32.1 (ajout de reseaux). Un fichier de version 1 ou 2 reste lisible." },
+    "formatVersion": { "type": "integer", "minimum": 1, "maximum": 4, "description": "2 depuis FUSAIN 0.3.0 (ajout de sousTitre et description) ; 3 depuis FUSAIN 0.32.1 (ajout de reseaux) ; 4 depuis FUSAIN 0.34.0 (ajout de alias). Un fichier de version 1 à 3 reste lisible." },
     "application": { "type": "string", "maxLength": 20 },
     "document": {
       "type": "object",
@@ -69,6 +69,13 @@
           }
         }
       }
+    },
+    "alias": {
+      "type": "array", "maxItems": 20000,
+      "description": "Facultatif. Alias de l'import du routage : [adresse, nom] ; adresse = IPv4 (prochain saut) ou sous-réseau en notation CIDR, adresse de réseau sans bit d'hôte (10.10.20.0/23) ; chaque adresse une seule fois.",
+      "items": { "type": "array", "minItems": 2, "items": false, "prefixItems": [
+        { "type": "string", "maxLength": 43, "pattern": "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}(/([0-9]|[12][0-9]|3[0-2]))?$" },
+        { "type": "string", "minLength": 1, "maxLength": 120 }] }
     }
   }
 }

@@ -99,7 +99,7 @@ test('fichier : aller-retour et refus des entrées hostiles', () => {
     delete ancien.pages[0].sousTitre;
     delete ancien.pages[0].description;
     const relu = lireJson(JSON.stringify(ancien));
-    assert.equal(relu.formatVersion, 3);
+    assert.equal(relu.formatVersion, 4);
     assert.equal(relu.pages[0].sousTitre, '');
     assert.equal(relu.pages[0].description, '');
 });
@@ -1618,4 +1618,134 @@ test('placement à la souris : logigramme — liens invisibles selon le sens, m�
     assert.equal(m.groupes[0].parent, null);
     const relu = logigramme.analyser(logigramme.ecrire(m));
     assert.equal(logigramme.ecrire(relu), logigramme.ecrire(m));
+});
+
+// ---------- Routage d'un commutateur Comware (ip route-static) et alias ----------
+import * as routage from '../js/routage.js';
+
+const ROUTES_FICTIVES = `ip route-static vpn-instance VRF_PROD 10.10.10.0 255.255.255.0 192.168.254.1 description via FW-PROD-ACTIF_App-Metier
+
+ip route-static vpn-instance VRF_PROD 10.10.20.0 255.255.254.0 192.168.254.1 description via FW-PROD-ACTIF_BDD-Oracle
+ip route-static vpn-instance VRF_PROD 10.10.30.0 255.255.255.128 192.168.254.2 description via FW-PARTENAIRES_Flux-SFTP
+ip route-static vpn-instance VRF_PROD 10.10.10.0 255.255.255.0 192.168.254.1 description via FW-PROD-ACTIF_App-Metier
+ip route-static vpn-instance VRF_DMZ_EXT 172.16.10.0 255.255.255.0 192.168.254.10 description via FW-DMZ-FRONT_Reverse-Proxy
+ip route-static vpn-instance VRF_DMZ_EXT 172.16.20.0 255.255.255.240 192.168.254.10 description via FW-DMZ-FRONT_Portail-Client
+ip route-static vpn-instance VRF_DMZ_EXT 172.16.30.0 255.255.255.0 192.168.254.11 description via FW-WAF_API-Publique
+ip route-static vpn-instance VRF_ADMIN 10.250.1.0 255.255.255.0 192.168.254.50 description via FW-BASTION_Administration-Linux
+ip route-static vpn-instance VRF_ADMIN 10.250.2.0 255.255.255.0 192.168.254.50 description via FW-BASTION_Hyperviseurs-ESXi
+ip route-static vpn-instance VRF_ADMIN 10.250.99.0 255.255.255.192 192.168.254.51 description via FW-SEC_Sondes-SIEM-Logs
+ip route-static vpn-instance VRF_VOIP 10.45.0.0 255.255.0.0 192.168.254.80 description via SBC-TELEPHONIE_Trunk-SIP
+ip route-static vpn-instance VRF_VOIP 10.46.12.0 255.255.252.0 192.168.254.81 description via FW-TOIP_Postes-IP-Siege
+ip route-static vpn-instance VRF_IOT_BATIMENT 172.22.5.0 255.255.255.0 192.168.254.90 description via FW-GTB_Controle-Acces-Badges
+ip route-static vpn-instance VRF_IOT_BATIMENT 172.22.6.0 255.255.255.0 192.168.254.90 description via FW-GTB_Cameras-Videosurveillance
+ip route-static 0.0.0.0 0.0.0.0 192.168.254.254 description via FW-INTERNET_Sortie-Par-Defaut`;
+
+test('routage : routes statiques Comware → 14 routes, 1 doublon, 5 VRF et la table globale, masques en CIDR', () => {
+    const lu = routage.lireRoutesComware(ROUTES_FICTIVES);
+    assert.equal(lu.routes.length, 14);
+    assert.equal(lu.bilan.doublons, 1);
+    assert.deepEqual(lu.bilan.invalides, []);
+    assert.deepEqual([...new Set(lu.routes.map((r) => r.vrf))], ['VRF_PROD', 'VRF_DMZ_EXT', 'VRF_ADMIN', 'VRF_VOIP', 'VRF_IOT_BATIMENT', '']);
+    assert.deepEqual([...new Set(lu.routes.map((r) => r.longueur))].sort((a, b) => a - b), [0, 16, 22, 23, 24, 25, 26, 28]);
+    const oracle = lu.routes.find((r) => r.cidr === '10.10.20.0/23');
+    assert.equal(oracle.nh, '192.168.254.1');
+    assert.equal(oracle.description, 'via FW-PROD-ACTIF_BDD-Oracle');
+    assert.equal(lu.routes.at(-1).cidr, '0.0.0.0/0');
+    assert.equal(lu.commutateur, '');
+});
+
+test('routage : autres syntaxes (longueur, interface, VRF du prochain saut, préférence, bits d\'hôte, refus)', () => {
+    const l = routage.lireLigneRoute;
+    const a = l('ip route-static 10.1.2.3 24 Vlan-interface10 192.168.1.1 preference 10 tag 5 description lien  de secours');
+    assert.equal(a.cidr, '10.1.2.0/24');
+    assert.equal(a.corrige, true);
+    assert.equal(a.interface, 'Vlan-interface10');
+    assert.equal(a.nh, '192.168.1.1');
+    assert.equal(a.preference, 10);
+    assert.equal(a.tag, 5);
+    assert.equal(a.description, 'lien de secours');
+    const b = l('ip route-static vpn-instance A 10.0.0.0 8 vpn-instance B 1.1.1.1 bfd echo-packet bfd-source 2.2.2.2');
+    assert.equal(b.vrf, 'A');
+    assert.equal(b.nhVrf, 'B');
+    assert.equal(b.nh, '1.1.1.1');
+    assert.equal(l('ip route-static 192.0.2.0 24 NULL0').interface, 'NULL0');
+    assert.equal(l('ip route-static 10.0.0.0 255.0.255.0 1.1.1.1').erreur, 'masque non contigu');
+    assert.equal(l('ip route-static 10.0.0.0 255.0.0.0').erreur, 'prochain saut manquant');
+    assert.equal(l('ip route-static 300.0.0.0 8 1.1.1.1').erreur, 'réseau ou masque illisible');
+    assert.equal(l('interface Vlan-interface10'), null);
+    const lu = routage.lireRoutesComware(' sysname CŒUR-01\nipv6 route-static 2001:db8:: 32 NULL0\nundo ip route-static 10.0.0.0 8 1.1.1.1\nip route-static 10.0.0.0 255.0.255.0 1.1.1.1\nip route-static 10.0.0.0 8 1.1.1.1');
+    assert.equal(lu.commutateur, 'CŒUR-01');
+    assert.equal(lu.routes.length, 1);
+    assert.equal(lu.bilan.ipv6, 1);
+    assert.equal(lu.bilan.undo, 1);
+    assert.deepEqual(lu.bilan.invalides.map((x) => x.ligne), [4]);
+});
+
+test('routage : alias « adresse = nom » (IP, CIDR, masque pointé), relus et réécrits', () => {
+    const { alias, invalides } = routage.lireAlias('# commentaire\n192.168.254.1 = FW-PROD-ACTIF\n10.10.20.0 255.255.254.0 = Bases Oracle\n10.10.10.0/24;Applications métier\n10.10.30.0 25\tFlux SFTP\npas une adresse = x\n10.0.0.0/33 = y');
+    assert.equal(alias.get('192.168.254.1'), 'FW-PROD-ACTIF');
+    assert.equal(alias.get('10.10.20.0/23'), 'Bases Oracle');
+    assert.equal(alias.get('10.10.10.0/24'), 'Applications métier');
+    assert.equal(alias.get('10.10.30.0/25'), 'Flux SFTP');
+    assert.deepEqual(invalides.map((x) => x.ligne), [6, 7]);
+    assert.equal(routage.cleAlias('10.10.20.0 255.255.254.0'), routage.cleAlias('10.10.20.0/23'));
+    assert.deepEqual(Object.fromEntries(routage.lireAlias(routage.ecrireAlias(alias)).alias), Object.fromEntries(alias));
+    assert.ok(routage.ecrireAlias(alias).startsWith('192.168.254.1 = FW-PROD-ACTIF\n'));
+});
+
+test('routage : pages (vue d\'ensemble puis une page par VRF), alias sur les nœuds, secours en pointillé', async () => {
+    const cfg = lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/comware-routes.cfg', import.meta.url)), 'utf8');
+    const al = lireFichierReseau(cheminReseau(new URL('../Documentation/exemples-reseau/comware-alias.txt', import.meta.url)), 'utf8');
+    const lu = routage.lireRoutesComware(cfg);
+    const { alias } = routage.lireAlias(al);
+    assert.equal(lu.commutateur, 'CŒUR-DC-01');
+    const r = routage.produirePagesRoutage(lu, alias);
+    assert.deepEqual(r.pages.map((p) => p.nom), ['Routage — CŒUR-DC-01 : vue d\'ensemble', 'Routage — VRF_PROD', 'Routage — VRF_DMZ_EXT', 'Routage — VRF_ADMIN', 'Routage — VRF_VOIP', 'Routage — VRF_IOT_BATIMENT', 'Routage — Table globale']);
+    assert.deepEqual(r.alertes, []);
+    relireToutes(r.pages);
+    const prod = r.pages[1].code;
+    assert.ok(prod.includes('label: "FW-PROD-ACTIF<br/>192.168.254.1"'));
+    assert.ok(prod.includes('label: "Bases Oracle<br/>10.10.20.0/23"'));
+    assert.ok(prod.includes('label: "10.10.30.0/25"'), 'sans alias : le CIDR seul');
+    // 10.10.40.0/24 : routé par deux pare-feu, un seul nœud ; la route de préférence 70 est en pointillé
+    assert.equal((prod.match(/Recette<br\/>10\.10\.40\.0\/24/g) || []).length, 1);
+    assert.match(prod, /-\.->\|"FW-PROD-SECOURS_Recette<br\/>préférence 70"\|/);
+    assert.ok(r.pages[6].code.includes('illus:box-internet') && r.pages[6].code.includes('Internet<br/>0.0.0.0/0'));
+    assert.ok(r.pages[6].code.includes('Interface NULL0'));
+    assert.ok(r.pages[0].code.includes('label: "FW-PROD-ACTIF<br/>192.168.254.1<br/>3 sous-réseaux routés"'), 'vue d\'ensemble : décompte sous le prochain saut');
+    assert.ok(!r.pages[0].code.includes('10.10.20.0/23'), 'la vue d\'ensemble ne détaille pas les sous-réseaux');
+    // Sans description, une seule page, pictogrammes
+    const u = routage.produirePagesRoutage(lu, alias, { presentation: 'unique', descriptions: false, jeu: 'picto' });
+    assert.equal(u.pages.length, 1);
+    assert.ok(!u.pages[0].code.includes('FW-PROD-ACTIF_App-Metier') && u.pages[0].code.includes('picto:internet'));
+    // Découpe par prochain saut au-delà de parPage sous-réseaux
+    const beaucoup = Array.from({ length: 50 }, (_, i) => `ip route-static vpn-instance V 10.${i}.0.0 16 192.168.0.${1 + (i % 2)}`).join('\n');
+    const d = routage.produirePagesRoutage(routage.lireRoutesComware(beaucoup), new Map(), { parPage: 20 });
+    assert.deepEqual(d.pages.map((p) => p.nom), ['Routage — Commutateur : vue d\'ensemble', 'Routage — V — 192.168.0.1 (1/2)', 'Routage — V — 192.168.0.1 (2/2)', 'Routage — V — 192.168.0.2 (1/2)', 'Routage — V — 192.168.0.2 (2/2)']);
+    assert.ok(d.pages[0].code.includes('25 sous-réseaux routés<br/>→ 2 pages « Routage — V — 192.168.0.1 »'));
+});
+
+test('routage : noms piégés protégés, alias gardés avec le document (format 4)', () => {
+    const lu = routage.lireRoutesComware('sysname SW <A> & "B"\nip route-static vpn-instance V_*1* 10.0.0.0 8 1.1.1.1 description via _a_ #x; | b');
+    const r = routage.produirePagesRoutage(lu, new Map([['1.1.1.1', 'FW *x* <y>'], ['10.0.0.0/8', 'Réseau & #35; _z_']]));
+    relireToutes(r.pages);
+    const code = r.pages.map((p) => p.code).join('\n');
+    assert.ok(!/<A>|<y>|\*x\*|&/.test(code.replace(/<br\/>/g, '')), code);
+    const doc = { format: 'fusain', formatVersion: 3, application: 'x', document: { titre: 't', creeLe: '2026-11-28T00:00:00.000Z', modifieLe: '2026-11-28T00:00:00.000Z', theme: 'bleu-france' },
+        pages: [{ id: 'p1', nom: 'P', format: 'A4', orientation: 'paysage', margesMm: 10, titre: '', sousTitre: '', piedDePage: '', description: '', ajustement: { mode: 'page', echelle: 100, alignement: 'centre' }, code: 'flowchart TD\n    A --> B\n' }] };
+    assert.equal(lireJson(JSON.stringify(doc)).alias, undefined, 'un document de version 3 reste lisible, sans alias');
+    const alias = [['192.168.254.1', 'FW-PROD-ACTIF'], ['10.10.20.0/23', 'Bases Oracle']];
+    const relu = lireJson(serialiser({ ...doc, alias }));
+    assert.equal(relu.formatVersion, 4);
+    assert.deepEqual(relu.alias, alias);
+    assert.equal(lireJson(serialiser({ ...doc, alias: [] })).alias, undefined);
+    const casse = (a) => assert.throws(() => lireJson(JSON.stringify({ ...doc, alias: a })));
+    casse([['10.10.20.5/23', 'bits d\'hôte']]);
+    casse([['10.10.20.0 255.255.254.0', 'masque pointé : non normalisé']]);
+    casse([['javascript:alert(1)', 'x']]);
+    casse([['1.1.1.1', '']]);
+    casse([['1.1.1.1', 'a\nb']]);
+    casse([['1.1.1.1', 'a'], ['1.1.1.1', 'b']]);
+    casse([['1.1.1.1', 'a', 'c']]);
+    casse({ '1.1.1.1': 'a' });
 });

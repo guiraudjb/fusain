@@ -9,13 +9,14 @@ import { diagnostiquer } from './diagnostic.js';
 import { SYNTAXES, TYPES_AIDE } from './syntaxes.js';
 import { ouvrirBoutEnBout } from './bout-en-bout.js';
 import { serialiser, lireJson, lireFichier, telecharger, nomDocument, PAGES_MAX, RESEAUX_MAX } from './fichier.js';
+import { ALIAS_MAX } from './adresses.js';
 import { enregistrerBrouillon, lireBrouillon, effacerDonneesLocales } from './brouillon.js';
 import { exporterPDF, exporterPNG, exporterSVG } from './export.js';
 import { exporterVisio } from './visio.js';
 import { editeurPour } from './diagrammes/index.js';
 import { MODELES, CATEGORIES, MODELE_INITIAL } from './modeles.js';
 import { rendreMarkdown } from './markdown.js';
-import { ouvrirImportReseau, ouvrirImportCommutateurs } from './import-reseau.js';
+import { ouvrirImportReseau, ouvrirImportCommutateurs, ouvrirImportRoutage } from './import-reseau.js';
 import { brancherNavigation, borner, ancrer } from './navigation.js';
 import { controlerCode } from './controles.js';
 import { estModeDiaporama, enregistrerSessionDiaporama, demarrerDiaporama, estBrouillonParDefaut, chargerDocumentDemonstration } from './diaporama.js';
@@ -1162,7 +1163,8 @@ function boutEnBout() { ouvrirBoutEnBout(etat.doc, ajouterPages); }
 // Plusieurs pages d'un coup (import d'un réseau), après la page courante : une seule étape d'annulation.
 // reseau : topologie lue dans le fichier importé, enregistrée avec le document (liaison de bout en bout) ; un nouvel
 // import du même fichier remplace la précédente. Liste vide : le réseau seul est enregistré, sans page.
-function ajouterPages(liste, { reseau = null } = {}) {
+// alias : paires [clé, nom] (import du routage), qui remplacent celles du document, dans la même étape d'annulation.
+function ajouterPages(liste, { reseau = null, alias = null } = {}) {
     const place = PAGES_MAX - etat.doc.pages.length;
     if (!liste.length) {
         if (reseau?.equipements?.length) modifier((doc) => { doc.reseaux = [...(doc.reseaux || []).filter((r) => r.nom !== reseau.nom), reseau].slice(-RESEAUX_MAX); });
@@ -1172,6 +1174,7 @@ function ajouterPages(liste, { reseau = null } = {}) {
     if (liste.length > place) message('Pages en trop', `Seules les ${place} premières pages ont été ajoutées (${PAGES_MAX} pages au plus par document).`, 'warning');
     ui.selection = null;
     modifier((doc) => {
+        if (alias) { if (alias.length) doc.alias = alias.slice(0, ALIAS_MAX); else delete doc.alias; }
         if (reseau?.equipements?.length) {
             doc.reseaux = [...(doc.reseaux || []).filter((r) => r.nom !== reseau.nom), reseau].slice(-RESEAUX_MAX);
         }
@@ -1259,6 +1262,9 @@ function ouvrirModeles(action) {
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
             id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportCommutateurs(ajouterPages, { datacenter: true, boutEnBout }); } },
                 h('span', { class: 'fusain-modele__nom' }, 'Data center : vue globale et tous les commutateurs, VLAN (CSV à 3 ou 4 colonnes)…'),
+                h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null,
+            id === 'reseaux' ? h('button', { type: 'button', class: 'fusain-modele', onclick: () => { fermerModale(dialogue); ouvrirImportRoutage(ajouterPages, { alias: etat.doc.alias || [] }); } },
+                h('span', { class: 'fusain-modele__nom' }, 'Routage d\'un commutateur Comware (ip route-static, alias)…'),
                 h('span', { class: 'fr-badge fr-badge--sm fr-badge--no-icon fr-badge--new' }, 'Nouvelles pages')) : null),
         ]));
     const dialogue = modale('fusain-modale-modeles', action === 'ajouter' ? 'Nouvelle page' : 'Modèles de schémas', contenu);
@@ -1412,6 +1418,8 @@ const EXEMPLES_CARTES = [
 ];
 
 const EXEMPLES_RESEAU = [
+    ['comware-routes.cfg', 'Routage d\'un commutateur Comware', 'configuration fictive : sysname, routes statiques dans cinq VRF et la table globale (route par défaut, route de secours, NULL0, un doublon) ; pour « Routage d\'un commutateur Comware »'],
+    ['comware-alias.txt', 'Alias du routage', 'alias fictifs des prochains sauts (pare-feu, SBC) et de quelques sous-réseaux routés, à coller dans la même fenêtre'],
     ['imc-liens.xlsx', 'Liste des liens (Excel)', 'export « Gestion des liens » d\'HPE IMC : siège et agence, VLAN, agrégat, lien en panne'],
     ['imc-liens.csv', 'Liste des liens (CSV)', 'le même tableau, précédé d\'une ligne de titre comme dans l\'export'],
     ['imc-equipements.csv', 'Liste des équipements', 'catégories, adresses IP, emplacements et locaux techniques des mêmes équipements'],
@@ -1478,6 +1486,7 @@ function ouvrirAPropos() {
             h('li', {}, 'Regroupement par emplacement, préfixe du nom ou sous-réseau ; au-delà de 25 équipements d\'infrastructure, une vue d\'ensemble puis une page par site.'),
             h('li', {}, 'Les pages créées sont des logigrammes ordinaires, entièrement modifiables ; un seul Ctrl+Z retire l\'import. Les fichiers sont lus dans le navigateur, sans envoi.')),
         h('p', { class: 'fr-text--sm' }, 'Depuis la 0.30.0, « Commutateur et périphériques » dessine un ou plusieurs commutateurs et leurs périphériques à partir d\'un fichier à trois colonnes (commutateur, lien, périphérique), sans intitulés imposés : une page pour l\'ensemble ou une par commutateur, nom du lien sur le trait, agrégats en trait épais. Les noms peuvent contenir les caractères de la syntaxe de Mermaid (guillemets, crochets, chevrons, #, &, |…) : ils sont écrits de façon à s\'afficher tels quels.'),
+        h('p', { class: 'fr-text--sm' }, 'Depuis la 0.34.0, « Routage d\'un commutateur Comware » dessine les routes statiques d\'un commutateur HPE Comware à partir de sa configuration collée ou chargée (lignes « ip route-static », VRF par « vpn-instance ») : le commutateur, ses prochains sauts, puis les sous-réseaux routés, un cadre par VRF ; une vue d\'ensemble puis une page par VRF. Des alias (« 192.168.254.1 = FW-PROD », « 10.10.10.0/24 = Applications ») nomment prochains sauts et sous-réseaux ; ils sont enregistrés avec le document.'),
         h('p', { class: 'fr-text--sm' }, 'Pour obtenir ces fichiers depuis IMC (liste des liens, descriptions des ports, API, sauvegardes de configuration, SNMP) et les retravailler avant l\'import, voir le guide ', document_('./Documentation/GUIDE_IMC.md', 'Obtenir les fichiers d\'HPE IMC'), '. Exports fictifs pour essayer l\'import (noms de colonnes documentés par HPE, équipements inventés) :'),
         h('ul', {}, EXEMPLES_RESEAU.map(([fichier, nom, detail]) => h('li', {},
             h('a', { class: 'fr-link', href: `./Documentation/exemples-reseau/${fichier}`, download: fichier }, nom), ` — ${detail}`))),

@@ -11,6 +11,9 @@ export const RESEAUX_MAX = 50;
 const EQUIPEMENTS_RESEAU_MAX = 60000;
 const LIAISONS_RESEAU_MAX = 120000;
 
+// Alias des prochains sauts et des sous-réseaux routés (import du routage), format 4
+import { ALIAS_MAX, ALIAS_NOM_MAX, cleAlias } from './adresses.js';
+
 const CLES_HOSTILES = new Set(['__proto__', 'constructor', 'prototype']);
 
 function refuser(motif) {
@@ -51,7 +54,7 @@ function date(valeur, nom) {
 // Reconstruit un document neuf, champ par champ, à partir d'un objet non fiable.
 // L'objet d'entrée n'est jamais réutilisé tel quel.
 export function valider(brut) {
-    objet(brut, 'fichier', ['format', 'formatVersion', 'application', 'document', 'pages', 'reseaux']);
+    objet(brut, 'fichier', ['format', 'formatVersion', 'application', 'document', 'pages', 'reseaux', 'alias']);
     if (brut.format !== 'fusain') refuser('Ce fichier n\'est pas un document FUSAIN.');
     if (!Number.isInteger(brut.formatVersion) || brut.formatVersion < 1) refuser('Version de format invalide.');
     if (brut.formatVersion > VERSION_FORMAT) refuser('Ce fichier a été créé avec une version plus récente de FUSAIN. Mettez l\'application à jour pour l\'ouvrir.');
@@ -100,7 +103,24 @@ export function valider(brut) {
     });
 
     const reseaux = brut.reseaux === undefined ? undefined : validerReseaux(brut.reseaux);
-    return { format: 'fusain', formatVersion: VERSION_FORMAT, application: VERSION, document, pages, ...(reseaux?.length ? { reseaux } : {}) };
+    const alias = brut.alias === undefined ? undefined : validerAlias(brut.alias);
+    return { format: 'fusain', formatVersion: VERSION_FORMAT, application: VERSION, document, pages, ...(reseaux?.length ? { reseaux } : {}), ...(alias?.length ? { alias } : {}) };
+}
+
+// Champ « alias » (format 4) : [[clé, nom]] ; clé = adresse IPv4 ou sous-réseau en CIDR (normalisé), nom d'une ligne
+function validerAlias(brut) {
+    if (!Array.isArray(brut) || brut.length > ALIAS_MAX) refuser('Le champ « alias » est mal formé.');
+    const vues = new Set();
+    return brut.map((a) => {
+        if (!Array.isArray(a) || a.length !== 2) refuser('Alias mal formé.');
+        const cle = cleAlias(chaine(a[0], 'alias / adresse', 43, { vide: false }));
+        if (!cle || cle !== a[0].trim()) refuser(`Adresse d'alias invalide : « ${String(a[0]).slice(0, 43)} ».`);
+        if (vues.has(cle)) refuser(`Alias en double : « ${cle} ».`);
+        vues.add(cle);
+        const nom = chaine(a[1], 'alias / nom', ALIAS_NOM_MAX, { vide: false });
+        if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/.test(nom)) refuser(`Nom d'alias invalide (caractère de contrôle) : « ${cle} ».`);
+        return [cle, nom];
+    });
 }
 
 // Champ « reseaux » (format 3) : [{ nom, equipements: [[nom, icône, 0|1]], liaisons: [[i, j, ports, vlans]] }]
@@ -156,6 +176,7 @@ export function serialiser(doc) {
             type: typeDiagramme(p.code), code: p.code,
         })),
         ...(doc.reseaux?.length ? { reseaux: doc.reseaux } : {}),
+        ...(doc.alias?.length ? { alias: doc.alias } : {}),
     };
     return JSON.stringify(sortie, null, 2);
 }

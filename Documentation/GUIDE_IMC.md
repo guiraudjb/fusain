@@ -11,6 +11,7 @@ FUSAIN lit les fichiers sur votre poste, sans les envoyer : le schéma est const
 | **Importer un réseau (HPE IMC, LLDP)** | Liste des liens d'IMC, telle qu'exportée ; liste des équipements en option | Sections 2 à 5 | Aucun, ou presque : les colonnes sont reconnues d'après leur intitulé |
 | **Commutateur et périphériques** | CSV à 3 colonnes : commutateur, lien, périphérique | Section 6 | Indispensable : ordre des colonnes, noms, sens des liens, tri des lignes inutiles |
 | **Data center** | Le même CSV, avec une 4e colonne VLAN facultative | Section 6 | Comme ci-dessus, plus la colonne VLAN |
+| **Routage d'un commutateur Comware** | La configuration du commutateur (texte), et une liste d'alias en option | Section 7 bis | Aucun : la configuration est collée telle quelle |
 
 Les deux derniers modules ne reconnaissent **pas** les intitulés d'IMC : ils lisent les colonnes **par position**. Un export d'IMC n'y entre donc jamais tel quel.
 
@@ -220,6 +221,18 @@ Retravail nécessaire :
 
 Formats lus : `.xlsx`, CSV (virgule, point-virgule ou tabulation, UTF-8 ou Windows), tableau HTML enregistré en `.xls`. Un ancien classeur Excel 97-2003 (`.xls` binaire) est à réenregistrer en `.xlsx` ou en CSV.
 
+## 7 bis. « Routage d'un commutateur Comware »
+
+Ce module dessine les **routes statiques** d'un commutateur HPE Comware (série 5130, 5940, 12900…) : le commutateur, puis chaque prochain saut (pare-feu, routeur, SBC…), puis les sous-réseaux routés, un cadre par VRF (`vpn-instance`) et un pour la table globale. Il ne passe pas par IMC.
+
+1. Sur le commutateur, relevez la configuration : `display current-configuration | include route-static` (ou `display current-configuration` en entier, ou une sauvegarde de configuration d'IMC, *Configuration Center*). Ajoutez la ligne `sysname` pour que le nom du commutateur soit repris.
+2. Dans FUSAIN : **Ajouter une page** › Réseaux informatiques › **Routage d'un commutateur Comware**. Collez la configuration, ou chargez le fichier (.txt, .cfg, .conf, .log). Les autres lignes sont ignorées.
+3. Lignes lues : `ip route-static [vpn-instance VRF] réseau masque [vpn-instance VRF-du-prochain-saut] [interface] [prochain-saut] [preference N] [tag N] [permanent] [track N] [bfd …] [description texte]`. Le masque s'écrit en notation pointée (`255.255.254.0`) ou en longueur (`23`). Une route vers une interface seule (`NULL0`) a son nœud « Interface NULL0 ».
+4. **Alias** : une ligne par alias, `adresse = nom` (ou `;`, ou une tabulation). Un prochain saut s'écrit par son adresse (`192.168.254.1 = FW-PROD-ACTIF`) ; un sous-réseau par `10.10.10.0/24` ou `10.10.10.0 255.255.255.0`. Sans alias, le nœud porte l'adresse seule. Les alias sont enregistrés avec le document et proposés au prochain import ; les pages déjà créées ne changent pas (refaites l'import).
+5. Contrôles du bilan : doublons écartés, lignes refusées (masque non contigu, prochain saut manquant), adresses de réseau corrigées (bits d'hôte), alias qui ne correspondent à aucune route, routes IPv6 ignorées.
+
+Pages créées : une vue d'ensemble (le commutateur en haut, les VRF côte à côte, le nombre de sous-réseaux routés sous chaque prochain saut), puis une page par VRF. Une VRF de plus de 60 sous-réseaux (réglable) est coupée par prochain saut. Un sous-réseau routé par deux prochains sauts n'a qu'un nœud : la route de préférence la plus élevée (secours) est en pointillé. La description de la route est écrite sur le trait, sauf si la case est décochée.
+
 ## 8. Problèmes fréquents
 
 | Constat | Cause probable | Remède |
@@ -247,3 +260,4 @@ Des exports fictifs, aux noms de colonnes documentés par HPE, permettent d'essa
 - `lldp-voisins.csv` : rapport de voisins LLDP (téléphones, borne Wi-Fi).
 - `commutateur-serveurs.csv`, `commutateur-48-serveurs.csv`, `plusieurs-commutateurs.csv` : fichiers à 3 colonnes pour « Commutateur et périphériques » ;
 - `datacenter.csv` (3 colonnes), `datacenter-vlans.csv` et `datacenter-cascade.csv` (4 colonnes, VLAN) : forme visée après retravail, pour le module « Data center ».
+- `comware-routes.cfg` et `comware-alias.txt` : configuration d'un commutateur Comware (routes statiques dans cinq VRF et la table globale) et ses alias, pour « Routage d'un commutateur Comware ».

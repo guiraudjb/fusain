@@ -1,7 +1,8 @@
 // Boîte « Importer un réseau » : choix des fichiers, vérification des colonnes reconnues, options, puis création des pages.
 // Toute la logique (lecture, analyse, écriture des schémas) est dans reseau.js ; ici, seulement le formulaire.
 import { h, bouton, champSelect, champCase, champTexte, message, modale, ouvrirModale, fermerModale, idUnique } from './dom.js';
-import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs, TRIS_PERIPHERIQUES, ecrireVlans } from './reseau.js';
+import { CHAMPS_LIENS, CHAMPS_EQUIPEMENTS, CATEGORIES_RESEAU, TAILLE_MAX_FICHIER, lireEnregistrements, tableau, analyserReseau, produirePages, lireCommutateurs, produirePagesCommutateurs, TRIS_PERIPHERIQUES, ecrireVlans, nettoyerNom } from './reseau.js';
+import { lireRoutesComware, lireAlias, ecrireAlias, produirePagesRoutage } from './routage.js';
 
 const ESSENTIELS_LIENS = ['source', 'portSource', 'cible', 'portCible', 'debit', 'etat', 'siteSource', 'localSource', 'siteCible', 'localCible'];
 const ESSENTIELS_EQUIPEMENTS = ['nom', 'ip', 'categorie', 'site', 'local', 'lieu'];
@@ -268,6 +269,121 @@ export function ouvrirImportCommutateurs(ajouterPages, { datacenter = false, bou
         h('div', { class: 'fr-upload-group fr-mb-2w' },
             h('label', { class: 'fr-label', for: id }, 'Fichier', h('span', { class: 'fr-hint-text' }, 'CSV (point-virgule, virgule ou tabulation), texte tabulé ou Excel (.xlsx). Première ligne d\'intitulés facultative.')), entree),
         zone), [creer]);
+    redessiner();
+    ouvrirModale(dialogue);
+}
+
+// Boîte « Routage d'un commutateur Comware » : configuration collée ou chargée (lignes « ip route-static »), alias des
+// prochains sauts et des sous-réseaux (« IP = nom », « réseau/longueur = nom »), gardés avec le document.
+// alias : paires [clé, nom] du document ; ajouterPages(pages, { alias }) les remplace par celles de la boîte.
+const ACCEPTES_CONFIG = '.txt,.cfg,.conf,.log,text/plain';
+const ATTENTE_SAISIE = 300;
+export function ouvrirImportRoutage(ajouterPages, { alias = [] } = {}) {
+    const etat = { config: '', alias: ecrireAlias(alias), commutateur: '', nomSaisi: false, nomFichier: '', options: { presentation: 'ensemble-vrf', jeu: 'illus', descriptions: true, parPage: 60 } };
+    const o = etat.options;
+    const plur = (n, un, plusieurs = `${un}s`) => `${n.toLocaleString('fr-FR')} ${n > 1 ? plusieurs : un}`;
+    const zone = h('div', { class: 'fusain-import-reseau' });
+    let resultat = null;
+    let attente = null;
+    const plusTard = () => { clearTimeout(attente); attente = setTimeout(redessiner, ATTENTE_SAISIE); };
+
+    const idConfig = idUnique('config');
+    const config = h('textarea', { class: 'fr-input fusain-import-routage__texte', id: idConfig, rows: 8, spellcheck: 'false', autocomplete: 'off', placeholder: 'ip route-static vpn-instance VRF_PROD 10.10.10.0 255.255.255.0 192.168.254.1 description via FW-PROD' });
+    config.addEventListener('input', () => { etat.config = config.value; plusTard(); });
+    const idFichier = idUnique('fichier');
+    const entree = h('input', { class: 'fr-upload', type: 'file', id: idFichier, accept: ACCEPTES_CONFIG });
+    entree.addEventListener('change', async () => {
+        const fichier = entree.files[0];
+        if (!fichier) return;
+        try {
+            if (fichier.size > TAILLE_MAX_FICHIER) throw new Error('Le fichier dépasse 30 Mo.');
+            etat.config = config.value = await fichier.text();
+            etat.nomFichier = fichier.name;
+        } catch (e) {
+            message('Fichier illisible', e.message, 'error');
+        }
+        entree.value = '';
+        redessiner();
+    });
+    const idNom = idUnique('nom');
+    const nom = h('input', { class: 'fr-input', id: idNom, type: 'text', maxlength: 120, autocomplete: 'off' });
+    nom.addEventListener('input', () => { etat.commutateur = nom.value; etat.nomSaisi = !!nom.value.trim(); plusTard(); });
+    const idAlias = idUnique('alias');
+    const zoneAlias = h('textarea', { class: 'fr-input fusain-import-routage__texte', id: idAlias, rows: 6, spellcheck: 'false', autocomplete: 'off', placeholder: '192.168.254.1 = FW-PROD-ACTIF\n10.10.10.0/24 = Applications métier' });
+    zoneAlias.value = etat.alias;
+    zoneAlias.addEventListener('input', () => { etat.alias = zoneAlias.value; plusTard(); });
+
+    const fixe = h('div', {},
+        h('div', { class: 'fr-input-group' },
+            h('label', { class: 'fr-label', for: idConfig }, 'Configuration du commutateur',
+                h('span', { class: 'fr-hint-text' }, 'Collez le résultat de « display current-configuration », ou seulement les lignes « ip route-static » (« display current-configuration | include route-static »). Les autres lignes sont ignorées.')),
+            config),
+        h('div', { class: 'fr-upload-group fr-mb-2w' },
+            h('label', { class: 'fr-label', for: idFichier }, 'Ou chargez un fichier de configuration', h('span', { class: 'fr-hint-text' }, 'Texte : .txt, .cfg, .conf, .log.')), entree),
+        h('div', { class: 'fr-input-group' },
+            h('label', { class: 'fr-label', for: idNom }, 'Nom du commutateur', h('span', { class: 'fr-hint-text' }, 'Repris de la ligne « sysname » de la configuration, s\'il y en a une.')), nom),
+        h('div', { class: 'fr-input-group' },
+            h('label', { class: 'fr-label', for: idAlias }, 'Alias des prochains sauts et des sous-réseaux routés',
+                h('span', { class: 'fr-hint-text' }, 'Une ligne par alias : « 192.168.254.1 = FW-PROD-ACTIF », « 10.10.10.0/24 = Applications métier » ou « 10.10.20.0 255.255.254.0 = Bases Oracle ». « # » en début de ligne : commentaire. Les alias sont enregistrés avec le document et proposés au prochain import.')),
+            zoneAlias));
+
+    const creer = bouton('Créer les pages', { icone: 'add-line', variante: 'primary', taille: 'md', onclick: () => {
+        if (!resultat) return;
+        fermerModale(dialogue);
+        ajouterPages(resultat.pages.map((p) => ({ nom: p.nom, code: p.code, format: p.equipements > 30 ? 'A3' : 'A4', orientation: 'paysage' })), { alias: [...resultat.alias] });
+        message('Routage importé', `${plur(resultat.pages.length, 'page')} ajoutée${resultat.pages.length > 1 ? 's' : ''} pour ${resultat.commutateur}. Chaque schéma reste modifiable ; les alias sont gardés avec le document.`, 'success', 6000);
+    } });
+
+    function redessiner() {
+        clearTimeout(attente);
+        resultat = null;
+        const parties = [];
+        const lu = lireRoutesComware(etat.config);
+        if (!etat.nomSaisi) nom.value = etat.commutateur = lu.commutateur;
+        const { alias: table, invalides: aliasInvalides } = lireAlias(etat.alias);
+        if (etat.config.trim()) {
+            const { bilan } = lu;
+            parties.push(h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Présentation'),
+                h('div', { class: 'fusain-import-reseau__colonnes' },
+                    champSelect('Pages', [['ensemble-vrf', 'Vue d\'ensemble, puis une page par VRF'], ['vrf', 'Une page par VRF'], ['unique', 'Tout sur une seule page']], o.presentation, (v) => { o.presentation = v; redessiner(); }),
+                    champSelect('Icônes', [['illus', 'Illustrées (couleur)'], ['picto', 'Pictogrammes (noir et blanc)']], o.jeu, (v) => { o.jeu = v; redessiner(); }),
+                    o.presentation === 'unique' ? null : champSelect('Sous-réseaux au plus par page', [['0', 'Sans limite'], ...[20, 30, 40, 60, 80].map((n) => [String(n), `${n} : au-delà, une page par prochain saut`])], String(o.parPage), (v) => { o.parPage = Number(v); redessiner(); }),
+                    champCase('Écrire la description de chaque route sur son trait', o.descriptions, (v) => { o.descriptions = v; redessiner(); })),
+                h('h2', { class: 'fr-h6 fr-mb-1w fr-mt-2w' }, 'Résultat'));
+            if (!lu.routes.length) {
+                parties.push(h('p', { class: 'fr-error-text' }, bilan.lignes ? 'Aucune route lisible : voir les lignes refusées ci-dessous.' : 'Aucune ligne « ip route-static » n\'a été trouvée.'));
+            } else {
+                const r = produirePagesRoutage({ commutateur: etat.commutateur, routes: lu.routes }, table, o);
+                resultat = { ...r, alias: table, commutateur: nettoyerNom(etat.commutateur) || 'Commutateur' };
+                const inconnus = [...table.keys()].filter((k) => !r.bilan.aliasUtilises.has(k));
+                const apercu = lu.routes.slice(0, 5);
+                parties.push(
+                    h('div', { class: 'fr-table fr-table--sm fr-mb-1w' }, h('table', {},
+                        h('thead', {}, h('tr', {}, ['VRF', 'Sous-réseau', 'Prochain saut', 'Description'].map((t) => h('th', { scope: 'col' }, t)))),
+                        h('tbody', {}, apercu.map((x) => h('tr', {}, [x.vrf || 'globale', [x.cidr, table.get(x.cidr) || (x.longueur < 32 ? table.get(x.reseau) : '')].filter(Boolean).join(' · '),
+                            [x.nh || x.interface, x.nh && table.get(x.nh)].filter(Boolean).join(' · '), x.description || '—'].map((t) => h('td', {}, t))))))),
+                    lu.routes.length > apercu.length ? h('p', { class: 'fr-text--xs' }, `… et ${plur(lu.routes.length - apercu.length, 'autre route')}.`) : null,
+                    h('div', { class: 'fr-callout fr-py-2w fr-px-3w' },
+                        h('p', { class: 'fr-callout__text fr-text--sm' }, `${plur(lu.routes.length, 'route')} : ${plur(r.bilan.vrfs, 'table')} (VRF ou table globale), ${plur(r.bilan.sauts, 'prochain saut', 'prochains sauts')}, ${plur(r.bilan.reseaux, 'sous-réseau routé', 'sous-réseaux routés')} ; ${plur(r.bilan.aliasUtilises.size, 'alias utilisé', 'alias utilisés')}`
+                            + `${bilan.doublons ? `, ${plur(bilan.doublons, 'doublon écarté', 'doublons écartés')}` : ''}.`),
+                        h('p', { class: 'fr-text--sm fr-mb-1w' }, `${plur(r.pages.length, 'page')} : ${r.pages.slice(0, 8).map((p) => p.nom).join(', ')}${r.pages.length > 8 ? '…' : ''}.`),
+                        h('p', { class: 'fr-text--xs fr-mb-0' }, 'Une route de secours (préférence plus élevée vers un même sous-réseau) est tracée en pointillé.'),
+                        bilan.corrigees.length ? h('p', { class: 'fr-text--xs fr-mb-0' }, `Adresse de réseau corrigée (bits d'hôte) : ${bilan.corrigees.slice(0, 5).map((c) => `ligne ${c.ligne} → ${c.cidr}`).join(', ')}${bilan.corrigees.length > 5 ? '…' : ''}.`) : null,
+                        inconnus.length ? h('p', { class: 'fr-text--xs fr-mb-0' }, `${plur(inconnus.length, 'alias ne correspond', 'alias ne correspondent')} à aucune route : ${inconnus.slice(0, 6).join(', ')}${inconnus.length > 6 ? '…' : ''} (gardé${inconnus.length > 1 ? 's' : ''} avec le document).`) : null,
+                        r.alertes.map((t) => h('p', { class: 'fr-text--xs fr-mb-0' }, t))));
+            }
+            const ignorees = [bilan.ipv6 ? plur(bilan.ipv6, 'route IPv6', 'routes IPv6') : '', bilan.undo ? plur(bilan.undo, 'ligne « undo »', 'lignes « undo »') : ''].filter(Boolean);
+            if (ignorees.length) parties.push(h('p', { class: 'fr-text--xs fr-mb-0' }, `Ignorées : ${ignorees.join(', ')}.`));
+            if (bilan.invalides.length) parties.push(h('p', { class: 'fr-text--xs fr-mb-0 fr-error-text' }, `${plur(bilan.invalides.length, 'ligne refusée', 'lignes refusées')} : ${bilan.invalides.slice(0, 5).map((x) => `ligne ${x.ligne} (${x.erreur})`).join(', ')}${bilan.invalides.length > 5 ? '…' : ''}.`));
+        }
+        if (aliasInvalides.length) parties.push(h('p', { class: 'fr-text--xs fr-mb-0 fr-error-text' }, `Alias illisibles, ignorés : ${aliasInvalides.slice(0, 5).map((x) => `ligne ${x.ligne} « ${x.texte} »`).join(', ')}${aliasInvalides.length > 5 ? '…' : ''} (attendu : « adresse = nom »).`));
+        creer.disabled = !resultat;
+        zone.replaceChildren(...parties.filter(Boolean));
+    }
+
+    const dialogue = modale('fusain-modale-import-routage', 'Routage d\'un commutateur Comware', h('div', {},
+        h('p', { class: 'fr-text--sm' }, 'Les routes statiques (« ip route-static ») d\'un commutateur HPE Comware sont dessinées du commutateur vers chaque prochain saut, puis vers les sous-réseaux routés, un cadre par VRF (vpn-instance). La configuration est lue dans le navigateur, sans envoi.'),
+        fixe, zone), [creer]);
     redessiner();
     ouvrirModale(dialogue);
 }

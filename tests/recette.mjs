@@ -392,7 +392,11 @@ ok('carte : export PDF vectoriel', fs.statSync(f).size > 5000 && (await p.textCo
 ok('carte : fond communal en cache vérifié', await p.evaluate(async () => (await (await caches.open('fusain-donnees')).keys()).some((r) => r.url.includes('cartes/communes/84.json?empreinte='))));
 // Jeux d'exemple proposés dans « À propos », importables tels quels
 await p.click('.fr-header__tools-links [data-action="apropos"]'); await p.waitForSelector('#fusain-modale-apropos.fr-modal--opened a[download]');
-ok('à propos : jeux d\'exemple (3 cartes, 5 réseaux)', await p.locator('#fusain-modale-apropos a[download]').count() === 8);
+{
+    const cartes = await p.locator('#fusain-modale-apropos a[download][href*="cartes/exemples/"]').count();
+    const reseaux = await p.locator('#fusain-modale-apropos a[download][href*="exemples-reseau/"]').count();
+    ok('à propos : jeux d\'exemple (3 cartes, 15 réseaux)', cartes === 3 && reseaux === 15, `${cartes} cartes, ${reseaux} réseaux`);
+}
 f = await dl(() => p.click('#fusain-modale-apropos a[download="france-departements.csv"]'));
 ok('à propos : jeu d\'exemple téléchargé', fs.readFileSync(f, 'utf8').startsWith('CODE_GEO,') && fs.statSync(f).size > 5000, `${fs.statSync(f).size} o`);
 await p.keyboard.press('Escape'); await p.waitForTimeout(400);
@@ -421,5 +425,28 @@ await q.waitForTimeout(1500);
 ok('carte : rendue hors ligne', await q.locator('#fusain-feuille .fusain-carte path[data-fusain^="z:"]').count() > 50 && await q.locator('#fusain-feuille .fusain-carte image').count() === 1);
 await q.close();
 await ctx.setOffline(false);
+// Routage d'un commutateur Comware : configuration et alias collés, vue d'ensemble puis une page par VRF ; alias gardés
+{
+    const exemple = (nom) => fs.readFileSync(new URL(`../Documentation/exemples-reseau/${nom}`, import.meta.url), 'utf8');
+    const avant = await p.locator('.fusain-vignette').count();
+    await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
+    await p.click('#fusain-modale-modeles button:has-text("Routage d\'un commutateur Comware")');
+    await p.waitForSelector('#fusain-modale-import-routage.fr-modal--opened');
+    const zones = p.locator('#fusain-modale-import-routage textarea');
+    await zones.nth(0).fill(exemple('comware-routes.cfg')); await zones.nth(1).fill(exemple('comware-alias.txt'));
+    await p.waitForTimeout(800);
+    const bilan = await p.textContent('#fusain-modale-import-routage .fr-callout');
+    ok('routage : configuration lue (17 routes, 6 tables, 1 doublon, 16 alias)', /17 routes : 6 tables/.test(bilan) && /1 doublon/.test(bilan) && /16 alias utilisés/.test(bilan), bilan.slice(0, 160));
+    ok('routage : nom du commutateur repris de sysname', await p.inputValue('#fusain-modale-import-routage input[type=text]') === 'CŒUR-DC-01');
+    await p.click('#fusain-modale-import-routage .fr-modal__footer button'); await p.waitForTimeout(2500);
+    ok('routage : 7 pages ajoutées', await p.locator('.fusain-vignette').count() === avant + 7);
+    await p.click(`.fusain-vignette >> nth=${avant + 1}`); await p.waitForTimeout(2500);
+    ok('routage : page de la VRF rendue avec ses alias', !(await p.isVisible('#fusain-erreur')) && (await p.textContent('#fusain-feuille')).includes('Bases Oracle'));
+    await p.click('button:has-text("Ajouter une page")'); await p.waitForSelector('#fusain-modale-modeles.fr-modal--opened');
+    await p.click('#fusain-modale-modeles button:has-text("Routage d\'un commutateur Comware")');
+    await p.waitForSelector('#fusain-modale-import-routage.fr-modal--opened');
+    ok('routage : alias gardés avec le document', (await zones.nth(1).inputValue()).split('\n').length === 16);
+    await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+}
 console.log('erreurs console/page :', errs.length, errs.slice(0, 5));
 await b.close();

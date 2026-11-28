@@ -222,7 +222,7 @@ export function categorieDe(...textes) {
 }
 
 // Catégorie devinée d'après le nom, en dernier recours
-function categorieDuNom(nom) {
+export function categorieDuNom(nom) {
     // Accents retirés et « œ » écrit « oe » : « CŒUR-DC-01 » se lit « coeur-dc-01 »
     const n = String(nom).toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (/^(fw|pf|firewall|parefeu)[-_.\d]/.test(n) || /[-_.](fw|pf)[-_.\d]/.test(n)) return 'pare-feu';
@@ -424,7 +424,7 @@ export function modeAutomatique(noeuds) {
 const SEUIL_VUE_ENSEMBLE = 25; // au-delà de ce nombre d'équipements d'infrastructure, une page par groupe
 const GROUPES_MAX = 40;
 
-function idsUniques() {
+export function idsUniques() {
     const pris = new Set(['end', 'subgraph', 'direction', 'style', 'click', 'graph', 'flowchart', 'class', 'classDef', 'linkStyle']);
     return (base) => {
         let id = `e_${String(base).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'x'}`;
@@ -531,7 +531,7 @@ function construirePage({ noeuds, liaisons, groupeDeNoeud, sousGroupeDeNoeud = (
     return modele;
 }
 
-function ecrirePage(modele, alertes, nom) {
+export function ecrirePage(modele, alertes, nom) {
     if (modele.liens.length > LIENS_MAX) {
         alertes.push(`${nom} : ${modele.liens.length} liaisons, au-delà des ${LIENS_MAX} que Mermaid dessine ; seules les ${LIENS_MAX} premières sont gardées.`);
         modele.liens = modele.liens.slice(0, LIENS_MAX);

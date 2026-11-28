@@ -139,7 +139,7 @@ function figerStyles(svg) {
         attrs['stroke-width'] = String(parseFloat(attrs['stroke-width']) || 0);
         attrs['font-family'] = 'Marianne';
         // Marianne est incorporée en normal, gras, italique et gras italique
-        attrs['font-style'] = /italic|oblique/.test(cs.fontStyle) ? 'italic' : 'normal';
+        attrs['font-style'] = /italic|oblique/.test(attrs['font-style']) ? 'italic' : 'normal';
         attrs['font-weight'] = Number(attrs['font-weight']) >= 600 ? 'bold' : 'normal';
         // Un motif sans plein ou sans vide (« 0 », « 1, 0 ») désigne un trait continu
         const motif = attrs['stroke-dasharray'].replace(/px/g, '');
@@ -193,7 +193,7 @@ function aplatirTextes(svg) {
                 // La ligne de base est déduite de la boîte du glyphe (haut de boîte + ascendante de la police) :
                 // contrairement à getStartPositionOfChar, ce calcul tient compte de dominant-baseline dans tous les navigateurs.
                 const y = texte.getExtentOfChar(rangCar).y + ascendante(cs);
-                fragments.push({ x: texte.getStartPositionOfChar(rangCar).x, y, contenu: noeud.data.trim().replace(/\s+/g, ' '), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, opacite: cs.fillOpacity });
+                fragments.push({ x: texte.getStartPositionOfChar(rangCar).x, y, contenu: noeud.data.trim().replace(/\s+/g, ' '), fill: cs.fill, taille: cs.fontSize, graisse: cs.fontWeight, style: cs.fontStyle, opacite: cs.fillOpacity });
             }
         } catch {
             continue; // texte non affiché : laissé tel quel
@@ -207,6 +207,7 @@ function aplatirTextes(svg) {
             t.style.fillOpacity = f.opacite;
             t.style.fontSize = f.taille;
             t.style.fontWeight = f.graisse;
+            t.style.fontStyle = f.style;
             t.style.textAnchor = 'start';
             t.style.dominantBaseline = 'alphabetic';
             t.style.stroke = 'none';

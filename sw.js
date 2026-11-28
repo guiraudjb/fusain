@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.35.0-f573dbb726';
+const VERSION_CACHE = 'fusain-0.35.0-fc17db31de';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
@@ -27,7 +27,7 @@ const FICHIERS = [
     ['./Documentation/exemples-reseau/plusieurs-commutateurs.csv', 'f63e4fb9078da0b31f7dc8e4697afb0aa86af1f7a69e5eb0d230f702f43a3cde'],
     ['./Documentation/outils/Exporter-ReseauIMC.ps1', '713c7428241de802477a0c2a86c0d03a88dbc7f6def715d10d781c1ad9e5c7ae'],
     ['./FUSAIN_cahier_des_charges.md', '43736e0c8386d2972d65aba09a20ad3fe1e44eff77413a0cff4cac4fd6e99761'],
-    ['./JOURNAL_DES_VERSIONS.md', '119baa56297e7c6a4824be3f2e0dd1b7898d74e6577d5a2abf0dd3c2c134f04e'],
+    ['./JOURNAL_DES_VERSIONS.md', '7f042ea180558ee377a2cc267722ab342618b6608d15710442a9a2fd3b50bb72'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '0a785f200f1128af45f64c705d1c9839ab575caf7645283f1fd3f457935d00d9'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -60,8 +60,8 @@ const FICHIERS = [
     ['./icones/illustrees/services-publics.json', 'a1643220153b4568a7105780a6db2d2281e1d8ae4b20b016614b752cc9de1d50'],
     ['./icones/illustrees/transports.json', '62cae57e6ce639d0107f47ef119087075ceab8816252cf6ec27309cbc4ea30d6'],
     ['./icones/pictogrammes.json', 'c1824ee1fc5eb7beb43ff1eff9405b5e262118fea17b57e2fc59df9960c2f121'],
-    ['./', '2444415cf718b8d3c85c7eba05bbc46e11f54e38837bb87a052a9143da5168ab'],
-    ['./index.html', '2444415cf718b8d3c85c7eba05bbc46e11f54e38837bb87a052a9143da5168ab'],
+    ['./', 'abd80d5a5a61628c72169e9afe1a2f9de737a516529f158248536266727c82e8'],
+    ['./index.html', 'abd80d5a5a61628c72169e9afe1a2f9de737a516529f158248536266727c82e8'],
     ['./js/adresses.js', 'acbb9a4a589c0fa81bd0b4ab2b9bab69c5a88a322ddd3c9b5a165ba90890c71c'],
     ['./js/app.js', '57636fbf548514260f423c8953fde8c6d9cb56106faff11eb8a25077e77262d5'],
     ['./js/bout-en-bout.js', '0901c447fabac022b195050f2044b54a5bcf1515745bc32b8a796d283bba2dfb'],
@@ -109,7 +109,7 @@ const FICHIERS = [
     ['./js/diaporama.js', '319a73158dad85457d98cbb4b671ad57cb6c872c90a10b3842e7c8363535f5b4'],
     ['./js/dom.js', 'ba9f245ffadc180897ee0226fbb42b0fe22441da000cf1727d28f703ca7f028d'],
     ['./js/etat.js', '76f6d4ff0f6299c2e6d64221e0a287dd4ab5bea73612031c3cdfe9e1770d0082'],
-    ['./js/export.js', '1f84f5c23495ae342b1fe50f1d13a4108c5dc1669d3066faebeb537f3a6e4e56'],
+    ['./js/export.js', '5cee2e6944c30aaeaba77642d6e0d576d394f646153c25607836dc704c509399'],
     ['./js/fichier.js', 'aaf109d66423de10af0ec7c9c292add9648087da628ea7750253f7e16b69292e'],
     ['./js/formats.js', 'a9fe7e27d095f75c0eab899f083747f0b9c24b53699f754d368b5d952f2a5687'],
     ['./js/geo.js', '2410705abae5ad8ac66487d8f395b0f42f41d4e70f523bb969698d07f09d9c93'],

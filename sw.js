@@ -3,7 +3,7 @@
 // et rien n'y entre sans que son empreinte ait été vérifiée (cahier des charges §7.6).
 
 /* DEBUT-GENERE */
-const VERSION_CACHE = 'fusain-0.35.0-fc17db31de';
+const VERSION_CACHE = 'fusain-0.35.0-31f72fe45a';
 // [chemin, empreinte SHA-256] de chaque fichier de la version
 const FICHIERS = [
     ['./AUDIT_SECURITE_FUSAIN.md', 'a142e5a9bef5b5a9cb48d59fd3780a6dcb497877ebee60103b946d3f3131567f'],
@@ -27,7 +27,7 @@ const FICHIERS = [
     ['./Documentation/exemples-reseau/plusieurs-commutateurs.csv', 'f63e4fb9078da0b31f7dc8e4697afb0aa86af1f7a69e5eb0d230f702f43a3cde'],
     ['./Documentation/outils/Exporter-ReseauIMC.ps1', '713c7428241de802477a0c2a86c0d03a88dbc7f6def715d10d781c1ad9e5c7ae'],
     ['./FUSAIN_cahier_des_charges.md', '43736e0c8386d2972d65aba09a20ad3fe1e44eff77413a0cff4cac4fd6e99761'],
-    ['./JOURNAL_DES_VERSIONS.md', '7f042ea180558ee377a2cc267722ab342618b6608d15710442a9a2fd3b50bb72'],
+    ['./JOURNAL_DES_VERSIONS.md', '0d858119aebc4608eb6ec972c3ed848332c5e202a9beda6b3c4f8789f5bc246b'],
     ['./NOMENCLATURE_LOGICIELLE_FUSAIN.md', '0a785f200f1128af45f64c705d1c9839ab575caf7645283f1fd3f457935d00d9'],
     ['./cartes/LICENCE.txt', 'ffc9ae78a83508f23d6aa7fa76e688ceb53c1c17c5b4930c96b26b697ac766e9'],
     ['./cartes/departements.json', '571bd5e0d68df17c854ef892a6e6ecbb90d05837762c7b94329bcbaa8f49a9e6'],
@@ -251,7 +251,7 @@ const FICHIERS = [
     ['./libs/topojson-client-v3.1.0/LICENSE', '4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999'],
     ['./libs/topojson-client-v3.1.0/topojson-client.min.js', '25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89'],
     ['./manifest.webmanifest', 'db470640d46619c11c0e76cadd1b55f404bb2b1d11dba166d1079b51df7343c1'],
-    ['./presentation-fusain.fusain.json', 'f9888e8541bb29643a28a8bf272e36103e2149609dccd9ce48c45e641ca7463f'],
+    ['./presentation-fusain.fusain.json', '32923c3514c6779e800cc137116fcd93c1776e52f2c8d87024101dc34920e211'],
     ['./sbom/fusain-sbom-cyclonedx.json', 'e2c72385c03630b89ac4d5d951105abc086bb26cb700cea4a3e8c9cee43e3733'],
     ['./schema/fusain.schema.json', '740351c18135bd2181649682bcd89e9029268a28420fb49f520671701fe606cb'],
 ];

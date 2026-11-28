@@ -1362,6 +1362,13 @@ test('diapo : taille de police et alignement (@style gauche, centre, droite, jus
 
 // ---------- 0.26.0 : édition visuelle de tout le document de démonstration ----------
 
+test('document de démonstration : accepté par le lecteur de fichiers (sinon l\'application ouvre en silence un document vide)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const doc = lireJson(readFileSync(new URL('../presentation-fusain.fusain.json', import.meta.url), 'utf8'));
+    assert.ok(doc.pages.length >= 80);
+    assert.ok(doc.alias.length > 0, 'alias du routage Comware gardés dans le document');
+});
+
 test('document de démonstration : chaque page a un éditeur visuel, et sa réécriture est stable', async () => {
     const { readFileSync } = await import('node:fs');
     const doc = JSON.parse(readFileSync(new URL('../presentation-fusain.fusain.json', import.meta.url), 'utf8'));
